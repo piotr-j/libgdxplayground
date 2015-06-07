@@ -22,17 +22,17 @@ public abstract class BaseScreen implements Screen, InputProcessor {
 	public final static float SCALE = 32f;
 	public final static float INV_SCALE = 1.f/32f;
 
-	OrthographicCamera gameCamera;
-	OrthographicCamera guiCamera;
-	ExtendViewport gameViewport;
-	ScreenViewport guiViewport;
+	protected OrthographicCamera gameCamera;
+	protected OrthographicCamera guiCamera;
+	protected ExtendViewport gameViewport;
+	protected ScreenViewport guiViewport;
 
-	SpriteBatch batch;
-	ShapeRenderer renderer;
+	protected SpriteBatch batch;
+	protected ShapeRenderer renderer;
 
-	Stage stage;
-	Table root;
-	Skin skin;
+	protected Stage stage;
+	protected Table root;
+	protected Skin skin;
 
 	boolean debugStage;
 
@@ -66,7 +66,8 @@ public abstract class BaseScreen implements Screen, InputProcessor {
 	@Override public void render (float delta) {
 		Gdx.gl.glClearColor(0, 0, 0, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-
+		stage.act(delta);
+		stage.draw();
 	}
 
 	@Override public void resize (int width, int height) {
