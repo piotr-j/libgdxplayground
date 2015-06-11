@@ -11,6 +11,7 @@ public class DesktopLauncher {
 			@Override public void uncaughtException (Thread thread, Throwable ex) {
 				System.err.println("Exploded!");
 				// run default
+				ex.printStackTrace();
 				handler.uncaughtException(thread, ex);
 			}
 		});
