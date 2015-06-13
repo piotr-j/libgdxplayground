@@ -34,7 +34,7 @@ public class MapWidget extends Widget {
 				int my = (int)(y / size);
 				if (mx < 0 || mx > data.width) return;
 				if (my < 0 || my > data.height) return;
-				Gdx.app.log("", "Clicked " + data.data[mx+200][my]);
+				Gdx.app.log("", "Clicked " + data.data[mx][my]);
 			}
 		});
 	}
