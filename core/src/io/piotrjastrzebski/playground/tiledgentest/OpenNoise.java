@@ -50,10 +50,21 @@ public class OpenNoise {
 	public double getNoise (int x, int y, int z) {
 		double result = 0;
 		for (int i = 0; i < octaves.length; i++) {
-			double frequency = Math.pow(2, i);
-			double amplitude = Math.pow(persistence, octaves.length - i);
+//			double frequency = Math.pow(2, i);
+//			double amplitude = Math.pow(persistence, octaves.length - i);
 
-			result = result + octaves[i].eval(x / frequency, y / frequency, z / frequency) * amplitude;
+			result = result + octaves[i].eval(x / frequencies[i], y / frequencies[i], z / frequencies[i]) * amplitudes[i];
+		}
+		return result;
+	}
+
+	public double getNoise (int x, int y, int z, int w ) {
+		double result = 0;
+		for (int i = 0; i < octaves.length; i++) {
+//			double frequency = Math.pow(2, i);
+//			double amplitude = Math.pow(persistence, octaves.length - i);
+
+			result = result + octaves[i].eval(x / frequencies[i], y / frequencies[i], z / frequencies[i], w / frequencies[i]) * amplitudes[i];
 		}
 		return result;
 	}
