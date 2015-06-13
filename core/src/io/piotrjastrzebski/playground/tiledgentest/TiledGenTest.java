@@ -27,6 +27,7 @@ public class TiledGenTest extends BaseScreen {
 
 		// reasonable values for world map
 		data.water = 0.4f;
+		data.waterEnabled = true;
 		data.largestFeature = 256;
 		data.persistence = 0.55f;
 		data.seed = MathUtils.random(Long.MAX_VALUE);
@@ -84,6 +85,7 @@ public class TiledGenTest extends BaseScreen {
 		settings.row();
 
 		final CheckBox waterEnabled = new CheckBox("Water " + data.water, skin);
+		waterEnabled.setChecked(data.waterEnabled);
 		waterEnabled.addListener(new ChangeListener() {
 			@Override public void changed (ChangeEvent event, Actor actor) {
 				data.waterEnabled = waterEnabled.isChecked();
