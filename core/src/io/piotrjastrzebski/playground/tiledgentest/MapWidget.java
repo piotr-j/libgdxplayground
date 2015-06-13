@@ -34,13 +34,9 @@ public class MapWidget extends Widget {
 				int my = (int)(y / size);
 				if (mx < 0 || mx > data.width) return;
 				if (my < 0 || my > data.height) return;
-				onSelected(mx, my);
+				Gdx.app.log("", "Clicked " + data.tiles[mx][my]);
 			}
 		});
-	}
-
-	public void onSelected(int x, int y){
-		Gdx.app.log("", "Clicked " + data.data[x][y]);
 	}
 
 	public void setSize(float size) {
@@ -60,34 +56,8 @@ public class MapWidget extends Widget {
 
 		for (int x = 0; x < data.width; x++) {
 			for (int y = 0; y < data.height; y++) {
-				float val = (float)data.data[x][y];
-				val = MathUtils.clamp(val, 0, 1);
-				// shades of gray
-				batch.setColor(val, val, val, 1);
-				if (data.waterEnabled) {
-					if (val < data.water) {
-						if (val < data.water * 0.8f) {
-							batch.setColor(0.2f, 0.5f, 0.9f, 1);
-						} else {
-							batch.setColor(0.4f, 0.7f, 1, 1);
-						}
-					} else {
-						if (data.biomeEnabled) {
-							// set color based on above the see level
-							// beach, plain, forest, montains etc
-						} else {
-							val = (val - data.water) / (1 - data.water);
-							batch.setColor(val, val, val, 1);
-						}
-					}
-				}
-				batch.draw(
-					white,
-					// center in the parent
-					sX + x * size, // + pWidth / 2 - data.width * size / 2,
-					sY + y * size, // + pHeight / 2 - data.height * size / 2,
-					size, size
-				);
+				batch.setColor(data.tiles[x][y].color);
+				batch.draw(white, sX + x * size, sY + y * size, size, size);
 			}
 		}
 	}

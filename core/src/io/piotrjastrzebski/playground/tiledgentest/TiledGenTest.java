@@ -123,13 +123,42 @@ public class TiledGenTest extends BaseScreen {
 
 		int xResolution = data.width;
 		int yResolution = data.height;
-		data.data = new double[xResolution][yResolution];
-		for (int i = 0; i < xResolution; i++) {
-			for (int j = 0; j < yResolution; j++) {
-				int x = (int)(xStart + i * ((XEnd - xStart) / xResolution));
-				int y = (int)(yStart + j * ((yEnd - yStart) / yResolution));
+		data.tiles = new MapData.Tile[xResolution][yResolution];
+		for (int mx = 0; mx < xResolution; mx++) {
+			for (int my = 0; my < yResolution; my++) {
+				int nx = (int)(xStart + mx * ((XEnd - xStart) / xResolution));
+				int ny = (int)(yStart + my * ((yEnd - yStart) / yResolution));
 				// normalize
-				data.data[i][j] = 0.5d + noise.getNoise(x, y);
+				double dVal = 0.5d + noise.getNoise(nx, ny);
+				MapData.Tile tile = new MapData.Tile();
+				tile.x = mx;
+				tile.y = my;
+				tile.value = dVal;
+
+				float val = (float)tile.value;
+				val = MathUtils.clamp(val, 0, 1);
+				// shades of gray
+				tile.setColor(val, val, val);
+				if (data.waterEnabled) {
+					if (val < data.water) {
+						if (val < data.water * 0.8f) {
+							tile.setColor(0.2f, 0.5f, 0.9f);
+						} else {
+							tile.setColor(0.4f, 0.7f, 1);
+						}
+					} else {
+						val = (val - data.water) / (1 - data.water);
+						if (data.biomeEnabled) {
+							// set color based on above the see level
+							// beach, plain, forest, mountains etc
+
+						} else {
+							tile.setColor(val, val, val);
+						}
+					}
+				}
+
+				data.tiles[mx][my] = tile;
 			}
 		}
 		map.setData(data);
