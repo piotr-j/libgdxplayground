@@ -27,6 +27,7 @@ public class TiledGenTest extends BaseScreen {
 		data = new MapData();
 
 		// reasonable values for world map
+		data.biomeEnabled = true;
 		data.water = 0.4f;
 		data.waterEnabled = true;
 		data.largestFeature = 256;
@@ -135,6 +136,7 @@ public class TiledGenTest extends BaseScreen {
 
 		int xResolution = data.width;
 		int yResolution = data.height;
+		float max = 1.0f;
 		for (int mx = 0; mx < xResolution; mx++) {
 			for (int my = 0; my < yResolution; my++) {
 				int nx = (int)(xStart + mx * ((XEnd - xStart) / xResolution));
@@ -145,7 +147,7 @@ public class TiledGenTest extends BaseScreen {
 				tile.value = dVal;
 
 				float val = (float)tile.value;
-				val = MathUtils.clamp(val, 0, 1);
+				if (val > max) max = val;
 				// shades of gray
 				tile.setColor(val, val, val);
 				if (data.waterEnabled) {
@@ -157,11 +159,12 @@ public class TiledGenTest extends BaseScreen {
 						}
 					} else {
 						// normalize val so 0 is at water level
-						val = (val - data.water) / (1 - data.water);
+						val = (val - data.water) / (max - data.water);
 						if (data.biomeEnabled) {
 							// set color based on above the see level
 							// beach, plain, forest, mountains etc
-
+							Gdx.app.log("", ""+val);
+							tile.setColor(val, val, val);
 						} else {
 							tile.setColor(val, val, val);
 						}
