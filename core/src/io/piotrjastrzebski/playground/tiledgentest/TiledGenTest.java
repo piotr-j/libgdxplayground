@@ -85,7 +85,7 @@ public class TiledGenTest extends BaseScreen {
 		final Label pLabel = new Label("Persistence " + data.persistence, skin);
 		settings.add(pLabel);
 		settings.row();
-		final Slider persistence = new Slider(0.1f, 1f, 0.05f, false, skin);
+		final Slider persistence = new Slider(0.1f, 1f, 0.01f, false, skin);
 		persistence.setValue(data.persistence);
 		persistence.addListener(new ChangeListener() {
 			@Override public void changed (ChangeEvent event, Actor actor) {
@@ -152,7 +152,7 @@ public class TiledGenTest extends BaseScreen {
 				tile.setColor(val, val, val);
 				if (data.waterEnabled) {
 					if (val < data.water) {
-						if (val < data.water * 0.8f) {
+						if (val < data.water * 0.7f) {
 							tile.setColor(0.2f, 0.5f, 0.9f);
 						} else {
 							tile.setColor(0.4f, 0.7f, 1);
@@ -163,7 +163,6 @@ public class TiledGenTest extends BaseScreen {
 						if (data.biomeEnabled) {
 							// set color based on above the see level
 							// beach, plain, forest, mountains etc
-							Gdx.app.log("", ""+val);
 							tile.setColor(val, val, val);
 						} else {
 							tile.setColor(val, val, val);
