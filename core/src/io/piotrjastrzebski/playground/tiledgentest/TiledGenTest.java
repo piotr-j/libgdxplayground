@@ -25,9 +25,10 @@ public class TiledGenTest extends BaseScreen {
 		map.setSize(4);
 		data = new MapData();
 
-		data.water = 0.5f;
-		data.largestFeature = 128;
-		data.persistence = 0.35f;
+		// reasonable values for world map
+		data.water = 0.4f;
+		data.largestFeature = 256;
+		data.persistence = 0.55f;
 		data.seed = MathUtils.random(Long.MAX_VALUE);
 		data.width = 256;
 		data.height = 128;
@@ -53,34 +54,36 @@ public class TiledGenTest extends BaseScreen {
 		});
 		settings.add(randomSeed);
 		settings.row();
-
-		settings.add(new Label("Largest Feature", skin));
+		final Label lfLabel = new Label("Max Feature " + data.largestFeature, skin);
+		settings.add(lfLabel);
 		settings.row();
 		final Slider largestFeature = new Slider(16, 513, 1, false, skin);
 		largestFeature.setValue(data.largestFeature);
 		largestFeature.addListener(new ChangeListener() {
 			@Override public void changed (ChangeEvent event, Actor actor) {
 				data.largestFeature = (int)largestFeature.getValue();
+				lfLabel.setText(String.format("Max Feature %d", data.largestFeature));
 				refresh();
 			}
 		});
 		settings.add(largestFeature);
 		settings.row();
-
-		settings.add(new Label("Persistence", skin));
+		final Label pLabel = new Label("Persistence " + data.persistence, skin);
+		settings.add(pLabel);
 		settings.row();
 		final Slider persistence = new Slider(0.1f, 1f, 0.05f, false, skin);
 		persistence.setValue(data.persistence);
 		persistence.addListener(new ChangeListener() {
 			@Override public void changed (ChangeEvent event, Actor actor) {
 				data.persistence = persistence.getValue();
+				pLabel.setText(String.format("Persistence %.2f", data.persistence));
 				refresh();
 			}
 		});
 		settings.add(persistence);
 		settings.row();
 
-		final CheckBox waterEnabled = new CheckBox("Water", skin);
+		final CheckBox waterEnabled = new CheckBox("Water " + data.water, skin);
 		waterEnabled.addListener(new ChangeListener() {
 			@Override public void changed (ChangeEvent event, Actor actor) {
 				data.waterEnabled = waterEnabled.isChecked();
@@ -95,6 +98,7 @@ public class TiledGenTest extends BaseScreen {
 		water.addListener(new ChangeListener() {
 			@Override public void changed (ChangeEvent event, Actor actor) {
 				data.water = water.getValue();
+				waterEnabled.setText(String.format("Water %.2f", data.water));
 				refresh();
 			}
 		});
