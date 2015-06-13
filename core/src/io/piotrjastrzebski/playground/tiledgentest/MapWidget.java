@@ -58,15 +58,19 @@ public class MapWidget extends Widget {
 			for (int y = 0; y < data.height; y++) {
 				float val = (float)data.data[x][y];
 				val = MathUtils.clamp(val, 0, 1);
-				if (val < data.water) {
-					if (val < data.water * 0.8f) {
-						batch.setColor(0.2f, 0.5f, 0.9f, 1);
+				// shades of gray
+				batch.setColor(val, val, val, 1);
+				if (data.waterEnabled) {
+					if (val < data.water) {
+						if (val < data.water * 0.8f) {
+							batch.setColor(0.2f, 0.5f, 0.9f, 1);
+						} else {
+							batch.setColor(0.4f, 0.7f, 1, 1);
+						}
 					} else {
-						batch.setColor(0.4f, 0.7f, 1, 1);
+						val = (val - data.water) / (1 - data.water);
+						batch.setColor(val, val, val, 1);
 					}
-				} else {
-					val = (val - data.water) / (1 - data.water);
-					batch.setColor(val, val, val, 1);
 				}
 				batch.draw(
 					white,

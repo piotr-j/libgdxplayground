@@ -12,4 +12,5 @@ public class MapData {
 	public int largestFeature;
 	public float persistence;
 	public long seed;
+	public boolean waterEnabled;
 }

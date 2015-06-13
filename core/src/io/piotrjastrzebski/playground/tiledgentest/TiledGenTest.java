@@ -7,10 +7,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
-import com.badlogic.gdx.scenes.scene2d.ui.Label;
-import com.badlogic.gdx.scenes.scene2d.ui.Slider;
-import com.badlogic.gdx.scenes.scene2d.ui.Table;
-import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import io.piotrjastrzebski.playground.BaseScreen;
@@ -59,7 +56,7 @@ public class TiledGenTest extends BaseScreen {
 
 		settings.add(new Label("Largest Feature", skin));
 		settings.row();
-		final Slider largestFeature = new Slider(4, 256, 1, false, skin);
+		final Slider largestFeature = new Slider(16, 513, 1, false, skin);
 		largestFeature.setValue(data.largestFeature);
 		largestFeature.addListener(new ChangeListener() {
 			@Override public void changed (ChangeEvent event, Actor actor) {
@@ -72,7 +69,7 @@ public class TiledGenTest extends BaseScreen {
 
 		settings.add(new Label("Persistence", skin));
 		settings.row();
-		final Slider persistence = new Slider(0.1f, 1.5f, 0.05f, false, skin);
+		final Slider persistence = new Slider(0.1f, 1f, 0.05f, false, skin);
 		persistence.setValue(data.persistence);
 		persistence.addListener(new ChangeListener() {
 			@Override public void changed (ChangeEvent event, Actor actor) {
@@ -83,8 +80,16 @@ public class TiledGenTest extends BaseScreen {
 		settings.add(persistence);
 		settings.row();
 
-		settings.add(new Label("Water", skin));
+		final CheckBox waterEnabled = new CheckBox("Water", skin);
+		waterEnabled.addListener(new ChangeListener() {
+			@Override public void changed (ChangeEvent event, Actor actor) {
+				data.waterEnabled = waterEnabled.isChecked();
+				refresh();
+			}
+		});
+		settings.add(waterEnabled);
 		settings.row();
+
 		final Slider water = new Slider(0.01f, 1.0f, 0.01f, false, skin);
 		water.setValue(data.water);
 		water.addListener(new ChangeListener() {
