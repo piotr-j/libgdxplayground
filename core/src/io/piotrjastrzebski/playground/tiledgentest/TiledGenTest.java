@@ -23,6 +23,7 @@ public class TiledGenTest extends BaseScreen {
 		map = new MapWidget(
 			new TextureRegion(new Texture(Gdx.files.internal("white.png"))));
 		map.setSize(2.75f);
+
 		data = new MapData();
 
 		// reasonable values for world map
@@ -34,6 +35,16 @@ public class TiledGenTest extends BaseScreen {
 		// same aspect as default 720p screen
 		data.width = 400;
 		data.height = 225;
+
+		data.tiles = new MapData.Tile[data.width][data.height];
+		for (int mx = 0; mx < data.width; mx++) {
+			for (int my = 0; my < data.height; my++) {
+				MapData.Tile tile = new MapData.Tile();
+				tile.x = mx;
+				tile.y = my;
+				data.tiles[mx][my] = tile;
+			}
+		}
 
 		Table container = new Table();
 		// put it in container so it is always centered in the pane
@@ -114,6 +125,7 @@ public class TiledGenTest extends BaseScreen {
 
 		refresh();
 	}
+
 	public void refresh() {
 		OpenNoise noise = new OpenNoise(data.largestFeature, data.persistence, data.seed);
 		double xStart = 0;
@@ -123,16 +135,13 @@ public class TiledGenTest extends BaseScreen {
 
 		int xResolution = data.width;
 		int yResolution = data.height;
-		data.tiles = new MapData.Tile[xResolution][yResolution];
 		for (int mx = 0; mx < xResolution; mx++) {
 			for (int my = 0; my < yResolution; my++) {
 				int nx = (int)(xStart + mx * ((XEnd - xStart) / xResolution));
 				int ny = (int)(yStart + my * ((yEnd - yStart) / yResolution));
 				// normalize
 				double dVal = 0.5d + noise.getNoise(nx, ny);
-				MapData.Tile tile = new MapData.Tile();
-				tile.x = mx;
-				tile.y = my;
+				MapData.Tile tile = data.tiles[mx][my];
 				tile.value = dVal;
 
 				float val = (float)tile.value;
@@ -147,6 +156,7 @@ public class TiledGenTest extends BaseScreen {
 							tile.setColor(0.4f, 0.7f, 1);
 						}
 					} else {
+						// normalize val so 0 is at water level
 						val = (val - data.water) / (1 - data.water);
 						if (data.biomeEnabled) {
 							// set color based on above the see level
@@ -158,7 +168,6 @@ public class TiledGenTest extends BaseScreen {
 					}
 				}
 
-				data.tiles[mx][my] = tile;
 			}
 		}
 		map.setData(data);
