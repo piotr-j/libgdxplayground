@@ -22,7 +22,7 @@ public class TiledGenTest extends BaseScreen {
 		super();
 		map = new MapWidget(
 			new TextureRegion(new Texture(Gdx.files.internal("white.png"))));
-		map.setSize(4);
+		map.setSize(2.75f);
 		data = new MapData();
 
 		// reasonable values for world map
@@ -31,8 +31,9 @@ public class TiledGenTest extends BaseScreen {
 		data.largestFeature = 256;
 		data.persistence = 0.55f;
 		data.seed = MathUtils.random(Long.MAX_VALUE);
-		data.width = 256;
-		data.height = 128;
+		// same aspect as default 720p screen
+		data.width = 400;
+		data.height = 225;
 
 		Table container = new Table();
 		// put it in container so it is always centered in the pane
