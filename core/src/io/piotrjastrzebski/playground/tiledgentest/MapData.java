@@ -13,4 +13,5 @@ public class MapData {
 	public float persistence;
 	public long seed;
 	public boolean waterEnabled;
+	public boolean biomeEnabled;
 }

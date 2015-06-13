@@ -34,9 +34,13 @@ public class MapWidget extends Widget {
 				int my = (int)(y / size);
 				if (mx < 0 || mx > data.width) return;
 				if (my < 0 || my > data.height) return;
-				Gdx.app.log("", "Clicked " + data.data[mx][my]);
+				onSelected(mx, my);
 			}
 		});
+	}
+
+	public void onSelected(int x, int y){
+		Gdx.app.log("", "Clicked " + data.data[x][y]);
 	}
 
 	public void setSize(float size) {
@@ -68,8 +72,13 @@ public class MapWidget extends Widget {
 							batch.setColor(0.4f, 0.7f, 1, 1);
 						}
 					} else {
-						val = (val - data.water) / (1 - data.water);
-						batch.setColor(val, val, val, 1);
+						if (data.biomeEnabled) {
+							// set color based on above the see level
+							// beach, plain, forest, montains etc
+						} else {
+							val = (val - data.water) / (1 - data.water);
+							batch.setColor(val, val, val, 1);
+						}
 					}
 				}
 				batch.draw(
