@@ -10,6 +10,6 @@ public class MapData {
 	public float water;
 
 	public int largestFeature;
-	public double persistence;
+	public float persistence;
 	public long seed;
 }
