@@ -2,30 +2,28 @@ package io.piotrjastrzebski.playground.tiledgentest;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Array;
 import io.piotrjastrzebski.playground.BaseScreen;
-import io.piotrjastrzebski.playground.Utils;
-import io.piotrjastrzebski.playground.tiledgentest.generators.TerrainGen;
+import io.piotrjastrzebski.playground.tiledgentest.generators.TempGen;
 
 /**
  * Created by EvilEntity on 07/06/2015.
  */
-public class TiledGenTest extends BaseScreen {
+public class TemperatureTest extends BaseScreen {
 	MapWidget map;
 	MapData data;
 	Interpolation interp;
-	float gain;
-	public TiledGenTest () {
+	public TemperatureTest () {
 		super();
 		map = new MapWidget(
 			new TextureRegion(new Texture(Gdx.files.internal("white.png"))));
@@ -33,13 +31,13 @@ public class TiledGenTest extends BaseScreen {
 
 		data = new MapData();
 
-		interp = Interpolation.fade;
+		interp = Interpolation.sine;
 
 		// reasonable values for world map
 		data.biomeEnabled = true;
 		data.water = 0.4f;
 		data.waterEnabled = true;
-		data.largestFeature = 256;
+		data.largestFeature = 513;
 		data.persistence = 0.55f;
 		data.seed = MathUtils.random(Long.MAX_VALUE);
 		// same aspect as default 720p screen
@@ -91,7 +89,6 @@ public class TiledGenTest extends BaseScreen {
 		});
 		settings.add(largestFeature);
 		settings.row();
-
 		final Label pLabel = new Label("Persistence " + data.persistence, skin);
 		settings.add(pLabel);
 		settings.row();
@@ -135,8 +132,8 @@ public class TiledGenTest extends BaseScreen {
 		settings.row();
 		final SelectBox<Interp> sbInterp = new SelectBox<>(skin);
 		Array<Interp> items = new Array<>();
-		items.add(new Interp(Interpolation.fade, "fade"));
 		items.add(new Interp(Interpolation.linear, "linear"));
+		items.add(new Interp(Interpolation.fade, "fade"));
 		items.add(new Interp(Interpolation.pow2, "pow2"));
 		items.add(new Interp(Interpolation.pow2In, "pow2In"));
 		items.add(new Interp(Interpolation.pow2Out, "pow2Out"));
@@ -203,53 +200,16 @@ public class TiledGenTest extends BaseScreen {
 	}
 
 	public void refresh() {
-		float[][] terrainData = TerrainGen.generate(data.seed, data.width, data.height);
-
-		float max = 1.0f;
+		float[][] tempData = TempGen.generate(data.seed, data.width, data.height);
+		Color temp = new Color(Color.BLUE);
+		temp.lerp(Color.RED, 0);
 		for (int mx = 0; mx < data.width; mx++) {
 			for (int my = 0; my < data.height; my++) {
 				MapData.Tile tile = data.tiles[mx][my];
-				float val = terrainData[mx][my];
-				tile.value = val;
-
-				if (val > max) max = val;
-				tile.setColor(val, val, val);
-
-				if (data.waterEnabled) {
-					if (val < data.water) {
-						if (val < data.water * 0.7f) {
-							tile.setColor(0.2f, 0.5f, 0.9f);
-						} else {
-							tile.setColor(0.4f, 0.7f, 1);
-						}
-					} else {
-						// normalize val so 0 is at water level
-						val = (val - data.water) / (max - data.water);
-
-						// todo interp so higher values go up faster
-						tile.elevation = val * 200;
-						tile.setColor(val, val, val);
-						if (data.biomeEnabled) {
-							// set color based on above the see level
-							// beach, plain, forest, mountains etc
-							tile.setColor(val, val, val);
-							if (val < 0.1) {
-								tile.setColor(Color.YELLOW);
-							} else if (val < 0.3) {
-								tile.setColor(Color.GREEN);
-							} else if (val < 0.55) {
-								tile.setColor(.1f, 0.8f, .2f);
-							} else if (val < 0.8) {
-								tile.setColor(Color.GRAY);
-							} else {
-								tile.setColor(Color.WHITE);
-							}
-						} else {
-							tile.setColor(val, val, val);
-						}
-					}
-				}
-
+				tile.value = tempData[mx][my];
+				temp.set(Color.BLUE);
+				temp.lerp(Color.RED, tempData[mx][my]);
+				tile.setColor(temp);
 			}
 		}
 		map.setData(data);

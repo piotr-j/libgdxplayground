@@ -2,7 +2,6 @@ package io.piotrjastrzebski.playground.tiledgentest;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Interpolation;
@@ -15,17 +14,17 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Array;
 import io.piotrjastrzebski.playground.BaseScreen;
 import io.piotrjastrzebski.playground.Utils;
-import io.piotrjastrzebski.playground.tiledgentest.generators.TerrainGen;
 
 /**
  * Created by EvilEntity on 07/06/2015.
  */
-public class TiledGenTest extends BaseScreen {
+public class BiomeTest extends BaseScreen {
 	MapWidget map;
 	MapData data;
 	Interpolation interp;
 	float gain;
-	public TiledGenTest () {
+
+	public BiomeTest () {
 		super();
 		map = new MapWidget(
 			new TextureRegion(new Texture(Gdx.files.internal("white.png"))));
@@ -33,7 +32,7 @@ public class TiledGenTest extends BaseScreen {
 
 		data = new MapData();
 
-		interp = Interpolation.fade;
+		interp = Interpolation.pow5;
 
 		// reasonable values for world map
 		data.biomeEnabled = true;
@@ -91,7 +90,6 @@ public class TiledGenTest extends BaseScreen {
 		});
 		settings.add(largestFeature);
 		settings.row();
-
 		final Label pLabel = new Label("Persistence " + data.persistence, skin);
 		settings.add(pLabel);
 		settings.row();
@@ -105,6 +103,20 @@ public class TiledGenTest extends BaseScreen {
 			}
 		});
 		settings.add(persistence);
+		settings.row();
+
+		final Label gLabel = new Label("Gain " + gain, skin);
+		settings.add(gLabel);
+		settings.row();
+		final Slider gains = new Slider(0.1f, 1f, 0.01f, false, skin);
+		gains.addListener(new ChangeListener() {
+			@Override public void changed (ChangeEvent event, Actor actor) {
+				gain = gains.getValue();
+				gLabel.setText(String.format("Gain %.2f", gain));
+				refresh();
+			}
+		});
+		settings.add(gains);
 		settings.row();
 
 		final CheckBox waterEnabled = new CheckBox("Water " + data.water, skin);
@@ -135,8 +147,8 @@ public class TiledGenTest extends BaseScreen {
 		settings.row();
 		final SelectBox<Interp> sbInterp = new SelectBox<>(skin);
 		Array<Interp> items = new Array<>();
-		items.add(new Interp(Interpolation.fade, "fade"));
 		items.add(new Interp(Interpolation.linear, "linear"));
+		items.add(new Interp(Interpolation.fade, "fade"));
 		items.add(new Interp(Interpolation.pow2, "pow2"));
 		items.add(new Interp(Interpolation.pow2In, "pow2In"));
 		items.add(new Interp(Interpolation.pow2Out, "pow2Out"));
@@ -203,52 +215,64 @@ public class TiledGenTest extends BaseScreen {
 	}
 
 	public void refresh() {
-		float[][] terrainData = TerrainGen.generate(data.seed, data.width, data.height);
+		OpenNoise noise = new OpenNoise(data.largestFeature, data.persistence, data.seed);
+		double xStart = 0;
+		double XEnd = data.width;
+		double yStart = 0;
+		double yEnd = data.height;
 
+		int xResolution = data.width;
+		int yResolution = data.height;
 		float max = 1.0f;
-		for (int mx = 0; mx < data.width; mx++) {
-			for (int my = 0; my < data.height; my++) {
+		for (int mx = 0; mx < xResolution; mx++) {
+			for (int my = 0; my < yResolution; my++) {
+				int nx = (int)(xStart + mx * ((XEnd - xStart) / xResolution));
+				int ny = (int)(yStart + my * ((yEnd - yStart) / yResolution));
+				// normalize
+				double dVal = 0.5d + noise.getNoise(nx, ny);
 				MapData.Tile tile = data.tiles[mx][my];
-				float val = terrainData[mx][my];
-				tile.value = val;
+				tile.value = dVal;
 
+				float val = (float)tile.value;
 				if (val > max) max = val;
+				val = interp.apply(val);
+//				val = MathUtils.clamp(val, 0, 0.9999f);
+//				val = Utils.bias(val, gain);
+				// shades of gray
 				tile.setColor(val, val, val);
-
-				if (data.waterEnabled) {
-					if (val < data.water) {
-						if (val < data.water * 0.7f) {
-							tile.setColor(0.2f, 0.5f, 0.9f);
-						} else {
-							tile.setColor(0.4f, 0.7f, 1);
-						}
-					} else {
-						// normalize val so 0 is at water level
-						val = (val - data.water) / (max - data.water);
-
-						// todo interp so higher values go up faster
-						tile.elevation = val * 200;
-						tile.setColor(val, val, val);
-						if (data.biomeEnabled) {
-							// set color based on above the see level
-							// beach, plain, forest, mountains etc
-							tile.setColor(val, val, val);
-							if (val < 0.1) {
-								tile.setColor(Color.YELLOW);
-							} else if (val < 0.3) {
-								tile.setColor(Color.GREEN);
-							} else if (val < 0.55) {
-								tile.setColor(.1f, 0.8f, .2f);
-							} else if (val < 0.8) {
-								tile.setColor(Color.GRAY);
-							} else {
-								tile.setColor(Color.WHITE);
-							}
-						} else {
-							tile.setColor(val, val, val);
-						}
-					}
-				}
+//				if (data.waterEnabled) {
+//					if (val < data.water) {
+//						if (val < data.water * 0.7f) {
+//							tile.setColor(0.2f, 0.5f, 0.9f);
+//						} else {
+//							tile.setColor(0.4f, 0.7f, 1);
+//						}
+//					} else {
+//						// normalize val so 0 is at water level
+//						val = (val - data.water) / (max - data.water);
+//						// TODO play with Interpolations
+//						val = interp.apply(val);
+//						tile.elevation = val * 200;
+//						if (data.biomeEnabled) {
+//							// set color based on above the see level
+//							// beach, plain, forest, mountains etc
+//							tile.setColor(val, val, val);
+//							if (val < 0.1) {
+//								tile.setColor(Color.YELLOW);
+//							} else if (val < 0.3) {
+//								tile.setColor(Color.GREEN);
+//							} else if (val < 0.55) {
+//								tile.setColor(.1f, 0.8f, .2f);
+//							} else if (val < 0.8) {
+//								tile.setColor(Color.GRAY);
+//							} else {
+//								tile.setColor(Color.WHITE);
+//							}
+//						} else {
+//							tile.setColor(val, val, val);
+//						}
+//					}
+//				}
 
 			}
 		}

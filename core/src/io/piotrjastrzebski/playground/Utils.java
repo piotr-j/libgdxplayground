@@ -6,18 +6,18 @@ package io.piotrjastrzebski.playground;
 public class Utils {
 	/**
 	 *
-	 * @param alpha [0, 1]
+	 * @param value [0, 1]
 	 * @param bias [0, 1]
 	 */
-	public static float bias(float alpha, float bias){
-		return (alpha / (((1f/bias) - 2f) * (1f - alpha)) + 1f);
+	public static float bias(float value, float bias){
+		return (value / (((1f/bias) - 2f) * (1f - value)) + 1f);
 	}
 
-	public static float gain(float alpha, float gain) {
-		if (alpha < .5f) {
-			return bias(alpha * 2f, gain) / 2f;
+	public static float gain(float value, float gain) {
+		if (value < .5f) {
+			return bias(value * 2f, gain) / 2f;
 		} else {
-			return bias(alpha * 2f - 1f, 1f - gain) / 2f + .5f;
+			return bias(value * 2f - 1f, 1f - gain) / 2f + .5f;
 		}
 	}
 }

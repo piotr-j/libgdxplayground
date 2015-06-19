@@ -14,18 +14,19 @@ import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Array;
 import io.piotrjastrzebski.playground.BaseScreen;
-import io.piotrjastrzebski.playground.Utils;
-import io.piotrjastrzebski.playground.tiledgentest.generators.TerrainGen;
 
 /**
  * Created by EvilEntity on 07/06/2015.
  */
-public class TiledGenTest extends BaseScreen {
+public class RainTest extends BaseScreen {
 	MapWidget map;
 	MapData data;
 	Interpolation interp;
-	float gain;
-	public TiledGenTest () {
+
+	boolean rainEnabled = true;
+	int rainDst = 29;
+
+	public RainTest () {
 		super();
 		map = new MapWidget(
 			new TextureRegion(new Texture(Gdx.files.internal("white.png"))));
@@ -130,6 +131,29 @@ public class TiledGenTest extends BaseScreen {
 		settings.add(water);
 		settings.row();
 
+		final CheckBox cbRain = new CheckBox("RainDst " + rainDst, skin);
+		cbRain.setChecked(rainEnabled);
+		cbRain.addListener(new ChangeListener() {
+			@Override public void changed (ChangeEvent event, Actor actor) {
+				rainEnabled = cbRain.isChecked();
+				refresh();
+			}
+		});
+		settings.add(cbRain);
+		settings.row();
+
+		final Slider rainS = new Slider(1f, 200.0f, 1f, false, skin);
+		rainS.setValue(rainDst);
+		rainS.addListener(new ChangeListener() {
+			@Override public void changed (ChangeEvent event, Actor actor) {
+				rainDst = (int)rainS.getValue();
+				cbRain.setText(String.format("RainDst %d", rainDst));
+				refresh();
+			}
+		});
+		settings.add(rainS);
+		settings.row();
+
 		final Label iLabel = new Label("Interpolation ", skin);
 		settings.add(iLabel);
 		settings.row();
@@ -203,16 +227,28 @@ public class TiledGenTest extends BaseScreen {
 	}
 
 	public void refresh() {
-		float[][] terrainData = TerrainGen.generate(data.seed, data.width, data.height);
+		OpenNoise noise = new OpenNoise(data.largestFeature, data.persistence, data.seed);
+		double xStart = 0;
+		double XEnd = data.width;
+		double yStart = 0;
+		double yEnd = data.height * 2;
 
+		int xResolution = data.width;
+		int yResolution = data.height;
 		float max = 1.0f;
-		for (int mx = 0; mx < data.width; mx++) {
-			for (int my = 0; my < data.height; my++) {
+		for (int mx = 0; mx < xResolution; mx++) {
+			for (int my = 0; my < yResolution; my++) {
+				int nx = (int)(xStart + mx * ((XEnd - xStart) / xResolution));
+				int ny = (int)(yStart + my * ((yEnd - yStart) / yResolution));
+				// normalize
+				double dVal = 0.5d + noise.getNoise(nx, ny);
 				MapData.Tile tile = data.tiles[mx][my];
-				float val = terrainData[mx][my];
-				tile.value = val;
+				tile.value = dVal;
+				tile.rainfall = 0;
 
+				float val = (float)tile.value;
 				if (val > max) max = val;
+
 				tile.setColor(val, val, val);
 
 				if (data.waterEnabled) {
@@ -222,12 +258,14 @@ public class TiledGenTest extends BaseScreen {
 						} else {
 							tile.setColor(0.4f, 0.7f, 1);
 						}
+						tile.water = true;
+						tile.rainfall = 1;
 					} else {
 						// normalize val so 0 is at water level
 						val = (val - data.water) / (max - data.water);
+//						val = interp.apply(val);
 
-						// todo interp so higher values go up faster
-						tile.elevation = val * 200;
+						tile.elevation = val;
 						tile.setColor(val, val, val);
 						if (data.biomeEnabled) {
 							// set color based on above the see level
@@ -249,10 +287,58 @@ public class TiledGenTest extends BaseScreen {
 						}
 					}
 				}
-
+			}
+		}
+		// add rainfall by blurring the water tiles
+		for (int mx = 0; mx < xResolution; mx++) {
+			for (int my = 0; my < yResolution; my++) {
+				MapData.Tile tile = data.tiles[mx][my];
+				if (tile.water) {
+					blur(tile, false);
+				}
+			}
+		}
+		for (int mx = 0; mx < xResolution; mx++) {
+			for (int my = 0; my < yResolution; my++) {
+				MapData.Tile tile = data.tiles[mx][my];
+				if (tile.rainfall > 0.1f) {
+					blur(tile, true);
+				}
+			}
+		}
+		for (int mx = 0; mx < xResolution; mx++) {
+			for (int my = 0; my < yResolution; my++) {
+				MapData.Tile tile = data.tiles[mx][my];
+				// remove some rainfall based on elevation
+				tile.rainfall -= Interpolation.exp10In.apply(tile.elevation);// * 0.5f;
+				tile.rainfall = MathUtils.clamp(tile.rainfall, 0, 1);
+				if (rainEnabled && tile.rainfall > 0.05f) {
+					tile.color.add(new Color(0, 0, tile.rainfall, 1));
+				}
 			}
 		}
 		map.setData(data);
+	}
+
+	private void blur (MapData.Tile tile, boolean horizontal) {
+		if (horizontal) {
+			for (int x = tile.x-rainDst; x <= tile.x+rainDst; x++) {
+				if (x == tile.x) continue;
+				if (x < 0 || x >= data.width) continue;
+				MapData.Tile other = data.tiles[x][tile.y];
+				// if we wont scale this value we will get infinite distance
+				other.rainfall += tile.rainfall/rainDst * 0.5f;
+//				if (other.rainfall > 1) other.rainfall = 1;
+			}
+		} else {
+			for (int y = tile.y - rainDst; y <= tile.y + rainDst; y++) {
+				if (y == tile.y) continue;
+				if (y < 0 || y >= data.height) continue;
+				MapData.Tile other = data.tiles[tile.x][y];
+				other.rainfall += tile.rainfall/rainDst * 0.5f;
+//				if (other.rainfall > 1) other.rainfall = 1;
+			}
+		}
 	}
 
 	@Override public void render (float delta) {
