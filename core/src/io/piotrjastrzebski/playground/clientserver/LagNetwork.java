@@ -41,10 +41,6 @@ public class LagNetwork<T> {
 		return null;
 	}
 
-	public Message obtain() {
-		return messagePool.obtain();
-	}
-
 	public void free(Message<T> message) {
 		messagePool.free(message);
 	}
@@ -52,7 +48,6 @@ public class LagNetwork<T> {
 	public class Message<E> implements Pool.Poolable {
 		long deliver;
 		E data;
-		public int entityId;
 		public long ts;
 
 		public void init(int lag, E msg) {

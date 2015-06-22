@@ -20,7 +20,7 @@ public class Client {
 
 	LagNetwork<Array<EntityState>> network;
 
-	int playerId;
+	int id;
 
 	long inputSeq = 0;
 	private Server server;
@@ -50,7 +50,7 @@ public class Client {
 			for (int i = 0; i < gameState.data.size; i++) {
 				EntityState state = gameState.data.get(i);
 				// TODO this is a bit dumb, playerId is set by the server directly
-				if (state.id == playerId) {
+				if (state.id == id) {
 					if (player == null) {
 						player = new Entity(0);
 						player.id = state.id;
@@ -143,5 +143,12 @@ public class Client {
 
 	public void rightUp () {
 		right = false;
+	}
+
+	@Override
+	public String toString() {
+		return "Client{" +
+				"id=" + id +
+				'}';
 	}
 }

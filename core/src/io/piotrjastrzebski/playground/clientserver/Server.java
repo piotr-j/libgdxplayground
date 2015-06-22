@@ -1,5 +1,6 @@
 package io.piotrjastrzebski.playground.clientserver;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.IntMap;
 
@@ -19,14 +20,14 @@ public class Server {
 
 	public void connect(Client client) {
 		client.setServer(this);
-		client.playerId = id;
+		client.id = id;
 		clients.put(id, client);
 
 		Entity entity = new Entity(0);
 		entities.put(id, entity);
 
-		entity.id = client.playerId;
-
+		entity.id = client.id;
+		Gdx.app.log("", ""+client);
 		id++;
 	}
 
@@ -52,7 +53,7 @@ public class Server {
 			}
 
 			if (validateInput(message.data)) {
-				int id = message.entityId;
+				int id = message.data.id;
 				entities.get(id).applyInput(message.data);
 
 				lastInputs.put(id, message.data);
@@ -95,9 +96,9 @@ public class Server {
 		tickTime = 1.0f/fps;
 	}
 
-	public Entity getPlayer () {
-		if (entities.size > 0) {
-			return entities.get(0);
+	public Entity getPlayer(int i) {
+		if (i < entities.size && i >= 0) {
+			return entities.get(i);
 		}
 		return null;
 	}
