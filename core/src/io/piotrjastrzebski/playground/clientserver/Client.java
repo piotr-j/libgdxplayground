@@ -1,6 +1,7 @@
 package io.piotrjastrzebski.playground.clientserver;
 
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.IntMap;
 
 import java.util.Iterator;
 
@@ -15,6 +16,7 @@ public class Client {
 	private boolean reconciliation;
 
 	private Entity player;
+	private IntMap<Entity> entities = new IntMap<>();
 	boolean left;
 	boolean right;
 
@@ -72,7 +74,12 @@ public class Client {
 						pendingInputs.clear();
 					}
 				} else {
-					// TODO other entities
+					Entity entity = entities.get(state.id);
+					if (entity == null) {
+						entity = new Entity(state.x);
+						entities.put(state.id, entity);
+					}
+					entity.x = state.x;
 				}
 			}
 
@@ -150,5 +157,9 @@ public class Client {
 		return "Client{" +
 				"id=" + id +
 				'}';
+	}
+
+	public IntMap<Entity> getEntities() {
+		return entities;
 	}
 }

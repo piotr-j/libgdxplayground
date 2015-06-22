@@ -103,6 +103,11 @@ public class CSTest extends BaseScreen {
 		renderer.begin(ShapeRenderer.ShapeType.Filled);
 
 		if (clientA.getPlayer() != null) {
+			for(Entity e : clientA.getEntities().values()) {
+				renderer.setColor(Color.GRAY);
+				renderer.circle(e.getX(), 3, 1.5f, 32);
+			}
+
 			// render client entity
 			renderer.setColor(Color.OLIVE);
 			renderer.circle(clientA.getPlayer().getX(), 3, 1.5f, 32);
@@ -111,6 +116,10 @@ public class CSTest extends BaseScreen {
 		}
 
 		if (clientB.getPlayer() != null) {
+			for(Entity e : clientB.getEntities().values()) {
+				renderer.setColor(Color.GRAY);
+				renderer.circle(e.getX(), -3, 1.5f, 32);
+			}
 			// render client entity
 			renderer.setColor(Color.MAROON);
 			renderer.circle(clientB.getPlayer().getX(), -3, 1.5f, 32);
