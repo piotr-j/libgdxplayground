@@ -51,6 +51,8 @@ project(":core") {
         compile "com.badlogicgames.box2dlights:box2dlights:$box2DLightsVersion"
         compile "com.badlogicgames.gdx:gdx-ai:$aiVersion"
         compile "com.kotcrab.vis:vis-ui:0.7.7"
+
+        compile fileTree(dir: '../libs', include: '*.jar')
     }
 }
 
@@ -71,6 +73,8 @@ project(":android") {
         natives "com.badlogicgames.gdx:gdx-box2d-platform:$gdxVersion:natives-x86"
         compile "com.badlogicgames.box2dlights:box2dlights:$box2DLightsVersion"
         compile "com.badlogicgames.gdx:gdx-ai:$aiVersion"
+
+        compile fileTree(dir: '../libs', include: '*.jar')
     }
 }
 
