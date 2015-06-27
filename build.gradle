@@ -21,6 +21,7 @@ allprojects {
         ashleyVersion = '1.4.0'
         aiVersion = '1.5.0'
         visuiVersion = '0.7.7'
+        artemisOdbVersion = "0.9.0"
     }
 
     repositories {
@@ -52,6 +53,7 @@ project(":core") {
         compile "com.badlogicgames.box2dlights:box2dlights:$box2DLightsVersion"
         compile "com.badlogicgames.gdx:gdx-ai:$aiVersion"
         compile "com.kotcrab.vis:vis-ui:$visuiVersion"
+        compile "net.onedaybeard.artemis:artemis-odb:$artemisOdbVersion"
     }
 }
 
