@@ -72,7 +72,7 @@ public abstract class BaseScreen implements Screen, InputProcessor {
 
 	@Override public void resize (int width, int height) {
 		gameViewport.update(width, height, false);
-		guiViewport.update(width, height, false);
+		guiViewport.update(width, height, true);
 	}
 
 	@Override public void pause () {
