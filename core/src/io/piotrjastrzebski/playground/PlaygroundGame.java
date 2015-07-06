@@ -1,6 +1,7 @@
 package io.piotrjastrzebski.playground;
 
 import com.badlogic.gdx.Game;
+import io.piotrjastrzebski.playground.asyncscreentest.AsyncScreenTest;
 import io.piotrjastrzebski.playground.clientserver.CSTest;
 import io.piotrjastrzebski.playground.clientserverv2.CSTestV2;
 import io.piotrjastrzebski.playground.tagtest.TagTest;
@@ -20,6 +21,7 @@ public class PlaygroundGame extends Game {
 //		setScreen(new UITest());
 //		setScreen(new CSTest());
 //		setScreen(new CSTestV2());
-		setScreen(new TagTest());
+//		setScreen(new TagTest());
+		setScreen(new AsyncScreenTest());
 	}
 }
