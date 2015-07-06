@@ -3,7 +3,6 @@ package io.piotrjastrzebski.playground;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.badlogic.gdx.scenes.scene2d.utils.ActorGestureListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.Array;
 import com.kotcrab.vis.ui.VisUI;
@@ -15,6 +14,7 @@ import io.piotrjastrzebski.playground.clientserver.CSTest;
 import io.piotrjastrzebski.playground.clientserverv2.CSTestV2;
 import io.piotrjastrzebski.playground.tagtest.TagTest;
 import io.piotrjastrzebski.playground.tiledgentest.*;
+import io.piotrjastrzebski.playground.uitesting.UIPaneTest;
 import io.piotrjastrzebski.playground.uitesting.UITest;
 
 import java.lang.reflect.Constructor;
@@ -26,7 +26,7 @@ public class PlaygroundGame extends Game {
 	final Class[] testScreens = new Class[]{
 		TiledGenTest.class, TemperatureTest.class, BiomeTest.class,
 		RainTest.class, BlurTest.class, CompositeGenTest.class, UITest.class, CSTest.class,
-		CSTestV2.class, TagTest.class, AsyncScreenTest.class
+		CSTestV2.class, TagTest.class, AsyncScreenTest.class, UIPaneTest.class
 	};
 
 	@Override
