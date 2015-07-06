@@ -6,14 +6,15 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import io.piotrjastrzebski.playground.BaseScreen;
+import io.piotrjastrzebski.playground.PlaygroundGame;
 
 /**
  * Created by EvilEntity on 07/06/2015.
  */
 public class TMWTest extends BaseScreen {
 	MapWidget map;
-	public TMWTest () {
-		super();
+	public TMWTest (PlaygroundGame game) {
+		super(game);
 		map = new MapWidget(
 			new TextureRegion(new Texture(Gdx.files.internal("white.png"))));
 

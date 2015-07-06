@@ -14,6 +14,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Array;
 import io.piotrjastrzebski.playground.BaseScreen;
+import io.piotrjastrzebski.playground.PlaygroundGame;
 
 /**
  * Created by EvilEntity on 07/06/2015.
@@ -25,8 +26,8 @@ public class BlurTest extends BaseScreen {
 	MapData data;
 	Interpolation interp;
 	float gain;
-	public BlurTest () {
-		super();
+	public BlurTest (PlaygroundGame game) {
+		super(game);
 		map = new MapWidget(
 			new TextureRegion(new Texture(Gdx.files.internal("white.png"))));
 		map.setSize(2.75f);

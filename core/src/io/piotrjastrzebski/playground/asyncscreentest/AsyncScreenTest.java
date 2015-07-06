@@ -8,6 +8,7 @@ import com.badlogic.gdx.utils.async.AsyncExecutor;
 import com.badlogic.gdx.utils.async.AsyncResult;
 import com.badlogic.gdx.utils.async.AsyncTask;
 import io.piotrjastrzebski.playground.BaseScreen;
+import io.piotrjastrzebski.playground.PlaygroundGame;
 
 /**
  * Created by EvilEntity on 07/06/2015.
@@ -17,8 +18,8 @@ public class AsyncScreenTest extends BaseScreen {
 	AsyncExecutor executor;
 	AsyncResult<SlowLoadStuff> result;
 
-	public AsyncScreenTest () {
-		super();
+	public AsyncScreenTest (PlaygroundGame game) {
+		super(game);
 		// we will do only one thing
 		executor = new AsyncExecutor(1);
 		result = executor.submit(new AsyncTask<SlowLoadStuff>() {

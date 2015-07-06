@@ -9,6 +9,7 @@ import com.artemis.utils.Bag;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.utils.Array;
 import io.piotrjastrzebski.playground.BaseScreen;
+import io.piotrjastrzebski.playground.PlaygroundGame;
 import io.piotrjastrzebski.playground.tagtest.components.*;
 import io.piotrjastrzebski.playground.tagtest.systems.BuildSystem;
 import io.piotrjastrzebski.playground.tagtest.systems.JobSystem;
@@ -20,7 +21,8 @@ import io.piotrjastrzebski.playground.tagtest.systems.TagSystem;
  */
 public class TagTest extends BaseScreen {
 	World world;
-	public TagTest() {
+	public TagTest (PlaygroundGame game) {
+		super(game);
 		WorldConfiguration cfg = new WorldConfiguration();
 
 		world = new World(cfg);
@@ -134,12 +136,6 @@ public class TagTest extends BaseScreen {
 		jobSystem.findJob(worker2);
 
 		world.process();
-
-
-
-
-		// we dont need to run
-		Gdx.app.exit();
 	}
 
 	private void findTagged(String tag, TagSystem tagSystem) {

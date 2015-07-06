@@ -14,6 +14,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Array;
 import io.piotrjastrzebski.playground.BaseScreen;
+import io.piotrjastrzebski.playground.PlaygroundGame;
 
 /**
  * Created by EvilEntity on 07/06/2015.
@@ -26,8 +27,8 @@ public class RainTest extends BaseScreen {
 	boolean rainEnabled = true;
 	int rainDst = 29;
 
-	public RainTest () {
-		super();
+	public RainTest (PlaygroundGame game) {
+		super(game);
 		map = new MapWidget(
 			new TextureRegion(new Texture(Gdx.files.internal("white.png"))));
 		map.setSize(2.75f);

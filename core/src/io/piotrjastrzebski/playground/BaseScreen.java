@@ -35,8 +35,9 @@ public abstract class BaseScreen implements Screen, InputProcessor {
 	protected Skin skin;
 
 	boolean debugStage;
-
-	public BaseScreen () {
+	PlaygroundGame game;
+	public BaseScreen (PlaygroundGame game) {
+		this.game = game;
 
 		gameCamera = new OrthographicCamera();
 		gameViewport = new ExtendViewport(VP_WIDTH, VP_HEIGHT, gameCamera);
@@ -47,7 +48,6 @@ public abstract class BaseScreen implements Screen, InputProcessor {
 		renderer = new ShapeRenderer();
 
 		skin = new Skin(Gdx.files.internal("gui/uiskin.json"));
-		VisUI.load();
 		stage = new Stage(guiViewport, batch);
 		stage.setDebugAll(debugStage);
 		root = new Table();
@@ -91,10 +91,12 @@ public abstract class BaseScreen implements Screen, InputProcessor {
 		batch.dispose();
 		renderer.dispose();
 		stage.dispose();
-		VisUI.dispose();
 	}
 
 	@Override public boolean keyDown (int keycode) {
+		if (keycode == Input.Keys.ESCAPE) {
+			game.reset();
+		}
 		if (keycode == Input.Keys.F1) {
 			debugStage = !debugStage;
 			stage.setDebugAll(debugStage);

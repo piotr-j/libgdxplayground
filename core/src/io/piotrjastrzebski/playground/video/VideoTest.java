@@ -1,13 +1,14 @@
 package io.piotrjastrzebski.playground.video;
 
 import io.piotrjastrzebski.playground.BaseScreen;
+import io.piotrjastrzebski.playground.PlaygroundGame;
 
 /**
  * Created by EvilEntity on 07/06/2015.
  */
 public class VideoTest extends BaseScreen {
-	public VideoTest () {
-		super();
+	public VideoTest (PlaygroundGame game) {
+		super(game);
 		// TODO test gdx video
 	}
 
