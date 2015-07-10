@@ -22,7 +22,7 @@ public class EntityOneCompTest extends BaseScreen {
 
 		Entity e1 = world.createEntity();
 		Gdx.app.log("" + e1, "create MandatoryComponent");
-		e1.edit().create(MAndatoryComponent.class);
+		e1.edit().create(MandatoryComponent.class);
 		world.process();
 		Gdx.app.log("" + e1, "create OptionalComponentA");
 		e1.edit().create(OptionalComponentA.class);
@@ -41,7 +41,7 @@ public class EntityOneCompTest extends BaseScreen {
 
 		Entity e2 = world.createEntity();
 		Gdx.app.log("" + e2, "create MandatoryComponent");
-		e2.edit().create(MAndatoryComponent.class);
+		e2.edit().create(MandatoryComponent.class);
 		Gdx.app.log("" + e2, "create OptionalComponentB");
 		e2.edit().create(OptionalComponentB.class);
 		world.process();
@@ -51,7 +51,7 @@ public class EntityOneCompTest extends BaseScreen {
 
 		Entity e3 = world.createEntity();
 		Gdx.app.log("" + e3, "create MandatoryComponent");
-		e3.edit().create(MAndatoryComponent.class);
+		e3.edit().create(MandatoryComponent.class);
 		Gdx.app.log("" + e3, "create OptionalComponentA");
 		e3.edit().create(OptionalComponentA.class);
 		world.process();
