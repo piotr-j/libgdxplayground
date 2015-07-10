@@ -14,13 +14,13 @@ import com.badlogic.gdx.Gdx;
  */
 @Wire
 public class OptionalTestSystem extends EntityProcessingSystem {
-    ComponentMapper<MAndatoryComponent> mandatoryCM;
+    ComponentMapper<MandatoryComponent> mandatoryCM;
     ComponentMapper<OptionalComponentA> optionalACM;
     ComponentMapper<OptionalComponentB> optionalBCM;
 
 
     public OptionalTestSystem() {
-        super(Aspect.getAspectForAll(MAndatoryComponent.class).one(OptionalComponentA.class, OptionalComponentB.class));
+        super(Aspect.getAspectForAll(MandatoryComponent.class).one(OptionalComponentA.class, OptionalComponentB.class));
     }
 
     Bag<Component> fill = new Bag<>();
