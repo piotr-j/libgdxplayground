@@ -7,16 +7,16 @@ import com.badlogic.gdx.backends.android.AndroidApplicationConfiguration;
 import io.piotrjastrzebski.playground.PlaygroundGame;
 
 public class AndroidLauncher extends AndroidApplication {
-	public AndroidLauncher () {
-		final Thread.UncaughtExceptionHandler handler = Thread.getDefaultUncaughtExceptionHandler();
-		Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
-			@Override public void uncaughtException (Thread thread, Throwable ex) {
-				System.err.println("Exploded!");
-				// run default
-				handler.uncaughtException(thread, ex);
-			}
-		});
-	}
+//	public AndroidLauncher () {
+//		final Thread.UncaughtExceptionHandler handler = Thread.getDefaultUncaughtExceptionHandler();
+//		Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
+//			@Override public void uncaughtException (Thread thread, Throwable ex) {
+//				System.err.println("Exploded!");
+//				// run default
+//				handler.uncaughtException(thread, ex);
+//			}
+//		});
+//	}
 
 	@Override
 	protected void onCreate (Bundle savedInstanceState) {
