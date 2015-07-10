@@ -5,13 +5,16 @@ import com.artemis.World;
 import com.artemis.WorldConfiguration;
 import com.badlogic.gdx.Gdx;
 import io.piotrjastrzebski.playground.BaseScreen;
+import io.piotrjastrzebski.playground.PlaygroundGame;
 
 /**
  * Created by PiotrJ on 20/06/15.
  */
 public class EntityOneCompTest extends BaseScreen {
 	World world;
-	public EntityOneCompTest() {
+
+	public EntityOneCompTest (PlaygroundGame game) {
+		super(game);
 		WorldConfiguration cfg = new WorldConfiguration();
 
 		world = new World(cfg);
@@ -22,7 +25,7 @@ public class EntityOneCompTest extends BaseScreen {
 
 		Entity e1 = world.createEntity();
 		Gdx.app.log("" + e1, "create MandatoryComponent");
-		e1.edit().create(MandatoryComponent.class);
+		e1.edit().create(MAndatoryComponent.class);
 		world.process();
 		Gdx.app.log("" + e1, "create OptionalComponentA");
 		e1.edit().create(OptionalComponentA.class);
@@ -41,7 +44,7 @@ public class EntityOneCompTest extends BaseScreen {
 
 		Entity e2 = world.createEntity();
 		Gdx.app.log("" + e2, "create MandatoryComponent");
-		e2.edit().create(MandatoryComponent.class);
+		e2.edit().create(MAndatoryComponent.class);
 		Gdx.app.log("" + e2, "create OptionalComponentB");
 		e2.edit().create(OptionalComponentB.class);
 		world.process();
@@ -51,7 +54,7 @@ public class EntityOneCompTest extends BaseScreen {
 
 		Entity e3 = world.createEntity();
 		Gdx.app.log("" + e3, "create MandatoryComponent");
-		e3.edit().create(MandatoryComponent.class);
+		e3.edit().create(MAndatoryComponent.class);
 		Gdx.app.log("" + e3, "create OptionalComponentA");
 		e3.edit().create(OptionalComponentA.class);
 		world.process();
