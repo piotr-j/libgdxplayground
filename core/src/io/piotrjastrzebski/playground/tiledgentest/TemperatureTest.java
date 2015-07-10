@@ -14,6 +14,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Array;
 import io.piotrjastrzebski.playground.BaseScreen;
+import io.piotrjastrzebski.playground.PlaygroundGame;
 import io.piotrjastrzebski.playground.tiledgentest.generators.TempGen;
 
 /**
@@ -23,8 +24,8 @@ public class TemperatureTest extends BaseScreen {
 	MapWidget map;
 	MapData data;
 	Interpolation interp;
-	public TemperatureTest () {
-		super();
+	public TemperatureTest (PlaygroundGame game) {
+		super(game);
 		map = new MapWidget(
 			new TextureRegion(new Texture(Gdx.files.internal("white.png"))));
 		map.setSize(2.75f);

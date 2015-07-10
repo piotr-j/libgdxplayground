@@ -8,12 +8,14 @@ import com.badlogic.gdx.utils.IntMap;
 import com.kotcrab.vis.ui.FocusManager;
 import com.kotcrab.vis.ui.widget.*;
 import io.piotrjastrzebski.playground.BaseScreen;
+import io.piotrjastrzebski.playground.PlaygroundGame;
 
 /**
  * Created by PiotrJ on 20/06/15.
  */
 public class UITest extends BaseScreen {
-	public UITest () {
+	public UITest (PlaygroundGame game) {
+		super(game);
 		VisTable table = new VisTable(true);
 		VisLabel label = new VisLabel("Test");
 		new Tooltip(label, "Test tooltip");
@@ -59,7 +61,7 @@ public class UITest extends BaseScreen {
 			action.execute();
 			return true;
 		}
-		return false;
+		return super.keyDown(keycode);
 	}
 
 	private abstract class BtnAction {

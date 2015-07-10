@@ -10,6 +10,7 @@ import com.kotcrab.vis.ui.widget.VisCheckBox;
 import com.kotcrab.vis.ui.widget.VisLabel;
 import com.kotcrab.vis.ui.widget.VisTable;
 import io.piotrjastrzebski.playground.BaseScreen;
+import io.piotrjastrzebski.playground.PlaygroundGame;
 
 /**
  * Very simple client entity prediction test based on
@@ -22,8 +23,8 @@ public class CSTestV2 extends BaseScreen {
 	Server server;
 	VisLabel ackLabel;
 
-	public CSTestV2() {
-		super();
+	public CSTestV2 (PlaygroundGame game) {
+		super(game);
 		server = new Server();
 
 		clientA = addClient();
@@ -162,7 +163,7 @@ public class CSTestV2 extends BaseScreen {
 //		} else if (keycode == Input.Keys.RIGHT) {
 //			clientB.right();
 //		}
-		return false;
+		return super.keyDown(keycode);
 	}
 
 	@Override public boolean keyUp (int keycode) {
@@ -176,6 +177,6 @@ public class CSTestV2 extends BaseScreen {
 //		} else if (keycode == Input.Keys.RIGHT) {
 //			clientB.rightUp();
 //		}
-		return false;
+		return super.keyUp(keycode);
 	}
 }
