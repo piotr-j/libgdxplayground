@@ -62,6 +62,6 @@ public class CircleTest extends BaseScreen {
 		if (keycode == Input.Keys.Z) {
 			circleContains = !circleContains;
 		}
-		return false;
+		return super.keyDown(keycode);
 	}
 }
