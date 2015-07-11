@@ -20,7 +20,7 @@ public class OptionalTestSystem extends EntityProcessingSystem {
 
 
     public OptionalTestSystem() {
-        super(Aspect.getAspectForAll(MandatoryComponent.class).one(OptionalComponentA.class, OptionalComponentB.class));
+        super(Aspect.all(MandatoryComponent.class).one(OptionalComponentA.class, OptionalComponentB.class));
     }
 
     Bag<Component> fill = new Bag<>();

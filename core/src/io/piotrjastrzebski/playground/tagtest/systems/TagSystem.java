@@ -18,8 +18,9 @@ import io.piotrjastrzebski.playground.tagtest.components.TagComponent;
     ObjectMap<String, IntArray> tagToEntities = new ObjectMap<>();
 
     public TagSystem() {
-        super(Aspect.getAspectForAll(TagComponent.class));
+        super(Aspect.all(TagComponent.class));
     }
+
 
     @Override
     protected void inserted(Entity e) {
@@ -50,8 +51,8 @@ import io.piotrjastrzebski.playground.tagtest.components.TagComponent;
     }
 
     @Override
-    protected void processEntities(IntBag entities) {
-        // do nothing, we are passive
+    protected void processSystem () {
+
     }
 
     public <T extends Component> void add(String tag, Class<T> aClass) {

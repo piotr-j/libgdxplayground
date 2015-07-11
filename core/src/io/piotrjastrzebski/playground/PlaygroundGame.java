@@ -12,6 +12,7 @@ import com.kotcrab.vis.ui.widget.VisScrollPane;
 import io.piotrjastrzebski.playground.asyncscreentest.AsyncScreenTest;
 import io.piotrjastrzebski.playground.clientserver.CSTest;
 import io.piotrjastrzebski.playground.clientserverv2.CSTestV2;
+import io.piotrjastrzebski.playground.deferredsystemtest.DeferredSystemTest;
 import io.piotrjastrzebski.playground.entityedittest.EntityEditTest;
 import io.piotrjastrzebski.playground.entityonecomptest.EntityOneCompTest;
 import io.piotrjastrzebski.playground.gpushadows.GpuShadows;
@@ -31,7 +32,7 @@ public class PlaygroundGame extends Game {
 	final Class[] testScreens = new Class[]{
 		TiledGenTest.class, TemperatureTest.class, BiomeTest.class,
 		RainTest.class, BlurTest.class, CompositeGenTest.class, UITest.class, CSTest.class,
-		CSTestV2.class, TagTest.class, EntityEditTest.class, EntityOneCompTest.class,
+		CSTestV2.class, TagTest.class, EntityEditTest.class, EntityOneCompTest.class, DeferredSystemTest.class,
 		AsyncScreenTest.class, UIPaneTest.class, UIContextMenuTest.class,
 		ShadowTest.class, GpuShadows.class
 	};
