@@ -6,15 +6,15 @@ import io.piotrjastrzebski.playground.PlaygroundGame;
 
 public class DesktopLauncher {
 	public static void main (String[] arg) {
-		final Thread.UncaughtExceptionHandler handler = Thread.getDefaultUncaughtExceptionHandler();
-		Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
-			@Override public void uncaughtException (Thread thread, Throwable ex) {
-				System.err.println("Exploded!");
-				// run default
-				ex.printStackTrace();
-				handler.uncaughtException(thread, ex);
-			}
-		});
+//		final Thread.UncaughtExceptionHandler handler = Thread.getDefaultUncaughtExceptionHandler();
+//		Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
+//			@Override public void uncaughtException (Thread thread, Throwable ex) {
+//				System.err.println("Exploded!");
+//				// run default
+//				ex.printStackTrace();
+//				handler.uncaughtException(thread, ex);
+//			}
+//		});
 
 		LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
 		config.width = 1280;
