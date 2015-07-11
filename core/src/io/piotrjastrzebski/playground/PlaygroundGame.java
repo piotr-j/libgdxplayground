@@ -34,7 +34,7 @@ public class PlaygroundGame extends Game {
 		RainTest.class, BlurTest.class, CompositeGenTest.class, UITest.class, CSTest.class,
 		CSTestV2.class, TagTest.class, EntityEditTest.class, EntityOneCompTest.class, DeferredSystemTest.class,
 		AsyncScreenTest.class, UIPaneTest.class, UIContextMenuTest.class,
-		ShadowTest.class, GpuShadows.class, CircleTest.class
+		ShadowTest.class, GpuShadows.class, CircleTest.class, ShapeRendererTest.class
 	};
 
 	@Override
