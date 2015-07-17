@@ -19,10 +19,7 @@ import io.piotrjastrzebski.playground.entityonecomptest.EntityOneCompTest;
 import io.piotrjastrzebski.playground.gpushadows.GpuShadows;
 import io.piotrjastrzebski.playground.tagtest.TagTest;
 import io.piotrjastrzebski.playground.tiledgentest.*;
-import io.piotrjastrzebski.playground.uitesting.UIContextMenuTest;
-import io.piotrjastrzebski.playground.uitesting.UIContextMenuTest2;
-import io.piotrjastrzebski.playground.uitesting.UIPaneTest;
-import io.piotrjastrzebski.playground.uitesting.UITest;
+import io.piotrjastrzebski.playground.uitesting.*;
 import light2dtest.ShadowTest;
 
 import java.lang.reflect.Constructor;
@@ -35,8 +32,8 @@ public class PlaygroundGame extends Game {
 		TiledGenTest.class, TemperatureTest.class, BiomeTest.class,
 		RainTest.class, BlurTest.class, CompositeGenTest.class, UITest.class, CSTest.class,
 		CSTestV2.class, TagTest.class, EntityEditTest.class, EntityOneCompTest.class, DeferredSystemTest.class,
-		AsyncScreenTest.class, UIPaneTest.class, UIContextMenuTest.class, UIContextMenuTest2.class,
-		ShadowTest.class, GpuShadows.class, CircleTest.class, ShapeRendererTest.class
+		AsyncScreenTest.class, UIPaneTest.class, UIContextMenuTest.class, UIContextMenuTest2.class, UIFillTest.class, UIDPITest.class,
+		ShadowTest.class, GpuShadows.class, CircleTest.class, ShapeRendererTest.class, BTreeTest.class
 	};
 
 	@Override
