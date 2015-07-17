@@ -1,0 +1,8 @@
+import bark:"io.piotrjastrzebski.playground.btreeserializationtest.dog.BarkTask"
+import walk:"io.piotrjastrzebski.playground.btreeserializationtest.dog.WalkTask"
+
+root
+  selector
+    semaphoreGuard name:"dogSemaphore"
+      walk
+    bark
