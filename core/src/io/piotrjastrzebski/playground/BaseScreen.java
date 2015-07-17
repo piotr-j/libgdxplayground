@@ -91,6 +91,7 @@ public abstract class BaseScreen implements Screen, InputProcessor {
 		batch.dispose();
 		renderer.dispose();
 		stage.dispose();
+		skin.dispose();
 	}
 
 	@Override public boolean keyDown (int keycode) {
