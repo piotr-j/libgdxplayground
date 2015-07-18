@@ -1,6 +1,7 @@
 package io.piotrjastrzebski.playground.uitesting;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.scenes.scene2d.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ActorGestureListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
@@ -26,9 +27,10 @@ public class UIPaneTest extends BaseScreen {
 				}
 			});
 		}
-
+		VisWindow window = new VisWindow("Pane");
 		final VisScrollPane pane;
-		root.add(pane = new VisScrollPane(data)).pad(200);
+		window.add(pane = new VisScrollPane(data));
+		root.add(window).pad(200);
 		pane.addListener(new InputListener() {
 			@Override public void enter (InputEvent event, float x, float y, int pointer, Actor fromActor) {
 				lastFocus = stage.getScrollFocus();
@@ -45,5 +47,12 @@ public class UIPaneTest extends BaseScreen {
 			}
 		});
 		pane.setCancelTouchFocus(false);
+	}
+
+	@Override public void render (float delta) {
+		Gdx.gl.glClearColor(1, 0, 0, 1);
+		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+		stage.act(delta);
+		stage.draw();
 	}
 }
