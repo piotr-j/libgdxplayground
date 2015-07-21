@@ -16,11 +16,12 @@ public class DeferredSystemTest extends BaseScreen {
 		super(game);
 		WorldConfiguration cfg = new WorldConfiguration();
 
+		DeferredManagerSystem deferred;
+		cfg.setSystem(deferred = new DeferredManagerSystem());
+		cfg.setSystem(new SubSystemA(deferred));
+		cfg.setSystem(new SubSystemB(deferred));
 		world = new World(cfg);
-		DeferredManagerSystem deferred = world.setSystem(new DeferredManagerSystem());
-		world.setSystem(new SubSystemA(deferred));
-		world.setSystem(new SubSystemB(deferred));
-		world.initialize();
+
 		EntityEdit editA = world.createEntity().edit();
 		editA.create(CommonComp.class);
 		editA.create(CompA.class);

@@ -14,7 +14,7 @@ import com.badlogic.gdx.Gdx;
 public class TestSystem extends EntityProcessingSystem {
 
 	public TestSystem () {
-		super(Aspect.getAspectForAll(TestComponentA.class, TestComponentB.class));
+		super(Aspect.all(TestComponentA.class, TestComponentB.class));
 	}
 
 	@Override protected void inserted (Entity e) {

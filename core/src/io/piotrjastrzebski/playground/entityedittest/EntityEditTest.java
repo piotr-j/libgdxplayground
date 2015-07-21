@@ -19,10 +19,9 @@ public class EntityEditTest extends BaseScreen {
 	public EntityEditTest (PlaygroundGame game) {
 		super(game);
 		WorldConfiguration cfg = new WorldConfiguration();
+		cfg.setSystem(new TestSystem());
 
 		world = new World(cfg);
-		world.setSystem(new TestSystem());
-		world.initialize();
 		Entity entity = world.createEntity();
 		Gdx.app.log("", "e: "+ world.getEntity(entity.id));
 		world.process();

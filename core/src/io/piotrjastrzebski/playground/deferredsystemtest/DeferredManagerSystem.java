@@ -1,10 +1,7 @@
 package io.piotrjastrzebski.playground.deferredsystemtest;
 
-import com.artemis.Aspect;
 import com.artemis.BaseSystem;
 import com.artemis.Entity;
-import com.artemis.EntitySystem;
-import com.artemis.utils.IntBag;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.utils.Array;
 

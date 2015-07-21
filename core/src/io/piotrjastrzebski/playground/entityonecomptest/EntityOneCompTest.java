@@ -16,10 +16,9 @@ public class EntityOneCompTest extends BaseScreen {
 	public EntityOneCompTest (PlaygroundGame game) {
 		super(game);
 		WorldConfiguration cfg = new WorldConfiguration();
+		cfg.setSystem(new OptionalTestSystem());
 
 		world = new World(cfg);
-		world.setSystem(new OptionalTestSystem());
-		world.initialize();
 
 		world.process();
 

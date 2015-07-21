@@ -25,13 +25,15 @@ public class TagTest extends BaseScreen {
 		super(game);
 		WorldConfiguration cfg = new WorldConfiguration();
 
+		TagSystem tagSystem;
+		cfg.setSystem(tagSystem = new TagSystem(), true);
+		cfg.setManager(new UuidEntityManager());
+		cfg.setSystem(new BuildSystem());
+		cfg.setSystem(new OrderSystem());
+		JobSystem jobSystem;
+		cfg.setSystem(jobSystem = new JobSystem());
+
 		world = new World(cfg);
-		TagSystem tagSystem = world.setSystem(new TagSystem(), true);
-		world.setManager(new UuidEntityManager());
-		world.setSystem(new BuildSystem());
-		world.setSystem(new OrderSystem());
-		JobSystem jobSystem = world.setSystem(new JobSystem());
-		world.initialize();
 
 //		world.createEntity().edit().create(JobComponent.class);
 //

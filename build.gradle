@@ -21,7 +21,7 @@ allprojects {
         ashleyVersion = '1.4.0'
         aiVersion = '1.5.1-SNAPSHOT'
         visuiVersion = '0.7.7'
-        artemisOdbVersion = "0.9.1-SNAPSHOT"
+        artemisOdbVersion = "0.10.2"
         gdxVideoVersion = "0.0.1"
     }
 
