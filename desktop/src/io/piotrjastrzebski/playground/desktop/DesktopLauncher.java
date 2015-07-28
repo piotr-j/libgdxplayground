@@ -20,9 +20,7 @@ public class DesktopLauncher {
 
 		LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
 		config.width = 1280;
-		config.width = 2880;
 		config.height = 720;
-		config.height = 1800;
 		config.useHDPI = true;
 		new LwjglApplication(new PlaygroundGame(new DesktopBridge()), config);
 	}
