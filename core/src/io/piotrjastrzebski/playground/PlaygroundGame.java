@@ -2,6 +2,7 @@ package io.piotrjastrzebski.playground;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.assets.loaders.resolvers.ResolutionFileResolver;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.Array;
@@ -39,9 +40,18 @@ public class PlaygroundGame extends Game {
 		SimpleKoalioTest.class, ECSKoalioTest.class
 	};
 
+	PlatformBridge bridge;
+	public PlaygroundGame (PlatformBridge bridge) {
+		this.bridge = bridge;
+	}
+
 	@Override
 	public void create () {
-		VisUI.load();
+		if (bridge.getPixelScaleFactor() > 1.5f) {
+			VisUI.load(VisUI.SkinScale.X2);
+		} else {
+			VisUI.load(VisUI.SkinScale.X1);
+		}
 		reset();
 	}
 

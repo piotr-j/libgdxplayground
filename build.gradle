@@ -20,7 +20,7 @@ allprojects {
         box2DLightsVersion = '1.3'
         ashleyVersion = '1.4.0'
         aiVersion = '1.5.1-SNAPSHOT'
-        visuiVersion = '0.7.7'
+        visuiVersion = '0.8.1-SNAPSHOT'
         artemisOdbVersion = "0.10.2"
         gdxVideoVersion = "0.0.1"
     }
@@ -35,9 +35,9 @@ allprojects {
 project(":desktop") {
     apply plugin: "java"
 
-
     dependencies {
         compile project(":core")
+        compile 'org.lwjgl.lwjgl:lwjgl:2.9.2'
         compile "com.badlogicgames.gdx:gdx-backend-lwjgl:$gdxVersion"
         compile "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
         compile "com.badlogicgames.gdx:gdx-box2d-platform:$gdxVersion:natives-desktop"

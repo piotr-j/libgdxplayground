@@ -2,7 +2,9 @@ package io.piotrjastrzebski.playground.desktop;
 
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
+import io.piotrjastrzebski.playground.PlatformBridge;
 import io.piotrjastrzebski.playground.PlaygroundGame;
+import org.lwjgl.opengl.Display;
 
 public class DesktopLauncher {
 	public static void main (String[] arg) {
@@ -18,8 +20,17 @@ public class DesktopLauncher {
 
 		LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
 		config.width = 1280;
+		config.width = 2880;
 		config.height = 720;
+		config.height = 1800;
 		config.useHDPI = true;
-		new LwjglApplication(new PlaygroundGame(), config);
+		new LwjglApplication(new PlaygroundGame(new DesktopBridge()), config);
+	}
+
+	private static class DesktopBridge implements PlatformBridge {
+
+		@Override public float getPixelScaleFactor () {
+			return Display.getPixelScaleFactor();
+		}
 	}
 }
