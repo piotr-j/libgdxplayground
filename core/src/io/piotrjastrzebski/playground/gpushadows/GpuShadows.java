@@ -225,7 +225,7 @@ public class GpuShadows extends BaseScreen {
 			softShadows = !softShadows;
 			return true;
 		}
-		return false;
+		return super.keyDown(key);
 	}
 
 	@Override public void resize (int width, int height) {
