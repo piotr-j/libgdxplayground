@@ -13,6 +13,7 @@ import io.piotrjastrzebski.playground.deferredsystemtest.DeferredSystemTest;
 import io.piotrjastrzebski.playground.entityedittest.EntityEditTest;
 import io.piotrjastrzebski.playground.entityonecomptest.EntityOneCompTest;
 import io.piotrjastrzebski.playground.gpushadows.GpuShadows;
+import io.piotrjastrzebski.playground.jobtest.ECSJobTest;
 import io.piotrjastrzebski.playground.jobtest.JobTest;
 import io.piotrjastrzebski.playground.simplelights.SimpleLightTest;
 import io.piotrjastrzebski.playground.superkoalio.ECSKoalioTest;
@@ -33,7 +34,7 @@ public class PlaygroundGame extends Game {
 		RainTest.class, BlurTest.class, CompositeGenTest.class, UITest.class, CSTest.class,
 		CSTestV2.class, TagTest.class, EntityEditTest.class, EntityOneCompTest.class, DeferredSystemTest.class,
 		AsyncScreenTest.class, UIPaneTest.class, UIContextMenuTest.class, UIContextMenuTest2.class, UIFillTest.class, UIDPITest.class,
-		UIDialogTest.class, JobTest.class,
+		UIDialogTest.class, JobTest.class, ECSJobTest.class,
 		ShadowTest.class, GpuShadows.class, CircleTest.class, ShapeRendererTest.class, BTreeTest.class, FitVPTest.class, VPTest.class,
 		SimpleKoalioTest.class, ECSKoalioTest.class, SimpleLightTest.class,
 	};
