@@ -1,15 +1,10 @@
 package io.piotrjastrzebski.playground;
 
 import com.badlogic.gdx.Game;
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.assets.loaders.resolvers.ResolutionFileResolver;
-import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
-import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.kotcrab.vis.ui.VisUI;
-import com.kotcrab.vis.ui.widget.VisLabel;
-import com.kotcrab.vis.ui.widget.VisList;
-import com.kotcrab.vis.ui.widget.VisScrollPane;
+import com.kotcrab.vis.ui.widget.*;
 import io.piotrjastrzebski.playground.asyncscreentest.AsyncScreenTest;
 import io.piotrjastrzebski.playground.btreeserializationtest.BTreeTest;
 import io.piotrjastrzebski.playground.clientserver.CSTest;
@@ -71,50 +66,26 @@ public class PlaygroundGame extends Game {
 			root.row();
 			root.row();
 
-			// TODO fix pane
-			final VisList<TestScreen> screenSelect = new VisList<>();
-			screenSelect.setItems(createScreens());
-			screenSelect.setSelectedIndex(lastSelected);
-			screenSelect.addListener(new ChangeListener() {
-				@Override public void changed (ChangeEvent event, Actor actor) {
-					lastSelected = screenSelect.getSelectedIndex();
-					screenSelect.getSelected().run();
-				}
-			});
-			root.add(new VisScrollPane(screenSelect));
-		}
-
-		private Array<TestScreen> createScreens () {
-			Array<TestScreen> screens = new Array<>();
-			for (Class cls : testScreens) {
-				if (!BaseScreen.class.isAssignableFrom(cls)) {
-					Gdx.app.log("", "Invalid class: " + cls);
-					continue;
-				}
-				screens.add(new TestScreen(cls));
+			VisTable data = new VisTable();
+			for (int i = 0; i < testScreens.length; i++) {
+				final Class cls = testScreens[i];
+				final VisTextButton button;
+				data.add(button = new VisTextButton("Run " + cls.getSimpleName()));
+				data.row();
+				button.addListener(new ClickListener() {
+					@Override public void clicked (InputEvent event, float x, float y) {
+						try {
+							Constructor constructor = cls.getConstructor(PlaygroundGame.class);
+							setScreen((BaseScreen)constructor.newInstance(PlaygroundGame.this));
+						} catch (InvocationTargetException | InstantiationException | IllegalAccessException | NoSuchMethodException e) {
+							e.printStackTrace();
+						}
+					}
+				});
 			}
-			return screens;
-		}
-
-		private class TestScreen {
-			Class cls;
-
-			public TestScreen (Class cls) {
-				this.cls = cls;
-			}
-
-			public void run() {
-				try {
-					Constructor constructor = cls.getConstructor(PlaygroundGame.class);
-					setScreen((BaseScreen)constructor.newInstance(PlaygroundGame.this));
-				} catch (InvocationTargetException | InstantiationException | IllegalAccessException | NoSuchMethodException e) {
-					e.printStackTrace();
-				}
-			}
-
-			@Override public String toString () {
-				return cls.getSimpleName();
-			}
+			VisScrollPane pane;
+			root.add(pane = new VisScrollPane(data));
+			stage.setScrollFocus(pane);
 		}
 
 		@Override public boolean keyDown (int keycode) {
