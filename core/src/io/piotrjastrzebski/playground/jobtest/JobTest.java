@@ -30,10 +30,10 @@ public class JobTest extends BaseScreen {
 		addWorker();
 		addWorker();
 
-		requireJobTest();
+//		requireJobTest();
 //		chainJobTest();
-		nextJobTest();
-//		complexJobTest();
+//		nextJobTest();
+		complexJobTest();
 	}
 
 	private void requireJobTest () {
@@ -42,26 +42,41 @@ public class JobTest extends BaseScreen {
 		jobA.require(jobB);
 		Job jobC = createJob("Req Job C");
 		jobA.require(jobC);
-		jobB.require(jobC);
+//		jobB.require(jobC);
 	}
 
-	private void chainJobTest () {
-		Job jobD = createJob("Job D");
-		Job jobE = createJob("Job E");
-		Job jobF = createJob("Job F");
-		jobF.chain(jobE);
-		jobE.chain(jobD);
-	}
+//	private void chainJobTest () {
+//		Job jobD = createJob("Job D");
+//		Job jobE = createJob("Job E");
+//		Job jobF = createJob("Job F");
+//		jobF.chain(jobE);
+//		jobE.chain(jobD);
+//	}
 
 	private void nextJobTest () {
-		Job jobG = createJob("Next Job G");
-		Job jobH = createJob("Next Job H");
-		Job jobI = createJob("Next Job I");
-		jobI.next(jobH);
-		jobH.next(jobG);
+		Job jobA = createJob("A");
+		Job jobB = createJob("B");
+		Job jobC = createJob("C");
+		// when C is done, B must be started immediately by same entity
+		jobC.next(jobB);
+		// when B is done, A must be started immediately by same entity
+		jobB.next(jobA);
 	}
 
 	private void complexJobTest () {
+		Job jobA = createJob("A");
+		Job jobB = createJob("B");
+		Job jobC = createJob("C");
+		jobA.require(jobB);
+		jobB.require(jobC);
+
+		Job jobD = createJob("D");
+		Job jobE = createJob("E");
+		Job jobF = createJob("F");
+		jobF.require(jobD);
+		jobE.require(jobF);
+
+		jobA.next(jobF);
 
 	}
 
@@ -114,7 +129,7 @@ public class JobTest extends BaseScreen {
 				if (MathUtils.randomBoolean()) {
 					job.require(job2);
 				} else {
-					job.chain(job2);
+					job.next(job2);
 				}
 			}
 		}
@@ -125,8 +140,6 @@ public class JobTest extends BaseScreen {
 		public int id = jobID++;
 		private float progress;
 		public Worker claimedBy;
-		public Array<Job> chained = new Array<>();
-		public Job chainedWith;
 		public Array<Job> required = new Array<>();
 		public String name;
 		// next job must be done by the same entity, ie go somewhere and do something
@@ -145,22 +158,24 @@ public class JobTest extends BaseScreen {
 			return "Job{" +
 				"id=" + id +
 				", name=" + name +
+				(next!=null?", next=" + next:"") +
+				(required.size>0?", required=" + required:"") +
 				'}';
 		}
 
 		/**
 		 * Jobs in chain must be done one after another by the same entity
 		 */
-		public Job chain (Job job) {
-			chained.add(job);
-			job.chainedWith(this);
-			return this;
-		}
-
-		private void chainedWith (Job job) {
-			chainedWith = job;
-
-		}
+//		public Job chain (Job job) {
+//			chained.add(job);
+//			job.chainedWith(this);
+//			return this;
+//		}
+//
+//		private void chainedWith (Job job) {
+//			chainedWith = job;
+//
+//		}
 
 		public void next (Job job) {
 			next = job;
@@ -185,13 +200,15 @@ public class JobTest extends BaseScreen {
 		}
 
 		public boolean isDone () {
+			// TODO should this check for previous jobs?
+			// progress cant start if others are not done anyway
 			return progress >= 1;
 		}
 
 		public boolean isAvailable () {
-			if (chainedWith != null && !chainedWith.isDone()) {
-				return false;
-			}
+//			if (chainedWith != null && !chainedWith.isDone()) {
+//				return false;
+//			}
 			if (previous != null && !previous.isDone()) {
 				return false;
 			}
