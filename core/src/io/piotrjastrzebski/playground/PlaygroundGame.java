@@ -18,6 +18,8 @@ import io.piotrjastrzebski.playground.deferredsystemtest.DeferredSystemTest;
 import io.piotrjastrzebski.playground.entityedittest.EntityEditTest;
 import io.piotrjastrzebski.playground.entityonecomptest.EntityOneCompTest;
 import io.piotrjastrzebski.playground.gpushadows.GpuShadows;
+import io.piotrjastrzebski.playground.jobtest.JobTest;
+import io.piotrjastrzebski.playground.simplelights.SimpleLightTest;
 import io.piotrjastrzebski.playground.superkoalio.ECSKoalioTest;
 import io.piotrjastrzebski.playground.superkoalio.SimpleKoalioTest;
 import io.piotrjastrzebski.playground.tagtest.TagTest;
@@ -36,9 +38,9 @@ public class PlaygroundGame extends Game {
 		RainTest.class, BlurTest.class, CompositeGenTest.class, UITest.class, CSTest.class,
 		CSTestV2.class, TagTest.class, EntityEditTest.class, EntityOneCompTest.class, DeferredSystemTest.class,
 		AsyncScreenTest.class, UIPaneTest.class, UIContextMenuTest.class, UIContextMenuTest2.class, UIFillTest.class, UIDPITest.class,
-		UIDialogTest.class,
+		UIDialogTest.class, JobTest.class,
 		ShadowTest.class, GpuShadows.class, CircleTest.class, ShapeRendererTest.class, BTreeTest.class, FitVPTest.class, VPTest.class,
-		SimpleKoalioTest.class, ECSKoalioTest.class
+		SimpleKoalioTest.class, ECSKoalioTest.class, SimpleLightTest.class,
 	};
 
 	PlatformBridge bridge;
@@ -69,6 +71,7 @@ public class PlaygroundGame extends Game {
 			root.row();
 			root.row();
 
+			// TODO fix pane
 			final VisList<TestScreen> screenSelect = new VisList<>();
 			screenSelect.setItems(createScreens());
 			screenSelect.setSelectedIndex(lastSelected);
