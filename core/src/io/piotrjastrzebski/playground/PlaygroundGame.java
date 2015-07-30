@@ -67,8 +67,7 @@ public class PlaygroundGame extends Game {
 			root.row();
 
 			VisTable data = new VisTable();
-			for (int i = 0; i < testScreens.length; i++) {
-				final Class cls = testScreens[i];
+			for (final Class cls : testScreens) {
 				final VisTextButton button;
 				data.add(button = new VisTextButton("Run " + cls.getSimpleName()));
 				data.row();
