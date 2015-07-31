@@ -6,6 +6,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.kotcrab.vis.ui.VisUI;
 import com.kotcrab.vis.ui.widget.*;
 import io.piotrjastrzebski.playground.asyncscreentest.AsyncScreenTest;
+import io.piotrjastrzebski.playground.box2dtest.Box2dInterpolationTest;
 import io.piotrjastrzebski.playground.btreeserializationtest.BTreeTest;
 import io.piotrjastrzebski.playground.clientserver.CSTest;
 import io.piotrjastrzebski.playground.clientserverv2.CSTestV2;
@@ -30,8 +31,8 @@ public class PlaygroundGame extends Game {
 
 	// should be a class that extends BaseScreen
 	final Class[] testScreens = new Class[]{
-		TiledGenTest.class, TemperatureTest.class, BiomeTest.class,
-		RainTest.class, BlurTest.class, CompositeGenTest.class, UITest.class, CSTest.class,
+		TiledGenTest.class, TemperatureTest.class, BiomeTest.class, Box2dInterpolationTest.class,
+		RainTest.class, BlurTest.class, CompositeGenTest.class, UITest.class, CSTest.class, UIFBOTransitionTest.class,
 		CSTestV2.class, TagTest.class, EntityEditTest.class, EntityOneCompTest.class, DeferredSystemTest.class,
 		AsyncScreenTest.class, UIPaneTest.class, UIContextMenuTest.class, UIContextMenuTest2.class, UIFillTest.class, UIDPITest.class,
 		UIDialogTest.class, JobTest.class, ECSJobTest.class,
