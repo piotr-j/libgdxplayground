@@ -27,59 +27,71 @@ public class ECSJobTest extends BaseScreen {
 		config.setSystem(new WorkerSystem());
 		world = new World(config);
 
-		createWorker();
-//		createWorker();
-//		createJob();
+		createWorker("A");
+		createWorker("B");
+//		createJob("Z");
 //		createJob();
 //		createChainJob();
-		createReqJob();
+//		createReqJob();
+		complexJobTest();
 	}
 
-	private void createWorker () {
+	private void createWorker (String name) {
 		Entity e = world.createEntity();
 		Worker worker = e.edit().create(Worker.class);
 		worker.eid = e.id;
-
+		worker.name = name;
 	}
 
-	private void createJob () {
+	private Job createJob (String name) {
 		Entity e = world.createEntity();
 		Job job = e.edit().create(Job.class);
-		job.eid = e.id;
+		job.parent(e);
+		job.setName(name);
+		return job;
 	}
 
 	private void createChainJob () {
-		Entity e = world.createEntity();
-		Job jobA = e.edit().create(Job.class);
-		jobA.eid = e.id;
+		Job jobA = createJob("A");
+		Job jobB = createJob("B");
+		Job jobC = createJob("C");
 
-		e = world.createEntity();
-		Job jobB = e.edit().create(Job.class);
-		jobB.eid = e.id;
-
-		e = world.createEntity();
-		Job jobC = e.edit().create(Job.class);
-		jobC.eid = e.id;
-
-		jobA.next = jobC.eid;
-		jobB.next = jobA.eid;
+		jobA.next(jobC);
+		jobB.next(jobA);
+		// B -> A -> C
 	}
 
 	private void createReqJob () {
-		Entity e = world.createEntity();
-		Job jobA = e.edit().create(Job.class);
-		jobA.eid = e.id;
-
-		e = world.createEntity();
-		Job jobB = e.edit().create(Job.class);
-		jobB.eid = e.id;
-
-		e = world.createEntity();
-		Job jobC = e.edit().create(Job.class);
-		jobC.eid = e.id;
+		Job jobA = createJob("A");
+		Job jobB = createJob("B");
+		Job jobC = createJob("C");
+		Job jobD = createJob("D");
 
 		jobA.require(jobB);
 		jobB.require(jobC);
+		jobB.require(jobD);
+		// C, D -> B -> A
+	}
+
+	private void complexJobTest () {
+		Job jobA = createJob("A");
+		Job jobB = createJob("B");
+		Job jobC = createJob("C");
+		jobA.require(jobB);
+		jobB.require(jobC);
+
+		Job jobD = createJob("D");
+		Job jobE = createJob("E");
+		Job jobF = createJob("F");
+		jobF.require(jobD);
+		jobE.require(jobF);
+
+		jobA.next(jobF);
+
+		// C -> B -> A
+		//           |
+		//           v
+		// 	  D -> F -> E
 	}
 
 	private void tick () {
@@ -95,34 +107,66 @@ public class ECSJobTest extends BaseScreen {
 		public int previous = NULL_ID;
 		public float progress;
 
-		public void next(Job job) {
-			next = job.eid;
+		public String name;
+
+		public void setName (String name) {
+			this.name = name;
 		}
 
+		/**
+		 * Job that must be done after this one by same entity
+		 */
+		public void next(Job job) {
+			next = job.eid;
+			job.prev(this);
+		}
+
+		/**
+		 * Previous unfinished job in a chain if any
+		 */
 		public void prev(Job job) {
 			previous = job.eid;
 		}
 
+		/**
+		 * That job must be done before this one is available
+		 */
 		public void require(Job job) {
 			required.add(job.eid);
 		}
 
+		public void parent(Entity e) {
+			eid = e.id;
+		}
+
 		@Override public String toString () {
-			return "Job{" +
-				"eid=" + eid +
-				'}';
+//			return "Job{" +
+//				"eid=" + eid +
+//				", name=" + name +
+//				(next!=NULL_ID?", next=" + next:"") +
+//				(required.size>0?", required=" + required:"") +
+//				'}';
+			return "Job " + name;
 		}
 	}
 
 	public static class Worker extends Component {
 		// id if entity
 		public int eid = -1;
-		public int jid = -1;
+		public int jobID = -1;
+		public String name;
+
+		public void claim (Job job) {
+			Gdx.app.log(TAG, this + " -> " + job);
+			jobID = job.eid;
+			job.workerID = eid;
+		}
 
 		@Override public String toString () {
-			return "Worker{" +
-				"eid=" + eid +
-				'}';
+//			return "Worker{" +
+//				"eid=" + eid +
+//				'}';
+			return "Worker " + name;
 		}
 	}
 
@@ -167,14 +211,14 @@ public class ECSJobTest extends BaseScreen {
 			return null;
 		}
 
+		private boolean isDone(int id) {
+			return isDone(jobById.get(id, null));
+		}
+
 		private boolean isDone(Job job) {
 			// already removed
 			if (job == null) return true;
-			return job.previous > 1;
-		}
-
-		private boolean isDone(int id) {
-			return isDone(jobById.get(id, null));
+			return job.progress > 1;
 		}
 
 		private boolean isAvailable (Job job) {
@@ -194,8 +238,16 @@ public class ECSJobTest extends BaseScreen {
 
 		public void finish (Job job) {
 			if (job.progress < 1) return;
-			Gdx.app.log(TAG, "Job done " + job);
+			Gdx.app.log(TAG, job + " finished");
 			world.getEntity(job.eid).deleteFromWorld();
+		}
+
+		public boolean hasNext (Job job) {
+			return job.next != NULL_ID;
+		}
+
+		public Job next (Job job) {
+			return getJob(job.next);
 		}
 	}
 
@@ -217,23 +269,25 @@ public class ECSJobTest extends BaseScreen {
 		@Override protected void process (Entity e) {
 			Worker worker = mWorker.get(e);
 			// job set
-			if (worker.jid != NULL_ID) {
-				Job job = jobs.getJob(worker.jid);
+			if (worker.jobID != NULL_ID) {
+				Job job = jobs.getJob(worker.jobID);
 				// work on job
 				job.progress += 0.5f;
 				if (job.progress > 1) {
 					// if done, finish it
 					jobs.finish(job);
-					worker.jid = NULL_ID;
+					if (jobs.hasNext(job)) {
+						worker.claim(jobs.next(job));
+					} else {
+						worker.jobID = NULL_ID;
+					}
 				}
 			} else {
 				// no job, try to find one
 				Job job = jobs.getJob();
 				if (job != null) {
 					// found some job, assign worker
-					Gdx.app.log(TAG, worker + " found job " + job);
-					job.workerID = e.id;
-					worker.jid = job.eid;
+					worker.claim(job);
 				}
 			}
 		}
@@ -258,13 +312,13 @@ public class ECSJobTest extends BaseScreen {
 		sb.append("]");
 		return sb.toString();
 	}
-
-	float tick = 1;
+	final float tTime = 0.25f;
+	float tick = tTime;
 	@Override public void render (float delta) {
 		super.render(delta);
 		tick+=delta;
-		if (tick >= 1) {
-			tick -= 1;
+		if (tick >= tTime) {
+			tick -= tTime;
 			tick();
 		}
 	}
