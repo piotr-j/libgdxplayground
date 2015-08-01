@@ -202,6 +202,15 @@ public class QTDebugSystem extends BaseSystem {
 		container.add(maxDepthSlider);
 		container.add(maxDepthLabel);
 		container.row();
+		final VisCheckBox freeOnClear = new VisCheckBox("Free On Clear");
+		freeOnClear.setChecked(QTSystem.QuadTree.FREE_ON_CLEAR);
+		freeOnClear.addListener(new ChangeListener() {
+			@Override public void changed (ChangeEvent event, Actor actor) {
+				QTSystem.QuadTree.FREE_ON_CLEAR = freeOnClear.isChecked();
+			}
+		});
+		container.add(freeOnClear);
+		container.row();
 
 		window.add(container);
 		window.pack();

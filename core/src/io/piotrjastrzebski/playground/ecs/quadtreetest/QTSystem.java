@@ -200,15 +200,23 @@ public class QTSystem extends EntityProcessingSystem {
 			return fill;
 		}
 
+		public static boolean FREE_ON_CLEAR = true;
 		@Override
 		public void reset() {
 			for (int i = containers.size() - 1; i >= 0; i--) {
 				cPool.free(containers.remove(i));
 			}
-			for (int i = 0; i < nodes.length; i++) {
-				if (nodes[i] == null) continue;
-				qtPool.free(nodes[i]);
-				nodes[i] = null;
+			if (FREE_ON_CLEAR) {
+				for (int i = 0; i < nodes.length; i++) {
+					if (nodes[i] == null) continue;
+					qtPool.free(nodes[i]);
+					nodes[i] = null;
+				}
+			} else {
+				for (int i = 0; i < nodes.length; i++) {
+					if (nodes[i] == null) continue;
+					nodes[i].reset();
+				}
 			}
 			touched = false;
 		}
