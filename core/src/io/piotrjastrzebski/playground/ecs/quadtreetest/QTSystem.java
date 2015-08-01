@@ -52,8 +52,8 @@ public class QTSystem extends EntityProcessingSystem {
 		public final static int SE = 1;
 		public final static int NW = 2;
 		public final static int NE = 3;
-		public int MAX_IN_BUCKET = 16;
-		public int MIN_DEPTH = -16;
+		public static int MAX_IN_BUCKET = 16;
+		public static int MAX_DEPTH = 16;
 		private int depth;
 		private Bag<Container> containers;
 		private Bounds bounds;
@@ -115,15 +115,15 @@ public class QTSystem extends EntityProcessingSystem {
 			}
 			containers.add(c);
 
-			if (containers.size() > MAX_IN_BUCKET && depth > MIN_DEPTH) {
+			if (containers.size() > MAX_IN_BUCKET && depth < MAX_DEPTH) {
 
 				if (nodes[0] == null) {
 					float halfWidth = bounds.width / 2;
 					float halfHeight = bounds.height / 2;
-					nodes[SW] = qtPool.obtain().init(depth - 1, bounds.x, bounds.y, halfWidth, halfHeight);
-					nodes[SE] = qtPool.obtain().init(depth - 1, bounds.x + halfWidth, bounds.y, halfWidth, halfHeight);
-					nodes[NW] = qtPool.obtain().init(depth - 1, bounds.x, bounds.y + halfHeight, halfWidth, halfHeight);
-					nodes[NE] = qtPool.obtain().init(depth - 1, bounds.x + halfWidth, bounds.y + halfHeight, halfWidth, halfHeight);
+					nodes[SW] = qtPool.obtain().init(depth + 1, bounds.x, bounds.y, halfWidth, halfHeight);
+					nodes[SE] = qtPool.obtain().init(depth + 1, bounds.x + halfWidth, bounds.y, halfWidth, halfHeight);
+					nodes[NW] = qtPool.obtain().init(depth + 1, bounds.x, bounds.y + halfHeight, halfWidth, halfHeight);
+					nodes[NE] = qtPool.obtain().init(depth + 1, bounds.x + halfWidth, bounds.y + halfHeight, halfWidth, halfHeight);
 				}
 
 				Object[] items = containers.getData();

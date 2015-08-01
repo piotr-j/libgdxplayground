@@ -48,6 +48,8 @@ public class QTDebugSystem extends BaseSystem {
 	float maxSize = 0.2f;
 	float maxVelocity = 3f;
 	boolean exact = true;
+	int maxInBucket = 16;
+	int maxDepth = 16;
 	VisLabel fps;
 	@Override protected void initialize () {
 		super.initialize();
@@ -172,6 +174,34 @@ public class QTDebugSystem extends BaseSystem {
 			}
 		});
 		container.add(drawRest);
+		container.row();
+
+		final VisLabel maxInBucketLabel = new VisLabel("");
+		final VisSlider maxInBucketSlider = new VisSlider(1, 16, 1, false);
+		maxInBucketSlider.addListener(new ChangeListener() {
+			@Override public void changed (ChangeEvent event, Actor actor) {
+				maxInBucket = (int)maxInBucketSlider.getValue();
+				maxInBucketLabel.setText(maxInBucket + " max in bucket");
+				QTSystem.QuadTree.MAX_IN_BUCKET = maxInBucket;
+			}
+		});
+		maxInBucketSlider.setValue(maxInBucket);
+		container.add(maxInBucketSlider);
+		container.add(maxInBucketLabel);
+
+		final VisLabel maxDepthLabel = new VisLabel("");
+		final VisSlider maxDepthSlider = new VisSlider(1, 16, 1, false);
+		maxDepthSlider.addListener(new ChangeListener() {
+			@Override public void changed (ChangeEvent event, Actor actor) {
+				maxDepth = (int)maxDepthSlider.getValue();
+				maxDepthLabel.setText(maxDepth + " max depth");
+				QTSystem.QuadTree.MAX_DEPTH = maxDepth;
+			}
+		});
+		maxDepthSlider.setValue(maxDepth);
+		container.add(maxDepthSlider);
+		container.add(maxDepthLabel);
+		container.row();
 
 		window.add(container);
 		window.pack();
@@ -188,6 +218,9 @@ public class QTDebugSystem extends BaseSystem {
 			Entity e = world.getEntity(actives.get(i));
 			e.deleteFromWorld();
 		}
+
+		QTSystem.QuadTree.MAX_DEPTH = maxDepth;
+		QTSystem.QuadTree.MAX_IN_BUCKET = maxInBucket;
 
 		for (int i = 0; i < numEntities; i++) {
 			createEntity();
