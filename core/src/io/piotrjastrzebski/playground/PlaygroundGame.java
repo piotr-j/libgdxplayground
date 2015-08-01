@@ -10,16 +10,18 @@ import io.piotrjastrzebski.playground.box2dtest.Box2dInterpolationTest;
 import io.piotrjastrzebski.playground.btreeserializationtest.BTreeTest;
 import io.piotrjastrzebski.playground.clientserver.CSTest;
 import io.piotrjastrzebski.playground.clientserverv2.CSTestV2;
+import io.piotrjastrzebski.playground.ecs.ECSPooledCompTest;
 import io.piotrjastrzebski.playground.ecs.deferredsystemtest.DeferredSystemTest;
 import io.piotrjastrzebski.playground.ecs.entityedittest.EntityEditTest;
 import io.piotrjastrzebski.playground.ecs.entityonecomptest.EntityOneCompTest;
+import io.piotrjastrzebski.playground.ecs.quadtreetest.QuadTreeTest;
+import io.piotrjastrzebski.playground.ecs.superkoalio.ECSKoalioTest;
+import io.piotrjastrzebski.playground.ecs.superkoalio.SimpleKoalioTest;
+import io.piotrjastrzebski.playground.ecs.tagtest.TagTest;
 import io.piotrjastrzebski.playground.gpushadows.GpuShadows;
 import io.piotrjastrzebski.playground.jobtest.ECSJobTest;
 import io.piotrjastrzebski.playground.jobtest.JobTest;
 import io.piotrjastrzebski.playground.simplelights.SimpleLightTest;
-import io.piotrjastrzebski.playground.ecs.superkoalio.ECSKoalioTest;
-import io.piotrjastrzebski.playground.ecs.superkoalio.SimpleKoalioTest;
-import io.piotrjastrzebski.playground.ecs.tagtest.TagTest;
 import io.piotrjastrzebski.playground.tiledgentest.*;
 import io.piotrjastrzebski.playground.uitesting.*;
 import light2dtest.ShadowTest;
@@ -32,7 +34,8 @@ public class PlaygroundGame extends Game {
 	// should be a class that extends BaseScreen
 	final Class[] testScreens = new Class[]{
 		TiledGenTest.class, TemperatureTest.class, BiomeTest.class, Box2dInterpolationTest.class,
-		RainTest.class, BlurTest.class, CompositeGenTest.class, UITest.class, CSTest.class, UIFBOTransitionTest.class,
+		RainTest.class, BlurTest.class, CompositeGenTest.class, UITest.class, CSTest.class, UIFBOTransitionTest.class, QuadTreeTest.class,
+		ECSPooledCompTest.class,
 		CSTestV2.class, TagTest.class, EntityEditTest.class, EntityOneCompTest.class, DeferredSystemTest.class,
 		AsyncScreenTest.class, UIPaneTest.class, UIContextMenuTest.class, UIContextMenuTest2.class, UIFillTest.class, UIDPITest.class,
 		UIDialogTest.class, JobTest.class, ECSJobTest.class,
