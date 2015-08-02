@@ -43,7 +43,7 @@ public class DebugDrawSystem extends EntityProcessingSystem {
 				drawQT(renderer, tree, touched);
 			}
 		}
-		QTSystem.Bounds bounds = quadTree.getBounds();
+		QTSystem.Container bounds = quadTree.getBounds();
 		if (touched && quadTree.isTouched()) {
 			renderer.setColor(Color.CYAN);
 			renderer.rect(bounds.x, bounds.y, bounds.width, bounds.height);

@@ -81,7 +81,7 @@ public class QTSystem extends EntityProcessingSystem {
 		public static int MAX_DEPTH = 16;
 		private int depth;
 		private Bag<Container> containers;
-		private Bounds bounds;
+		private Container bounds;
 		private QuadTree[] nodes;
 		private QuadTree parent;
 		private boolean touched;
@@ -92,7 +92,7 @@ public class QTSystem extends EntityProcessingSystem {
 		static IntMap<Container> idToContainer = new IntMap<>();
 
 		public QuadTree() {
-			this.bounds = new Bounds();
+			bounds = new Container();
 			containers = new Bag<>(MAX_IN_BUCKET);
 			nodes = new QuadTree[4];
 			parent = null;
@@ -136,7 +136,7 @@ public class QTSystem extends EntityProcessingSystem {
 
 		private void insert(Container c) {
 			if (nodes[0] != null) {
-				int index = indexOf(c.bounds.x, c.bounds.y, c.bounds.width, c.bounds.height);
+				int index = indexOf(c.x, c.y, c.width, c.height);
 				if (index != OUTSIDE) {
 					nodes[index].insert(c);
 					return;
@@ -164,7 +164,7 @@ public class QTSystem extends EntityProcessingSystem {
 				Object[] items = containers.getData();
 				for (int i = containers.size() - 1; i >= 0; i--) {
 					Container next = (Container)items[i];
-					int index = indexOf(next.bounds.x, next.bounds.y, next.bounds.width, next.bounds.height);
+					int index = indexOf(next.x, next.y, next.width, next.height);
 					if (index != OUTSIDE) {
 						nodes[index].insert(next);
 						containers.remove(i);
@@ -184,7 +184,7 @@ public class QTSystem extends EntityProcessingSystem {
 			}
 			for (int i = 0; i < containers.size(); i++) {
 				Container c = containers.get(i);
-				if (c.bounds.contains(x, y)) {
+				if (c.contains(x, y)) {
 					fill.add(c.eid);
 				}
 			}
@@ -233,7 +233,7 @@ public class QTSystem extends EntityProcessingSystem {
 				}
 				for (int i = 0; i < containers.size(); i++) {
 					Container c = containers.get(i);
-					if (c.bounds.overlaps(x, y, width, height)) {
+					if (c.overlaps(x, y, width, height)) {
 						fill.add(c.eid);
 					}
 				}
@@ -247,7 +247,7 @@ public class QTSystem extends EntityProcessingSystem {
 
 			QuadTree qTree = c.tree;
 			qTree.remove(c);
-			while (qTree.parent != null && !qTree.bounds.contains(c.bounds)){
+			while (qTree.parent != null && !qTree.bounds.contains(c)){
 				qTree = qTree.parent;
 			}
 			qTree.insert(c);
@@ -294,7 +294,7 @@ public class QTSystem extends EntityProcessingSystem {
 			return nodes;
 		}
 
-		public Bounds getBounds () {
+		public Container getBounds () {
 			return bounds;
 		}
 
@@ -308,37 +308,39 @@ public class QTSystem extends EntityProcessingSystem {
 	public static class Container implements Pool.Poolable{
 		int eid;
 		QuadTree tree;
-		Bounds bounds = new Bounds();
 
 		public Container() {}
 
 		@Override public void reset () {
 			eid = -1;
-			bounds.set(0, 0, 0, 0);
+			x = 0;
+			y = 0;
+			width = 0;
+			height = 0;
 			tree = null;
 		}
 
 		public Container set (int eid, float x, float y, float width, float height) {
 			this.eid = eid;
-			bounds.set(x, y, width, height);
-
-			return this;
-		}
-	}
-
-	public static class Bounds {
-		float x;
-		float y;
-		float width;
-		float height;
-
-		public Bounds set (float x, float y, float width, float height) {
 			this.x = x;
 			this.y = y;
 			this.width = width;
 			this.height = height;
 			return this;
 		}
+
+		public Container set (float x, float y, float width, float height) {
+			this.x = x;
+			this.y = y;
+			this.width = width;
+			this.height = height;
+			return this;
+		}
+
+		float x;
+		float y;
+		float width;
+		float height;
 
 		public boolean contains (float x, float y) {
 			return this.x <= x && this.x + this.width >= x && this.y <= y && this.y + this.height >= y;
@@ -359,8 +361,8 @@ public class QTSystem extends EntityProcessingSystem {
 				&& ((ymin > y && ymin < y + height) && (ymax > y && ymax < y + height));
 		}
 
-		public boolean contains (Bounds o) {
-			return contains(o.x, o.y, o.width, o.height);
+		public boolean contains (Container c) {
+			return contains(c.x, c.y, c.width, c.height);
 		}
 	}
 }
