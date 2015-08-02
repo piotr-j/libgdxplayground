@@ -7,9 +7,9 @@ import com.artemis.annotations.Wire;
 import com.artemis.systems.EntityProcessingSystem;
 import com.artemis.utils.Bag;
 import com.artemis.utils.IntBag;
-import com.badlogic.gdx.utils.IntMap;
-import com.badlogic.gdx.utils.Pool;
-import com.badlogic.gdx.utils.Pools;
+import net.mostlyoriginal.api.utils.pooling.ObjectPool;
+import net.mostlyoriginal.api.utils.pooling.Poolable;
+import net.mostlyoriginal.api.utils.pooling.Pools;
 
 @Wire
 public class QTSystem extends EntityProcessingSystem {
@@ -71,7 +71,7 @@ public class QTSystem extends EntityProcessingSystem {
 	/**
 	 * Assumes bottom left for x,y
 	 */
-	public static class QuadTree implements Pool.Poolable {
+	public static class QuadTree implements Poolable {
 		public final static int OUTSIDE = -1;
 		public final static int SW = 0;
 		public final static int SE = 1;
@@ -86,10 +86,9 @@ public class QTSystem extends EntityProcessingSystem {
 		private QuadTree parent;
 		private boolean touched;
 
-		// TODO clear on dispose, init in resume, remove libgdx dep?
-		static Pool<QuadTree> qtPool = Pools.get(QuadTree.class, Integer.MAX_VALUE);
-		static Pool<Container> cPool = Pools.get(Container.class, Integer.MAX_VALUE);
-		static IntMap<Container> idToContainer = new IntMap<>();
+		static ObjectPool<QuadTree> qtPool = Pools.getPool(QuadTree.class);
+		static ObjectPool<Container> cPool = Pools.getPool(Container.class);
+		static Bag<Container> idToContainer = new Bag<>();
 
 		public QuadTree() {
 			bounds = new Container();
@@ -143,7 +142,7 @@ public class QTSystem extends EntityProcessingSystem {
 				}
 			}
 			c.tree = this;
-			idToContainer.put(c.eid, c);
+			idToContainer.set(c.eid, c);
 			containers.add(c);
 
 			if (containers.size() > MAX_IN_BUCKET && depth < MAX_DEPTH) {
@@ -305,7 +304,7 @@ public class QTSystem extends EntityProcessingSystem {
 		}
 	}
 
-	public static class Container implements Pool.Poolable{
+	public static class Container implements Poolable {
 		int eid;
 		QuadTree tree;
 
