@@ -22,6 +22,7 @@ allprojects {
         aiVersion = '1.5.1-SNAPSHOT'
         visuiVersion = '0.8.1-SNAPSHOT'
         artemisOdbVersion = "0.10.2"
+        artemisOdbcontribVersion = "0.10.2"
         gdxVideoVersion = "0.0.1"
     }
 
@@ -58,7 +59,7 @@ project(":core") {
         compile "com.badlogicgames.gdx:gdx-ai:$aiVersion"
         compile "com.kotcrab.vis:vis-ui:$visuiVersion"
         compile "net.onedaybeard.artemis:artemis-odb:$artemisOdbVersion"
-
+        compile "net.mostlyoriginal.artemis-odb:contrib-core:$artemisOdbcontribVersion"
         compile 'com.esotericsoftware:kryo:3.0.2'
 
 //        compile "com.badlogicgames.gdxvideo:gdx-video:$gdxVideoVersion"
