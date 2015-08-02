@@ -10,11 +10,11 @@ import com.artemis.systems.EntityProcessingSystem;
  * Created by EvilEntity on 31/07/2015.
  */
 @Wire
-public class VelocitySysytem extends EntityProcessingSystem {
+public class VelocitySystem extends EntityProcessingSystem {
 	private ComponentMapper<Position> mPosition;
 	private ComponentMapper<Velocity> mVelocity;
 
-	public VelocitySysytem () {
+	public VelocitySystem () {
 		super(Aspect.all(Position.class, Velocity.class));
 	}
 
@@ -23,5 +23,6 @@ public class VelocitySysytem extends EntityProcessingSystem {
 		Velocity velocity = mVelocity.get(e);
 		position.x += velocity.x * world.delta;
 		position.y += velocity.y * world.delta;
+		position.dirty = true;
 	}
 }

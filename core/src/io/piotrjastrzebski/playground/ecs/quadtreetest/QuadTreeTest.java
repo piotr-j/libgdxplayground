@@ -24,7 +24,7 @@ public class QuadTreeTest extends BaseScreen {
 		config.register(root);
 		config.setSystem(new QTSystem());
 		config.setSystem(qtDebugSystem = new QTDebugSystem());
-		config.setSystem(new VelocitySysytem());
+		config.setSystem(new VelocitySystem());
 		config.setSystem(new BoundsSystem());
 		config.setSystem(new DebugDrawSystem());
 		world = new World(config);

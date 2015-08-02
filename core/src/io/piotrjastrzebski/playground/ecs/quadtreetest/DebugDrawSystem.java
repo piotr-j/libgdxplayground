@@ -69,7 +69,11 @@ public class DebugDrawSystem extends EntityProcessingSystem {
 			e.edit().remove(InQuad.class);
 			renderer.rect(position.x, position.y, size.width, size.height);
 		} else if (drawRest) {
-			renderer.setColor(Color.RED);
+			if (position.dirty) {
+				renderer.setColor(Color.RED);
+			} else {
+				renderer.setColor(Color.MAROON);
+			}
 			renderer.rect(position.x, position.y, size.width, size.height);
 		}
 	}

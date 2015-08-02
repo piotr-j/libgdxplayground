@@ -7,6 +7,7 @@ import com.artemis.annotations.Wire;
 import com.artemis.systems.EntityProcessingSystem;
 import com.artemis.utils.Bag;
 import com.artemis.utils.IntBag;
+import com.badlogic.gdx.utils.IntMap;
 import com.badlogic.gdx.utils.Pool;
 import com.badlogic.gdx.utils.Pools;
 
@@ -29,14 +30,38 @@ public class QTSystem extends EntityProcessingSystem {
 		base = new QuadTree(0, x, y, width, height);
 	}
 
+	public boolean rebuild = false;
+	public long diff;
+	private long start;
 	@Override protected void begin () {
-		base.reset();
+		start = System.nanoTime();
+		if (rebuild) {
+			base.reset();
+		}
+	}
+
+	@Override protected void inserted (Entity e) {
+		Position position = mPosition.get(e);
+		Size size = mSize.get(e);
+		base.insert(e.id, position.x, position.y, size.width, size.height);
 	}
 
 	@Override protected void process (Entity e) {
 		Position position = mPosition.get(e);
 		Size size = mSize.get(e);
-		base.insert(e.id, position.x, position.y, size.width, size.height);
+		if (rebuild) {
+			base.insert(e.id, position.x, position.y, size.width, size.height);
+		} else if (position.dirty) {
+			base.update(e.id, position.x, position.y, size.width, size.height);
+		}
+	}
+
+	@Override protected void removed (Entity e) {
+		base.remove(e.id);
+	}
+
+	@Override protected void end () {
+		diff = System.nanoTime() - start;
 	}
 
 	public QuadTree getQuadTree () {
@@ -58,15 +83,19 @@ public class QTSystem extends EntityProcessingSystem {
 		private Bag<Container> containers;
 		private Bounds bounds;
 		private QuadTree[] nodes;
+		private QuadTree parent;
 		private boolean touched;
 
+		// TODO clear on dispose, init in resume, remove libgdx dep?
 		static Pool<QuadTree> qtPool = Pools.get(QuadTree.class, Integer.MAX_VALUE);
 		static Pool<Container> cPool = Pools.get(Container.class, Integer.MAX_VALUE);
+		static IntMap<Container> idToContainer = new IntMap<>();
 
 		public QuadTree() {
 			this.bounds = new Bounds();
 			containers = new Bag<>(MAX_IN_BUCKET);
 			nodes = new QuadTree[4];
+			parent = null;
 		}
 
 		public QuadTree(int depth, float x, float y, float width, float height) {
@@ -113,6 +142,8 @@ public class QTSystem extends EntityProcessingSystem {
 					return;
 				}
 			}
+			c.tree = this;
+			idToContainer.put(c.eid, c);
 			containers.add(c);
 
 			if (containers.size() > MAX_IN_BUCKET && depth < MAX_DEPTH) {
@@ -121,9 +152,13 @@ public class QTSystem extends EntityProcessingSystem {
 					float halfWidth = bounds.width / 2;
 					float halfHeight = bounds.height / 2;
 					nodes[SW] = qtPool.obtain().init(depth + 1, bounds.x, bounds.y, halfWidth, halfHeight);
+					nodes[SW].parent = this;
 					nodes[SE] = qtPool.obtain().init(depth + 1, bounds.x + halfWidth, bounds.y, halfWidth, halfHeight);
+					nodes[SE].parent = this;
 					nodes[NW] = qtPool.obtain().init(depth + 1, bounds.x, bounds.y + halfHeight, halfWidth, halfHeight);
+					nodes[NW].parent = this;
 					nodes[NE] = qtPool.obtain().init(depth + 1, bounds.x + halfWidth, bounds.y + halfHeight, halfWidth, halfHeight);
+					nodes[NE].parent = this;
 				}
 
 				Object[] items = containers.getData();
@@ -139,7 +174,7 @@ public class QTSystem extends EntityProcessingSystem {
 		}
 
 		/**
-		 * Returns entity ids of entities that overlap given rectangle
+		 * Returns entity ids of entities that bounds contain given point
 		 */
 		public IntBag get(IntBag fill, float x, float y) {
 			touched = true;
@@ -156,6 +191,9 @@ public class QTSystem extends EntityProcessingSystem {
 			return fill;
 		}
 
+		/**
+		 *  Returns entity ids of entities that are inside quads that overlap given bounds
+		 */
 		public IntBag get(IntBag fill, float x, float y, float width, float height) {
 			if (bounds.overlaps(x, y, width, height)) {
 				touched = true;
@@ -177,6 +215,9 @@ public class QTSystem extends EntityProcessingSystem {
 			return fill;
 		}
 
+		/**
+		 *  Returns entity ids of entities that overlap given bounds
+		 */
 		public IntBag getExact(IntBag fill, float x, float y, float width, float height) {
 			if (bounds.overlaps(x, y, width, height)) {
 				touched = true;
@@ -200,7 +241,19 @@ public class QTSystem extends EntityProcessingSystem {
 			return fill;
 		}
 
-		public static boolean FREE_ON_CLEAR = true;
+		public void update (int id, float x, float y, float width, float height) {
+			Container c = idToContainer.get(id);
+			c.set(id, x, y, width, height);
+
+			QuadTree qTree = c.tree;
+			qTree.remove(c);
+			while (qTree.parent != null && !qTree.bounds.contains(c.bounds)){
+				qTree = qTree.parent;
+			}
+			qTree.insert(c);
+		}
+
+		public static boolean FREE_ON_CLEAR = false;
 		@Override
 		public void reset() {
 			for (int i = containers.size() - 1; i >= 0; i--) {
@@ -212,6 +265,7 @@ public class QTSystem extends EntityProcessingSystem {
 					qtPool.free(nodes[i]);
 					nodes[i] = null;
 				}
+				parent = null;
 			} else {
 				for (int i = 0; i < nodes.length; i++) {
 					if (nodes[i] == null) continue;
@@ -219,6 +273,17 @@ public class QTSystem extends EntityProcessingSystem {
 				}
 			}
 			touched = false;
+		}
+
+		public void remove (int id) {
+			Container c = idToContainer.get(id);
+			if (c == null) return;
+			if (c.tree != null) c.tree.remove(c);
+			cPool.free(c);
+		}
+
+		private void remove(Container c) {
+			containers.remove(c);
 		}
 
 		public boolean isTouched () {
@@ -232,10 +297,17 @@ public class QTSystem extends EntityProcessingSystem {
 		public Bounds getBounds () {
 			return bounds;
 		}
+
+		@Override public String toString () {
+			return "QuadTree{"+
+				"depth="+depth
+				+"}";
+		}
 	}
 
 	public static class Container implements Pool.Poolable{
 		int eid;
+		QuadTree tree;
 		Bounds bounds = new Bounds();
 
 		public Container() {}
@@ -243,6 +315,7 @@ public class QTSystem extends EntityProcessingSystem {
 		@Override public void reset () {
 			eid = -1;
 			bounds.set(0, 0, 0, 0);
+			tree = null;
 		}
 
 		public Container set (int eid, float x, float y, float width, float height) {
@@ -273,6 +346,21 @@ public class QTSystem extends EntityProcessingSystem {
 
 		public boolean overlaps (float x, float y, float width, float height) {
 			return this.x < x + width && this.x + this.width > x && this.y < y + height && this.y + this.height > y;
+		}
+
+		public boolean contains (float ox, float oy, float owidth, float oheight) {
+			float xmin = ox;
+			float xmax = xmin + owidth;
+
+			float ymin = oy;
+			float ymax = ymin + oheight;
+
+			return ((xmin > x && xmin < x + width) && (xmax > x && xmax < x + width))
+				&& ((ymin > y && ymin < y + height) && (ymax > y && ymax < y + height));
+		}
+
+		public boolean contains (Bounds o) {
+			return contains(o.x, o.y, o.width, o.height);
 		}
 	}
 }

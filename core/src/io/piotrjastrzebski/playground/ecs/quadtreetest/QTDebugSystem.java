@@ -6,18 +6,17 @@ import com.artemis.utils.IntBag;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.FPSLogger;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
-import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
-import com.badlogic.gdx.utils.TimeUtils;
+import com.badlogic.gdx.utils.*;
+import com.badlogic.gdx.utils.StringBuilder;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.kotcrab.vis.ui.widget.*;
 
@@ -37,26 +36,30 @@ public class QTDebugSystem extends BaseSystem {
 	@Wire Table root;
 
 	QTSystem qtSystem;
+	VelocitySystem velocitySystem;
 	DebugDrawSystem debugDrawSystem;
 
 	public QTDebugSystem () {
 		super();
 	}
 
-	int numEntities = 25000;
-	float minSize = 0.025f;
+	int numEntities = 75000;
+	float minSize = 0.05f;
 	float maxSize = 0.2f;
-	float maxVelocity = 3f;
+	float maxVelocity = 0.5f;
 	boolean exact = true;
 	int maxInBucket = 16;
-	int maxDepth = 16;
+	int maxDepth = 6;
+	float staticPer = 0.5f;
+	boolean linearSearch;
+	int iterations = 1000;
 	VisLabel fps;
 	@Override protected void initialize () {
 		super.initialize();
 		AspectSubscriptionManager manager = world.getManager(AspectSubscriptionManager.class);
 		entitySub = manager.get(Aspect.all(Position.class, Size.class));
 		VisTable container = new VisTable(true);
-		VisWindow window = new VisWindow("Config");
+		VisWindow window = new VisWindow("Config, options that modify entities require restart");
 		VisTextButton resetBtn = new VisTextButton("Restart");
 		resetBtn.addListener(new ClickListener() {
 			@Override public void clicked (InputEvent event, float x, float y) {
@@ -64,23 +67,31 @@ public class QTDebugSystem extends BaseSystem {
 			}
 		});
 		container.add(resetBtn);
-		fps = new VisLabel("??");
+		fps = new VisLabel("????????????????????????????????");
 		container.add(fps);
-		container.add(new VisLabel("FPS"));
-
-		final VisCheckBox exactCB = new VisCheckBox("Exact", true);
+		container.row();
+		final VisCheckBox exactCB = new VisCheckBox("Exact search", true);
 		exactCB.addListener(new ChangeListener() {
 			@Override public void changed (ChangeEvent event, Actor actor) {
 				exact = exactCB.isChecked();
 			}
 		});
 		container.add(exactCB);
+		VisTextButton pauseBtn = new VisTextButton("Pause", "toggle");
+		pauseBtn.setChecked(qtSystem.isEnabled());
+		pauseBtn.addListener(new ClickListener() {
+			@Override public void clicked (InputEvent event, float x, float y) {
+				qtSystem.setEnabled(!qtSystem.isEnabled());
+				velocitySystem.setEnabled(qtSystem.isEnabled());
+			}
+		});
+		container.add(pauseBtn);
 		container.row();
 		final VisLabel numEntLabel = new VisLabel(numEntities + " entities");
 
 		final VisSlider numESlider = new VisSlider(0, 1000, 25, false);
 		numESlider.setValue(0);
-		final VisSlider numEKSlider = new VisSlider(0, 100000, 1000, false);
+		final VisSlider numEKSlider = new VisSlider(0, 500000, 1000, false);
 		numEKSlider.setValue(25000);
 
 		ChangeListener numEntListener = new ChangeListener() {
@@ -96,8 +107,19 @@ public class QTDebugSystem extends BaseSystem {
 		container.add(numEntLabel);
 		container.row();
 
+		final VisTextButton linearBtn = new VisTextButton("Linear Search (slow)", "toggle");
+		linearBtn.setChecked(linearSearch);
+		linearBtn.addListener(new ClickListener() {
+			@Override public void clicked (InputEvent event, float x, float y) {
+				linearSearch = linearBtn.isChecked();
+				qtSystem.setEnabled(!linearSearch);
+			}
+		});
+		container.add(linearBtn);
+		container.row();
+
 		final VisLabel minSizeLabel = new VisLabel("");
-		final VisSlider minSizeSlider = new VisSlider(0.025f, 2.0f, 0.3f, false);
+		final VisSlider minSizeSlider = new VisSlider(0.025f, 2.0f, 0.025f, false);
 		minSizeSlider.addListener(new ChangeListener() {
 			@Override public void changed (ChangeEvent event, Actor actor) {
 				minSize = minSizeSlider.getValue();
@@ -110,7 +132,7 @@ public class QTDebugSystem extends BaseSystem {
 		container.row();
 
 		final VisLabel maxSizeLabel = new VisLabel("");
-		final VisSlider maxSizeSlider = new VisSlider(0.025f, 2.0f, 0.4f, false);
+		final VisSlider maxSizeSlider = new VisSlider(0.025f, 2.0f, 0.025f, false);
 		maxSizeSlider.addListener(new ChangeListener() {
 			@Override public void changed (ChangeEvent event, Actor actor) {
 				maxSize = maxSizeSlider.getValue();
@@ -123,7 +145,7 @@ public class QTDebugSystem extends BaseSystem {
 		container.row();
 
 		final VisLabel maxVelLabel = new VisLabel("");
-		final VisSlider maxVelSlider = new VisSlider(0.0f, 6.0f, 0.5f, false);
+		final VisSlider maxVelSlider = new VisSlider(0.0f, 6.0f, 0.1f, false);
 		maxVelSlider.addListener(new ChangeListener() {
 			@Override public void changed (ChangeEvent event, Actor actor) {
 				maxVelocity = maxVelSlider.getValue();
@@ -133,6 +155,17 @@ public class QTDebugSystem extends BaseSystem {
 		maxVelSlider.setValue(maxVelocity);
 		container.add(maxVelSlider);
 		container.add(maxVelLabel);
+		final VisLabel staticPerLabel = new VisLabel("");
+		final VisSlider staticPerSlider = new VisSlider(0.0f, 1.0f, 0.05f, false);
+		staticPerSlider.addListener(new ChangeListener() {
+			@Override public void changed (ChangeEvent event, Actor actor) {
+				staticPer = staticPerSlider.getValue();
+				staticPerLabel.setText(100 * staticPer + " % static");
+			}
+		});
+		staticPerSlider.setValue(staticPer);
+		container.add(staticPerSlider);
+		container.add(staticPerLabel);
 		container.row();
 
 		final VisCheckBox drawQuadTree = new VisCheckBox("QuadTree", true);
@@ -210,6 +243,14 @@ public class QTDebugSystem extends BaseSystem {
 			}
 		});
 		container.add(freeOnClear);
+		final VisCheckBox rebuild = new VisCheckBox("Rebuild");
+		rebuild.setChecked(qtSystem.rebuild);
+		rebuild.addListener(new ChangeListener() {
+			@Override public void changed (ChangeEvent event, Actor actor) {
+				qtSystem.rebuild = rebuild.isChecked();
+			}
+		});
+		container.add(rebuild);
 		container.row();
 
 		window.add(container);
@@ -219,10 +260,8 @@ public class QTDebugSystem extends BaseSystem {
 	}
 
 	private void reset() {
-		AspectSubscriptionManager asm = world.getManager(AspectSubscriptionManager.class);
-		EntitySubscription toClear = asm.get(Aspect.all(Position.class));
 
-		IntBag actives = toClear.getEntities();
+		IntBag actives = entitySub.getEntities();
 		for (int i = 0; i < actives.size(); i++) {
 			Entity e = world.getEntity(actives.get(i));
 			e.deleteFromWorld();
@@ -245,34 +284,70 @@ public class QTDebugSystem extends BaseSystem {
 		Size size = edit.create(Size.class);
 		size.width = MathUtils.random(minSize, maxSize);
 		size.height = MathUtils.random(minSize, maxSize);
-		Velocity velocity = edit.create(Velocity.class);
-		velocity.x = MathUtils.random(-maxVelocity, maxVelocity);
-		velocity.y = MathUtils.random(-maxVelocity, maxVelocity);
+		if (MathUtils.random() > staticPer) {
+			Velocity velocity = edit.create(Velocity.class);
+			velocity.x = MathUtils.random(-maxVelocity, maxVelocity);
+			velocity.y = MathUtils.random(-maxVelocity, maxVelocity);
+		}
 	}
 
+	long nanoDiff;
 	long startTime = TimeUtils.nanoTime();
 	IntBag fill = new IntBag();
 	@Override protected void processSystem () {
 		QTSystem.QuadTree quadTree = qtSystem.getQuadTree();
 		fill.clear();
-		if (exact) {
-			quadTree.getExact(fill, selected.x, selected.y, selected.width, selected.height);
+		if (linearSearch) {
+			IntBag actives = entitySub.getEntities();
+			long start = System.nanoTime();
+			for (int i = 0; i < iterations; i++) {
+				fill.clear();
+				for (int id = 0; id < actives.size(); id++) {
+					Entity e = world.getEntity(actives.get(id));
+					Position position = mPosition.get(e);
+					Size size = mSize.get(e);
+					temp1.set(position.x, position.y, size.width, size.height);
+					if (selected.overlaps(temp1)) {
+						fill.add(e.id);
+					}
+				}
+			}
+			nanoDiff = System.nanoTime() - start;
+			for (int i = 0; i < fill.size(); i++) {
+				Entity e = world.getEntity(fill.get(i));
+				if (!mSelected.has(e)) e.edit().create(Selected.class);
+			}
 		} else {
-			quadTree.get(fill, selected.x, selected.y, selected.width, selected.height);
-		}
-		for (int i = 0; i < fill.size(); i++) {
-			Entity e = world.getEntity(fill.get(i));
-			EntityEdit edit = e.edit();
 			if (exact) {
-				if (!mSelected.has(e)) edit.create(Selected.class);
+				long start = System.nanoTime();
+				for (int i = 0; i < iterations; i++) {
+					fill.clear();
+					quadTree.getExact(fill, selected.x, selected.y, selected.width, selected.height);
+				}
+				nanoDiff = System.nanoTime() - start;
 			} else {
-				Position position = mPosition.get(e);
-				Size size = mSize.get(e);
-				temp1.set(position.x, position.y, size.width, size.height);
-				if (selected.overlaps(temp1)) {
+				long start = System.nanoTime();
+				for (int i = 0; i < iterations; i++) {
+					fill.clear();
+					quadTree.get(fill, selected.x, selected.y, selected.width, selected.height);
+				}
+				nanoDiff = System.nanoTime() - start;
+			}
+			for (int i = 0; i < fill.size(); i++) {
+				Entity e = world.getEntity(fill.get(i));
+				if (e == null) continue;
+				EntityEdit edit = e.edit();
+				if (exact) {
 					if (!mSelected.has(e)) edit.create(Selected.class);
 				} else {
-					if (!mInQuad.has(e)) edit.create(InQuad.class);
+					Position position = mPosition.get(e);
+					Size size = mSize.get(e);
+					temp1.set(position.x, position.y, size.width, size.height);
+					if (selected.overlaps(temp1)) {
+						if (!mSelected.has(e)) edit.create(Selected.class);
+					} else {
+						if (!mInQuad.has(e)) edit.create(InQuad.class);
+					}
 				}
 			}
 		}
@@ -285,7 +360,18 @@ public class QTDebugSystem extends BaseSystem {
 			fps.setText(Integer.toString(Gdx.graphics.getFramesPerSecond()));
 			startTime = TimeUtils.nanoTime();
 		}
+		sb.setLength(0);
+		if (linearSearch) {
+			sb.append(nanoDiff / 1000000);
+		} else {
+			sb.append(qtSystem.diff / 1000000);
+			sb.append(" update(), ");
+			sb.append(nanoDiff / 1000000);
+		}
+		sb.append(" millis (1000x)");
+		fps.setText(sb);
 	}
+	StringBuilder sb = new StringBuilder();
 
 	Vector2 start = new Vector2();
 	Rectangle selected = new Rectangle(-1, -1, 2, 2);
