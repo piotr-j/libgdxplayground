@@ -95,20 +95,20 @@ public class QTSystem extends EntityProcessingSystem {
 		static Bag<Container> idToContainer = new Bag<>();
 
 		public QuadTree() {
-			bounds = new Container();
-			containers = new Bag<>(MAX_IN_BUCKET);
-			nodes = new QuadTree[4];
-			parent = null;
+			this(0, 0, 0, 0);
 		}
 
 		public QuadTree(float x, float y, float width, float height) {
-			this();
-			init(0, x, y, width, height);
+			bounds = new Container();
+			containers = new Bag<>(MAX_IN_BUCKET);
+			nodes = new QuadTree[4];
+			init(0, x, y, width, height, null);
 		}
 
-		public QuadTree init (int depth, float x, float y, float width, float height) {
+		public QuadTree init (int depth, float x, float y, float width, float height, QuadTree parent) {
 			this.depth = depth;
 			bounds.set(x, y, width, height);
+			this.parent = parent;
 			return this;
 		}
 
@@ -150,18 +150,13 @@ public class QTSystem extends EntityProcessingSystem {
 			containers.add(c);
 
 			if (containers.size() > MAX_IN_BUCKET && depth < MAX_DEPTH) {
-
 				if (nodes[0] == null) {
 					float halfWidth = bounds.width / 2;
 					float halfHeight = bounds.height / 2;
-					nodes[SW] = qtPool.obtain().init(depth + 1, bounds.x, bounds.y, halfWidth, halfHeight);
-					nodes[SW].parent = this;
-					nodes[SE] = qtPool.obtain().init(depth + 1, bounds.x + halfWidth, bounds.y, halfWidth, halfHeight);
-					nodes[SE].parent = this;
-					nodes[NW] = qtPool.obtain().init(depth + 1, bounds.x, bounds.y + halfHeight, halfWidth, halfHeight);
-					nodes[NW].parent = this;
-					nodes[NE] = qtPool.obtain().init(depth + 1, bounds.x + halfWidth, bounds.y + halfHeight, halfWidth, halfHeight);
-					nodes[NE].parent = this;
+					nodes[SW] = qtPool.obtain().init(depth + 1, bounds.x, bounds.y, halfWidth, halfHeight, this);
+					nodes[SE] = qtPool.obtain().init(depth + 1, bounds.x + halfWidth, bounds.y, halfWidth, halfHeight, this);
+					nodes[NW] = qtPool.obtain().init(depth + 1, bounds.x, bounds.y + halfHeight, halfWidth, halfHeight, this);
+					nodes[NE] = qtPool.obtain().init(depth + 1, bounds.x + halfWidth, bounds.y + halfHeight, halfWidth, halfHeight, this);
 				}
 
 				Object[] items = containers.getData();
