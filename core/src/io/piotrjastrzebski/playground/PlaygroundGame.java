@@ -15,8 +15,6 @@ import io.piotrjastrzebski.playground.ecs.deferredsystemtest.DeferredSystemTest;
 import io.piotrjastrzebski.playground.ecs.entityedittest.EntityEditTest;
 import io.piotrjastrzebski.playground.ecs.entityonecomptest.EntityOneCompTest;
 import io.piotrjastrzebski.playground.ecs.quadtreetest.QuadTreeTest;
-import io.piotrjastrzebski.playground.ecs.superkoalio.ECSKoalioTest;
-import io.piotrjastrzebski.playground.ecs.superkoalio.SimpleKoalioTest;
 import io.piotrjastrzebski.playground.ecs.tagtest.TagTest;
 import io.piotrjastrzebski.playground.gpushadows.GpuShadows;
 import io.piotrjastrzebski.playground.jobtest.ECSJobTest;
@@ -40,7 +38,7 @@ public class PlaygroundGame extends Game {
 		AsyncScreenTest.class, UIPaneTest.class, UIContextMenuTest.class, UIContextMenuTest2.class, UIFillTest.class, UIDPITest.class,
 		UIDialogTest.class, JobTest.class, ECSJobTest.class,
 		ShadowTest.class, GpuShadows.class, CircleTest.class, ShapeRendererTest.class, BTreeTest.class, FitVPTest.class, VPTest.class,
-		SimpleKoalioTest.class, ECSKoalioTest.class, SimpleLightTest.class,
+		SimpleLightTest.class,
 	};
 
 	PlatformBridge bridge;
