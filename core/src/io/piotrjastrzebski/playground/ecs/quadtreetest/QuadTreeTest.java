@@ -65,6 +65,6 @@ public class QuadTreeTest extends BaseScreen {
 
 	@Override public void dispose () {
 		super.dispose();
-
+		world.dispose();
 	}
 }

@@ -27,7 +27,7 @@ public class QTSystem extends EntityProcessingSystem {
 	}
 
 	public void init(float x, float y, float width, float height) {
-		base = new QuadTree(0, x, y, width, height);
+		base = new QuadTree(x, y, width, height);
 	}
 
 	public boolean rebuild = false;
@@ -68,6 +68,10 @@ public class QTSystem extends EntityProcessingSystem {
 		return base;
 	}
 
+	@Override protected void dispose () {
+		base.dispose();
+	}
+
 	/**
 	 * Assumes bottom left for x,y
 	 */
@@ -97,9 +101,9 @@ public class QTSystem extends EntityProcessingSystem {
 			parent = null;
 		}
 
-		public QuadTree(int depth, float x, float y, float width, float height) {
+		public QuadTree(float x, float y, float width, float height) {
 			this();
-			init(depth, x, y, width, height);
+			init(0, x, y, width, height);
 		}
 
 		public QuadTree init (int depth, float x, float y, float width, float height) {
@@ -301,6 +305,17 @@ public class QTSystem extends EntityProcessingSystem {
 			return "QuadTree{"+
 				"depth="+depth
 				+"}";
+		}
+
+		public void dispose () {
+			for (int i = containers.size() - 1; i >= 0; i--) {
+				cPool.free(containers.remove(i));
+			}
+			for (int i = 0; i < nodes.length; i++) {
+				if (nodes[i] == null) continue;
+				qtPool.free(nodes[i]);
+				nodes[i] = null;
+			}
 		}
 	}
 
