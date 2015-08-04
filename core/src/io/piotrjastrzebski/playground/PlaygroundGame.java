@@ -36,7 +36,7 @@ public class PlaygroundGame extends Game {
 		ECSPooledCompTest.class,
 		CSTestV2.class, TagTest.class, EntityEditTest.class, EntityOneCompTest.class, DeferredSystemTest.class,
 		AsyncScreenTest.class, UIPaneTest.class, UIContextMenuTest.class, UIContextMenuTest2.class, UIFillTest.class, UIDPITest.class,
-		UIDialogTest.class, JobTest.class, ECSJobTest.class,
+		UIDialogTest.class, UITableBuilderTest.class, JobTest.class, ECSJobTest.class,
 		ShadowTest.class, GpuShadows.class, CircleTest.class, ShapeRendererTest.class, BTreeTest.class, FitVPTest.class, VPTest.class,
 		SimpleLightTest.class,
 	};
