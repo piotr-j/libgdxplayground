@@ -1,0 +1,8 @@
+import bark:"io.piotrjastrzebski.playground.ecs.aitest.dog.BarkTask"
+import walk:"io.piotrjastrzebski.playground.ecs.aitest.dog.WalkTask"
+
+root
+  selector
+    semaphoreGuard name:"dogSemaphore"
+      walk
+    bark

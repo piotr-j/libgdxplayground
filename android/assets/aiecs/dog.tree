@@ -1,0 +1,24 @@
+#
+# Dog tree
+#
+
+# Alias definitions
+
+
+import bark:"io.piotrjastrzebski.playground.ecs.aitest.dog.BarkTask"
+import care:"io.piotrjastrzebski.playground.ecs.aitest.dog.CareTask"
+import mark:"io.piotrjastrzebski.playground.ecs.aitest.dog.MarkTask"
+import walk:"io.piotrjastrzebski.playground.ecs.aitest.dog.WalkTask"
+
+# Tree definition (note that root is optional)
+root
+  selector
+    parallel
+      care urgentProb:0.8
+      alwaysFail
+        io.piotrjastrzebski.playground.ecs.aitest.dog.RestTask # fully qualified task
+    sequence
+      bark times:"uniform,1,5"
+      walk
+      io.piotrjastrzebski.playground.ecs.aitest.dog.BarkTask # fully qualified task
+      mark

@@ -1,6 +1,8 @@
 package io.piotrjastrzebski.playground;
 
 import com.badlogic.gdx.Game;
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.kotcrab.vis.ui.VisUI;
@@ -10,6 +12,7 @@ import io.piotrjastrzebski.playground.box2dtest.Box2dInterpolationTest;
 import io.piotrjastrzebski.playground.btreeserializationtest.BTreeTest;
 import io.piotrjastrzebski.playground.clientserver.CSTest;
 import io.piotrjastrzebski.playground.clientserverv2.CSTestV2;
+import io.piotrjastrzebski.playground.ecs.aitest.AIECSTest;
 import io.piotrjastrzebski.playground.ecs.ECSPooledCompTest;
 import io.piotrjastrzebski.playground.ecs.deferredsystemtest.DeferredSystemTest;
 import io.piotrjastrzebski.playground.ecs.entityedittest.EntityEditTest;
@@ -17,6 +20,7 @@ import io.piotrjastrzebski.playground.ecs.entityonecomptest.EntityOneCompTest;
 import io.piotrjastrzebski.playground.ecs.quadtreetest.QuadTreeTest;
 import io.piotrjastrzebski.playground.ecs.tagtest.TagTest;
 import io.piotrjastrzebski.playground.gpushadows.GpuShadows;
+import io.piotrjastrzebski.playground.jobtest.AIECSJobTest;
 import io.piotrjastrzebski.playground.jobtest.ECSJobTest;
 import io.piotrjastrzebski.playground.jobtest.JobTest;
 import io.piotrjastrzebski.playground.simplelights.SimpleLightTest;
@@ -36,7 +40,7 @@ public class PlaygroundGame extends Game {
 		ECSPooledCompTest.class,
 		CSTestV2.class, TagTest.class, EntityEditTest.class, EntityOneCompTest.class, DeferredSystemTest.class,
 		AsyncScreenTest.class, UIPaneTest.class, UIContextMenuTest.class, UIContextMenuTest2.class, UIFillTest.class, UIDPITest.class,
-		UIDialogTest.class, UITableBuilderTest.class, JobTest.class, ECSJobTest.class,
+		UIDialogTest.class, UITableBuilderTest.class, JobTest.class, ECSJobTest.class, AIECSJobTest.class, AIECSTest.class,
 		ShadowTest.class, GpuShadows.class, CircleTest.class, ShapeRendererTest.class, BTreeTest.class, FitVPTest.class, VPTest.class,
 		SimpleLightTest.class,
 	};
@@ -89,8 +93,12 @@ public class PlaygroundGame extends Game {
 			root.add(pane = new VisScrollPane(data));
 			stage.setScrollFocus(pane);
 		}
-
+		int lastKey;
 		@Override public boolean keyDown (int keycode) {
+			if (keycode == Input.Keys.ESCAPE && lastKey == Input.Keys.ESCAPE) {
+				Gdx.app.exit();
+			}
+			lastKey = keycode;
 			return false;
 		}
 	}
