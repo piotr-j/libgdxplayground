@@ -1,10 +1,21 @@
 apply plugin: "java"
+apply plugin: "artemis"
 
 sourceCompatibility = 1.7
 [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
 
 sourceSets.main.java.srcDirs = [ "src/" ]
 
+weave {
+    enableArtemisPlugin = true
+    enablePackedWeaving = true
+    enablePooledWeaving = true
+    ideFriendlyPacking = true
+    optimizeEntitySystems = true
+    classesDir = sourceSets.main.output.classesDir
+}
+
+classes.finalizedBy weave
 
 eclipse.project {
     name = appName + "-core"

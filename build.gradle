@@ -1,10 +1,12 @@
 buildscript {
     repositories {
         mavenCentral()
+        jcenter()
         maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:1.2.3'
+        classpath "net.onedaybeard.artemis:artemis-odb-gradle-plugin:0.10.2"
     }
 }
 
@@ -50,7 +52,6 @@ project(":desktop") {
 
 project(":core") {
     apply plugin: "java"
-
 
     dependencies {
         compile "com.badlogicgames.gdx:gdx:$gdxVersion"

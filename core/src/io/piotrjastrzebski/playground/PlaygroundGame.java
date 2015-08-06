@@ -17,6 +17,8 @@ import io.piotrjastrzebski.playground.ecs.ECSPooledCompTest;
 import io.piotrjastrzebski.playground.ecs.deferredsystemtest.DeferredSystemTest;
 import io.piotrjastrzebski.playground.ecs.entityedittest.EntityEditTest;
 import io.piotrjastrzebski.playground.ecs.entityonecomptest.EntityOneCompTest;
+import io.piotrjastrzebski.playground.ecs.profiler.ECSPolyProfilerTest;
+import io.piotrjastrzebski.playground.ecs.profiler.ECSShapeProfilerTest;
 import io.piotrjastrzebski.playground.ecs.quadtreetest.QuadTreeTest;
 import io.piotrjastrzebski.playground.ecs.tagtest.TagTest;
 import io.piotrjastrzebski.playground.gpushadows.GpuShadows;
@@ -37,7 +39,7 @@ public class PlaygroundGame extends Game {
 	final Class[] testScreens = new Class[]{
 		TiledGenTest.class, TemperatureTest.class, BiomeTest.class, Box2dInterpolationTest.class,
 		RainTest.class, BlurTest.class, CompositeGenTest.class, UITest.class, CSTest.class, UIFBOTransitionTest.class, QuadTreeTest.class,
-		ECSPooledCompTest.class,
+		ECSPooledCompTest.class, ECSShapeProfilerTest.class, ECSPolyProfilerTest.class,
 		CSTestV2.class, TagTest.class, EntityEditTest.class, EntityOneCompTest.class, DeferredSystemTest.class,
 		AsyncScreenTest.class, UIPaneTest.class, UIContextMenuTest.class, UIContextMenuTest2.class, UIFillTest.class, UIDPITest.class,
 		UIDialogTest.class, UITableBuilderTest.class, JobTest.class, ECSJobTest.class, AIECSJobTest.class, AIECSTest.class,
@@ -100,6 +102,12 @@ public class PlaygroundGame extends Game {
 			}
 			lastKey = keycode;
 			return false;
+		}
+
+		@Override public void render (float delta) {
+			super.render(delta);
+			stage.act(delta);
+			stage.draw();
 		}
 	}
 
