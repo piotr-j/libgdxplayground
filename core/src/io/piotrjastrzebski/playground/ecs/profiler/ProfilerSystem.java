@@ -64,10 +64,10 @@ public class ProfilerSystem extends BaseSystem {
 		batch.setProjectionMatrix(camera.combined);
 		renderer.setProjectionMatrix(camera.combined);
 		update += world.getDelta();
-		Sort.instance().sort(SystemProfiler.get());
+//		Sort.instance().sort(SystemProfiler.get());
 
 		drawGraph(SystemProfiler.get());
-		Sort.instance().sort(SystemProfiler.get(), byAvg);
+//		Sort.instance().sort(SystemProfiler.get(), byAvg);
 		drawText();
 	}
 
@@ -116,7 +116,7 @@ public class ProfilerSystem extends BaseSystem {
 	}
 
 	private void setDrawColor(SystemProfiler profiler) {
-		color.set(profiler.color);
+		color.set(profiler.getColor());
 	}
 
 	private void drawGraph(Array<SystemProfiler> profilers) {
@@ -200,6 +200,6 @@ public class ProfilerSystem extends BaseSystem {
 
 	@Override
 	public boolean isEnabled() {
-		return SystemProfiler.SHOW;
+		return SystemProfiler.RUNNING;
 	}
 }

@@ -21,7 +21,7 @@ public class ECSShapeProfilerTest extends BaseScreen {
 	public ECSShapeProfilerTest (PlaygroundGame game) {
 		super(game);
 
-		SystemProfiler.toggleShow();
+		SystemProfiler.resume();
 
 		WorldConfiguration config = new WorldConfiguration();
 		config.register("gui", guiCamera);

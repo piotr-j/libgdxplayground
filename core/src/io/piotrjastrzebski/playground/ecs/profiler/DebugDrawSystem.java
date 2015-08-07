@@ -15,7 +15,7 @@ import io.piotrjastrzebski.playground.ecs.quadtreetest.Size;
 
 @Wire
 @com.artemis.annotations.Profile(using = SystemProfiler.class, enabled = SystemProfiler.ENABLED)
-public class DebugDrawSystem extends EntityProcessingSystem implements ProfilerConfig {
+public class DebugDrawSystem extends EntityProcessingSystem {
 	private ComponentMapper<Position> mPosition;
 	private ComponentMapper<Size> mSize;
 	private ComponentMapper<Selected> mSelected;
@@ -72,22 +72,5 @@ public class DebugDrawSystem extends EntityProcessingSystem implements ProfilerC
 
 	@Override protected void end () {
 		renderer.end();
-
-	}
-
-	@Override public Type getType () {
-		return Type.RENDER;
-	}
-
-	@Override public float getRefreshRate () {
-		return 0;
-	}
-
-	@Override public void setColor (Color color) {
-
-	}
-
-	@Override public String getName () {
-		return null;
 	}
 }

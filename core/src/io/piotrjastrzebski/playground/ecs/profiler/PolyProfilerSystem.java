@@ -10,7 +10,6 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g3d.utils.MeshBuilder;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.GdxRuntimeException;
@@ -130,7 +129,7 @@ public class PolyProfilerSystem extends BaseSystem {
 	}
 
 	private void setDrawColor(SystemProfiler profiler) {
-		color.set(profiler.color);
+		color.set(profiler.getColor());
 	}
 
 	private void drawGraph(Array<SystemProfiler> profilers) {
@@ -245,7 +244,7 @@ public class PolyProfilerSystem extends BaseSystem {
 
 	@Override
 	public boolean isEnabled() {
-		return SystemProfiler.SHOW;
+		return SystemProfiler.RUNNING;
 	}
 
 	@Override protected void dispose () {

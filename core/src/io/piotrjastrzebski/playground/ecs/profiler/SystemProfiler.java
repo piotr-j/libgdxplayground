@@ -10,15 +10,14 @@ import com.badlogic.gdx.utils.ObjectMap;
 /**
  * Created by PiotrJ on 05/08/15.
  */
-public class SystemProfiler implements ArtemisProfiler, Comparable<SystemProfiler> {
+public class SystemProfiler implements ArtemisProfiler {
+	/**
+	 * Global flag if all annotated profilers are enabled
+	 */
 	public static final boolean ENABLED = true;
 	public static final int SAMPLES = 200;
-	public static boolean SHOW = false;
+	public static boolean RUNNING = false;
 
-//	public static final SystemProfiler GAME_LOGIC = new SystemProfiler("Logic");
-//	public static final SystemProfiler RENDER = new SystemProfiler("Render");
-//	public static final SystemProfiler FRAME = new SystemProfiler("Frame");
-// need to clear this at dispose time or something
 	private static Array<SystemProfiler> profilers = new Array<>();
 	private static ObjectMap<String, SystemProfiler> profilerByName = new ObjectMap<>();
 
@@ -45,6 +44,20 @@ public class SystemProfiler implements ArtemisProfiler, Comparable<SystemProfile
 	}
 
 	/**
+	 * Pause all profilers
+	 */
+	public static void pause() {
+		RUNNING = false;
+	}
+
+	/**
+	 * Resume all profilers
+	 */
+	public static void resume() {
+		RUNNING = true;
+	}
+
+	/**
 	 * Must be disposed
 	 */
 	public static void dispose() {
@@ -60,33 +73,27 @@ public class SystemProfiler implements ArtemisProfiler, Comparable<SystemProfile
 	public long localMaxIndex;
 	public int samples;
 	int maxCounter;
-//	public String maxString = "0,00";
-//	public String movingString = "0,00";
-//	public String localMaxString = "0,00";
-	public long total;
-	public Color color;
 
+	public long total;
+	private Color color;
 	private BaseSystem system;
 	private String name;
-	private ProfilerConfig.Type type;
 
 	public SystemProfiler() {}
 
-	public SystemProfiler(String nameOverride) {
-		this.name = nameOverride;
+	public SystemProfiler(String name) {
+		this.name = name;
 	}
 
-	public static void reset() {
-		profilers.clear();
+	boolean drawGraph = true;
+
+	public boolean getDrawGraph () {
+		return drawGraph;
 	}
 
-	public static void toggleShow() {
-		SHOW = !SHOW;
+	public void setDrawGraph (boolean drawGraph) {
+		this.drawGraph = drawGraph;
 	}
-
-//	public void updateMovingString() {
-//		movingString = String.format("%.2f", getAverage() / 1000000f);
-//	}
 
 	public long getAverage() {
 		return samples == 0 ? 0 : total / Math.min(times.length, samples);
@@ -94,7 +101,7 @@ public class SystemProfiler implements ArtemisProfiler, Comparable<SystemProfile
 
 	@Override
 	public void start() {
-		if (!SHOW) {
+		if (!RUNNING) {
 			return;
 		}
 		startTime = System.nanoTime();
@@ -102,7 +109,7 @@ public class SystemProfiler implements ArtemisProfiler, Comparable<SystemProfile
 
 	@Override
 	public void stop() {
-		if (!SHOW) {
+		if (!RUNNING) {
 			return;
 		}
 		long time = System.nanoTime() - startTime;
@@ -154,14 +161,10 @@ public class SystemProfiler implements ArtemisProfiler, Comparable<SystemProfile
 	@Override
 	public void initialize(BaseSystem baseSystem, World world) {
 		system = baseSystem;
-//		if (system instanceof ProfilerConfig) {
-//			ProfilerConfig config = (ProfilerConfig)system;
-//		}
 		if (name == null) {
 			name = toString();
 		}
 		SystemProfiler.add(this);
-//		profilers.add(this);
 		if (color == null) {
 			calculateColor(toString().hashCode(), color = new Color());
 		}
@@ -172,12 +175,6 @@ public class SystemProfiler implements ArtemisProfiler, Comparable<SystemProfile
 		return name!= null ? name :
 			system != null ? system.getClass().getSimpleName():"<dummy>";
 	}
-
-	@Override
-	public int compareTo(SystemProfiler o) {
-		return (int)(o.localMax - localMax);
-	}
-
 
 	public static Color calculateColor(int hash, Color color) {
 		float hue = (hash % 333) / 333f;

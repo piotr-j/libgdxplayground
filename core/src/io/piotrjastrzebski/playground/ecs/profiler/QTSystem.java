@@ -16,7 +16,7 @@ import net.mostlyoriginal.api.utils.pooling.Pools;
 
 @Wire
 @com.artemis.annotations.Profile(using = SystemProfiler.class, enabled = SystemProfiler.ENABLED)
-public class QTSystem extends EntityProcessingSystem implements ProfilerConfig {
+public class QTSystem extends EntityProcessingSystem {
 	private ComponentMapper<Position> mPosition;
 	private ComponentMapper<Size> mSize;
 
@@ -68,22 +68,6 @@ public class QTSystem extends EntityProcessingSystem implements ProfilerConfig {
 
 	@Override protected void dispose () {
 		base.dispose();
-	}
-
-	@Override public Type getType () {
-		return Type.LOGIC;
-	}
-
-	@Override public float getRefreshRate () {
-		return 0;
-	}
-
-	@Override public void setColor (Color color) {
-
-	}
-
-	@Override public String getName () {
-		return null;
 	}
 
 	/**

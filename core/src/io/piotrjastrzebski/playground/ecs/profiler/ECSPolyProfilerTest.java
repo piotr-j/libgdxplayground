@@ -28,7 +28,7 @@ public class ECSPolyProfilerTest extends BaseScreen {
 
 		polyBatch = new PolygonSpriteBatch(10920);
 
-		SystemProfiler.toggleShow();
+		SystemProfiler.resume();
 
 		WorldConfiguration config = new WorldConfiguration();
 		config.register("gui", guiCamera);
