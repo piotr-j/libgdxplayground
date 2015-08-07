@@ -26,9 +26,7 @@ public class ProfilerGUISystem extends BaseSystem {
 	public ProfilerGUISystem () {
 
 	}
-
-	VisWindow window;
-
+	
 	SystemProfilerGUI gui;
 
 	@Override protected void initialize () {
