@@ -18,22 +18,19 @@ import com.kotcrab.vis.ui.widget.*;
 public class ProfilerGUISystem extends BaseSystem {
 	GUISystem guiSystem;
 
-	SystemProfiler total = new SystemProfiler("Profiled");
-
 	@Wire ShapeRenderer renderer;
 	@Wire(name = "gui") OrthographicCamera camera;
 
 	public ProfilerGUISystem () {
 
 	}
-	
+
 	SystemProfilerGUI gui;
 
 	@Override protected void initialize () {
 		super.initialize();
 
 		// add some global profilers
-		SystemProfiler.add(total).setColor(1, 1, 0, 1);
 		SystemProfiler.add(new SystemProfiler("Logic")).setColor(1, 0, 0, 1);
 		SystemProfiler.add(new SystemProfiler("Render")).setColor(1, 0, 0, 1);
 		SystemProfiler.add(new SystemProfiler("Frame")).setColor(1, 0, 0, 1);
@@ -69,11 +66,6 @@ public class ProfilerGUISystem extends BaseSystem {
 			return;
 		}
 
-		long frameTotal = 0;
-		for (int i = 0; i < SystemProfiler.sixe(); i++) {
-			frameTotal += SystemProfiler.get(i).getCurrentSample();
-		}
-		total.sample(frameTotal - total.getCurrentSample());
 		renderer.setProjectionMatrix(camera.combined);
 		renderer.begin(ShapeRenderer.ShapeType.Line);
 		gui.renderGraph(renderer);

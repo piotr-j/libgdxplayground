@@ -52,9 +52,10 @@ public class SystemProfilerGUI extends Window {
 	Graph graph;
 	Table profilersTable;
 	Array<ProfilerRow> rows = new Array<>();
-
+	Skin skin;
 	public SystemProfilerGUI (Skin skin, String style) {
 		super("Profiler", skin, style);
+		this.skin = skin;
 
 		setResizable(true);
 		setResizeBorder(16);
@@ -125,6 +126,10 @@ public class SystemProfilerGUI extends Window {
 		if (refreshTimer < REFRESH_RATE) return;
 		refreshTimer -= REFRESH_RATE;
 
+		if (rows.size != SystemProfiler.sixe()) {
+			rebuildRows();
+		}
+
 		Sort.instance().sort(rows, byAvg);
 		// TODO would be better without clearing and re adding
 		profilersTable.clear();
@@ -135,6 +140,21 @@ public class SystemProfilerGUI extends Window {
 			row.update(0);
 			profilersTable.add(row).expandX().fillX().left();
 			profilersTable.row();
+		}
+	}
+
+	private void rebuildRows() {
+		int target = SystemProfiler.sixe();
+		if (target > rows.size) {
+			for (int i = rows.size; i < target; i++) {
+				rows.add(new ProfilerRow(skin));
+			}
+		} else if (target < rows.size) {
+			rows.removeRange(rows.size - target + 1, rows.size - 1);
+		}
+		for (int i = 0; i < target; i++) {
+			SystemProfiler profiler = SystemProfiler.get(i);
+			rows.get(i).init(profiler);
 		}
 	}
 
@@ -228,35 +248,45 @@ public class SystemProfilerGUI extends Window {
 		SystemProfiler profiler;
 		Label name, max, localMax, avg;
 		CheckBox draw;
-		float lastMax = -1, lastLocalMax = -1, lastAvg = -1;
+		float lastMax, lastLocalMax, lastAvg;
 
-		public ProfilerRow (final SystemProfiler profiler, Skin skin) {
+		public ProfilerRow (Skin skin) {
+			this(null, skin);
+		}
+
+		public ProfilerRow(SystemProfiler profiler, Skin skin) {
 			super();
-			this.profiler = profiler;
 			draw = new CheckBox("", skin);
-			draw.setChecked(profiler.getDrawGraph());
-			draw.addListener(new ChangeListener() {
-				@Override public void changed (ChangeEvent event, Actor actor) {
-					profiler.setDrawGraph(!profiler.getDrawGraph());
-					if (profiler.getDrawGraph()) {
-						setChildColor(ProfilerRow.this.profiler.getColor());
-					} else {
-						setChildColor(Color.LIGHT_GRAY);
-					}
-				}
-			});
-			name = new Label(profiler.getName(), skin, STYLE_SMALL);
+			name = new Label("", skin, STYLE_SMALL);
 			max = label("", skin, Align.right);
 			localMax = label("", skin, Align.right);
 			avg = label("", skin, Align.right);
-
-			setChildColor(profiler.getColor());
 
 			add(draw);
 			add(name).expandX().fillX();
 			add(max).minWidth(MIN_WIDTH);
 			add(localMax).minWidth(MIN_WIDTH);
 			add(avg).minWidth(MIN_WIDTH);
+
+			if (profiler != null) init(profiler);
+		}
+
+		public void init (final SystemProfiler profiler) {
+			this.profiler = profiler;
+			draw.setChecked(profiler.getDrawGraph());
+			draw.addListener(new ChangeListener() {
+				@Override public void changed (ChangeEvent event, Actor actor) {
+					profiler.setDrawGraph(!profiler.getDrawGraph());
+					if (profiler.getDrawGraph()) {
+						setChildColor(profiler.getColor());
+					} else {
+						setChildColor(Color.LIGHT_GRAY);
+					}
+				}
+			});
+			name.setText(profiler.getName());
+			setChildColor(profiler.getColor());
+			lastMax = lastLocalMax = lastAvg = -1;
 		}
 
 		private void setChildColor(Color color) {

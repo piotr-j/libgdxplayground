@@ -22,8 +22,11 @@ public class SystemProfiler implements ArtemisProfiler {
 
 	private static Array<SystemProfiler> profilers = new Array<>();
 	private static ObjectMap<String, SystemProfiler> profilerByName = new ObjectMap<>();
+	private boolean added;
 
 	public static SystemProfiler add(SystemProfiler profiler) {
+		if (profiler.added) return profiler;
+		profiler.added = true;
 		profilers.add(profiler);
 		profilerByName.put(profiler.getName(), profiler);
 		return profiler;
@@ -39,6 +42,44 @@ public class SystemProfiler implements ArtemisProfiler {
 
 	public static SystemProfiler get (int id) {
 		return profilers.get(id);
+	}
+
+	/**
+	 * Get profiler for given system
+	 * @return profiler pr null
+	 */
+	public static SystemProfiler getFor (BaseSystem system) {
+		Object[] items = profilers.items;
+		for (int i = 0; i < profilers.size; i++) {
+			SystemProfiler profiler = (SystemProfiler)items[i];
+			if (profiler.system == system) {
+				return profiler;
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * get or create system for given system
+	 * @return profiler pr null
+	 */
+	public static SystemProfiler getFor (BaseSystem system, World world) {
+		Object[] items = profilers.items;
+		for (int i = 0; i < profilers.size; i++) {
+			SystemProfiler profiler = (SystemProfiler)items[i];
+			if (profiler.system == system) {
+				return profiler;
+			}
+		}
+		return createFor(system, world);
+	}
+
+	public static SystemProfiler create (String name) {
+		return SystemProfiler.add(new SystemProfiler(name));
+	}
+
+	public static SystemProfiler createFor (BaseSystem system, World world) {
+		return SystemProfiler.add(new SystemProfiler(system, world));
 	}
 
 	public static Array<SystemProfiler> get() {
@@ -85,6 +126,10 @@ public class SystemProfiler implements ArtemisProfiler {
 
 	public SystemProfiler(String name) {
 		this.name = name;
+	}
+
+	public SystemProfiler (BaseSystem system, World world) {
+		initialize(system, world);
 	}
 
 	boolean drawGraph = true;
@@ -164,10 +209,10 @@ public class SystemProfiler implements ArtemisProfiler {
 		if (name == null) {
 			name = toString();
 		}
-		SystemProfiler.add(this);
 		if (color == null) {
 			calculateColor(toString().hashCode(), color = new Color());
 		}
+		SystemProfiler.add(this);
 	}
 
 	@Override

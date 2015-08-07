@@ -1,6 +1,8 @@
 package io.piotrjastrzebski.playground.ecs.profiler;
 
 import com.artemis.*;
+import com.artemis.utils.Bag;
+import com.artemis.utils.ImmutableBag;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.math.MathUtils;
 import com.kotcrab.vis.ui.VisUI;
@@ -46,10 +48,11 @@ public class ECSShapeProfilerTest extends BaseScreen {
 		config.setSystem(new QTSelectSystem());
 
 		config.setSystem(new GUISystem());
-		config.setSystem(new ProfilerSystem());
+//		config.setSystem(new ProfilerSystem());
 		config.setSystem(new ProfilerGUISystem());
 
 		world = new World(config);
+		world.setInvocationStrategy(new ProfilerIS(world));
 
 		for (int i = 0; i < 10000; i++) {
 			createEntity();
@@ -75,9 +78,43 @@ public class ECSShapeProfilerTest extends BaseScreen {
 	@Override public void render (float delta) {
 		super.render(delta);
 		world.delta = delta;
-		long start = System.nanoTime();
 		world.process();
-		SystemProfiler.get("Frame").sample(System.nanoTime() - start);
-//		SystemProfiler.FRAME.sample(System.nanoTime() - start);
+	}
+
+	public static class ProfilerIS extends SystemInvocationStrategy {
+		SystemProfiler total;
+		SystemProfiler[] profilers;
+
+		public ProfilerIS (World world) {
+			total = SystemProfiler.create("Frame");
+			total.setColor(1, 1, 0, 1);
+
+			ImmutableBag<BaseSystem> systems = world.getSystems();
+			profilers = new SystemProfiler[systems.size()];
+			for (int i = 0; i < systems.size(); i++) {
+				BaseSystem system = systems.get(i);
+				SystemProfiler old = SystemProfiler.getFor(system);
+				if (old == null) {
+					profilers[i] = SystemProfiler.createFor(system, world);
+				}
+			}
+		}
+
+		@Override protected void process (Bag<BaseSystem> systems) {
+			total.start();
+			Object[] systemsData = systems.getData();
+			for (int i = 0; i < systems.size(); i++) {
+				updateEntityStates();
+
+				BaseSystem system = (BaseSystem)systemsData[i];
+				if (!system.isPassive()) {
+					SystemProfiler profiler = profilers[i];
+					if (profiler != null) profiler.start();
+					system.process();
+					if (profiler != null) profiler.stop();
+				}
+			}
+			total.stop();
+		}
 	}
 }
