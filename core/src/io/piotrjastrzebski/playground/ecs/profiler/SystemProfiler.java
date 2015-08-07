@@ -8,6 +8,8 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ObjectMap;
 
 /**
+ * {@link ArtemisProfiler} implementation, {@link SystemProfiler#dispose()} should be called to clean static references as needed
+ *
  * Created by PiotrJ on 05/08/15.
  */
 public class SystemProfiler implements ArtemisProfiler {
@@ -137,13 +139,11 @@ public class SystemProfiler implements ArtemisProfiler {
 		if (time > max || maxCounter > 2000) {
 			max = time;
 			maxCounter = 0;
-//			maxString = String.format("%.2f", max / 1000000f);
 		}
 
 		if (time > localMax || index == localMaxIndex) {
 			localMax = time;
 			localMaxIndex = index;
-//			localMaxString = String.format("%.2f", localMax / 1000000f);
 		}
 		add(time);
 	}
