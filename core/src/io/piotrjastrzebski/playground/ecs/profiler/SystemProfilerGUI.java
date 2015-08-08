@@ -8,6 +8,7 @@ import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.EventListener;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
@@ -249,6 +250,7 @@ public class SystemProfilerGUI extends Window {
 		Label name, max, localMax, avg;
 		CheckBox draw;
 		float lastMax, lastLocalMax, lastAvg;
+		ChangeListener listener;
 
 		public ProfilerRow (Skin skin) {
 			this(null, skin);
@@ -273,8 +275,9 @@ public class SystemProfilerGUI extends Window {
 
 		public void init (final SystemProfiler profiler) {
 			this.profiler = profiler;
+			draw.removeListener(listener);
 			draw.setChecked(profiler.getDrawGraph());
-			draw.addListener(new ChangeListener() {
+			draw.addListener(listener = new ChangeListener() {
 				@Override public void changed (ChangeEvent event, Actor actor) {
 					profiler.setDrawGraph(!profiler.getDrawGraph());
 					if (profiler.getDrawGraph()) {
