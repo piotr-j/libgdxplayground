@@ -33,7 +33,6 @@ public class ProfilerGUISystem extends BaseSystem {
 		// add some global profilers
 		SystemProfiler.add(new SystemProfiler("Logic")).setColor(1, 0, 0, 1);
 		SystemProfiler.add(new SystemProfiler("Render")).setColor(1, 0, 0, 1);
-		SystemProfiler.add(new SystemProfiler("Frame")).setColor(1, 0, 0, 1);
 
 		SystemProfilerGUI.STYLE_SMALL = "small";
 		gui = new SystemProfilerGUI(VisUI.getSkin(), "default");
