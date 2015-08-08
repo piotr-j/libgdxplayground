@@ -52,7 +52,7 @@ public class ECSShapeProfilerTest extends BaseScreen {
 		world = new World(config);
 		world.setInvocationStrategy(new ProfilerIS(world));
 
-		for (int i = 0; i < 10000; i++) {
+		for (int i = 0; i < 17500; i++) {
 			createEntity();
 		}
 	}
