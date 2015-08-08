@@ -117,4 +117,9 @@ public class ECSShapeProfilerTest extends BaseScreen {
 			total.stop();
 		}
 	}
+
+	@Override public void dispose () {
+		super.dispose();
+		world.dispose();
+	}
 }
