@@ -32,7 +32,7 @@ public class SystemProfiler implements ArtemisProfiler {
 		return profiler;
 	}
 
-	public static int sixe () {
+	public static int size () {
 		return profilers.size;
 	}
 

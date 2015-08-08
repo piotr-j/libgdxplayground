@@ -127,7 +127,7 @@ public class SystemProfilerGUI extends Window {
 		if (refreshTimer < REFRESH_RATE) return;
 		refreshTimer -= REFRESH_RATE;
 
-		if (rows.size != SystemProfiler.sixe()) {
+		if (rows.size != SystemProfiler.size()) {
 			rebuildRows();
 		}
 
@@ -145,7 +145,7 @@ public class SystemProfilerGUI extends Window {
 	}
 
 	private void rebuildRows() {
-		int target = SystemProfiler.sixe();
+		int target = SystemProfiler.size();
 		if (target > rows.size) {
 			for (int i = rows.size; i < target; i++) {
 				rows.add(new ProfilerRow(skin));
