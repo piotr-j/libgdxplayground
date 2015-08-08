@@ -8,7 +8,6 @@ import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.badlogic.gdx.scenes.scene2d.EventListener;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
@@ -120,9 +119,11 @@ public class SystemProfilerGUI extends Window {
 		}
 	};
 
-	@Override public void act (float delta) {
-		super.act(delta);
-
+	/**
+	 * Call to update, rate limited by {@link SystemProfilerGUI#REFRESH_RATE}
+	 * @param delta duration of last frame
+	 */
+	public void update (float delta) {
 		refreshTimer += delta;
 		if (refreshTimer < REFRESH_RATE) return;
 		refreshTimer -= REFRESH_RATE;
@@ -168,6 +169,11 @@ public class SystemProfilerGUI extends Window {
 		Gdx.gl.glEnable(GL20.GL_BLEND);
 		graph.localToStageCoordinates(temp.setZero());
 		drawGraph(renderer, temp.x, temp.y, graph.getWidth(), graph.getHeight(), getColor().a);
+	}
+
+	public void updateAndRender(float delta, ShapeRenderer renderer) {
+		update(delta);
+		renderGraph(renderer);
 	}
 
 	/**

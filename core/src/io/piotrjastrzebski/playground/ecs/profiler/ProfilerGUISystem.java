@@ -2,7 +2,9 @@ package io.piotrjastrzebski.playground.ecs.profiler;
 
 import com.artemis.BaseSystem;
 import com.artemis.annotations.Wire;
+import com.artemis.utils.IntBag;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
@@ -67,7 +69,7 @@ public class ProfilerGUISystem extends BaseSystem {
 
 		renderer.setProjectionMatrix(camera.combined);
 		renderer.begin(ShapeRenderer.ShapeType.Line);
-		gui.renderGraph(renderer);
+		gui.updateAndRender(world.delta, renderer);
 		renderer.end();
 	}
 

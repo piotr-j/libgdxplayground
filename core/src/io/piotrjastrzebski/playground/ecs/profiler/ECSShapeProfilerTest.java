@@ -17,9 +17,8 @@ import io.piotrjastrzebski.playground.ecs.quadtreetest.Velocity;
  * Created by EvilEntity on 28/07/2015.
  */
 public class ECSShapeProfilerTest extends BaseScreen {
-	private final static String TAG = ECSShapeProfilerTest.class.getSimpleName();
-
 	World world;
+
 	public ECSShapeProfilerTest (PlaygroundGame game) {
 		super(game);
 
@@ -48,7 +47,6 @@ public class ECSShapeProfilerTest extends BaseScreen {
 		config.setSystem(new QTSelectSystem());
 
 		config.setSystem(new GUISystem());
-//		config.setSystem(new ProfilerSystem());
 		config.setSystem(new ProfilerGUISystem());
 
 		world = new World(config);
