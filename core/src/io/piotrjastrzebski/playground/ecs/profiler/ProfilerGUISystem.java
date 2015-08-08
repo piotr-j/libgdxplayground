@@ -31,11 +31,12 @@ public class ProfilerGUISystem extends BaseSystem {
 
 	@Override protected void initialize () {
 		super.initialize();
-
 		// add some global profilers
 		SystemProfiler.add(new SystemProfiler("Logic")).setColor(1, 0, 0, 1);
 		SystemProfiler.add(new SystemProfiler("Render")).setColor(1, 0, 0, 1);
 
+		// change samples, new systems will be affected
+		SystemProfiler.SAMPLES = 10 * 60;
 		SystemProfilerGUI.STYLE_SMALL = "small";
 		gui = new SystemProfilerGUI(VisUI.getSkin(), "default");
 

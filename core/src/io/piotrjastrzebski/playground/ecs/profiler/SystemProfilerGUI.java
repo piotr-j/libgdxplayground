@@ -229,10 +229,10 @@ public class SystemProfilerGUI extends Window {
 
 			renderer.setColor(profiler.getColor());
 			renderer.getColor().a = alpha;
-			float sampleLen = width / SystemProfiler.SAMPLES;
 			// TODO make this cleaner, maybe find a nice circular buffer to iterate?
 			int current = profiler.index;
 			for (int i = profiler.times.length - 1; i >= 1; i--) {
+				float sampleLen = width / profiler.times.length;
 				int prev = current == 0 ? profiler.times.length - 1 : current - 1;
 				float x1 = profiler.times[prev] * NANO_MULTI;
 				float prevPoint = getPoint(x1);
