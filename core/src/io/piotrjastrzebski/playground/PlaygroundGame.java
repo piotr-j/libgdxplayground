@@ -45,7 +45,7 @@ public class PlaygroundGame extends Game {
 		AsyncScreenTest.class, UIPaneTest.class, UIContextMenuTest.class, UIContextMenuTest2.class, UIFillTest.class, UIDPITest.class,
 		UIDialogTest.class, UITableBuilderTest.class, JobTest.class, ECSJobTest.class, AIECSJobTest.class, AIECSTest.class,
 		ShadowTest.class, GpuShadows.class, CircleTest.class, ShapeRendererTest.class, BTreeTest.class, FitVPTest.class, VPTest.class,
-		SimpleLightTest.class,
+		SimpleLightTest.class, UIImageButtonTest.class,
 	};
 
 	PlatformBridge bridge;
