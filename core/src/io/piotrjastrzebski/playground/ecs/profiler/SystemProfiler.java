@@ -17,7 +17,12 @@ public class SystemProfiler implements ArtemisProfiler {
 	 * Global flag if all annotated profilers are enabled
 	 */
 	public static final boolean ENABLED = true;
-	public static final int SAMPLES = 200;
+	/**
+	 * Number of stored samples, can be changed before system is created, default 5s at 60fps
+	 *
+	 * Change has no effect on Annotation based SystemProfilers
+	 */
+	public static int SAMPLES = 60 * 5;
 	public static boolean RUNNING = false;
 
 	private static Array<SystemProfiler> profilers = new Array<>();
