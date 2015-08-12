@@ -22,6 +22,7 @@ import io.piotrjastrzebski.playground.ecs.profiler.ECSShapeProfilerTest;
 import io.piotrjastrzebski.playground.ecs.quadtreetest.QuadTreeTest;
 import io.piotrjastrzebski.playground.ecs.tagtest.TagTest;
 import io.piotrjastrzebski.playground.gpushadows.GpuShadows;
+import io.piotrjastrzebski.playground.isotiled.IsoTest;
 import io.piotrjastrzebski.playground.jobtest.AIECSJobTest;
 import io.piotrjastrzebski.playground.jobtest.ECSJobTest;
 import io.piotrjastrzebski.playground.jobtest.JobTest;
@@ -45,7 +46,7 @@ public class PlaygroundGame extends Game {
 		AsyncScreenTest.class, UIPaneTest.class, UIContextMenuTest.class, UIContextMenuTest2.class, UIFillTest.class, UIDPITest.class,
 		UIDialogTest.class, UITableBuilderTest.class, JobTest.class, ECSJobTest.class, AIECSJobTest.class, AIECSTest.class,
 		ShadowTest.class, GpuShadows.class, CircleTest.class, ShapeRendererTest.class, BTreeTest.class, FitVPTest.class, VPTest.class,
-		SimpleLightTest.class, UIImageButtonTest.class,
+		SimpleLightTest.class, UIImageButtonTest.class, IsoTest.class, UISelectRowTest.class,
 	};
 
 	PlatformBridge bridge;
