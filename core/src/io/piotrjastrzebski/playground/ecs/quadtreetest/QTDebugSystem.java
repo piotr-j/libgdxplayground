@@ -44,15 +44,19 @@ public class QTDebugSystem extends BaseSystem {
 	}
 
 	int numEntities = 75000;
+//	int numEntities = 0;
 	float minSize = 0.05f;
+//	float minSize = 2f;
 	float maxSize = 0.2f;
+//	float maxSize = 2.0f;
 	float maxVelocity = 0.5f;
+//	float maxVelocity = 0f;
 	boolean exact = true;
 	int maxInBucket = 16;
 	int maxDepth = 6;
 	float staticPer = 0.5f;
 	boolean linearSearch;
-	int iterations = 1000;
+	int iterations = 1;
 	VisLabel fps;
 	@Override protected void initialize () {
 		super.initialize();
@@ -215,7 +219,7 @@ public class QTDebugSystem extends BaseSystem {
 			@Override public void changed (ChangeEvent event, Actor actor) {
 				maxInBucket = (int)maxInBucketSlider.getValue();
 				maxInBucketLabel.setText(maxInBucket + " max in bucket");
-				QTSystem.QuadTree.MAX_IN_BUCKET = maxInBucket;
+				QuadTree.MAX_IN_BUCKET = maxInBucket;
 			}
 		});
 		maxInBucketSlider.setValue(maxInBucket);
@@ -228,21 +232,13 @@ public class QTDebugSystem extends BaseSystem {
 			@Override public void changed (ChangeEvent event, Actor actor) {
 				maxDepth = (int)maxDepthSlider.getValue();
 				maxDepthLabel.setText(maxDepth + " max depth");
-				QTSystem.QuadTree.MAX_DEPTH = maxDepth;
+				QuadTree.MAX_DEPTH = maxDepth;
 			}
 		});
 		maxDepthSlider.setValue(maxDepth);
 		container.add(maxDepthSlider);
 		container.add(maxDepthLabel);
 		container.row();
-		final VisCheckBox freeOnClear = new VisCheckBox("Free On Clear");
-		freeOnClear.setChecked(QTSystem.QuadTree.FREE_ON_CLEAR);
-		freeOnClear.addListener(new ChangeListener() {
-			@Override public void changed (ChangeEvent event, Actor actor) {
-				QTSystem.QuadTree.FREE_ON_CLEAR = freeOnClear.isChecked();
-			}
-		});
-		container.add(freeOnClear);
 		final VisCheckBox rebuild = new VisCheckBox("Rebuild");
 		rebuild.setChecked(qtSystem.rebuild);
 		rebuild.addListener(new ChangeListener() {
@@ -254,6 +250,7 @@ public class QTDebugSystem extends BaseSystem {
 		container.row();
 
 		window.add(container);
+		window.addCloseButton();
 		window.pack();
 		root.getStage().addActor(window);
 		reset();
@@ -267,20 +264,26 @@ public class QTDebugSystem extends BaseSystem {
 			e.deleteFromWorld();
 		}
 
-		QTSystem.QuadTree.MAX_DEPTH = maxDepth;
-		QTSystem.QuadTree.MAX_IN_BUCKET = maxInBucket;
+		QuadTree.MAX_DEPTH = maxDepth;
+		QuadTree.MAX_IN_BUCKET = maxInBucket;
 
 		for (int i = 0; i < numEntities; i++) {
 			createEntity();
 		}
 	}
 
-	private void createEntity( ){
+	private void createEntity(){
+		float x = MathUtils.random(-19.f, 19.f);
+		float y = MathUtils.random(-10.f, 10.f);
+		createEntity(x, y);
+	}
+
+	private void createEntity(float x, float y){
 		Entity entity = world.createEntity();
 		EntityEdit edit = entity.edit();
 		Position position = edit.create(Position.class);
-		position.x = MathUtils.random(-19.f, 19.f);
-		position.y = MathUtils.random(-10.f, 10.f);
+		position.x = x;
+		position.y = y;
 		Size size = edit.create(Size.class);
 		size.width = MathUtils.random(minSize, maxSize);
 		size.height = MathUtils.random(minSize, maxSize);
@@ -295,7 +298,7 @@ public class QTDebugSystem extends BaseSystem {
 	long startTime = TimeUtils.nanoTime();
 	IntBag fill = new IntBag();
 	@Override protected void processSystem () {
-		QTSystem.QuadTree quadTree = qtSystem.getQuadTree();
+		QuadTree quadTree = qtSystem.getQuadTree();
 		fill.clear();
 		if (linearSearch) {
 			IntBag actives = entitySub.getEntities();
@@ -368,13 +371,15 @@ public class QTDebugSystem extends BaseSystem {
 			sb.append(" update(), ");
 			sb.append(nanoDiff / 1000000);
 		}
-		sb.append(" millis (1000x)");
+		sb.append(" millis (");
+		sb.append(iterations);
+		sb.append(")");
 		fps.setText(sb);
 	}
 	StringBuilder sb = new StringBuilder();
 
 	Vector2 start = new Vector2();
-	Rectangle selected = new Rectangle(-1, -1, 2, 2);
+	Rectangle selected = new Rectangle(-2.5f, -2.5f, 5, 5);
 	Rectangle temp1 = new Rectangle();
 	Rectangle temp2 = new Rectangle();
 	boolean dragging;
@@ -383,7 +388,7 @@ public class QTDebugSystem extends BaseSystem {
 	 */
 	public void touched (float x, float y, int button) {
 		if (button == Input.Buttons.LEFT) {
-			createEntity();
+			createEntity(x, y);
 		} else if (button == Input.Buttons.MIDDLE) {
 			start.set(x, y);
 			selected.setPosition(x, y);
