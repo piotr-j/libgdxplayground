@@ -19,6 +19,7 @@ import io.piotrjastrzebski.playground.ecs.entityedittest.EntityEditTest;
 import io.piotrjastrzebski.playground.ecs.entityonecomptest.EntityOneCompTest;
 import io.piotrjastrzebski.playground.ecs.profiler.ECSPolyProfilerTest;
 import io.piotrjastrzebski.playground.ecs.profiler.ECSShapeProfilerTest;
+import io.piotrjastrzebski.playground.ecs.profilerv2.ECSProfilerTest;
 import io.piotrjastrzebski.playground.ecs.quadtreetest.QuadTreeTest;
 import io.piotrjastrzebski.playground.ecs.tagtest.TagTest;
 import io.piotrjastrzebski.playground.gpushadows.GpuShadows;
@@ -41,7 +42,7 @@ public class PlaygroundGame extends Game {
 		TiledGenTest.class, TemperatureTest.class, BiomeTest.class, Box2dInterpolationTest.class,
 		RainTest.class, BlurTest.class, CompositeGenTest.class, UITest.class, UISortTest.class, UISort2Test.class, CSTest.class,
 		UIFBOTransitionTest.class, QuadTreeTest.class,
-		ECSPooledCompTest.class, ECSShapeProfilerTest.class, ECSPolyProfilerTest.class,
+		ECSPooledCompTest.class, ECSProfilerTest.class, ECSShapeProfilerTest.class, ECSPolyProfilerTest.class,
 		CSTestV2.class, TagTest.class, EntityEditTest.class, EntityOneCompTest.class, DeferredSystemTest.class,
 		AsyncScreenTest.class, UIPaneTest.class, UIContextMenuTest.class, UIContextMenuTest2.class, UIFillTest.class, UIDPITest.class,
 		UIDialogTest.class, UITableBuilderTest.class, JobTest.class, ECSJobTest.class, AIECSJobTest.class, AIECSTest.class,
