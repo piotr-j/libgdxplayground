@@ -57,6 +57,7 @@ public abstract class BaseScreen implements Screen, InputProcessor {
 
 		Gdx.app.log(TAG, "F1 - toggle stage debug");
 
+		resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 	}
 
 	@Override public void show () {
