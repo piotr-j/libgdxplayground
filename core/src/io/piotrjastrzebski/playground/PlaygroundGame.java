@@ -17,6 +17,7 @@ import io.piotrjastrzebski.playground.ecs.ECSPooledCompTest;
 import io.piotrjastrzebski.playground.ecs.deferredsystemtest.DeferredSystemTest;
 import io.piotrjastrzebski.playground.ecs.entityedittest.EntityEditTest;
 import io.piotrjastrzebski.playground.ecs.entityonecomptest.EntityOneCompTest;
+import io.piotrjastrzebski.playground.ecs.jobs.ECSJobsTest;
 import io.piotrjastrzebski.playground.ecs.profiler.ECSPolyProfilerTest;
 import io.piotrjastrzebski.playground.ecs.profiler.ECSShapeProfilerTest;
 import io.piotrjastrzebski.playground.ecs.profilerv2.ECSProfilerTest;
@@ -39,6 +40,7 @@ public class PlaygroundGame extends Game {
 
 	// should be a class that extends BaseScreen
 	final Class[] testScreens = new Class[]{
+		ECSJobsTest.class, UISpriteDrawableTest.class,
 		TiledGenTest.class, TemperatureTest.class, BiomeTest.class, Box2dInterpolationTest.class,
 		RainTest.class, BlurTest.class, CompositeGenTest.class, UITest.class, UISortTest.class, UISort2Test.class, CSTest.class,
 		UIFBOTransitionTest.class, QuadTreeTest.class,
