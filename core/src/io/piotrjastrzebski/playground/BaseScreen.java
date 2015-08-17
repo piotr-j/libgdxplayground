@@ -34,6 +34,8 @@ public abstract class BaseScreen implements Screen, InputProcessor {
 	protected Table root;
 	protected Skin skin;
 
+	protected final InputMultiplexer multiplexer;
+
 	boolean debugStage;
 	PlaygroundGame game;
 	public BaseScreen (PlaygroundGame game) {
@@ -53,7 +55,7 @@ public abstract class BaseScreen implements Screen, InputProcessor {
 		root = new Table();
 		root.setFillParent(true);
 		stage.addActor(root);
-		Gdx.input.setInputProcessor(new InputMultiplexer(stage, this));
+		Gdx.input.setInputProcessor(multiplexer = new InputMultiplexer(stage, this));
 
 		Gdx.app.log(TAG, "F1 - toggle stage debug");
 
