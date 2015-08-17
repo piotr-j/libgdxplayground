@@ -1,8 +1,6 @@
 package io.piotrjastrzebski.playground.uitesting;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
@@ -21,10 +19,10 @@ public class UISpriteDrawableTest extends BaseScreen {
 
 		Sprite white = new Sprite(new Texture("white.png"));
 		GradientSpriteDrawable drawable = new GradientSpriteDrawable(white);
-		drawable.setC1(Color.RED);
-		drawable.setC2(Color.GREEN);
-		drawable.setC3(Color.BLUE);
-		drawable.setC4(Color.WHITE);
+		drawable.setLowerLeft(Color.RED);
+		drawable.setUpperLeft(Color.GREEN);
+		drawable.setUpperRight(Color.BLUE);
+		drawable.setLowerRight(Color.WHITE);
 		Image image = new Image(drawable);
 		root.add(image).expand().fill().pad(100);
 	}
@@ -39,6 +37,7 @@ public class UISpriteDrawableTest extends BaseScreen {
 	}
 
 	public static class GradientSpriteDrawable extends SpriteDrawable {
+		// clock wise starting at lower left corner
 		private Color c1 = new Color();
 		private Color c2 = new Color();
 		private Color c3 = new Color();
@@ -66,35 +65,35 @@ public class UISpriteDrawableTest extends BaseScreen {
 			sprite.draw(batch);
 		}
 
-		public void setC1 (Color c1) {
-			this.c1 = c1;
+		public void setLowerLeft (Color color) {
+			c1.set(color);
 		}
 
-		public void setC2 (Color c2) {
-			this.c2 = c2;
+		public void setUpperLeft (Color color) {
+			c2.set(color);
 		}
 
-		public void setC3 (Color c3) {
-			this.c3 = c3;
+		public void setUpperRight (Color color) {
+			c3.set(color);
 		}
 
-		public void setC4 (Color c4) {
-			this.c4 = c4;
+		public void setLowerRight (Color color) {
+			c4.set(color);
 		}
 
-		public Color getC1 () {
+		public Color getLowerLeft () {
 			return c1;
 		}
 
-		public Color getC2 () {
+		public Color getUpperLeft () {
 			return c2;
 		}
 
-		public Color getC3 () {
+		public Color getUpperRight () {
 			return c3;
 		}
 
-		public Color getC4 () {
+		public Color getLowerRight () {
 			return c4;
 		}
 	}
