@@ -132,13 +132,13 @@ public class ECSJobsTest extends BaseScreen {
 
 	static Bag<Component> fill = new Bag<>();
 	static StringBuilder sb = new StringBuilder();
-	public static String entityToStr(Entity e) {
+	public static String entityToStr(World world, int e) {
 		fill.clear();
 		sb.setLength(0);
 		sb.append("Entity{");
-		sb.append(e.id);
+		sb.append(e);
 		sb.append("}[\n");
-		e.getComponents(fill);
+		world.getEntity(e).getComponents(fill);
 		for (int i = 0; fill.size() > i; i++) {
 			if (i > 0) sb.append(",\n");
 			sb.append("  ");

@@ -23,8 +23,8 @@ public class Workers extends EntityProcessingSystem {
 		super(Aspect.all(Worker.class));
 	}
 
-	@Override protected void inserted (Entity e) {
-		Gdx.app.log(TAG, ECSJobsTest.entityToStr(e));
+	@Override protected void inserted (int e) {
+		Gdx.app.log(TAG, ECSJobsTest.entityToStr(world, e));
 
 	}
 
@@ -54,7 +54,7 @@ public class Workers extends EntityProcessingSystem {
 		}
 	}
 
-	@Override protected void removed (Entity e) {
+	@Override protected void removed (int e) {
 
 	}
 }

@@ -25,10 +25,10 @@ public class Jobs extends EntityProcessingSystem{
 		super(Aspect.all(Job.class));
 	}
 
-	@Override protected void inserted (Entity e) {
-		Gdx.app.log(TAG, ECSJobsTest.entityToStr(e));
+	@Override protected void inserted (int e) {
+		Gdx.app.log(TAG, ECSJobsTest.entityToStr(world, e));
 		Job job = mJob.get(e);
-		jobById.put(e.id, job);
+		jobById.put(e, job);
 		jobs.add(job);
 	}
 
@@ -36,7 +36,7 @@ public class Jobs extends EntityProcessingSystem{
 
 	}
 
-	@Override protected void removed (Entity e) {
+	@Override protected void removed (int e) {
 		Job job = mJob.get(e);
 		jobs.removeValue(job, true);
 		jobById.put(job.eid, null);

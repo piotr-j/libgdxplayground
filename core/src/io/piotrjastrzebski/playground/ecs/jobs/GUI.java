@@ -49,7 +49,7 @@ public class GUI extends EntityProcessingSystem {
 		Godlike godlike = mGodlike.get(e);
 		if (godlike.selected) {
 			name.setText(godlike.name);
-			entity.setText(ECSJobsTest.entityToStr(e));
+			entity.setText(ECSJobsTest.entityToStr(world, e.id));
 		}
 	}
 
