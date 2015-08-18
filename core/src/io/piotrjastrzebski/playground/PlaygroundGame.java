@@ -41,7 +41,7 @@ public class PlaygroundGame extends Game {
 
 	// should be a class that extends BaseScreen
 	final Class[] testScreens = new Class[]{
-		ECSJobsTest.class, UISpriteDrawableTest.class, SimpleTiledTest.class,
+		ECSJobsTest.class, UISpriteDrawableTest.class, SimpleTiledTest.class, ParticleTest.class,
 		TiledGenTest.class, TemperatureTest.class, BiomeTest.class, Box2dInterpolationTest.class,
 		RainTest.class, BlurTest.class, CompositeGenTest.class, UITest.class, UISortTest.class, UISort2Test.class, CSTest.class,
 		UIFBOTransitionTest.class, QuadTreeTest.class,
