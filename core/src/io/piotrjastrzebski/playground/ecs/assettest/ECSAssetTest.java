@@ -33,9 +33,10 @@ public class ECSAssetTest extends BaseScreen {
 			setPassive(true);
 		}
 
-		@Override protected void inserted (Entity e) {
+		@Override protected void inserted (int e) {
 			SpriteRenderableDef spriteRenderableDef = mSpriteRenderableDef.get(e);
-			SpriteRenderable renderable = e.edit().create(SpriteRenderable.class);
+			EntityEdit edit = world.getEntity(e).edit();
+			SpriteRenderable renderable = edit.create(SpriteRenderable.class);
 			// get sprite from some where
 			//renderable.sprite =
 		}

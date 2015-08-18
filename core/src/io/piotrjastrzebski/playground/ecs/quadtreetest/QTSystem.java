@@ -5,11 +5,6 @@ import com.artemis.ComponentMapper;
 import com.artemis.Entity;
 import com.artemis.annotations.Wire;
 import com.artemis.systems.EntityProcessingSystem;
-import com.artemis.utils.Bag;
-import com.artemis.utils.IntBag;
-import net.mostlyoriginal.api.utils.pooling.ObjectPool;
-import net.mostlyoriginal.api.utils.pooling.Poolable;
-import net.mostlyoriginal.api.utils.pooling.Pools;
 
 @Wire
 public class QTSystem extends EntityProcessingSystem {
@@ -40,10 +35,10 @@ public class QTSystem extends EntityProcessingSystem {
 		}
 	}
 
-	@Override protected void inserted (Entity e) {
+	@Override protected void inserted (int e) {
 		Position position = mPosition.get(e);
 		Size size = mSize.get(e);
-		base.insert(e.id, position.x, position.y, size.width, size.height);
+		base.insert(e, position.x, position.y, size.width, size.height);
 	}
 
 	@Override protected void process (Entity e) {
@@ -56,8 +51,8 @@ public class QTSystem extends EntityProcessingSystem {
 		}
 	}
 
-	@Override protected void removed (Entity e) {
-		base.remove(e.id);
+	@Override protected void removed (int e) {
+		base.remove(e);
 	}
 
 	@Override protected void end () {

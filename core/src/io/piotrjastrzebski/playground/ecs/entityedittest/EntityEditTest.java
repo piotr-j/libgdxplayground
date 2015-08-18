@@ -48,10 +48,10 @@ public class EntityEditTest extends BaseScreen {
 	}
 
 	static Bag<Component> cFill = new Bag<>();
-	public static String entityToStr(Entity e) {
+	public static String entityToStr(World world, int e) {
 		cFill.clear();
-		e.getComponents(cFill);
-		String str =  "Entity{id="+e.getId();
+		world.getEntity(e).getComponents(cFill);
+		String str =  "Entity{id="+e;
 		for(Component c: cFill) {
 			// can be null when it was removed
 			if (c == null) continue;

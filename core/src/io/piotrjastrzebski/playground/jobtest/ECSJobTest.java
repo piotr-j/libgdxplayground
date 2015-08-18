@@ -181,10 +181,10 @@ public class ECSJobTest extends BaseScreen {
 			super(Aspect.all(Job.class));
 		}
 
-		@Override protected void inserted (Entity e) {
-			Gdx.app.log(TAG, entityToStr(e));
+		@Override protected void inserted (int e) {
+			Gdx.app.log(TAG, entityToStr(world, e));
 			Job job = mJob.get(e);
-			jobById.put(e.id, job);
+			jobById.put(e, job);
 			jobs.add(job);
 		}
 
@@ -192,7 +192,7 @@ public class ECSJobTest extends BaseScreen {
 
 		}
 
-		@Override protected void removed (Entity e) {
+		@Override protected void removed (int e) {
 			Job job = mJob.get(e);
 			jobs.removeValue(job, true);
 			jobById.put(job.eid, null);
@@ -261,8 +261,8 @@ public class ECSJobTest extends BaseScreen {
 			super(Aspect.all(Worker.class));
 		}
 
-		@Override protected void inserted (Entity e) {
-			Gdx.app.log(TAG, entityToStr(e));
+		@Override protected void inserted (int e) {
+			Gdx.app.log(TAG, entityToStr(world, e));
 
 		}
 
@@ -292,19 +292,19 @@ public class ECSJobTest extends BaseScreen {
 			}
 		}
 
-		@Override protected void removed (Entity e) {
+		@Override protected void removed (int e) {
 
 		}
 	}
 
 	static Bag<Component> fill = new Bag<>();
-	public static String entityToStr(Entity e) {
+	public static String entityToStr(World world, int e) {
 		fill.clear();
 		StringBuilder sb = new StringBuilder();
 		sb.append("Entity{");
-		sb.append(e.id);
+		sb.append(e);
 		sb.append("}[");
-		e.getComponents(fill);
+		world.getEntity(e).getComponents(fill);
 		for (int i = 0; fill.size() > i; i++) {
 			if (i > 0) sb.append(", ");
 			sb.append(fill.get(i));

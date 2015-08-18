@@ -32,8 +32,8 @@ import io.piotrjastrzebski.playground.ecs.tagtest.components.BuildTagComponent;
     }
 
     @Override
-    protected void inserted(Entity e) {
-        Bag<Component> components = e.getComponents(new Bag<Component>());
+    protected void inserted(int e) {
+        Bag<Component> components = world.getEntity(e).getComponents(new Bag<Component>());
         Gdx.app.log("", "Added BuildTag" + e + " " + components.toString());
 
     }
@@ -45,8 +45,8 @@ import io.piotrjastrzebski.playground.ecs.tagtest.components.BuildTagComponent;
 
 
     @Override
-    protected void removed(Entity e) {
-        Bag<Component> components = e.getComponents(new Bag<Component>());
+    protected void removed(int e) {
+        Bag<Component> components = world.getEntity(e).getComponents(new Bag<Component>());
         Gdx.app.log("", "Removed BuildTag" + e + " " + components.toString());
     }
 

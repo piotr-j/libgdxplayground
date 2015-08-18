@@ -17,18 +17,18 @@ public class TestSystem extends EntityProcessingSystem {
 		super(Aspect.all(TestComponentA.class, TestComponentB.class));
 	}
 
-	@Override protected void inserted (Entity e) {
-		Gdx.app.log("Inserted","" + EntityEditTest.entityToStr(e));
+	@Override protected void inserted (int e) {
+		Gdx.app.log("Inserted","" + EntityEditTest.entityToStr(world, e));
 	}
 
 	@Override protected void process (Entity e) {
-		Gdx.app.log("Process","" + EntityEditTest.entityToStr(e));
+		Gdx.app.log("Process","" + EntityEditTest.entityToStr(world, e.id));
 
 	}
 	private ComponentMapper<TestComponentA> mTestComponentA;
 	private ComponentMapper<TestComponentB> mTestComponentB;
-	@Override protected void removed (Entity e) {
-		Gdx.app.log("Removed","" + EntityEditTest.entityToStr(e));
+	@Override protected void removed (int e) {
+		Gdx.app.log("Removed","" + EntityEditTest.entityToStr(world, e));
 		Gdx.app.log("R", "A: " + mTestComponentA.get(e));
 		Gdx.app.log("R", "B: " + mTestComponentB.get(e));
 	}
