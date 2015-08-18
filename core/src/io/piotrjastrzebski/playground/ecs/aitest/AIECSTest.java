@@ -89,10 +89,10 @@ public class AIECSTest extends BaseScreen {
 			injectBTree(behaviorTreeArchetype);
 		}
 
-		@Override protected void inserted (Entity e) {
+		@Override protected void inserted (int e) {
 			AI ai = mAI.get(e);
 			ai.bTree = (BehaviorTree<Dog>)behaviorTreeArchetype.cloneTask();
-			Gdx.app.log(TAG, entityToStr(e));
+			Gdx.app.log(TAG, entityToStr(world, e));
 		}
 
 		@Override protected void process (Entity e) {
@@ -102,7 +102,7 @@ public class AIECSTest extends BaseScreen {
 			ai.bTree.step();
 		}
 
-		@Override protected void removed (Entity e) {
+		@Override protected void removed (int e) {
 			AI ai = mAI.get(e);
 
 		}
@@ -133,13 +133,13 @@ public class AIECSTest extends BaseScreen {
 	}
 
 	static Bag<Component> fill = new Bag<>();
-	public static String entityToStr(Entity e) {
+	public static String entityToStr(World world, int e) {
 		fill.clear();
 		StringBuilder sb = new StringBuilder();
 		sb.append("Entity{");
-		sb.append(e.id);
+		sb.append(e);
 		sb.append("}[");
-		e.getComponents(fill);
+		world.getEntity(e).getComponents(fill);
 		for (int i = 0; fill.size() > i; i++) {
 			if (i > 0) sb.append(", ");
 			sb.append(fill.get(i));

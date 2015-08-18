@@ -25,9 +25,9 @@ public class OptionalTestSystem extends EntityProcessingSystem {
 
     Bag<Component> fill = new Bag<>();
     @Override
-    protected void inserted(Entity e) {
+    protected void inserted(int e) {
         fill.clear();
-        e.getComponents(fill);
+        world.getEntity(e).getComponents(fill);
         Gdx.app.log("OptionalTestSystem", "Inserted " + e + " " + fill);
     }
 
@@ -39,9 +39,9 @@ public class OptionalTestSystem extends EntityProcessingSystem {
     }
 
     @Override
-    protected void removed(Entity e) {
+    protected void removed(int e) {
         fill.clear();
-        e.getComponents(fill);
+        world.getEntity(e).getComponents(fill);
         Gdx.app.log("OptionalTestSystem", "Removed " + e + " " + fill);
     }
 }

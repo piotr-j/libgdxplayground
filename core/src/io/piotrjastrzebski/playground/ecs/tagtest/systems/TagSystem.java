@@ -22,29 +22,29 @@ import io.piotrjastrzebski.playground.ecs.tagtest.components.TagComponent;
 
 
     @Override
-    protected void inserted(Entity e) {
+    protected void inserted(int e) {
         TagComponent tagComponent = tagM.get(e);
         for (String tag:tagComponent.tags) {
             Class aClass = tagToClass.get(tag, null);
             if (aClass == null) continue;
-            e.edit().create(aClass);
+            world.getEntity(e).edit().create(aClass);
 
             IntArray bag = tagToEntities.get(tag, null);
             if (bag == null) {
                 bag = new IntArray();
                 tagToEntities.put(tag, bag);
             }
-            bag.add(e.getId());
+            bag.add(e);
         }
     }
 
     @Override
-    protected void removed(Entity e) {
+    protected void removed(int e) {
         TagComponent tagComponent = tagM.get(e);
         for (String tag:tagComponent.tags) {
             IntArray bag = tagToEntities.get(tag, null);
             if (bag != null) {
-                bag.removeValue(e.getId());
+                bag.removeValue(e);
             }
         }
     }

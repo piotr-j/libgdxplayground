@@ -6,7 +6,7 @@ buildscript {
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:1.2.3'
-        classpath "net.onedaybeard.artemis:artemis-odb-gradle-plugin:0.10.2"
+        classpath "net.onedaybeard.artemis:artemis-odb-gradle-plugin:0.11.3"
     }
 }
 
@@ -23,7 +23,7 @@ allprojects {
         ashleyVersion = '1.4.0'
         aiVersion = '1.5.1-SNAPSHOT'
         visuiVersion = '0.8.1'
-        artemisOdbVersion = "0.10.2"
+        artemisOdbVersion = "0.11.3"
         artemisOdbcontribVersion = "0.10.2"
         gdxVideoVersion = "0.0.1"
     }

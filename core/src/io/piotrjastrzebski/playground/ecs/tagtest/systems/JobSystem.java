@@ -49,7 +49,7 @@ import java.util.UUID;
     }
 
     @Override
-    protected void inserted(Entity e) {
+    protected void inserted(int e) {
         JobDelegateComponent delegateComponent = delegateM.get(e);
         String aClass = delegateComponent.getActualClassStr();
         if (aClass == null) {
@@ -60,7 +60,7 @@ import java.util.UUID;
         try {
             Class jobClass = ClassReflection.forName(aClass);
             if (JobComponent.class.isAssignableFrom(jobClass)) {
-                actual = (JobComponent) e.getComponent(jobClass);
+                actual = (JobComponent) world.getEntity(e).getComponent(jobClass);
                 delegateComponent.setActual(actual);
             }
         } catch (ReflectionException ex) {
@@ -76,7 +76,7 @@ import java.util.UUID;
             }
             Job job;
             // note should be pooled
-            jobs.add(job = new Job(e.getId(), e.getUuid(), actual));
+            jobs.add(job = new Job(e, world.getEntity(e).getUuid(), actual));
             // quick access by entity id, we cant get it via mapper as we dont know the class
             jobByID.put(job.id, job);
             jobByUUID.put(job.uuid, job);
@@ -94,12 +94,12 @@ import java.util.UUID;
     }
 
     @Override
-    protected void removed(Entity e) {
+    protected void removed(int e) {
         JobDelegateComponent delegateComponent = delegateM.get(e);
 
         JobComponent actual = delegateComponent.getActual();
         if (actual != null) {
-            Job job = jobByID.get(e.getId());
+            Job job = jobByID.get(e);
             Array<Job> jobs = availableJobsByTag.get(actual.tag, null);
             if (jobs != null) {
                 // is null if we called finishJob before
