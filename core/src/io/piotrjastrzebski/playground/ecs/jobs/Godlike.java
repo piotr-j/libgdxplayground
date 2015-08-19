@@ -3,6 +3,7 @@ package io.piotrjastrzebski.playground.ecs.jobs;
 import com.artemis.PooledComponent;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.kotcrab.vis.ui.widget.VisLabel;
 
 /**
  * All we need besides jobs cus we are lazy
@@ -14,7 +15,7 @@ public class Godlike extends PooledComponent {
 	public float vx, vy;
 	public Color color = new Color();
 	boolean selected;
-	public Actor actor;
+	public VisLabel actor;
 
 	@Override protected void reset () {
 		name = null;
