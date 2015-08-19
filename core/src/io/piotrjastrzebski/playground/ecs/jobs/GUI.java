@@ -5,6 +5,9 @@ import com.artemis.ComponentMapper;
 import com.artemis.Entity;
 import com.artemis.annotations.Wire;
 import com.artemis.systems.EntityProcessingSystem;
+import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.kotcrab.vis.ui.widget.VisLabel;
 import com.kotcrab.vis.ui.widget.VisWindow;
@@ -16,6 +19,7 @@ import com.kotcrab.vis.ui.widget.VisWindow;
 public class GUI extends EntityProcessingSystem {
 	private ComponentMapper<Godlike> mGodlike;
 	@Wire Stage stage;
+	@Wire(name = "game-cam") OrthographicCamera camera;
 
 	public GUI () {
 		super(Aspect.all(Godlike.class));
@@ -40,13 +44,21 @@ public class GUI extends EntityProcessingSystem {
 		window.centerWindow();
 	}
 
+	@Override protected void inserted (int entityId) {
+		Godlike godlike = mGodlike.get(entityId);
+		stage.addActor(godlike.actor);
+	}
+
 	@Override protected void begin () {
 		name.setText("Nothing");
 		entity.setText("");
 	}
 
+	Vector3 temp = new Vector3();
 	@Override protected void process (Entity e) {
 		Godlike godlike = mGodlike.get(e);
+		camera.project(temp.set(godlike.x, godlike.y, 0));
+		godlike.actor.setPosition(temp.x, temp.y);
 		if (godlike.selected) {
 			name.setText(godlike.name);
 			entity.setText(ECSJobsTest.entityToStr(world, e.id));
@@ -56,5 +68,9 @@ public class GUI extends EntityProcessingSystem {
 	@Override protected void end () {
 		stage.act(world.delta);
 		stage.draw();
+	}
+
+	@Override protected void removed (int entityId) {
+		mGodlike.get(entityId).actor.remove();
 	}
 }

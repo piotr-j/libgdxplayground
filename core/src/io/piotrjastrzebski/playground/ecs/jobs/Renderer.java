@@ -17,7 +17,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 @Wire
 public class Renderer extends EntityProcessingSystem {
 	private ComponentMapper<Godlike> mGodlike;
-	@Wire OrthographicCamera camera;
+	@Wire(name = "game-cam") OrthographicCamera camera;
 	@Wire ShapeRenderer renderer;
 	public Renderer () {
 		super(Aspect.all(Godlike.class));

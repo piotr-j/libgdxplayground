@@ -18,7 +18,7 @@ import com.badlogic.gdx.math.Vector3;
 @Wire
 public class Selector extends EntityProcessingSystem implements InputProcessor {
 	private ComponentMapper<Godlike> mGodlike;
-	@Wire OrthographicCamera camera;
+	@Wire(name = "game-cam") OrthographicCamera camera;
 	public Selector () {
 		super(Aspect.all(Godlike.class));
 	}

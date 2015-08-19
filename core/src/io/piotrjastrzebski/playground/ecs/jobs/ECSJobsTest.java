@@ -4,6 +4,7 @@ import com.artemis.*;
 import com.artemis.utils.Bag;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.MathUtils;
+import com.kotcrab.vis.ui.widget.VisLabel;
 import io.piotrjastrzebski.playground.BaseScreen;
 import io.piotrjastrzebski.playground.PlaygroundGame;
 import io.piotrjastrzebski.playground.ecs.jobs.systems.JobMaker;
@@ -24,7 +25,8 @@ public class ECSJobsTest extends BaseScreen {
 	public ECSJobsTest (PlaygroundGame game) {
 		super(game);
 		WorldConfiguration config = new WorldConfiguration();
-		config.register(gameCamera);
+		config.register("game-cam", gameCamera);
+		config.register("gui-cam", guiCamera);
 		config.register(renderer);
 		config.register(stage);
 
@@ -62,6 +64,7 @@ public class ECSJobsTest extends BaseScreen {
 		godlike.x = MathUtils.round(MathUtils.random(-20, 20));
 		godlike.y = MathUtils.round(MathUtils.random(-10, 10));
 		godlike.name = "Worker " + workers++;
+		godlike.actor = new VisLabel(godlike.name);
 	}
 
 	int jobs = 0;
