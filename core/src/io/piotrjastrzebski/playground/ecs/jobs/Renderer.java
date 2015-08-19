@@ -38,7 +38,7 @@ public class Renderer extends EntityProcessingSystem {
 			renderer.rect(godlike.x - 0.2f, godlike.y - 0.2f, godlike.width + 0.4f, godlike.height + 0.4f);
 		}
 		if (!godlike.atTarget && godlike.mover) {
-			renderer.getColor().a = 0.33f;
+			renderer.getColor().a = 0.5f;
 			renderer.rect(godlike.tx, godlike.ty, godlike.width, godlike.height);
 		}
 	}
