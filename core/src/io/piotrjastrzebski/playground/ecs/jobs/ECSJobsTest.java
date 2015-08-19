@@ -63,9 +63,7 @@ public class ECSJobsTest extends BaseScreen {
 		godlike.width = 1;
 		godlike.height = 1;
 		godlike.x = MathUtils.round(MathUtils.random(-18, 18));
-		godlike.tx = MathUtils.round(MathUtils.random(-18, 18));
 		godlike.y = MathUtils.round(MathUtils.random(-10, 10));
-		godlike.ty = MathUtils.round(MathUtils.random(-10, 10));
 		godlike.vx = 1f;
 		godlike.vy = 1f;
 		godlike.mover = true;

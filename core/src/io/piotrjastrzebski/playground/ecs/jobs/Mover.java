@@ -46,8 +46,6 @@ public class Mover extends EntityProcessingSystem {
 		}
 
 		if (MathUtils.isEqual(godlike.x, godlike.tx) && MathUtils.isEqual(godlike.y, godlike.ty)) {
-			godlike.tx = MathUtils.round(MathUtils.random(-18, 18));
-			godlike.ty = MathUtils.round(MathUtils.random(-10, 10));
 			godlike.atTarget = true;
 		}
 	}
