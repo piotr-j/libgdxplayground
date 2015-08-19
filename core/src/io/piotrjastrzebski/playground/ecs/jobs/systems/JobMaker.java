@@ -58,6 +58,7 @@ public class JobMaker extends BaseSystem {
 		godlike.name = "Job " + jobs++;
 
 		godlike.actor = new VisLabel(godlike.name);
+		godlike.actor.setColor(Color.YELLOW);
 		job.setName(godlike.name);
 
 		return job;
