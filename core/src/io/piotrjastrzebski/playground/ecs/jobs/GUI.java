@@ -9,11 +9,17 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.kotcrab.vis.ui.widget.VisLabel;
+import com.kotcrab.vis.ui.widget.VisTextButton;
 import com.kotcrab.vis.ui.widget.VisWindow;
 import io.piotrjastrzebski.playground.ecs.jobs.components.Job;
 import io.piotrjastrzebski.playground.ecs.jobs.components.Worker;
+import io.piotrjastrzebski.playground.ecs.jobs.systems.JobMaker;
+import io.piotrjastrzebski.playground.ecs.jobs.systems.Jobs;
+import io.piotrjastrzebski.playground.ecs.jobs.systems.Workers;
 
 /**
  * Created by EvilEntity on 17/08/2015.
@@ -26,16 +32,42 @@ public class GUI extends EntityProcessingSystem {
 	@Wire Stage stage;
 	@Wire(name = "game-cam") OrthographicCamera camera;
 
+	JobMaker jobMaker;
+	Jobs jobs;
+	Workers workers;
+
 	public GUI () {
 		super(Aspect.all(Godlike.class));
 	}
 
 	VisLabel name;
 	VisLabel entity;
+	VisTextButton pause;
 	@Override protected void initialize () {
 		super.initialize();
+		pause = new VisTextButton("Pause");
+		pause.addListener(new ClickListener(){
+			@Override public void clicked (InputEvent event, float x, float y) {
+				boolean enabled = jobMaker.isEnabled();
+				if (enabled) {
+					pause.setText("Resume");
+					jobMaker.setEnabled(false);
+					jobs.setEnabled(false);
+					workers.setEnabled(false);
+				} else {
+					pause.setText("Pause");
+					jobMaker.setEnabled(true);
+					jobs.setEnabled(true);
+					workers.setEnabled(true);
+				}
+			}
+		});
+		stage.addActor(pause);
+		pause.setPosition(10, 10);
 		VisWindow window = new VisWindow("Stuff");
 		window.setSize(300, 200);
+		window.setResizeBorder(12);
+		window.setResizable(true);
 		name = new VisLabel();
 		window.add(name);
 		window.row();
