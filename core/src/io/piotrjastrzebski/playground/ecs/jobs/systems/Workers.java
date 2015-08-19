@@ -7,6 +7,7 @@ import com.artemis.annotations.Wire;
 import com.artemis.systems.EntityProcessingSystem;
 import com.badlogic.gdx.Gdx;
 import io.piotrjastrzebski.playground.ecs.jobs.ECSJobsTest;
+import io.piotrjastrzebski.playground.ecs.jobs.Godlike;
 import io.piotrjastrzebski.playground.ecs.jobs.components.Job;
 import io.piotrjastrzebski.playground.ecs.jobs.components.Worker;
 
@@ -17,6 +18,7 @@ import io.piotrjastrzebski.playground.ecs.jobs.components.Worker;
 public class Workers extends EntityProcessingSystem {
 	private final static String TAG = Workers.class.getSimpleName();
 	private ComponentMapper<Worker> mWorker;
+	protected ComponentMapper<Godlike> mGodlike;
 	Jobs jobs;
 
 	public Workers () {
@@ -29,9 +31,11 @@ public class Workers extends EntityProcessingSystem {
 	}
 
 	@Override protected void process (Entity e) {
+		Godlike godlike = mGodlike.get(e);
 		Worker worker = mWorker.get(e);
 		// job set
 		if (worker.jobID != ECSJobsTest.NULL_ID) {
+			if (!godlike.atTarget) return;
 			Job job = jobs.getJob(worker.jobID);
 			// work on job
 			job.progress += 1f * world.delta;
@@ -39,7 +43,7 @@ public class Workers extends EntityProcessingSystem {
 				// if done, finish it
 				jobs.finish(job);
 				if (jobs.hasNext(job)) {
-					worker.claim(jobs.next(job));
+					claim(worker, jobs.next(job));
 				} else {
 					worker.jobID = ECSJobsTest.NULL_ID;
 				}
@@ -49,12 +53,22 @@ public class Workers extends EntityProcessingSystem {
 			Job job = jobs.getJob();
 			if (job != null) {
 				// found some job, assign worker
-				worker.claim(job);
+				claim(worker, job);
 			}
 		}
+	}
+
+	private void claim (Worker worker, Job job) {
+		worker.claim(job);
+		Godlike joblike = mGodlike.get(job.eid);
+		Godlike workerlike = mGodlike.get(worker.eid);
+		workerlike.tx = joblike.x;
+		workerlike.ty = joblike.y;
 	}
 
 	@Override protected void removed (int e) {
 
 	}
+
+
 }
