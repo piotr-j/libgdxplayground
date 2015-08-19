@@ -57,8 +57,8 @@ public class GUI extends EntityProcessingSystem {
 	Vector3 temp = new Vector3();
 	@Override protected void process (Entity e) {
 		Godlike godlike = mGodlike.get(e);
-		camera.project(temp.set(godlike.x, godlike.y, 0));
-		godlike.actor.setPosition(temp.x, temp.y);
+		camera.project(temp.set(godlike.x + godlike.width / 2 , godlike.y + godlike.height / 2, 0));
+		godlike.actor.setPosition(temp.x - godlike.actor.getWidth() / 2, temp.y - godlike.actor.getHeight() / 2);
 		if (godlike.selected) {
 			name.setText(godlike.name);
 			entity.setText(ECSJobsTest.entityToStr(world, e.id));
