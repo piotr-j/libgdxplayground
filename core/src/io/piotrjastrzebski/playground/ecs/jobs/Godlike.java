@@ -13,9 +13,12 @@ public class Godlike extends PooledComponent {
 	public String name;
 	public float x, y, width, height;
 	public float vx, vy;
+	public float tx, ty;
 	public Color color = new Color();
 	boolean selected;
 	public VisLabel actor;
+	public boolean atTarget;
+	public boolean mover;
 
 	@Override protected void reset () {
 		name = null;

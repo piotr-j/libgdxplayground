@@ -33,6 +33,7 @@ public class ECSJobsTest extends BaseScreen {
 		Selector selector = new Selector();
 		multiplexer.addProcessor(selector);
 		config.setSystem(selector);
+		config.setSystem(new Mover());
 		config.setSystem(new Renderer());
 		config.setSystem(new GUI());
 
@@ -61,8 +62,13 @@ public class ECSJobsTest extends BaseScreen {
 		godlike.color.set(Color.BLUE);
 		godlike.width = 1;
 		godlike.height = 1;
-		godlike.x = MathUtils.round(MathUtils.random(-20, 20));
+		godlike.x = MathUtils.round(MathUtils.random(-18, 18));
+		godlike.tx = MathUtils.round(MathUtils.random(-18, 18));
 		godlike.y = MathUtils.round(MathUtils.random(-10, 10));
+		godlike.ty = MathUtils.round(MathUtils.random(-10, 10));
+		godlike.vx = 1f;
+		godlike.vy = 1f;
+		godlike.mover = true;
 		godlike.name = "Worker " + workers++;
 		godlike.actor = new VisLabel(godlike.name);
 	}
