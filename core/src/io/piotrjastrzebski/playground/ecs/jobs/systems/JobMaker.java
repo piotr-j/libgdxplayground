@@ -59,7 +59,7 @@ public class JobMaker extends BaseSystem {
 		godlike.color.set(color);
 		godlike.width = 0.5f;
 		godlike.height = 0.5f;
-		godlike.x = 0.25f + MathUtils.round(MathUtils.random(-20, 20));
+		godlike.x = 0.25f + MathUtils.round(MathUtils.random(-18, 18));
 		godlike.y = 0.25f + MathUtils.round(MathUtils.random(-10, 10));
 		godlike.name = "Job " + jobID++;
 
