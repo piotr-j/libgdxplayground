@@ -1,7 +1,6 @@
 package io.piotrjastrzebski.playground.ecs.jobs.systems;
 
-import com.artemis.BaseSystem;
-import com.artemis.Entity;
+import com.artemis.*;
 import com.artemis.annotations.Wire;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.MathUtils;
@@ -16,9 +15,16 @@ import io.piotrjastrzebski.playground.ecs.jobs.components.Job;
 public class JobMaker extends BaseSystem {
 	float DELAY = 7;
 	float timer = DELAY;
+	EntitySubscription jobs;
+	@Override protected void initialize () {
+		super.initialize();
+		AspectSubscriptionManager manager = world.getManager(AspectSubscriptionManager.class);
+		jobs = manager.get(Aspect.all(Job.class));
+	}
+
 	@Override protected void processSystem () {
 		timer += world.delta;
-		if (timer > DELAY) {
+		if (timer > DELAY && jobs.getEntities().size() == 0) {
 			timer -= DELAY;
 			createRandomJobs();
 		}
@@ -43,7 +49,7 @@ public class JobMaker extends BaseSystem {
 		jobA.next(jobF);
 	}
 
-	int jobs = 0;
+	int jobID = 0;
 	private Job createJob (Color color) {
 		Entity e = world.createEntity();
 		Job job = e.edit().create(Job.class);
@@ -55,7 +61,7 @@ public class JobMaker extends BaseSystem {
 		godlike.height = 0.5f;
 		godlike.x = 0.25f + MathUtils.round(MathUtils.random(-20, 20));
 		godlike.y = 0.25f + MathUtils.round(MathUtils.random(-10, 10));
-		godlike.name = "Job " + jobs++;
+		godlike.name = "Job " + jobID++;
 
 		godlike.actor = new VisLabel(godlike.name);
 		godlike.actor.setColor(Color.YELLOW);
