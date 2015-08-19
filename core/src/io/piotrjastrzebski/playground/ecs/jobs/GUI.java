@@ -64,7 +64,7 @@ public class GUI extends EntityProcessingSystem {
 		});
 		stage.addActor(pause);
 		pause.setPosition(10, 10);
-		VisWindow window = new VisWindow("Stuff");
+		VisWindow window = new VisWindow("Selected");
 		window.setSize(300, 200);
 		window.setResizeBorder(12);
 		window.setResizable(true);
