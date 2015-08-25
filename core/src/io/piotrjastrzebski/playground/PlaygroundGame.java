@@ -32,7 +32,6 @@ import io.piotrjastrzebski.playground.jobtest.ECSJobTest;
 import io.piotrjastrzebski.playground.jobtest.JobTest;
 import io.piotrjastrzebski.playground.shaders.Shader2dRainTest;
 import io.piotrjastrzebski.playground.shaders.ShaderFireWallTest;
-import io.piotrjastrzebski.playground.shaders.ShaderFireWallTest2;
 import io.piotrjastrzebski.playground.shaders.ShaderPortalTest;
 import io.piotrjastrzebski.playground.simplelights.SimpleLightTest;
 import io.piotrjastrzebski.playground.tiledgentest.*;
