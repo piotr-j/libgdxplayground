@@ -24,6 +24,7 @@ import io.piotrjastrzebski.playground.ecs.profiler.ECSShapeProfilerTest;
 import io.piotrjastrzebski.playground.ecs.profilerv2.ECSProfilerTest;
 import io.piotrjastrzebski.playground.ecs.quadtreetest.QuadTreeTest;
 import io.piotrjastrzebski.playground.ecs.tagtest.TagTest;
+import io.piotrjastrzebski.playground.ecs.worldiotest.ECSWorldIOTest;
 import io.piotrjastrzebski.playground.gpushadows.GpuShadows;
 import io.piotrjastrzebski.playground.isotiled.IsoTest;
 import io.piotrjastrzebski.playground.isotiled.SimpleTiledTest;
@@ -45,7 +46,7 @@ public class PlaygroundGame extends Game {
 
 	// should be a class that extends BaseScreen
 	final Class[] testScreens = new Class[]{
-		ShaderFireWallTest.class, ShaderPortalTest.class, Shader2dRainTest.class,
+		ShaderFireWallTest.class, ShaderPortalTest.class, Shader2dRainTest.class, ECSWorldIOTest.class,
 		ECSJobsTest.class, ECSAIJobsTest.class, UISpriteDrawableTest.class, SimpleTiledTest.class, ParticleTest.class, CameraMoveTest.class,
 		TiledGenTest.class, TemperatureTest.class, BiomeTest.class, Box2dInterpolationTest.class,
 		RainTest.class, BlurTest.class, CompositeGenTest.class, UITest.class, UISortTest.class, UISort2Test.class, CSTest.class,
