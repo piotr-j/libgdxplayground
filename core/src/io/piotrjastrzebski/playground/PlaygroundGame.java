@@ -12,6 +12,7 @@ import io.piotrjastrzebski.playground.box2dtest.Box2dInterpolationTest;
 import io.piotrjastrzebski.playground.btreeserializationtest.BTreeTest;
 import io.piotrjastrzebski.playground.clientserver.CSTest;
 import io.piotrjastrzebski.playground.clientserverv2.CSTestV2;
+import io.piotrjastrzebski.playground.ecs.aijobs.ECSAIJobsTest;
 import io.piotrjastrzebski.playground.ecs.aitest.AIECSTest;
 import io.piotrjastrzebski.playground.ecs.ECSPooledCompTest;
 import io.piotrjastrzebski.playground.ecs.deferredsystemtest.DeferredSystemTest;
@@ -29,6 +30,10 @@ import io.piotrjastrzebski.playground.isotiled.SimpleTiledTest;
 import io.piotrjastrzebski.playground.jobtest.AIECSJobTest;
 import io.piotrjastrzebski.playground.jobtest.ECSJobTest;
 import io.piotrjastrzebski.playground.jobtest.JobTest;
+import io.piotrjastrzebski.playground.shaders.Shader2dRainTest;
+import io.piotrjastrzebski.playground.shaders.ShaderFireWallTest;
+import io.piotrjastrzebski.playground.shaders.ShaderFireWallTest2;
+import io.piotrjastrzebski.playground.shaders.ShaderPortalTest;
 import io.piotrjastrzebski.playground.simplelights.SimpleLightTest;
 import io.piotrjastrzebski.playground.tiledgentest.*;
 import io.piotrjastrzebski.playground.uitesting.*;
@@ -41,7 +46,8 @@ public class PlaygroundGame extends Game {
 
 	// should be a class that extends BaseScreen
 	final Class[] testScreens = new Class[]{
-		ECSJobsTest.class, UISpriteDrawableTest.class, SimpleTiledTest.class, ParticleTest.class, CameraMoveTest.class,
+		ShaderFireWallTest.class, ShaderPortalTest.class, Shader2dRainTest.class,
+		ECSJobsTest.class, ECSAIJobsTest.class, UISpriteDrawableTest.class, SimpleTiledTest.class, ParticleTest.class, CameraMoveTest.class,
 		TiledGenTest.class, TemperatureTest.class, BiomeTest.class, Box2dInterpolationTest.class,
 		RainTest.class, BlurTest.class, CompositeGenTest.class, UITest.class, UISortTest.class, UISort2Test.class, CSTest.class,
 		UIFBOTransitionTest.class, QuadTreeTest.class,

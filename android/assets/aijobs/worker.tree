@@ -1,0 +1,8 @@
+#
+# Base worker tree
+#
+
+import dummy:"io.piotrjastrzebski.playground.ecs.aijobs.tasks.DummyTask"
+
+root
+  dummy
