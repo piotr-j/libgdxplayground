@@ -75,7 +75,8 @@ public class RandomTest extends BaseScreen {
 		}
 		Gdx.app.log(TAG, "Results");
 		for (int choice = 0; choice < choices.length; choice++) {
-			Gdx.app.log(TAG, "m" + choice + " " +(choices[choice]/(float)runs)*100f + "%, expected "+prob[choice]+"%");
+			float percent = (choices[choice]/(float)runs)*100f;
+			Gdx.app.log(TAG, "m" + choice + " " + percent + "%, expected "+prob[choice]+"%");
 		}
 	}
 }
