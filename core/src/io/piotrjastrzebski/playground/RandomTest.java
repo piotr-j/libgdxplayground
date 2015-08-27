@@ -11,6 +11,14 @@ public class RandomTest extends BaseScreen {
 	private int m1, m2, m3, m4, m5;
 	public RandomTest (PlaygroundGame game) {
 		super(game);
+		Gdx.app.log(TAG, "Running test 1");
+		test1();
+		m1 = m2 = m3 = m4 = m5 = 0;
+		Gdx.app.log(TAG, "Running test 2");
+		test2();
+	}
+
+	private void test1() {
 		Gdx.app.log(TAG, "Rolling " + runs + " times");
 		for (int i = 0; i < runs; i++) {
 			int randomer = MathUtils.random(99);
@@ -25,6 +33,27 @@ public class RandomTest extends BaseScreen {
 		Gdx.app.log(TAG, "m2 " +(m2/(float)runs)*100f + "%, expected 6%");
 		Gdx.app.log(TAG, "m3 " +(m3/(float)runs)*100f + "%, expected 6%");
 		Gdx.app.log(TAG, "m4 " +(m4/(float)runs)*100f + "%, expected 6%");
-		Gdx.app.log(TAG, "m5 " +(m5/(float)runs)*100f + "%, expected 2%");
+		Gdx.app.log(TAG, "m5 " + (m5 / (float)runs) * 100f + "%, expected 2%");
+	}
+
+	private void test2() {
+		int[] prob = {80, 6, 6, 6, 2};
+		int[] choices = {0, 0, 0, 0, 0};
+		Gdx.app.log(TAG, "Rolling " + runs + " times");
+		for (int i = 0; i < runs; i++) {
+			int roll = MathUtils.random(1, 100);
+			int sum = 0;
+			for (int j = 0; j < choices.length; j++) {
+				sum += prob[j];
+				if (roll <= sum) {
+					choices[j]++;
+					break;
+				}
+			}
+		}
+		Gdx.app.log(TAG, "Results");
+		for (int i = 0; i < choices.length; i++) {
+			Gdx.app.log(TAG, "m" +i + " " +(choices[i]/(float)runs)*100f + "%, expected "+prob[i]+"%");
+		}
 	}
 }
