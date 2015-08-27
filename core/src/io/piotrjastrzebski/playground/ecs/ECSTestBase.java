@@ -61,7 +61,7 @@ public abstract class ECSTestBase extends BaseScreen {
 			}
 		});
 		for (Input input : inputs) {
-			multiplexer.addProcessor(input);
+			multiplexer.addProcessor(input.get());
 		}
 	}
 
