@@ -24,6 +24,7 @@ import io.piotrjastrzebski.playground.ecs.profiler.ECSPolyProfilerTest;
 import io.piotrjastrzebski.playground.ecs.profiler.ECSShapeProfilerTest;
 import io.piotrjastrzebski.playground.ecs.profilerv2.ECSProfilerTest;
 import io.piotrjastrzebski.playground.ecs.quadtreetest.QuadTreeTest;
+import io.piotrjastrzebski.playground.ecs.sat.SATTest;
 import io.piotrjastrzebski.playground.ecs.tagtest.TagTest;
 import io.piotrjastrzebski.playground.ecs.worldiotest.ECSWorldIOTest;
 import io.piotrjastrzebski.playground.gpushadows.GpuShadows;
@@ -32,6 +33,7 @@ import io.piotrjastrzebski.playground.isotiled.SimpleTiledTest;
 import io.piotrjastrzebski.playground.jobtest.AIECSJobTest;
 import io.piotrjastrzebski.playground.jobtest.ECSJobTest;
 import io.piotrjastrzebski.playground.jobtest.JobTest;
+import io.piotrjastrzebski.playground.particletest.ParticleFaceTest;
 import io.piotrjastrzebski.playground.shaders.Shader2dRainTest;
 import io.piotrjastrzebski.playground.shaders.ShaderFireWallTest;
 import io.piotrjastrzebski.playground.shaders.ShaderPortalTest;
@@ -42,11 +44,13 @@ import light2dtest.ShadowTest;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
+import java.util.Comparator;
 
 public class PlaygroundGame extends Game {
 
 	// should be a class that extends BaseScreen
-	final Class[] testScreens = new Class[]{
+	final Class[] testScreens = new Class[]{SATTest.class, ParticleFaceTest.class,
 		ShaderFireWallTest.class, ShaderPortalTest.class, Shader2dRainTest.class, ECSWorldIOTest.class, ECSOrderTest.class,
 		ECSJobsTest.class, ECSAIJobsTest.class, UISpriteDrawableTest.class, SimpleTiledTest.class, ParticleTest.class, CameraMoveTest.class,
 		TiledGenTest.class, TemperatureTest.class, BiomeTest.class, Box2dInterpolationTest.class,
@@ -89,6 +93,11 @@ public class PlaygroundGame extends Game {
 			root.row();
 
 			VisTable data = new VisTable();
+			Arrays.sort(testScreens, new Comparator<Class>() {
+				@Override public int compare (Class o1, Class o2) {
+					return o1.getSimpleName().compareTo(o2.getSimpleName());
+				}
+			});
 			for (final Class cls : testScreens) {
 				final VisTextButton button;
 				data.add(button = new VisTextButton("Run " + cls.getSimpleName()));
