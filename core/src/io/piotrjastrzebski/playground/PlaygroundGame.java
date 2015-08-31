@@ -3,8 +3,12 @@ package io.piotrjastrzebski.playground;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.InputListener;
+import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.utils.Array;
 import com.kotcrab.vis.ui.VisUI;
 import com.kotcrab.vis.ui.widget.*;
 import io.piotrjastrzebski.playground.asyncscreentest.AsyncScreenTest;
@@ -80,20 +84,28 @@ public class PlaygroundGame extends Game {
 		reset();
 	}
 
-	int lastSelected = -1;
-
 	public void reset () {
 		setScreen(new TestSelectScreen(this));
 	}
 
 	private class TestSelectScreen extends BaseScreen {
+		Array<VisTextButton> buttons = new Array<>();
+		VisScrollPane pane;
+		VisTable data;
 		public TestSelectScreen (PlaygroundGame game) {
 			super(game);
 			root.add(new VisLabel("Select test to run, ESC to go back"));
 			root.row();
+			final VisTextField filter = new VisTextField("");
+			filter.addListener(new ChangeListener() {
+				 @Override public void changed (ChangeEvent event, Actor actor) {
+					 filter(filter.getText());
+				 }
+			 });
+			root.add(filter);
 			root.row();
 
-			VisTable data = new VisTable();
+			data = new VisTable();
 			Arrays.sort(testScreens, new Comparator<Class>() {
 				@Override public int compare (Class o1, Class o2) {
 					return o1.getSimpleName().compareTo(o2.getSimpleName());
@@ -101,8 +113,7 @@ public class PlaygroundGame extends Game {
 			});
 			for (final Class cls : testScreens) {
 				final VisTextButton button;
-				data.add(button = new VisTextButton("Run " + cls.getSimpleName()));
-				data.row();
+				button = new VisTextButton(cls.getSimpleName());
 				button.addListener(new ClickListener() {
 					@Override public void clicked (InputEvent event, float x, float y) {
 						try {
@@ -113,11 +124,24 @@ public class PlaygroundGame extends Game {
 						}
 					}
 				});
+				buttons.add(button);
 			}
-			VisScrollPane pane;
 			root.add(pane = new VisScrollPane(data));
 			stage.setScrollFocus(pane);
+			filter("");
 		}
+
+		private void filter (String text) {
+			text = text.toLowerCase();
+			data.clear();
+			for (VisTextButton button : buttons) {
+				if (button.getText().toString().toLowerCase().contains(text)) {
+					data.add(button);
+					data.row();
+				}
+			}
+		}
+
 		int lastKey;
 		@Override public boolean keyDown (int keycode) {
 			if (keycode == Input.Keys.ESCAPE && lastKey == Input.Keys.ESCAPE) {
