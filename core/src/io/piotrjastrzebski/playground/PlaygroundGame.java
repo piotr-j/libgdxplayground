@@ -29,6 +29,7 @@ import io.piotrjastrzebski.playground.ecs.tagtest.TagTest;
 import io.piotrjastrzebski.playground.ecs.worldiotest.ECSWorldIOTest;
 import io.piotrjastrzebski.playground.gpushadows.GpuShadows;
 import io.piotrjastrzebski.playground.isotiled.IsoTest;
+import io.piotrjastrzebski.playground.isotiled.SimpleTiledCropTest;
 import io.piotrjastrzebski.playground.isotiled.SimpleTiledTest;
 import io.piotrjastrzebski.playground.jobtest.AIECSJobTest;
 import io.piotrjastrzebski.playground.jobtest.ECSJobTest;
@@ -50,7 +51,7 @@ import java.util.Comparator;
 public class PlaygroundGame extends Game {
 
 	// should be a class that extends BaseScreen
-	final Class[] testScreens = new Class[]{SATTest.class, ParticleFaceTest.class,
+	final Class[] testScreens = new Class[]{SATTest.class, ParticleFaceTest.class, SimpleTiledCropTest.class,
 		ShaderFireWallTest.class, ShaderPortalTest.class, Shader2dRainTest.class, ECSWorldIOTest.class, ECSOrderTest.class,
 		ECSJobsTest.class, ECSAIJobsTest.class, UISpriteDrawableTest.class, SimpleTiledTest.class, ParticleTest.class, CameraMoveTest.class,
 		TiledGenTest.class, TemperatureTest.class, BiomeTest.class, Box2dInterpolationTest.class,
