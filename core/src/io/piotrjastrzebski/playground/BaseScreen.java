@@ -37,8 +37,8 @@ public abstract class BaseScreen implements Screen, InputProcessor {
 	protected final InputMultiplexer multiplexer;
 
 	boolean debugStage;
-	PlaygroundGame game;
-	public BaseScreen (PlaygroundGame game) {
+	GameReset game;
+	public BaseScreen (GameReset game) {
 		this.game = game;
 
 		gameCamera = new OrthographicCamera();

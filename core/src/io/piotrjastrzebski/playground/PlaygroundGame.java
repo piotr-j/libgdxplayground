@@ -16,6 +16,7 @@ import io.piotrjastrzebski.playground.box2dtest.Box2dInterpolationTest;
 import io.piotrjastrzebski.playground.btreeserializationtest.BTreeTest;
 import io.piotrjastrzebski.playground.clientserver.CSTest;
 import io.piotrjastrzebski.playground.clientserverv2.CSTestV2;
+import io.piotrjastrzebski.playground.dungeon.DungeonGeneratorTest;
 import io.piotrjastrzebski.playground.ecs.ECSOrderTest;
 import io.piotrjastrzebski.playground.ecs.aijobs.ECSAIJobsTest;
 import io.piotrjastrzebski.playground.ecs.aitest.AIECSTest;
@@ -53,10 +54,11 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.Comparator;
 
-public class PlaygroundGame extends Game {
+public class PlaygroundGame extends Game implements GameReset {
 
 	// should be a class that extends BaseScreen
-	final Class[] testScreens = new Class[]{SATTest.class, ParticleFaceTest.class, SimpleTiledCropTest.class, AIParallelTest.class,
+	final Class[] testScreens = new Class[]{DungeonGeneratorTest.class, SATTest.class, ParticleFaceTest.class, SimpleTiledCropTest.class,
+		AIParallelTest.class,
 		ShaderFireWallTest.class, ShaderPortalTest.class, Shader2dRainTest.class, ECSWorldIOTest.class, ECSOrderTest.class,
 		ECSJobsTest.class, ECSAIJobsTest.class, UISpriteDrawableTest.class, SimpleTiledTest.class, ParticleTest.class, CameraMoveTest.class,
 		TiledGenTest.class, TemperatureTest.class, BiomeTest.class, Box2dInterpolationTest.class,
