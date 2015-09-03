@@ -50,14 +50,13 @@ public class DungeonGeneratorTest extends BaseScreen {
 		roomWidth = 4*gridSize;
 		roomHeight = 4*gridSize;
 		mainRoomScale = 1.3f;
-		reconnectChance = 0.1f;
+		reconnectChance = 0.2f;
 
 		restart();
 	}
 
 	private void restart () {
 		graph.clear();
-		mstGraph.clear();
 		mainRooms.clear();
 		if (rooms.size > 0) {
 			for (Room room : rooms) {
@@ -107,9 +106,21 @@ public class DungeonGeneratorTest extends BaseScreen {
 		room.body = body;
 	}
 
+	int pIters = 1000;
 	@Override public void render (float delta) {
 		super.render(delta);
-		b2d.step(0.25f, 12, 8);
+		boolean settled = true;
+		for (int i = 0; i < pIters; i++) {
+			b2d.step(0.1f, 12, 8);
+			for (Room room : rooms) {
+				if (!room.isSleeping()) {
+					settled = false;
+					break;
+				}
+			}
+			if (settled) break;
+		}
+
 		if (drawBodies){
 			b2dd.render(b2d, gameCamera.combined);
 		}
@@ -118,13 +129,9 @@ public class DungeonGeneratorTest extends BaseScreen {
 		renderer.begin(ShapeRenderer.ShapeType.Line);
 
 		drawGrid(gridSize, gameViewport.getWorldWidth(), gameViewport.getWorldHeight());
-		boolean settled = true;
 		for (Room room : rooms) {
 			room.update();
 			room.draw(renderer);
-			if (!room.isSleeping()) {
-				settled = false;
-			}
 		}
 		if (settled && mainRooms.size == 0) {
 			float mw = roomWidth * mainRoomScale;
@@ -143,13 +150,12 @@ public class DungeonGeneratorTest extends BaseScreen {
 			});
 			triangulate();
 		}
-//		graph.render(renderer);
-		mstGraph.render(renderer);
+		graph.render(renderer);
 		renderer.end();
 	}
 
 	Array<Room> mainRooms = new Array<>();
-	RoomGraph graph = new RoomGraph(Color.GREEN);
+	RoomGraph graph = new RoomGraph();
 	private void triangulate () {
 		DelaunayTriangulator triangulator = new DelaunayTriangulator();
 
@@ -180,7 +186,6 @@ public class DungeonGeneratorTest extends BaseScreen {
 		createMST();
 	}
 
-	RoomGraph mstGraph = new RoomGraph(Color.YELLOW);
 	private void createMST () {
 		/*
 		kruskal's algorithm, we dont need anything fancy
@@ -191,9 +196,19 @@ public class DungeonGeneratorTest extends BaseScreen {
 				return Float.compare(o1.len, o2.len);
 			}
 		});
+		RoomGraph mstGraph = new RoomGraph();
 		for (RoomEdge edge : edges) {
 			if (!mstGraph.isConnected(edge)) {
 				mstGraph.add(edge);
+				edge.mst = true;
+			}
+		}
+
+		for (RoomEdge edge : edges) {
+			if (!edge.mst && MathUtils.random() < reconnectChance) {
+				edge.mst = true;
+				edge.recon = true;
+				Gdx.app.log("", "recon " + edge);
 			}
 		}
 	}
@@ -297,10 +312,9 @@ public class DungeonGeneratorTest extends BaseScreen {
 		Array<RoomEdge> edges = new Array<>();
 		ObjectMap<Room, RoomNode> roomToNode = new ObjectMap<>();
 		Array<RoomNode> nodes = new Array<>();
-		Color color = new Color();
-		public RoomGraph (Color color) {
-			this.color.set(color);
-		}
+
+
+		public RoomGraph () {}
 
 		public void add (RoomEdge edge) {
 			add(edge.roomA, edge.roomB);
@@ -309,7 +323,9 @@ public class DungeonGeneratorTest extends BaseScreen {
 		public void add (Room roomA, Room roomB) {
 			RoomEdge edge = new RoomEdge();
 			edge.set(roomA, roomB);
-			edges.add(edge);
+			if (!edges.contains(edge, false)) {
+				edges.add(edge);
+			}
 			addNode(roomA, roomB);
 			addNode(roomB, roomA);
 		}
@@ -327,14 +343,16 @@ public class DungeonGeneratorTest extends BaseScreen {
 
 		public void render(ShapeRenderer renderer) {
 			if (edges.size == 0) return;
-			renderer.setColor(color);
-			for (RoomNode node : nodes) {
-				Room room = node.room;
-				renderer.circle(room.cx(), room.cy(), 0.1f, 8);
-				for (RoomEdge e : node.edges) {
-					renderer.circle(e.bx(), e.by(), 0.1f, 8);
-					renderer.line(e.ax(), e.ay(), e.bx(), e.by());
+			for (RoomEdge e : edges) {
+				if (e.recon) {
+					renderer.setColor(Color.CYAN);
+				} else if (e.mst) {
+					renderer.setColor(Color.YELLOW);
+				} else {
+//					renderer.setColor(Color.GREEN);
+					renderer.setColor(Color.CLEAR);
 				}
+				renderer.line(e.ax(), e.ay(), e.bx(), e.by());
 			}
 		}
 
@@ -348,22 +366,6 @@ public class DungeonGeneratorTest extends BaseScreen {
 			return edges;
 		}
 
-		/*
-		Create two sets of nodes:  toDoSet and doneSet
-		Add the source node to the toDoSet
-		while (toDoSet is not empty) {
-		  Remove the first element from toDoList
-		  Add it to doneList
-		  foreach (node reachable from the removed node) {
-			 if (the node equals the destination node) {
-				 return success
-			 }
-			 if (the node is not in doneSet) {
-				 add it to toDoSet
-			 }
-		  }
-		}
-		 */
 		Array<RoomNode> open = new Array<>();
 		Array<RoomNode> closed = new Array<>();
 		public boolean isConnected (RoomEdge edge) {
@@ -451,6 +453,9 @@ public class DungeonGeneratorTest extends BaseScreen {
 		public Room roomA;
 		public Room roomB;
 		public float len;
+		public boolean mst;
+		public boolean recon;
+
 		public void set(Room roomA, Room roomB) {
 			this.roomA = roomA;
 			this.roomB = roomB;
@@ -480,13 +485,9 @@ public class DungeonGeneratorTest extends BaseScreen {
 				return false;
 
 			RoomEdge edge = (RoomEdge)o;
-
-			if (Float.compare(edge.len, len) != 0)
-				return false;
-			if (roomA != null ? !roomA.equals(edge.roomA) : edge.roomA != null)
-				return false;
-			return !(roomB != null ? !roomB.equals(edge.roomB) : edge.roomB != null);
-
+			if (edge.roomA == roomA && edge.roomB == roomB) return true;
+			if (edge.roomA == roomB && edge.roomB == roomA) return true;
+			return false;
 		}
 
 		@Override public int hashCode () {
@@ -494,6 +495,14 @@ public class DungeonGeneratorTest extends BaseScreen {
 			result = 31 * result + (roomB != null ? roomB.hashCode() : 0);
 			result = 31 * result + (len != +0.0f ? Float.floatToIntBits(len) : 0);
 			return result;
+		}
+
+		@Override public String toString () {
+			return "RoomEdge{" +
+				"roomA=" + roomA +
+				", roomB=" + roomB +
+				", mst=" + mst +
+				'}';
 		}
 	}
 
@@ -558,6 +567,13 @@ public class DungeonGeneratorTest extends BaseScreen {
 			break;
 		case Input.Keys.B:
 			drawBodies = !drawBodies;
+			break;
+		case Input.Keys.Q:
+			if (pIters == 1) {
+				pIters = 1000;
+			} else {
+				pIters = 1;
+			}
 			break;
 		}
 		return super.keyDown(keycode);
