@@ -49,8 +49,8 @@ public class SimpleBox2dTest extends BaseScreen {
 		float halfWidth = VP_WIDTH / 2f - 0.5f;
 		float halfHeight = VP_HEIGHT / 2f - 0.5f;
 		ChainShape chainShape = new ChainShape();
-		chainShape.createLoop(new Vector2[] {new Vector2(-halfWidth, -halfHeight), new Vector2(halfWidth, -halfHeight),
-			new Vector2(halfWidth, halfHeight), new Vector2(-halfWidth, halfHeight)});
+		chainShape.createLoop(new float[] {-halfWidth, -halfHeight, halfWidth, -halfHeight,
+			halfWidth, halfHeight, -halfWidth, halfHeight});
 		BodyDef chainBodyDef = new BodyDef();
 		chainBodyDef.type = BodyDef.BodyType.StaticBody;
 		groundBody = world.createBody(chainBodyDef);
