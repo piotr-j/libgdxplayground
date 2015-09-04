@@ -15,12 +15,10 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ShortArray;
-import com.badlogic.gdx.utils.TimeUtils;
 import io.piotrjastrzebski.playground.BaseScreen;
 import io.piotrjastrzebski.playground.GameReset;
 
 import java.util.Comparator;
-import java.util.Random;
 
 /**
  * Created by PiotrJ on 02/09/15.
@@ -28,31 +26,26 @@ import java.util.Random;
 public class DungeonGeneratorTest extends BaseScreen {
 	private int roomID;
 	Array<Room> rooms = new Array<>();
-	private float gridSize;
-	private float ellipseWidth, ellipseHeight;
-	private float roomWidth, roomHeight;
-	private float mainRoomScale;
-	private float reconnectChance;
 
 	World b2d;
 	Box2DDebugRenderer b2dd;
 	Vector2 tmp = new Vector2();
 	Grid grid;
+	GenSettings settings;
+
 	boolean drawBodies;
 	public DungeonGeneratorTest (GameReset game) {
 		super(game);
 		b2d = new World(new Vector2(), true);
 		b2dd = new Box2DDebugRenderer();
+		settings = new GenSettings()
+			.setGridSize(.25f)
+			.setSpawnWidth(20).setSpawnHeight(10)
+			.setRoomWidth(4).setRoomHeight(4)
+			.setMainRoomScale(1.3f)
+			.setReconnectChance(.2f);
 
-		gridSize = .25f;
-		ellipseWidth = 20*gridSize;
-		ellipseHeight = 10*gridSize;
-		roomWidth = 4*gridSize;
-		roomHeight = 4*gridSize;
-		mainRoomScale = 1.3f;
-		reconnectChance = 0.2f;
 		grid = new Grid();
-		grid.setSize(gridSize);
 		restart();
 	}
 
@@ -65,7 +58,12 @@ public class DungeonGeneratorTest extends BaseScreen {
 			}
 		}
 		rooms.clear();
-
+		float gridSize = settings.getGridSize();
+		grid.setSize(gridSize);
+		float roomWidth = settings.getRoomWidth();
+		float roomHeight = settings.getRoomHeight();
+		float spawnWidth = settings.getSpawnWidth();
+		float spawnHeight = settings.getSpawnHeight();
 		for (int i = 0; i < 100; i++) {
 			Room room = new Room(roomID++, gridSize);
 			float w = Utils.roundedRngFloat(roomWidth, gridSize);
@@ -73,7 +71,7 @@ public class DungeonGeneratorTest extends BaseScreen {
 			float h = Utils.roundedRngFloat(roomHeight, gridSize);
 			if (h < 0) h = -h;
 			if (w < gridSize || h < gridSize) continue;
-			Utils.roundedPointInEllipse(ellipseWidth, ellipseHeight, gridSize, tmp);
+			Utils.roundedPointInEllipse(spawnWidth, spawnHeight, gridSize, tmp);
 			room.set(tmp.x, tmp.y, w, h);
 			createBody(room);
 			rooms.add(room);
@@ -135,8 +133,8 @@ public class DungeonGeneratorTest extends BaseScreen {
 			room.draw(renderer);
 		}
 		if (settled && mainRooms.size == 0) {
-			float mw = roomWidth * mainRoomScale;
-			float mh = roomHeight * mainRoomScale;
+			float mw = settings.getRoomWidth() * settings.getMainRoomScale();
+			float mh = settings.getRoomHeight() * settings.getMainRoomScale();
 			for (Room room : rooms) {
 				if (room.bounds.width >= mw && room.bounds.height >= mh) {
 					room.isMain = true;
@@ -206,7 +204,7 @@ public class DungeonGeneratorTest extends BaseScreen {
 		}
 
 		for (RoomEdge edge : edges) {
-			if (!edge.mst && MathUtils.random() < reconnectChance) {
+			if (!edge.mst && MathUtils.random() < settings.getReconnectChance()) {
 				edge.mst = true;
 				edge.recon = true;
 				Gdx.app.log("", "recon " + edge);
