@@ -25,8 +25,8 @@ public class Room {
 		if (body == null)
 			return;
 		Vector2 pos = body.getPosition();
-		bounds.setPosition(DungeonGeneratorTest.roundToSize(pos.x - bounds.width / 2, gridSize), DungeonGeneratorTest
-			.roundToSize(pos.y - bounds.height / 2, gridSize));
+		bounds.setPosition(Utils.roundToSize(pos.x - bounds.width / 2, gridSize),
+			Utils.roundToSize(pos.y - bounds.height / 2, gridSize));
 	}
 
 	public boolean isSleeping () {

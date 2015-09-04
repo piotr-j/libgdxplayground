@@ -68,13 +68,13 @@ public class DungeonGeneratorTest extends BaseScreen {
 
 		for (int i = 0; i < 100; i++) {
 			Room room = new Room(roomID++, gridSize);
-			float w = roundToSize(rngFloat(roomWidth), gridSize);
+			float w = Utils.roundedRngFloat(roomWidth, gridSize);
 			if (w < 0) w = -w;
-			float h = roundToSize(rngFloat(roomHeight), gridSize);
+			float h = Utils.roundedRngFloat(roomHeight, gridSize);
 			if (h < 0) h = -h;
 			if (w < gridSize || h < gridSize) continue;
-			pointInEllipse(ellipseWidth, ellipseHeight, gridSize, tmp);
-			room.set(roundToSize(tmp.x, gridSize), roundToSize(tmp.y, gridSize), w, h);
+			Utils.roundedPointInEllipse(ellipseWidth, ellipseHeight, gridSize, tmp);
+			room.set(tmp.x, tmp.y, w, h);
 			createBody(room);
 			rooms.add(room);
 		}
@@ -240,37 +240,6 @@ public class DungeonGeneratorTest extends BaseScreen {
 		}
 	}
 
-	public static Vector2 pointInCircle(float radius, float size, Vector2 out) {
-		return pointInEllipse(radius * 2, radius * 2, size, out);
-	}
-
-	public static Vector2 pointInEllipse (float width, float height, float size, Vector2 out) {
-		float t = (float)(MathUtils.random() * Math.PI * 2);
-		float u = MathUtils.random() + MathUtils.random();
-		float r = (u > 1)?(2 - u):u;
-		out.set(
-			width * r * MathUtils.cos(t) / 2,
-			height * r * MathUtils.sin(t) / 2
-		);
-		return out;
-	}
-
-	public static float roundToSize(float value, float size) {
-		return MathUtils.floor(((value + size - 1)/size))*size;
-	}
-
-	private static Random rng = new Random(TimeUtils.millis());
-	public static float rngFloat() {
-		return (float)(rng.nextGaussian());
-	}
-
-	public static float rngFloat(float max) {
-		return rngFloat() * max;
-	}
-
-	public static float rngFloat(float min ,float max) {
-		return min + rngFloat() * (max - min);
-	}
 
 	@Override public void dispose () {
 		super.dispose();
