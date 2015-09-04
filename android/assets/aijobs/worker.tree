@@ -3,6 +3,15 @@
 #
 
 import dummy:"io.piotrjastrzebski.playground.ecs.aijobs.tasks.DummyTask"
+import findJob:"io.piotrjastrzebski.playground.ecs.aijobs.tasks.FindJobTask"
+import move:"io.piotrjastrzebski.playground.ecs.aijobs.tasks.MoveTask"
+import work:"io.piotrjastrzebski.playground.ecs.aijobs.tasks.WorkJobTask"
+import idle:"io.piotrjastrzebski.playground.ecs.aijobs.tasks.IdleTask"
 
 root
-  dummy
+  selector
+    sequence
+      findJob
+      move
+      work
+    idle

@@ -124,7 +124,7 @@ additive: true
 behind: false
 premultipliedAlpha: false
 - Image Path -
-\Dev\libgdx\tests\gdx-tests-lwjgl\data/particle.png
+particle.png
 
 
 fire
@@ -262,7 +262,7 @@ additive: true
 behind: false
 premultipliedAlpha: false
 - Image Path -
-\Dev\libgdx\tests\gdx-tests-lwjgl\data/particle-fire.png
+particle-fire.png
 
 
 stars
@@ -424,7 +424,7 @@ additive: true
 behind: false
 premultipliedAlpha: false
 - Image Path -
-\Dev\libgdx\tests\gdx-tests-lwjgl\data/particle-star.png
+particle-star.png
 
 
 smoke
@@ -568,4 +568,4 @@ additive: true
 behind: false
 premultipliedAlpha: false
 - Image Path -
-\Dev\libgdx\tests\gdx-tests-lwjgl\data/particle-cloud.png
+particle-cloud.png
