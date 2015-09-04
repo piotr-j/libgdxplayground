@@ -13,6 +13,7 @@ import com.kotcrab.vis.ui.VisUI;
 import com.kotcrab.vis.ui.widget.*;
 import io.piotrjastrzebski.playground.asyncscreentest.AsyncScreenTest;
 import io.piotrjastrzebski.playground.box2dtest.Box2dInterpolationTest;
+import io.piotrjastrzebski.playground.box2dtest.SimpleBox2dTest;
 import io.piotrjastrzebski.playground.btreeserializationtest.BTreeTest;
 import io.piotrjastrzebski.playground.clientserver.CSTest;
 import io.piotrjastrzebski.playground.clientserverv2.CSTestV2;
@@ -58,7 +59,7 @@ public class PlaygroundGame extends Game implements GameReset {
 
 	// should be a class that extends BaseScreen
 	final Class[] testScreens = new Class[]{DungeonGeneratorTest.class, SATTest.class, ParticleFaceTest.class, SimpleTiledCropTest.class,
-		AIParallelTest.class,
+		AIParallelTest.class, SimpleBox2dTest.class,
 		ShaderFireWallTest.class, ShaderPortalTest.class, Shader2dRainTest.class, ECSWorldIOTest.class, ECSOrderTest.class,
 		ECSJobsTest.class, ECSAIJobsTest.class, UISpriteDrawableTest.class, SimpleTiledTest.class, ParticleTest.class, CameraMoveTest.class,
 		TiledGenTest.class, TemperatureTest.class, BiomeTest.class, Box2dInterpolationTest.class,
