@@ -69,7 +69,7 @@ public class Box2dLoaderTest extends BaseScreen {
 
 		// width in tool is always 1m, so we need to scale
 		float scale = texture.getWidth() * INV_SCALE;
-		loader.attachFixture(body, name, fixtureDef, texture.getWidth() * INV_SCALE);
+		loader.attachFixture(body, name, fixtureDef, scale);
 		Vector2 origin = loader.getOrigin(name, scale);
 
 		Box box = new Box(x, y, 0, texture);
