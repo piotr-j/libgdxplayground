@@ -37,6 +37,7 @@ public class DungeonGeneratorTest extends BaseScreen {
 	World b2d;
 	Box2DDebugRenderer b2dd;
 	Vector2 tmp = new Vector2();
+	Grid grid;
 	boolean drawBodies;
 	public DungeonGeneratorTest (GameReset game) {
 		super(game);
@@ -50,7 +51,8 @@ public class DungeonGeneratorTest extends BaseScreen {
 		roomHeight = 4*gridSize;
 		mainRoomScale = 1.3f;
 		reconnectChance = 0.2f;
-
+		grid = new Grid();
+		grid.setSize(gridSize);
 		restart();
 	}
 
@@ -127,7 +129,7 @@ public class DungeonGeneratorTest extends BaseScreen {
 		renderer.setProjectionMatrix(gameCamera.combined);
 		renderer.begin(ShapeRenderer.ShapeType.Line);
 
-		drawGrid(gridSize, gameViewport.getWorldWidth(), gameViewport.getWorldHeight());
+		grid.draw(renderer);
 		for (Room room : rooms) {
 			room.update();
 			room.draw(renderer);
@@ -273,6 +275,12 @@ public class DungeonGeneratorTest extends BaseScreen {
 	@Override public void dispose () {
 		super.dispose();
 		b2d.dispose();
+	}
+
+	@Override public void resize (int width, int height) {
+		super.resize(width, height);
+		if (grid != null)
+			grid.setViewPort(width, height);
 	}
 
 	@Override public boolean keyDown (int keycode) {
