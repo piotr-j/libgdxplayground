@@ -69,7 +69,7 @@ public class HallwayPath {
 		poly.setVertices(verts);
 		boolean intersects;
 		if (hasBend) {
-			intersects =  Intersector.intersectSegmentPolygon(start, bend, poly)
+			intersects = Intersector.intersectSegmentPolygon(start, bend, poly)
 				|| Intersector.intersectSegmentPolygon(bend, end, poly);
 		} else {
 			intersects = Intersector.intersectSegmentPolygon(start, end, poly);

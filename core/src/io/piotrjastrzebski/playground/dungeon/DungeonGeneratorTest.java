@@ -315,6 +315,8 @@ public class DungeonGeneratorTest extends BaseScreen {
 					}
 				}
 			}
+			path.roomA = e.roomA;
+			path.roomB = e.roomB;
 			paths.add(path);
 		}
 
