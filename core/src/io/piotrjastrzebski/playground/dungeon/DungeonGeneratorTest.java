@@ -8,10 +8,7 @@ import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.math.DelaunayTriangulator;
-import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.*;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ShortArray;
@@ -43,7 +40,8 @@ public class DungeonGeneratorTest extends BaseScreen {
 			.setSpawnWidth(20).setSpawnHeight(10)
 			.setRoomWidth(4).setRoomHeight(4)
 			.setMainRoomScale(1.3f)
-			.setReconnectChance(.2f);
+			.setReconnectChance(.2f)
+			.setHallwaysWidth(3);
 
 		grid = new Grid();
 		restart();
@@ -58,6 +56,8 @@ public class DungeonGeneratorTest extends BaseScreen {
 			}
 		}
 		rooms.clear();
+		paths.clear();
+
 		float gridSize = settings.getGridSize();
 		grid.setSize(gridSize);
 		float roomWidth = settings.getRoomWidth();
@@ -144,14 +144,25 @@ public class DungeonGeneratorTest extends BaseScreen {
 			// sort so main rooms are drawn lsat
 			rooms.sort(new Comparator<Room>() {
 				@Override public int compare (Room o1, Room o2) {
-					return Boolean.compare(o1.isMain, o2.isMain);
+					int main = Boolean.compare(o1.isMain, o2.isMain);
+					if (main != 0) {
+						return main;
+					}
+					return Boolean.compare(o1.isHallway, o2.isHallway);
 				}
 			});
 			triangulate();
 		}
 		graph.render(renderer);
+		renderer.setColor(Color.BLUE);
+		for (HallwayPath path : paths) {
+			path.draw(renderer);
+		}
 		renderer.end();
 	}
+
+	private static Polygon poly = new Polygon();
+	private static float[] verts = new float[8];
 
 	Array<Room> mainRooms = new Array<>();
 	RoomGraph graph = new RoomGraph();
@@ -207,7 +218,116 @@ public class DungeonGeneratorTest extends BaseScreen {
 			if (!edge.mst && MathUtils.random() < settings.getReconnectChance()) {
 				edge.mst = true;
 				edge.recon = true;
-				Gdx.app.log("", "recon " + edge);
+			}
+		}
+
+		createHallways();
+	}
+
+	Array<HallwayPath> paths = new Array<>();
+	private void createHallways () {
+		Array<RoomEdge> edges = graph.getEdges();
+		for (RoomEdge e : edges) {
+			if (!e.mst)
+				continue;
+			HallwayPath path = new HallwayPath();
+			Rectangle bA = e.roomA.bounds;
+			Rectangle bB = e.roomB.bounds;
+			float min, max, mid;
+			// rooms cant overlap on both axis
+			if (bA.x < bB.x + bB.width && bA.x + bA.width > bB.x) {
+				// no need for 0 len hallway
+				if (MathUtils.isEqual(bA.y, bB.y + bB.height) || MathUtils.isEqual(bA.y + bA.height, bB.y)) {
+					continue;
+				}
+				min = (bA.x < bB.x)?bB.x:bA.x;
+				max = (bA.x + bA.width < bB.x + bB.width)?bA.x + bA.width:bB.x + bB.width;
+
+				mid = (min + max) /2;
+//				mid = Utils.roundToSize(mid, settings.getGridSize());
+
+				if (bA.y > bB.y) {
+					path.set(mid, bA.y, mid, bB.y + bB.height);
+				} else {
+					path.set(mid, bA.y + bA.height, mid, bB.y);
+				}
+			} else if (bA.y < bB.y + bB.height && bA.y + bA.height > bB.y) {
+				// no need for 0 len hallway
+				if (MathUtils.isEqual(bA.x, bB.x + bB.width) || MathUtils.isEqual(bA.x + bA.width, bB.x)) {
+					continue;
+				}
+
+				min = (bA.y < bB.y)?bB.y:bA.y;
+				max = (bA.y + bA.height < bB.y + bB.height)?bA.y + bA.height:bB.y + bB.height;
+
+				mid = (min + max) /2;
+//				mid = Utils.roundToSize(mid, settings.getGridSize());
+
+				if (bA.x > bB.x) {
+					path.set(bA.x, mid, bB.x + bB.width, mid);
+				} else {
+					path.set(bA.x + bA.width, mid, bB.x, mid);
+				}
+			} else {
+				// need to make a L shaped hallway
+				float ax = bA.x;
+				float ay = bA.y;
+				float aw = bA.width;
+				float ah = bA.height;
+				float bx = bB.x;
+				float by = bB.y;
+				float bw = bB.width;
+				float bh = bB.height;
+				float mx, my;
+				// pack a side
+				// can we make this simpler? im dumb
+				if (MathUtils.randomBoolean()) {
+					mx = ax + aw / 2;
+					my = by + bh / 2;
+					if (ax < bx) {
+						if (ay < by) {
+							path.set(mx, ay + ah, mx, my, bx, my);
+						} else {
+							path.set(mx, ay, mx, my, bx, my);
+						}
+					} else {
+						if (ay > by) {
+							path.set(mx, ay, mx, my, bx + bw, my);
+						} else {
+							path.set(mx, ay + ah, mx, my, bx + bw, my);
+						}
+					}
+				} else {
+					mx = bx + bw / 2;
+					my = ay + ah / 2;
+					if (ax < bx) {
+						if (ay < by) {
+							path.set(ax + aw, my, mx, my, mx, by);
+						} else {
+							path.set(ax + aw, my, mx, my, mx, by + bh);
+						}
+					} else {
+						if (ay > by) {
+							path.set(ax, my, mx, my, mx, by + bh);
+						} else {
+							path.set(ax, my, mx, my, mx, by);
+						}
+					}
+				}
+			}
+			paths.add(path);
+		}
+
+		addHallwayRooms();
+	}
+
+	private void addHallwayRooms () {
+		for (HallwayPath path : paths) {
+			for (Room room : rooms) {
+				if (room.isMain) continue;
+				if (path.intersects(room)) {
+					room.isHallway = true;
+				}
 			}
 		}
 	}
@@ -220,24 +340,6 @@ public class DungeonGeneratorTest extends BaseScreen {
 		}
 		return null;
 	}
-
-	Color gridColor = new Color(0.25f, 0.25f, 0.25f, 0.25f);
-	private void drawGrid (float size, float w, float h) {
-		renderer.setColor(gridColor);
-		int hSegments = (int)(w / size);
-		for (int i = 0; i < hSegments/2; i++) {
-			float x = i * size;
-			renderer.line(x, -h / 2, x, h / 2);
-			renderer.line(-x, -h / 2, -x, h / 2);
-		}
-		int vSegments = (int)(h / size);
-		for (int i = 0; i < vSegments/2; i++) {
-			float y = i * size;
-			renderer.line(-w / 2, y, w / 2, y);
-			renderer.line(-w / 2, -y, w / 2, -y);
-		}
-	}
-
 
 	@Override public void dispose () {
 		super.dispose();

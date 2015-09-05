@@ -53,7 +53,7 @@ public class RoomGraph {
 //					renderer.setColor(Color.GREEN);
 				renderer.setColor(Color.CLEAR);
 			}
-			renderer.line(e.ax(), e.ay(), e.bx(), e.by());
+//			renderer.line(e.ax(), e.ay(), e.bx(), e.by());
 		}
 	}
 

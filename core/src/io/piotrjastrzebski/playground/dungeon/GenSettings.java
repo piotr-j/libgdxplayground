@@ -9,8 +9,18 @@ public class GenSettings {
 	private float roomWidth, roomHeight;
 	private float mainRoomScale;
 	private float reconnectChance;
+	private float hallwaysWidth;
 
 	public GenSettings () {}
+
+	public float getHallwaysWidth () {
+		return hallwaysWidth;
+	}
+
+	public GenSettings setHallwaysWidth (float hallwaysWidth) {
+		this.hallwaysWidth = hallwaysWidth;
+		return this;
+	}
 
 	public float getGridSize () {
 		return gridSize;

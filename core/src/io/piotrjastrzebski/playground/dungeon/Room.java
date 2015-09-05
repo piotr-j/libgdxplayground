@@ -15,6 +15,7 @@ public class Room {
 	public Body body;
 	public float gridSize;
 	public boolean isMain;
+	public boolean isHallway;
 
 	public Room (int id, float gridSize) {
 		this.id = id;
@@ -40,6 +41,8 @@ public class Room {
 			renderer.setColor(Color.BLUE);
 		} else if (isMain) {
 			renderer.setColor(Color.RED);
+		} else if (isHallway) {
+			renderer.setColor(Color.PINK);
 		} else if (isSleeping()) {
 			renderer.setColor(Color.GRAY);
 		} else {
