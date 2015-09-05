@@ -39,7 +39,7 @@ public class DungeonGeneratorTest extends BaseScreen {
 			.setGridSize(.25f)
 			.setSpawnWidth(20).setSpawnHeight(10)
 			.setRoomWidth(4).setRoomHeight(4)
-			.setMainRoomScale(1.3f)
+			.setMainRoomScale(1.15f)
 			.setReconnectChance(.2f)
 			.setHallwaysWidth(3);
 
@@ -230,7 +230,7 @@ public class DungeonGeneratorTest extends BaseScreen {
 		for (RoomEdge e : edges) {
 			if (!e.mst)
 				continue;
-			HallwayPath path = new HallwayPath();
+			HallwayPath path = new HallwayPath(settings.getGridSize());
 			Rectangle bA = e.roomA.bounds;
 			Rectangle bB = e.roomB.bounds;
 			float min, max, mid;
