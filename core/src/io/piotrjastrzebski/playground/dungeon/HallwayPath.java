@@ -22,8 +22,10 @@ public class HallwayPath {
 	public Room roomA;
 	public Room roomB;
 	public Array<Room> overlap = new Array<>();
+	private float gridSize;
 
-	public HallwayPath () {
+	public HallwayPath (float gridSize) {
+		this.gridSize = gridSize;
 		this.id = ID++;
 	}
 
@@ -41,6 +43,8 @@ public class HallwayPath {
 	public void set(float sx, float sy, float ex, float ey) {
 		start.set(sx, sy);
 		end.set(ex, ey);
+ 		Utils.roundToSize(start, gridSize);
+		Utils.roundToSize(end, gridSize);
 		hasBend = false;
 	}
 
@@ -48,6 +52,9 @@ public class HallwayPath {
 		start.set(sx, sy);
 		bend.set(bx, by);
 		end.set(ex, ey);
+		Utils.roundToSize(start, gridSize);
+		Utils.roundToSize(bend, gridSize);
+		Utils.roundToSize(end, gridSize);
 		hasBend = true;
 	}
 
