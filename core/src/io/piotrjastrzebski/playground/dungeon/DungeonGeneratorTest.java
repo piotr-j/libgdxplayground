@@ -130,7 +130,24 @@ public class DungeonGeneratorTest extends BaseScreen {
 		grid.draw(renderer);
 		for (Room room : rooms) {
 			room.update();
-			room.draw(renderer);
+		}
+		for (Room room : rooms) {
+			if (room.isSleeping()) {
+				renderer.setColor(Color.GRAY);
+				room.draw(renderer);
+			}
+		}
+		for (Room room : rooms) {
+			if (room.isHallway) {
+				renderer.setColor(Color.PINK);
+				room.draw(renderer);
+			}
+		}
+		for (Room room : rooms) {
+			if (room.isMain) {
+				renderer.setColor(Color.RED);
+				room.draw(renderer);
+			}
 		}
 		if (settled && mainRooms.size == 0) {
 			float mw = settings.getRoomWidth() * settings.getMainRoomScale();

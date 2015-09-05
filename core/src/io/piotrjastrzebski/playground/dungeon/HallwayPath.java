@@ -31,11 +31,9 @@ public class HallwayPath {
 
 	public void draw (ShapeRenderer renderer) {
 		if (hasBend) {
-			renderer.setColor(Color.CYAN);
 			renderer.line(start.x, start.y, bend.x, bend.y);
 			renderer.line(bend.x, bend.y, end.x, end.y);
 		} else {
-			renderer.setColor(Color.BLUE);
 			renderer.line(start.x, start.y, end.x, end.y);
 		}
 	}

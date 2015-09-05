@@ -37,17 +37,6 @@ public class Room {
 	}
 
 	public void draw (ShapeRenderer renderer) {
-		if (body == null) {
-			renderer.setColor(Color.BLUE);
-		} else if (isMain) {
-			renderer.setColor(Color.RED);
-		} else if (isHallway) {
-			renderer.setColor(Color.PINK);
-		} else if (isSleeping()) {
-			renderer.setColor(Color.GRAY);
-		} else {
-			renderer.setColor(Color.CYAN);
-		}
 		renderer.rect(bounds.x, bounds.y, bounds.width, bounds.height);
 	}
 
