@@ -34,7 +34,13 @@ public class Utils {
 	}
 
 	public static float roundToSize(float value, float size) {
-		return MathUtils.floor(((value + size - 1)/size))*size;
+		return ((Math.round(value / size)) * size);
+	}
+
+	public static Vector2 roundToSize(Vector2 value, float size) {
+		value.x = roundToSize(value.x, size);
+		value.y = roundToSize(value.y, size);
+		return value;
 	}
 
 	private static Random rng = new Random(TimeUtils.millis());
