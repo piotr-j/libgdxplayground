@@ -67,12 +67,17 @@ public class HallwayPath {
 		verts[6] = b.x + b.width;
 		verts[7] = b.y;
 		poly.setVertices(verts);
+		boolean intersects;
 		if (hasBend) {
-			return Intersector.intersectSegmentPolygon(start, bend, poly)
+			intersects =  Intersector.intersectSegmentPolygon(start, bend, poly)
 				|| Intersector.intersectSegmentPolygon(bend, end, poly);
 		} else {
-			return Intersector.intersectSegmentPolygon(start, end, poly);
+			intersects = Intersector.intersectSegmentPolygon(start, end, poly);
 		}
+		if (intersects) {
+			overlap.add(room);
+		}
+		return intersects;
 	}
 
 	@Override public String toString () {
