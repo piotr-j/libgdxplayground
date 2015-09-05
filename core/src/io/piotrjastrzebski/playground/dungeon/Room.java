@@ -16,6 +16,7 @@ public class Room {
 	public float gridSize;
 	public boolean isMain;
 	public boolean isHallway;
+	public boolean isExtra;
 
 	public Room (int id, float gridSize) {
 		this.id = id;
@@ -37,7 +38,8 @@ public class Room {
 	}
 
 	public void draw (ShapeRenderer renderer) {
-		renderer.rect(bounds.x, bounds.y, bounds.width, bounds.height);
+		float s = gridSize * 0.16f;
+		renderer.rect(bounds.x + s, bounds.y + s, bounds.width - 2 * s, bounds.height - 2 * s);
 	}
 
 	public void set (float x, float y, float w, float h) {

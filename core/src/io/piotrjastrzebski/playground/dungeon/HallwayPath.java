@@ -31,10 +31,10 @@ public class HallwayPath {
 
 	public void draw (ShapeRenderer renderer) {
 		if (hasBend) {
-			renderer.line(start.x, start.y, bend.x, bend.y);
-			renderer.line(bend.x, bend.y, end.x, end.y);
+			renderer.rectLine(start.x, start.y, bend.x, bend.y, gridSize * 0.1f);
+			renderer.rectLine(bend.x, bend.y, end.x, end.y, gridSize * 0.1f);
 		} else {
-			renderer.line(start.x, start.y, end.x, end.y);
+			renderer.rectLine(start.x, start.y, end.x, end.y, gridSize * 0.1f);
 		}
 	}
 

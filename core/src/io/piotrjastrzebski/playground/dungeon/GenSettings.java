@@ -10,6 +10,7 @@ public class GenSettings {
 	private float mainRoomScale;
 	private float reconnectChance;
 	private float hallwaysWidth;
+	private int count;
 
 	public GenSettings () {}
 
@@ -83,5 +84,14 @@ public class GenSettings {
 	public GenSettings setReconnectChance (float reconnectChance) {
 		this.reconnectChance = reconnectChance;
 		return this;
+	}
+
+	public GenSettings spawnCount (int count) {
+		this.count = count;
+		return this;
+	}
+
+	public int getCount () {
+		return count;
 	}
 }

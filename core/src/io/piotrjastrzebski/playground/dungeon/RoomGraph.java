@@ -47,13 +47,14 @@ public class RoomGraph {
 		for (RoomEdge e : edges) {
 			if (e.recon) {
 				renderer.setColor(Color.CYAN);
+//			renderer.line(e.ax(), e.ay(), e.bx(), e.by());
 			} else if (e.mst) {
 				renderer.setColor(Color.YELLOW);
+//			renderer.line(e.ax(), e.ay(), e.bx(), e.by());
 			} else {
 //					renderer.setColor(Color.GREEN);
-				renderer.setColor(Color.CLEAR);
+//				renderer.setColor(Color.CLEAR);
 			}
-//			renderer.line(e.ax(), e.ay(), e.bx(), e.by());
 		}
 	}
 

@@ -29,7 +29,7 @@ public class DungeonGeneratorTest extends BaseScreen {
 	Vector2 tmp = new Vector2();
 	Grid grid;
 	GenSettings settings;
-
+	Rectangle map = new Rectangle();
 	boolean drawBodies;
 	public DungeonGeneratorTest (GameReset game) {
 		super(game);
@@ -37,6 +37,7 @@ public class DungeonGeneratorTest extends BaseScreen {
 		b2dd = new Box2DDebugRenderer();
 		settings = new GenSettings()
 			.setGridSize(.25f)
+			.spawnCount(150)
 			.setSpawnWidth(20).setSpawnHeight(10)
 			.setRoomWidth(4).setRoomHeight(4)
 			.setMainRoomScale(1.15f)
@@ -52,7 +53,8 @@ public class DungeonGeneratorTest extends BaseScreen {
 		mainRooms.clear();
 		if (rooms.size > 0) {
 			for (Room room : rooms) {
-				b2d.destroyBody(room.body);
+				if (room.body != null)
+					b2d.destroyBody(room.body);
 			}
 		}
 		rooms.clear();
@@ -64,7 +66,7 @@ public class DungeonGeneratorTest extends BaseScreen {
 		float roomHeight = settings.getRoomHeight();
 		float spawnWidth = settings.getSpawnWidth();
 		float spawnHeight = settings.getSpawnHeight();
-		for (int i = 0; i < 100; i++) {
+		for (int i = 0; i < settings.getCount(); i++) {
 			Room room = new Room(roomID++, gridSize);
 			float w = Utils.roundedRngFloat(roomWidth, gridSize);
 			if (w < 0) w = -w;
@@ -105,7 +107,7 @@ public class DungeonGeneratorTest extends BaseScreen {
 		room.body = body;
 	}
 
-	int pIters = 1000;
+	int pIters = 100;
 	@Override public void render (float delta) {
 		super.render(delta);
 		boolean settled = true;
@@ -131,21 +133,31 @@ public class DungeonGeneratorTest extends BaseScreen {
 		for (Room room : rooms) {
 			room.update();
 		}
+		renderer.end();
+		renderer.begin(ShapeRenderer.ShapeType.Filled);
+
+		float size = settings.getGridSize();
 		for (Room room : rooms) {
-			if (room.isSleeping()) {
-				renderer.setColor(Color.GRAY);
+			if (room.isSleeping() && !room.isExtra && !room.isHallway && !room.isMain) {
+				renderer.setColor(0.3f, 0.3f, 0.3f, 1);
+				room.draw(renderer);
+			}
+		}
+		for (Room room : rooms) {
+			if (room.isExtra) {
+				renderer.setColor(0.8f, 0.8f, 0.8f, 1);
 				room.draw(renderer);
 			}
 		}
 		for (Room room : rooms) {
 			if (room.isHallway) {
-				renderer.setColor(Color.PINK);
+				renderer.setColor(0.2f, 0.4f, 1, 1);
 				room.draw(renderer);
 			}
 		}
 		for (Room room : rooms) {
 			if (room.isMain) {
-				renderer.setColor(Color.RED);
+				renderer.setColor(1, 0.2f, 0.1f, 1);
 				room.draw(renderer);
 			}
 		}
@@ -153,11 +165,17 @@ public class DungeonGeneratorTest extends BaseScreen {
 			float mw = settings.getRoomWidth() * settings.getMainRoomScale();
 			float mh = settings.getRoomHeight() * settings.getMainRoomScale();
 			for (Room room : rooms) {
+				map.merge(room.bounds);
 				if (room.bounds.width >= mw && room.bounds.height >= mh) {
 					room.isMain = true;
 					mainRooms.add(room);
 				}
 			}
+			// extend map bounds by 1 tile in all directions
+			map.x -= size;
+			map.y -= size;
+			map.width += size * 2;
+			map.height += size * 2;
 			// sort so main rooms are drawn lsat
 			rooms.sort(new Comparator<Room>() {
 				@Override public int compare (Room o1, Room o2) {
@@ -171,15 +189,12 @@ public class DungeonGeneratorTest extends BaseScreen {
 			triangulate();
 		}
 		graph.render(renderer);
-		renderer.setColor(Color.BLUE);
+		renderer.setColor(Color.YELLOW);
 		for (HallwayPath path : paths) {
 			path.draw(renderer);
 		}
 		renderer.end();
 	}
-
-	private static Polygon poly = new Polygon();
-	private static float[] verts = new float[8];
 
 	Array<Room> mainRooms = new Array<>();
 	RoomGraph graph = new RoomGraph();
@@ -259,9 +274,7 @@ public class DungeonGeneratorTest extends BaseScreen {
 				}
 				min = (bA.x < bB.x)?bB.x:bA.x;
 				max = (bA.x + bA.width < bB.x + bB.width)?bA.x + bA.width:bB.x + bB.width;
-
 				mid = (min + max) /2;
-//				mid = Utils.roundToSize(mid, settings.getGridSize());
 
 				if (bA.y > bB.y) {
 					path.set(mid, bA.y, mid, bB.y + bB.height);
@@ -276,9 +289,7 @@ public class DungeonGeneratorTest extends BaseScreen {
 
 				min = (bA.y < bB.y)?bB.y:bA.y;
 				max = (bA.y + bA.height < bB.y + bB.height)?bA.y + bA.height:bB.y + bB.height;
-
 				mid = (min + max) /2;
-//				mid = Utils.roundToSize(mid, settings.getGridSize());
 
 				if (bA.x > bB.x) {
 					path.set(bA.x, mid, bB.x + bB.width, mid);
@@ -296,7 +307,7 @@ public class DungeonGeneratorTest extends BaseScreen {
 				float bw = bB.width;
 				float bh = bB.height;
 				float mx, my;
-				// pack a side
+				// pick a side
 				// can we make this simpler? im dumb
 				if (MathUtils.randomBoolean()) {
 					mx = ax + aw / 2;
@@ -349,6 +360,40 @@ public class DungeonGeneratorTest extends BaseScreen {
 				}
 			}
 		}
+
+		for (HallwayPath path : paths) {
+			if (path.hasBend) {
+				createRooms(path.start, path.bend);
+				createRooms(path.bend, path.end);
+			} else {
+				createRooms(path.start, path.end);
+			}
+		}
+	}
+
+	private void createRooms (Vector2 start, Vector2 end) {
+		tmp.set(end).sub(start);
+		float len = tmp.len();
+		float size = settings.getGridSize();
+		tmp.set(start);
+		int num = (int)(len / size);
+		int scaleX = (int)Math.signum(end.x - start.x);
+		int scaleY = (int)Math.signum(end.y - start.y);
+		for (int i = 0; i <= num; i++) {
+			createRoom(tmp.x - size, tmp.y, size);
+			createRoom(tmp.x, tmp.y, size);
+			createRoom(tmp.x - size, tmp.y, size);
+			createRoom(tmp.x - size, tmp.y - size, size);
+			tmp.add(size * scaleX, size * scaleY);
+		}
+	}
+
+	private void createRoom (float x, float y, float size) {
+		if (findRoom(x + size/2, y + size/2) != null) return;
+		Room room = new Room(roomID++, size);
+		room.bounds.set(x, y, size, size);
+		room.isExtra = true;
+		rooms.add(room);
 	}
 
 	private Room getRoom (float cx, float cy) {
@@ -356,6 +401,14 @@ public class DungeonGeneratorTest extends BaseScreen {
 			if (MathUtils.isEqual(cx, room.cx()) && MathUtils.isEqual(cy, room.cy())) {
 				return room;
 			}
+		}
+		return null;
+	}
+
+	private Room findRoom (float tx, float ty) {
+		for (Room room : rooms) {
+			if (room.bounds.contains(tx, ty))
+				return room;
 		}
 		return null;
 	}
@@ -381,7 +434,7 @@ public class DungeonGeneratorTest extends BaseScreen {
 			break;
 		case Input.Keys.Q:
 			if (pIters == 1) {
-				pIters = 1000;
+				pIters = 100;
 			} else {
 				pIters = 1;
 			}
