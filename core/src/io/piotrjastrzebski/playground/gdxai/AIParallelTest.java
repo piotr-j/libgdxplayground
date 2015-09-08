@@ -4,7 +4,6 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ai.btree.BehaviorTree;
 import com.badlogic.gdx.ai.btree.LeafTask;
 import com.badlogic.gdx.ai.btree.Task;
-import com.badlogic.gdx.ai.btree.branch.Parallel;
 import com.badlogic.gdx.ai.btree.branch.Selector;
 import com.badlogic.gdx.ai.btree.branch.Sequence;
 import com.badlogic.gdx.ai.btree.decorator.Include;
@@ -13,14 +12,14 @@ import com.badlogic.gdx.ai.btree.utils.BehaviorTreeLibraryManager;
 import com.badlogic.gdx.ai.btree.utils.BehaviorTreeParser;
 import com.badlogic.gdx.math.MathUtils;
 import io.piotrjastrzebski.playground.BaseScreen;
-import io.piotrjastrzebski.playground.PlaygroundGame;
+import io.piotrjastrzebski.playground.GameReset;
 
 /**
  * Created by PiotrJ on 01/09/15.
  */
 public class AIParallelTest extends BaseScreen {
 	BehaviorTree<Brain> brainBT;
-	public AIParallelTest (PlaygroundGame game) {
+	public AIParallelTest (GameReset game) {
 		super(game);
 		BehaviorTreeLibraryManager libraryManager = BehaviorTreeLibraryManager.getInstance();
 		BehaviorTreeLibrary library = new BehaviorTreeLibrary(BehaviorTreeParser.DEBUG_HIGH);
@@ -43,7 +42,7 @@ public class AIParallelTest extends BaseScreen {
 	public static Task<Brain> createBrainBehavior () {
 		Selector<Brain> selector = new Selector<>();
 
-		Parallel<Brain> parallel = new Parallel<>();
+		MyParallel<Brain> parallel = new MyParallel<>();
 		parallel.addChild(new TaskA());
 		parallel.addChild(new TaskB());
 
@@ -81,13 +80,17 @@ public class AIParallelTest extends BaseScreen {
 		private final static String TAG = TaskA.class.getSimpleName();
 
 		@Override public void run () {
-			if (MathUtils.random() > 0.5f) {
+			if (MathUtils.random() > 0.8f) {
 				Gdx.app.log(TAG, "Success");
 				success();
 			} else {
 				Gdx.app.log(TAG, "Fail");
 				fail();
 			}
+		}
+
+		@Override public void end () {
+			Gdx.app.log(TAG, "end");
 		}
 
 		@Override protected Task<Brain> copyTo (Task<Brain> task) {
@@ -98,13 +101,17 @@ public class AIParallelTest extends BaseScreen {
 		private final static String TAG = TaskB.class.getSimpleName();
 
 		@Override public void run () {
-			if (MathUtils.random() > 0.5f) {
-				Gdx.app.log(TAG, "Success");
-				success();
-			} else {
+//			if (MathUtils.random() > 0.5f) {
+//				Gdx.app.log(TAG, "Success");
+//				success();
+//			} else {
 				Gdx.app.log(TAG, "Running");
 				running();
-			}
+//			}
+		}
+
+		@Override public void end () {
+			Gdx.app.log(TAG, "end");
 		}
 
 		@Override protected Task<Brain> copyTo (Task<Brain> task) {

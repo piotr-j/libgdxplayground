@@ -14,7 +14,7 @@ import com.badlogic.gdx.physics.box2d.joints.MouseJointDef;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import io.piotrjastrzebski.playground.BaseScreen;
-import io.piotrjastrzebski.playground.PlaygroundGame;
+import io.piotrjastrzebski.playground.GameReset;
 
 /**
  * Created by PiotrJ on 31/07/15.
@@ -31,7 +31,7 @@ public class SimpleBox2dTest extends BaseScreen {
 	Box2DDebugRenderer debugRenderer;
 	boolean debugDraw = true;
 
-	public SimpleBox2dTest (PlaygroundGame game) {
+	public SimpleBox2dTest (GameReset game) {
 		super(game);
 		gameCamera = new OrthographicCamera();
 		gameViewport = new ExtendViewport(VP_WIDTH, VP_HEIGHT, gameCamera);

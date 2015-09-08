@@ -5,7 +5,7 @@ import com.artemis.annotations.Wire;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import io.piotrjastrzebski.playground.BaseScreen;
-import io.piotrjastrzebski.playground.PlaygroundGame;
+import io.piotrjastrzebski.playground.GameReset;
 import io.piotrjastrzebski.playground.ecs.profilerv2.lib.ProfilerInvocationStrategy;
 import io.piotrjastrzebski.playground.ecs.profilerv2.lib.SystemProfiler;
 
@@ -15,7 +15,7 @@ import io.piotrjastrzebski.playground.ecs.profilerv2.lib.SystemProfiler;
 public class ECSProfilerTest extends BaseScreen {
 	World world;
 
-	public ECSProfilerTest (PlaygroundGame game) {
+	public ECSProfilerTest (GameReset game) {
 		super(game);
 		SystemProfiler.resume();
 

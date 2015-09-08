@@ -9,7 +9,7 @@ import com.artemis.utils.Bag;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.utils.Array;
 import io.piotrjastrzebski.playground.BaseScreen;
-import io.piotrjastrzebski.playground.PlaygroundGame;
+import io.piotrjastrzebski.playground.GameReset;
 import io.piotrjastrzebski.playground.ecs.tagtest.components.*;
 import io.piotrjastrzebski.playground.ecs.tagtest.systems.BuildSystem;
 import io.piotrjastrzebski.playground.ecs.tagtest.systems.JobSystem;
@@ -21,7 +21,7 @@ import io.piotrjastrzebski.playground.ecs.tagtest.systems.TagSystem;
  */
 public class TagTest extends BaseScreen {
 	World world;
-	public TagTest (PlaygroundGame game) {
+	public TagTest (GameReset game) {
 		super(game);
 		WorldConfiguration cfg = new WorldConfiguration();
 

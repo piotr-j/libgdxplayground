@@ -7,14 +7,14 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import io.piotrjastrzebski.playground.BaseScreen;
-import io.piotrjastrzebski.playground.PlaygroundGame;
+import io.piotrjastrzebski.playground.GameReset;
 
 /**
  * Created by PiotrJ on 20/06/15.
  */
 public class UIImageButtonTest extends BaseScreen {
 	Texture texture;
-	public UIImageButtonTest (PlaygroundGame game) {
+	public UIImageButtonTest (GameReset game) {
 		super(game);
 		texture = new Texture("badlogic.jpg");
 		TextureRegion region = new TextureRegion(texture);

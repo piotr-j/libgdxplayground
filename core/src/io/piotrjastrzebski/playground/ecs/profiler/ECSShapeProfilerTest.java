@@ -7,7 +7,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.math.MathUtils;
 import com.kotcrab.vis.ui.VisUI;
 import io.piotrjastrzebski.playground.BaseScreen;
-import io.piotrjastrzebski.playground.PlaygroundGame;
+import io.piotrjastrzebski.playground.GameReset;
 import io.piotrjastrzebski.playground.ecs.quadtreetest.Position;
 import io.piotrjastrzebski.playground.ecs.quadtreetest.Size;
 import io.piotrjastrzebski.playground.ecs.quadtreetest.Velocity;
@@ -19,7 +19,7 @@ import io.piotrjastrzebski.playground.ecs.quadtreetest.Velocity;
 public class ECSShapeProfilerTest extends BaseScreen {
 	World world;
 
-	public ECSShapeProfilerTest (PlaygroundGame game) {
+	public ECSShapeProfilerTest (GameReset game) {
 		super(game);
 
 		SystemProfiler.resume();

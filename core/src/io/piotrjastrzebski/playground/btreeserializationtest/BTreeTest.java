@@ -10,7 +10,7 @@ import com.badlogic.gdx.utils.JsonValue;
 import com.badlogic.gdx.utils.JsonWriter;
 import com.badlogic.gdx.utils.StreamUtils;
 import io.piotrjastrzebski.playground.BaseScreen;
-import io.piotrjastrzebski.playground.PlaygroundGame;
+import io.piotrjastrzebski.playground.GameReset;
 import io.piotrjastrzebski.playground.btreeserializationtest.dog.Dog;
 
 import java.io.Reader;
@@ -25,7 +25,7 @@ public class BTreeTest extends BaseScreen {
 
 	Json json;
 	BehaviorTree<Dog> dogBehaviorTreeArchetype;
-	public BTreeTest (PlaygroundGame game) {
+	public BTreeTest (GameReset game) {
 		super(game);
 
 

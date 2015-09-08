@@ -9,7 +9,7 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import io.piotrjastrzebski.playground.BaseScreen;
-import io.piotrjastrzebski.playground.PlaygroundGame;
+import io.piotrjastrzebski.playground.GameReset;
 
 /**
  * Simple lights
@@ -31,7 +31,7 @@ public class SimpleLightTest extends BaseScreen {
 	TextureRegion lightRegion;
 	TextureRegion coneLightRegion;
 
-	public SimpleLightTest (PlaygroundGame game) {
+	public SimpleLightTest (GameReset game) {
 		super(game);
 		Texture lightTex = new Texture("simplelighttest/light.png");
 		lightRegion = new TextureRegion(lightTex);

@@ -3,22 +3,19 @@ package io.piotrjastrzebski.playground.box2dtest;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
-import com.badlogic.gdx.math.Interpolation;
-import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.math.*;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.physics.box2d.joints.MouseJoint;
 import com.badlogic.gdx.physics.box2d.joints.MouseJointDef;
 import com.badlogic.gdx.utils.Array;
 import io.piotrjastrzebski.playground.BaseScreen;
-import io.piotrjastrzebski.playground.PlaygroundGame;
+import io.piotrjastrzebski.playground.GameReset;
 
 /**
  * Created by PiotrJ on 31/07/15.
  */
 public class Box2dInterpolationTest extends BaseScreen {
-	public final static float STEP_TIME = 1.0f / 15.0f;
+	public final static float STEP_TIME = 1.0f / 60.0f;
 	private final static int MAX_STEPS = 3;
 
 	World box2dWorld;
@@ -28,7 +25,7 @@ public class Box2dInterpolationTest extends BaseScreen {
 	Box2DDebugRenderer debugRenderer;
 	boolean debugDraw = true;
 
-	public Box2dInterpolationTest (PlaygroundGame game) {
+	public Box2dInterpolationTest (GameReset game) {
 		super(game);
 		debugRenderer = new Box2DDebugRenderer();
 		box2dWorld = new World(new Vector2(0, -10), true);
@@ -100,7 +97,7 @@ public class Box2dInterpolationTest extends BaseScreen {
 		while (STEP_TIME < accumulator && MAX_STEPS > steps) {
 			// TODO figure out if we need this
 //			box2dWorld.clearForces();
-			box2dWorld.step(STEP_TIME, 6, 2);
+			box2dWorld.step(STEP_TIME, 6, 4);
 			accumulator -= STEP_TIME;
 			steps++;
 			fixedUpdate();
@@ -147,9 +144,9 @@ public class Box2dInterpolationTest extends BaseScreen {
 		private int srcHeight;
 
 		public Box (float x, float y, float rotation, Texture texture) {
-			current.x = start.x = target.x = x;
-			current.y = start.y = target.y = y;
-			current.rot = start.rot = target.rot = rotation;
+			current.set(x, y, rotation);
+			start.set(x, y, rotation);
+			target.set(x, y, rotation);
 
 			this.texture = texture;
 			srcWidth = texture.getWidth();
@@ -160,9 +157,7 @@ public class Box2dInterpolationTest extends BaseScreen {
 
 		public void fixedUpdate () {
 			Vector2 position = body.getPosition();
-			target.x = position.x;
-			target.y = position.y;
-			target.rot = body.getAngle() * MathUtils.radiansToDegrees;
+			target.set(position.x, position.y, body.getAngle() * MathUtils.radiansToDegrees);
 			start.set(current);
 		}
 
@@ -172,7 +167,7 @@ public class Box2dInterpolationTest extends BaseScreen {
 
 		public void draw (Batch batch) {
 			batch
-				.draw(texture, current.x - width / 2, current.y - height / 2, width / 2, height / 2, width, height, 1, 1, current.rot,
+				.draw(texture, current.x - width / 2, current.y - height / 2, width / 2, height / 2, width, height, 1, 1, current.rot(),
 					0, 0, srcWidth, srcHeight, false, false);
 		}
 
@@ -180,6 +175,12 @@ public class Box2dInterpolationTest extends BaseScreen {
 			public float x;
 			public float y;
 			public float rot;
+
+			public void set (float x, float y, float rot) {
+				this.x = x;
+				this.y = y;
+				this.rot = rot;
+			}
 
 			public void set (Transform other) {
 				x = other.x;
@@ -190,10 +191,24 @@ public class Box2dInterpolationTest extends BaseScreen {
 			public void interpolate (Transform src, Transform dst, float alpha) {
 				x = Interpolation.linear.apply(src.x, dst.x, alpha);
 				y = Interpolation.linear.apply(src.y, dst.y, alpha);
-				rot = Interpolation.linear.apply(src.rot, dst.rot, alpha);
+				// if angle > PI then angle -= PI2 where angle = angle < 0 ? PI2 - (-angle % PI2) : angle % PI2 and angle = target - source
+
+				float angle = dst.rot - src.rot;
+				angle = angle < 0 ? 360 - (-angle % 360) : angle % 360;
+				if (angle > 180) angle -= 360;
+//				rot = Interpolation.linear.apply(src.rot, dst.rot, alpha);
+				rot = src.rot + angle * alpha;
+
+//				rot = rot < 0 ? 360 - (-rot % 360) : rot % 360;
+//				if (rot > 180) rot -= 360;
+			}
+
+			public float rot() {
+				return rot;
 			}
 		}
 	}
+
 	Body hitBody;
 	Vector3 testPoint = new Vector3();
 	QueryCallback callback = new QueryCallback() {

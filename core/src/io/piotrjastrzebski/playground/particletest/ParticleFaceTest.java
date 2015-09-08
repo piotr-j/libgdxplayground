@@ -7,7 +7,7 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.badlogic.gdx.utils.StreamUtils;
 import io.piotrjastrzebski.playground.BaseScreen;
-import io.piotrjastrzebski.playground.PlaygroundGame;
+import io.piotrjastrzebski.playground.GameReset;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -16,7 +16,7 @@ import java.io.InputStreamReader;
 
 public class ParticleFaceTest extends BaseScreen {
 	MyEmitter emitter;
-	public ParticleFaceTest (PlaygroundGame game) {
+	public ParticleFaceTest (GameReset game) {
 		super(game);
 
 		InputStream input = Gdx.files.internal("particles/face.p").read();

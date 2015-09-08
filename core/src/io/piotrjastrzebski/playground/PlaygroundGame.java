@@ -5,7 +5,6 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
-import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Array;
@@ -23,6 +22,7 @@ import io.piotrjastrzebski.playground.ecs.ECSOrderTest;
 import io.piotrjastrzebski.playground.ecs.aijobs.ECSAIJobsTest;
 import io.piotrjastrzebski.playground.ecs.aitest.AIECSTest;
 import io.piotrjastrzebski.playground.ecs.ECSPooledCompTest;
+import io.piotrjastrzebski.playground.ecs.assettest.ECSAssetTest;
 import io.piotrjastrzebski.playground.ecs.deferredsystemtest.DeferredSystemTest;
 import io.piotrjastrzebski.playground.ecs.entityedittest.EntityEditTest;
 import io.piotrjastrzebski.playground.ecs.entityonecomptest.EntityOneCompTest;
@@ -35,6 +35,7 @@ import io.piotrjastrzebski.playground.ecs.sat.SATTest;
 import io.piotrjastrzebski.playground.ecs.tagtest.TagTest;
 import io.piotrjastrzebski.playground.ecs.worldiotest.ECSWorldIOTest;
 import io.piotrjastrzebski.playground.gdxai.AIParallelTest;
+import io.piotrjastrzebski.playground.gpushadows.GpuShadowTest;
 import io.piotrjastrzebski.playground.gpushadows.GpuShadows;
 import io.piotrjastrzebski.playground.isotiled.IsoTest;
 import io.piotrjastrzebski.playground.isotiled.SimpleTiledCropTest;
@@ -46,8 +47,10 @@ import io.piotrjastrzebski.playground.particletest.ParticleFaceTest;
 import io.piotrjastrzebski.playground.shaders.Shader2dRainTest;
 import io.piotrjastrzebski.playground.shaders.ShaderFireWallTest;
 import io.piotrjastrzebski.playground.shaders.ShaderPortalTest;
+import io.piotrjastrzebski.playground.simple.*;
 import io.piotrjastrzebski.playground.simplelights.SimpleLightTest;
 import io.piotrjastrzebski.playground.tiledgentest.*;
+import io.piotrjastrzebski.playground.tiledmapwidget.TMWTest;
 import io.piotrjastrzebski.playground.uitesting.*;
 import light2dtest.ShadowTest;
 
@@ -60,18 +63,18 @@ public class PlaygroundGame extends Game implements GameReset {
 
 	// should be a class that extends BaseScreen
 	final Class[] testScreens = new Class[]{DungeonGeneratorTest.class, SATTest.class, ParticleFaceTest.class, SimpleTiledCropTest.class,
-		AIParallelTest.class, SimpleBox2dTest.class, Box2dLoaderTest.class,
+		AIParallelTest.class, SimpleBox2dTest.class, Box2dLoaderTest.class, RadialSpriteTest.class,
 		ShaderFireWallTest.class, ShaderPortalTest.class, Shader2dRainTest.class, ECSWorldIOTest.class, ECSOrderTest.class,
 		ECSJobsTest.class, ECSAIJobsTest.class, UISpriteDrawableTest.class, SimpleTiledTest.class, ParticleTest.class, CameraMoveTest.class,
 		TiledGenTest.class, TemperatureTest.class, BiomeTest.class, Box2dInterpolationTest.class,
 		RainTest.class, BlurTest.class, CompositeGenTest.class, UITest.class, UISortTest.class, UISort2Test.class, CSTest.class,
-		UIFBOTransitionTest.class, QuadTreeTest.class, RandomTest.class,
+		UIFBOTransitionTest.class, QuadTreeTest.class, RandomTest.class, ECSAssetTest.class, GpuShadowTest.class,
 		ECSPooledCompTest.class, ECSProfilerTest.class, ECSShapeProfilerTest.class, ECSPolyProfilerTest.class,
 		CSTestV2.class, TagTest.class, EntityEditTest.class, EntityOneCompTest.class, DeferredSystemTest.class,
 		AsyncScreenTest.class, UIPaneTest.class, UIContextMenuTest.class, UIContextMenuTest2.class, UIFillTest.class, UIDPITest.class,
 		UIDialogTest.class, UITableBuilderTest.class, JobTest.class, ECSJobTest.class, AIECSJobTest.class, AIECSTest.class,
 		ShadowTest.class, GpuShadows.class, CircleTest.class, ShapeRendererTest.class, BTreeTest.class, FitVPTest.class, VPTest.class,
-		SimpleLightTest.class, UIImageButtonTest.class, IsoTest.class, UISelectRowTest.class,
+		SimpleLightTest.class, UIImageButtonTest.class, IsoTest.class, UISelectRowTest.class, TMWTest.class,
 	};
 
 	PlatformBridge bridge;
@@ -122,7 +125,7 @@ public class PlaygroundGame extends Game implements GameReset {
 				button.addListener(new ClickListener() {
 					@Override public void clicked (InputEvent event, float x, float y) {
 						try {
-							Constructor constructor = cls.getConstructor(PlaygroundGame.class);
+							Constructor constructor = cls.getConstructor(GameReset.class);
 							setScreen((BaseScreen)constructor.newInstance(PlaygroundGame.this));
 						} catch (InvocationTargetException | InstantiationException | IllegalAccessException | NoSuchMethodException e) {
 							e.printStackTrace();

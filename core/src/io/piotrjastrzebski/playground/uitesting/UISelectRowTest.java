@@ -6,13 +6,13 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.kotcrab.vis.ui.widget.VisLabel;
 import com.kotcrab.vis.ui.widget.VisTable;
 import io.piotrjastrzebski.playground.BaseScreen;
-import io.piotrjastrzebski.playground.PlaygroundGame;
+import io.piotrjastrzebski.playground.GameReset;
 
 /**
  * Created by PiotrJ on 20/06/15.
  */
 public class UISelectRowTest extends BaseScreen {
-	public UISelectRowTest (PlaygroundGame game) {
+	public UISelectRowTest (GameReset game) {
 		super(game);
 		VisTable table = new VisTable(true);
 		table.addListener(new ClickListener(){

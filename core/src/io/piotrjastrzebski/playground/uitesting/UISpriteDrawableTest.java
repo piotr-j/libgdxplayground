@@ -8,13 +8,13 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.utils.SpriteDrawable;
 import io.piotrjastrzebski.playground.BaseScreen;
-import io.piotrjastrzebski.playground.PlaygroundGame;
+import io.piotrjastrzebski.playground.GameReset;
 
 /**
  * Created by PiotrJ on 20/06/15.
  */
 public class UISpriteDrawableTest extends BaseScreen {
-	public UISpriteDrawableTest (PlaygroundGame game) {
+	public UISpriteDrawableTest (GameReset game) {
 		super(game);
 
 		Sprite white = new Sprite(new Texture("white.png"));

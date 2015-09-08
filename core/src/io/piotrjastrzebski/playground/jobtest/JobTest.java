@@ -4,7 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Array;
 import io.piotrjastrzebski.playground.BaseScreen;
-import io.piotrjastrzebski.playground.PlaygroundGame;
+import io.piotrjastrzebski.playground.GameReset;
 
 import java.util.Iterator;
 
@@ -18,7 +18,7 @@ public class JobTest extends BaseScreen {
 
 	Array<Worker> workers = new Array<>();
 	Array<Job> jobs = new Array<>();
-	public JobTest (PlaygroundGame game) {
+	public JobTest (GameReset game) {
 		super(game);
 		// TODO prototype job system
 		// new job -> entity picks it up

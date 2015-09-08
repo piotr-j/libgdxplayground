@@ -9,7 +9,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.kotcrab.vis.ui.widget.VisTable;
 import com.kotcrab.vis.ui.widget.VisTextButton;
 import io.piotrjastrzebski.playground.BaseScreen;
-import io.piotrjastrzebski.playground.PlaygroundGame;
+import io.piotrjastrzebski.playground.GameReset;
 
 /**
  * Created by PiotrJ on 20/06/15.
@@ -17,7 +17,7 @@ import io.piotrjastrzebski.playground.PlaygroundGame;
 public class UIContextMenuTest extends BaseScreen {
 	VisTable contextMenu;
 	Vector2 temp = new Vector2();
-	public UIContextMenuTest (PlaygroundGame game) {
+	public UIContextMenuTest (GameReset game) {
 		super(game);
 		contextMenu = new VisTable();
 		contextMenu.setTransform(true);

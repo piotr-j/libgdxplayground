@@ -17,7 +17,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import io.piotrjastrzebski.playground.BaseScreen;
-import io.piotrjastrzebski.playground.PlaygroundGame;
+import io.piotrjastrzebski.playground.GameReset;
 
 /**
  * Super Koalio raw from libgdx tests
@@ -46,7 +46,7 @@ public class SimpleKoalioTest extends BaseScreen {
 		boolean grounded = false;
 	}
 
-	public SimpleKoalioTest (PlaygroundGame game) {
+	public SimpleKoalioTest (GameReset game) {
 		super(game);
 		// load the koala frames, split them, and assign them to Animations
 		koalaTexture = new Texture("superkoalio/koalio.png");

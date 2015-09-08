@@ -5,14 +5,14 @@ import com.badlogic.gdx.math.Vector3;
 import com.kotcrab.vis.ui.widget.VisTable;
 import com.kotcrab.vis.ui.widget.VisTextButton;
 import io.piotrjastrzebski.playground.BaseScreen;
-import io.piotrjastrzebski.playground.PlaygroundGame;
+import io.piotrjastrzebski.playground.GameReset;
 
 /**
  * Created by PiotrJ on 20/06/15.
  */
 public class UIContextMenuTest2 extends BaseScreen {
 	VisTable contextMenu;
-	public UIContextMenuTest2 (PlaygroundGame game) {
+	public UIContextMenuTest2 (GameReset game) {
 		super(game);
 		contextMenu = new VisTable();
 		contextMenu.add(new VisTextButton("Context action " + lastId++)).row();

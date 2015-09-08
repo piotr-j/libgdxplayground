@@ -12,9 +12,8 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
-import com.badlogic.gdx.utils.Array;
 import io.piotrjastrzebski.playground.BaseScreen;
-import io.piotrjastrzebski.playground.PlaygroundGame;
+import io.piotrjastrzebski.playground.GameReset;
 import io.piotrjastrzebski.playground.tiledgentest.generators.MountainGen;
 import io.piotrjastrzebski.playground.tiledgentest.generators.RainGen;
 import io.piotrjastrzebski.playground.tiledgentest.generators.TempGen;
@@ -32,7 +31,7 @@ public class CompositeGenTest extends BaseScreen {
 	private boolean temp = false;
 	private boolean mountains = false;
 
-	public CompositeGenTest (PlaygroundGame game) {
+	public CompositeGenTest (GameReset game) {
 		super(game);
 		map = new MapWidget(
 			new TextureRegion(new Texture(Gdx.files.internal("white.png"))));

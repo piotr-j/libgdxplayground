@@ -1,4 +1,4 @@
-package io.piotrjastrzebski.playground;
+package io.piotrjastrzebski.playground.simple;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
@@ -22,6 +22,8 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.kotcrab.vis.ui.widget.VisTextButton;
+import io.piotrjastrzebski.playground.BaseScreen;
+import io.piotrjastrzebski.playground.GameReset;
 
 /*
 
@@ -50,7 +52,7 @@ public class ShapeRendererTest extends BaseScreen {
 	Actor ellipse;
 	TextureRegion white;
 
-	public ShapeRendererTest (PlaygroundGame game) {
+	public ShapeRendererTest (GameReset game) {
 		super(game);
 		drawer = new PolygonShapeDrawer();
 		batch = new PolygonSpriteBatch();

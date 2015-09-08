@@ -6,7 +6,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.MathUtils;
 import com.kotcrab.vis.ui.widget.VisLabel;
 import io.piotrjastrzebski.playground.BaseScreen;
-import io.piotrjastrzebski.playground.PlaygroundGame;
+import io.piotrjastrzebski.playground.GameReset;
 import io.piotrjastrzebski.playground.ecs.jobs.systems.JobMaker;
 import io.piotrjastrzebski.playground.ecs.jobs.systems.Jobs;
 import io.piotrjastrzebski.playground.ecs.jobs.systems.Workers;
@@ -22,7 +22,7 @@ public class ECSJobsTest extends BaseScreen {
 	public static final int NULL_ID = -1;
 
 	World world;
-	public ECSJobsTest (PlaygroundGame game) {
+	public ECSJobsTest (GameReset game) {
 		super(game);
 		WorldConfiguration config = new WorldConfiguration();
 		config.register("game-cam", gameCamera);

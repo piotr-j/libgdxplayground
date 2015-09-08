@@ -1,12 +1,14 @@
-package io.piotrjastrzebski.playground;
+package io.piotrjastrzebski.playground.simple;
 
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
+import io.piotrjastrzebski.playground.BaseScreen;
+import io.piotrjastrzebski.playground.GameReset;
 
 public class CameraMoveTest extends BaseScreen {
 	Sprite sprite;
-	public CameraMoveTest (PlaygroundGame game) {
+	public CameraMoveTest (GameReset game) {
 		super(game);
 		sprite = new Sprite(new Texture("white.png"));
 		sprite.setSize(1, 1);

@@ -1,4 +1,4 @@
-package io.piotrjastrzebski.playground;
+package io.piotrjastrzebski.playground.simple;
 
 import com.badlogic.gdx.*;
 import com.badlogic.gdx.graphics.Color;
@@ -8,12 +8,14 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Circle;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
+import io.piotrjastrzebski.playground.BaseScreen;
+import io.piotrjastrzebski.playground.GameReset;
 
 public class CircleTest extends BaseScreen {
 
 	Circle player;
 	Circle other;
-	public CircleTest (PlaygroundGame game) {
+	public CircleTest (GameReset game) {
 		super(game);
 		player = new Circle(0, 0, 5);
 		other = new Circle(0, 0, 3.5f);

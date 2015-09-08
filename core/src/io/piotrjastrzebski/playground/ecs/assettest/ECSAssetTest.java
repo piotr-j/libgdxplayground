@@ -2,16 +2,15 @@ package io.piotrjastrzebski.playground.ecs.assettest;
 
 import com.artemis.*;
 import com.artemis.systems.EntityProcessingSystem;
-import com.badlogic.gdx.graphics.g2d.Sprite;
 import io.piotrjastrzebski.playground.BaseScreen;
-import io.piotrjastrzebski.playground.PlaygroundGame;
+import io.piotrjastrzebski.playground.GameReset;
 
 /**
  * Created by PiotrJ on 11/08/15.
  */
 public class ECSAssetTest extends BaseScreen {
 	World world;
-	public ECSAssetTest (PlaygroundGame game) {
+	public ECSAssetTest (GameReset game) {
 		super(game);
 		WorldConfiguration config = new WorldConfiguration();
 

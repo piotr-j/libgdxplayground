@@ -1,7 +1,9 @@
-package io.piotrjastrzebski.playground;
+package io.piotrjastrzebski.playground.simple;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.MathUtils;
+import io.piotrjastrzebski.playground.BaseScreen;
+import io.piotrjastrzebski.playground.GameReset;
 
 public class RandomTest extends BaseScreen {
 	private final static String TAG = RandomTest.class.getSimpleName();
@@ -9,7 +11,7 @@ public class RandomTest extends BaseScreen {
 	public int runs = 10000000;
 
 	private int m1, m2, m3, m4, m5;
-	public RandomTest (PlaygroundGame game) {
+	public RandomTest (GameReset game) {
 		super(game);
 		Gdx.app.log(TAG, "Running test 1");
 		test1();

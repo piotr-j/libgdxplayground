@@ -5,13 +5,12 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
-import com.badlogic.gdx.maps.tiled.renderers.IsometricTiledMapRenderer;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import io.piotrjastrzebski.playground.BaseScreen;
-import io.piotrjastrzebski.playground.PlaygroundGame;
+import io.piotrjastrzebski.playground.GameReset;
 
 /**
  * Created by EvilEntity on 07/06/2015.
@@ -23,7 +22,7 @@ public class SimpleTiledTest extends BaseScreen {
 	public final static float VP_HEIGHT = 720/SCALE;
 
 	OrthogonalTiledMapRenderer mapRenderer;
-	public SimpleTiledTest (PlaygroundGame game) {
+	public SimpleTiledTest (GameReset game) {
 		super(game);
 		// fields in super class
 		gameCamera = new OrthographicCamera();

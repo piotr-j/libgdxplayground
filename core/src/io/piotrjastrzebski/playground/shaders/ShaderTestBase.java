@@ -12,7 +12,7 @@ import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ObjectMap;
 import io.piotrjastrzebski.playground.BaseScreen;
-import io.piotrjastrzebski.playground.PlaygroundGame;
+import io.piotrjastrzebski.playground.GameReset;
 
 /**
  * Adpated from http://forums.tigsource.com/index.php?topic=48508.msg1163762#msg1163762
@@ -27,7 +27,7 @@ public abstract class ShaderTestBase extends BaseScreen {
 	FrameBuffer fbo;
 	TextureRegion fboRegion;
 
-	public ShaderTestBase (PlaygroundGame game) {
+	public ShaderTestBase (GameReset game) {
 		super(game);
 		createShader(DEF_SHADER);
 		init();

@@ -8,14 +8,14 @@ import com.artemis.utils.Bag;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.utils.Json;
 import io.piotrjastrzebski.playground.BaseScreen;
-import io.piotrjastrzebski.playground.PlaygroundGame;
+import io.piotrjastrzebski.playground.GameReset;
 
 /**
  * Created by PiotrJ on 20/06/15.
  */
 public class EntityEditTest extends BaseScreen {
 	World world;
-	public EntityEditTest (PlaygroundGame game) {
+	public EntityEditTest (GameReset game) {
 		super(game);
 		WorldConfiguration cfg = new WorldConfiguration();
 		cfg.setSystem(new TestSystem());

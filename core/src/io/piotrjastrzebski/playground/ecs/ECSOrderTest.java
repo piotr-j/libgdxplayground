@@ -4,13 +4,13 @@ import com.artemis.*;
 import com.artemis.systems.EntityProcessingSystem;
 import com.badlogic.gdx.Gdx;
 import io.piotrjastrzebski.playground.BaseScreen;
-import io.piotrjastrzebski.playground.PlaygroundGame;
+import io.piotrjastrzebski.playground.GameReset;
 
 public class ECSOrderTest extends BaseScreen {
 	private final static String TAG = ECSOrderTest.class.getSimpleName();
 
 	World world;
-	public ECSOrderTest (PlaygroundGame game) {
+	public ECSOrderTest (GameReset game) {
 		super(game);
 		WorldConfiguration config = new WorldConfiguration();
 

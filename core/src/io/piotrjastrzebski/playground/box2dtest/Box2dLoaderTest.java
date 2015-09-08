@@ -15,7 +15,7 @@ import com.badlogic.gdx.physics.box2d.joints.MouseJointDef;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import io.piotrjastrzebski.playground.BaseScreen;
-import io.piotrjastrzebski.playground.PlaygroundGame;
+import io.piotrjastrzebski.playground.GameReset;
 
 /**
  * Created by PiotrJ on 31/07/15.
@@ -36,7 +36,7 @@ public class Box2dLoaderTest extends BaseScreen {
 	Texture test04;
 	Texture test05;
 
-	public Box2dLoaderTest (PlaygroundGame game) {
+	public Box2dLoaderTest (GameReset game) {
 		super(game);
 		gameCamera = new OrthographicCamera();
 		gameViewport = new ExtendViewport(VP_WIDTH, VP_HEIGHT, gameCamera);
@@ -177,8 +177,7 @@ public class Box2dLoaderTest extends BaseScreen {
 		// ask the world which bodies are within the given
 		// bounding box around the mouse pointer
 		hitBody = null;
-		world.QueryAABB(callback, testPoint.x - 0.1f, testPoint.y - 0.1f,
-			testPoint.x + 0.1f, testPoint.y + 0.1f);
+		world.QueryAABB(callback, testPoint.x - 0.1f, testPoint.y - 0.1f, testPoint.x + 0.1f, testPoint.y + 0.1f);
 
 		// if we hit something we create a new mouse joint
 		// and attach it to the hit body.

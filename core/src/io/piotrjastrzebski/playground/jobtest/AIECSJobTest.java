@@ -9,7 +9,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.IntArray;
 import com.badlogic.gdx.utils.IntMap;
 import io.piotrjastrzebski.playground.BaseScreen;
-import io.piotrjastrzebski.playground.PlaygroundGame;
+import io.piotrjastrzebski.playground.GameReset;
 
 /**
  * Job test with ecs
@@ -20,7 +20,7 @@ public class AIECSJobTest extends BaseScreen {
 	public static final int NULL_ID = -1;
 
 	World world;
-	public AIECSJobTest (PlaygroundGame game) {
+	public AIECSJobTest (GameReset game) {
 		super(game);
 		WorldConfiguration config = new WorldConfiguration();
 		config.setSystem(new JobSystem());

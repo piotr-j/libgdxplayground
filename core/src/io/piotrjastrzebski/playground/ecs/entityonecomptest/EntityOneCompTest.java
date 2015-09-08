@@ -5,7 +5,7 @@ import com.artemis.World;
 import com.artemis.WorldConfiguration;
 import com.badlogic.gdx.Gdx;
 import io.piotrjastrzebski.playground.BaseScreen;
-import io.piotrjastrzebski.playground.PlaygroundGame;
+import io.piotrjastrzebski.playground.GameReset;
 
 /**
  * Created by PiotrJ on 20/06/15.
@@ -13,7 +13,7 @@ import io.piotrjastrzebski.playground.PlaygroundGame;
 public class EntityOneCompTest extends BaseScreen {
 	World world;
 
-	public EntityOneCompTest (PlaygroundGame game) {
+	public EntityOneCompTest (GameReset game) {
 		super(game);
 		WorldConfiguration cfg = new WorldConfiguration();
 		cfg.setSystem(new OptionalTestSystem());

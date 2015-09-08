@@ -6,15 +6,18 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.IntMap;
 import com.kotcrab.vis.ui.FocusManager;
-import com.kotcrab.vis.ui.widget.*;
+import com.kotcrab.vis.ui.widget.Tooltip;
+import com.kotcrab.vis.ui.widget.VisLabel;
+import com.kotcrab.vis.ui.widget.VisTable;
+import com.kotcrab.vis.ui.widget.VisTextButton;
 import io.piotrjastrzebski.playground.BaseScreen;
-import io.piotrjastrzebski.playground.PlaygroundGame;
+import io.piotrjastrzebski.playground.GameReset;
 
 /**
  * Created by PiotrJ on 20/06/15.
  */
 public class UITest extends BaseScreen {
-	public UITest (PlaygroundGame game) {
+	public UITest (GameReset game) {
 		super(game);
 		VisTable table = new VisTable(true);
 		VisLabel label = new VisLabel("Test");

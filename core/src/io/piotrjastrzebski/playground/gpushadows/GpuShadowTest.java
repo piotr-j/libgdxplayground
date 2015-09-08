@@ -13,7 +13,7 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 import io.piotrjastrzebski.playground.BaseScreen;
-import io.piotrjastrzebski.playground.PlaygroundGame;
+import io.piotrjastrzebski.playground.GameReset;
 
 /**
  * Created by EvilEntity on 09/07/2015.
@@ -41,7 +41,7 @@ public class GpuShadowTest extends BaseScreen {
 	boolean additive = true;
 	boolean softShadows = true;
 
-	public GpuShadowTest (PlaygroundGame game) {
+	public GpuShadowTest (GameReset game) {
 		super(game);
 
 		ShaderProgram.pedantic = false;

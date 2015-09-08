@@ -1,13 +1,9 @@
 package io.piotrjastrzebski.playground.uitesting;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
-import com.badlogic.gdx.assets.loaders.resolvers.InternalFileHandleResolver;
-import com.badlogic.gdx.assets.loaders.resolvers.ResolutionFileResolver;
 import com.badlogic.gdx.assets.loaders.resolvers.ResolutionFileResolver.Resolution;
-import com.badlogic.gdx.files.FileHandle;
 import io.piotrjastrzebski.playground.BaseScreen;
-import io.piotrjastrzebski.playground.PlaygroundGame;
+import io.piotrjastrzebski.playground.GameReset;
 
 /**
  * Created by PiotrJ on 20/06/15.
@@ -16,7 +12,7 @@ public class UIDPITest extends BaseScreen {
 
 	Resolution[] resolutions;
 
-	public UIDPITest (PlaygroundGame game) {
+	public UIDPITest (GameReset game) {
 		super(game);
 
 		// retina mac: 2880 1800

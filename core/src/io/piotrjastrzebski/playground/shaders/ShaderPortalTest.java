@@ -1,7 +1,7 @@
 package io.piotrjastrzebski.playground.shaders;
 
 import io.piotrjastrzebski.playground.BaseScreen;
-import io.piotrjastrzebski.playground.PlaygroundGame;
+import io.piotrjastrzebski.playground.GameReset;
 
 /**
  * Adpated from http://forums.tigsource.com/index.php?topic=48508.msg1168021#msg1168021
@@ -9,7 +9,7 @@ import io.piotrjastrzebski.playground.PlaygroundGame;
  * Created by EvilEntity on 07/06/2015.
  */
 public class ShaderPortalTest extends BaseScreen {
-	public ShaderPortalTest (PlaygroundGame game) {
+	public ShaderPortalTest (GameReset game) {
 		super(game);
 
 	}

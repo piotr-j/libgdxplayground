@@ -9,7 +9,7 @@ import com.badlogic.gdx.graphics.g2d.PolygonSpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
 import com.kotcrab.vis.ui.VisUI;
 import io.piotrjastrzebski.playground.BaseScreen;
-import io.piotrjastrzebski.playground.PlaygroundGame;
+import io.piotrjastrzebski.playground.GameReset;
 import io.piotrjastrzebski.playground.ecs.quadtreetest.Position;
 import io.piotrjastrzebski.playground.ecs.quadtreetest.Size;
 import io.piotrjastrzebski.playground.ecs.quadtreetest.Velocity;
@@ -23,7 +23,7 @@ public class ECSPolyProfilerTest extends BaseScreen {
 
 	PolygonSpriteBatch polyBatch;
 	World world;
-	public ECSPolyProfilerTest (PlaygroundGame game) {
+	public ECSPolyProfilerTest (GameReset game) {
 		super(game);
 
 		polyBatch = new PolygonSpriteBatch(10920);

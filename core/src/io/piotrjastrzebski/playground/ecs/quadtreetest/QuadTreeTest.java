@@ -6,7 +6,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.math.Vector3;
 import io.piotrjastrzebski.playground.BaseScreen;
-import io.piotrjastrzebski.playground.PlaygroundGame;
+import io.piotrjastrzebski.playground.GameReset;
 
 /**
  * Created by EvilEntity on 31/07/2015.
@@ -15,7 +15,7 @@ public class QuadTreeTest extends BaseScreen {
 	World world;
 
 	QTDebugSystem qtDebugSystem;
-	public QuadTreeTest (PlaygroundGame game) {
+	public QuadTreeTest (GameReset game) {
 		super(game);
 		WorldConfiguration config = new WorldConfiguration();
 		config.register(gameCamera);

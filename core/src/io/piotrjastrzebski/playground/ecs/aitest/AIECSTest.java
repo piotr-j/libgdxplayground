@@ -9,10 +9,9 @@ import com.badlogic.gdx.ai.btree.BehaviorTree;
 import com.badlogic.gdx.ai.btree.LeafTask;
 import com.badlogic.gdx.ai.btree.Task;
 import com.badlogic.gdx.ai.btree.utils.BehaviorTreeParser;
-import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.StreamUtils;
 import io.piotrjastrzebski.playground.BaseScreen;
-import io.piotrjastrzebski.playground.PlaygroundGame;
+import io.piotrjastrzebski.playground.GameReset;
 import io.piotrjastrzebski.playground.ecs.aitest.dog.Dog;
 import io.piotrjastrzebski.playground.ecs.aitest.dog.DogTask;
 
@@ -27,7 +26,7 @@ public class AIECSTest extends BaseScreen {
 	public static final int NULL_ID = -1;
 
 	World world;
-	public AIECSTest (PlaygroundGame game) {
+	public AIECSTest (GameReset game) {
 		super(game);
 
 		loadAI();

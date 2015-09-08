@@ -4,7 +4,7 @@ import com.artemis.EntityEdit;
 import com.artemis.World;
 import com.artemis.WorldConfiguration;
 import io.piotrjastrzebski.playground.BaseScreen;
-import io.piotrjastrzebski.playground.PlaygroundGame;
+import io.piotrjastrzebski.playground.GameReset;
 
 /**
  * Created by PiotrJ on 20/06/15.
@@ -12,7 +12,7 @@ import io.piotrjastrzebski.playground.PlaygroundGame;
 public class DeferredSystemTest extends BaseScreen {
 	World world;
 
-	public DeferredSystemTest (PlaygroundGame game) {
+	public DeferredSystemTest (GameReset game) {
 		super(game);
 		WorldConfiguration cfg = new WorldConfiguration();
 

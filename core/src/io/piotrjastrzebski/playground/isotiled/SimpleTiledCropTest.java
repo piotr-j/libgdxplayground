@@ -13,7 +13,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ScissorStack;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import io.piotrjastrzebski.playground.BaseScreen;
-import io.piotrjastrzebski.playground.PlaygroundGame;
+import io.piotrjastrzebski.playground.GameReset;
 
 /**
  * Created by EvilEntity on 07/06/2015.
@@ -25,7 +25,7 @@ public class SimpleTiledCropTest extends BaseScreen {
 	public final static float VP_HEIGHT = 720/SCALE;
 
 	OrthogonalTiledMapRenderer mapRenderer;
-	public SimpleTiledCropTest (PlaygroundGame game) {
+	public SimpleTiledCropTest (GameReset game) {
 		super(game);
 		// fields in super class
 		gameCamera = new OrthographicCamera();

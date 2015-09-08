@@ -7,9 +7,12 @@ import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
-import com.kotcrab.vis.ui.widget.*;
+import com.kotcrab.vis.ui.widget.VisLabel;
+import com.kotcrab.vis.ui.widget.VisSlider;
+import com.kotcrab.vis.ui.widget.VisTable;
+import com.kotcrab.vis.ui.widget.VisTextButton;
 import io.piotrjastrzebski.playground.BaseScreen;
-import io.piotrjastrzebski.playground.PlaygroundGame;
+import io.piotrjastrzebski.playground.GameReset;
 
 /**
  * Created by PiotrJ on 20/06/15.
@@ -23,7 +26,7 @@ public class UIFBOTransitionTest extends BaseScreen {
 	VisTable dummyB;
 
 	VisTable current;
-	public UIFBOTransitionTest (PlaygroundGame game) {
+	public UIFBOTransitionTest (GameReset game) {
 		super(game);
 
 		trans = new VisTextButton("Transition");

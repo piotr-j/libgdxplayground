@@ -4,14 +4,14 @@ import com.badlogic.gdx.utils.Array;
 import com.kotcrab.vis.ui.widget.VisLabel;
 import com.kotcrab.vis.ui.widget.VisWindow;
 import io.piotrjastrzebski.playground.BaseScreen;
-import io.piotrjastrzebski.playground.PlaygroundGame;
+import io.piotrjastrzebski.playground.GameReset;
 
 /**
  * Created by PiotrJ on 20/06/15.
  */
 public class UIFillTest extends BaseScreen {
 	Array<CleverWindow> windows = new Array<>();
-	public UIFillTest (PlaygroundGame game) {
+	public UIFillTest (GameReset game) {
 		super(game);
 		// undo BaseScreen stuff
 		stage.clear();

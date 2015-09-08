@@ -10,7 +10,7 @@ import com.kotcrab.vis.ui.widget.VisCheckBox;
 import com.kotcrab.vis.ui.widget.VisLabel;
 import com.kotcrab.vis.ui.widget.VisTable;
 import io.piotrjastrzebski.playground.BaseScreen;
-import io.piotrjastrzebski.playground.PlaygroundGame;
+import io.piotrjastrzebski.playground.GameReset;
 
 /**
  * Very simple client entity prediction test based on
@@ -23,7 +23,7 @@ public class CSTestV2 extends BaseScreen {
 	Server server;
 	VisLabel ackLabel;
 
-	public CSTestV2 (PlaygroundGame game) {
+	public CSTestV2 (GameReset game) {
 		super(game);
 		server = new Server();
 

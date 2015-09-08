@@ -1,4 +1,4 @@
-package io.piotrjastrzebski.playground;
+package io.piotrjastrzebski.playground.simple;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
@@ -11,6 +11,8 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Circle;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
+import io.piotrjastrzebski.playground.BaseScreen;
+import io.piotrjastrzebski.playground.GameReset;
 
 import java.util.Iterator;
 
@@ -18,7 +20,7 @@ public class ParticleTest extends BaseScreen {
 	ParticleEffectPool pool;
 	Array<ParticleEffectPool.PooledEffect> effects;
 	ParticleEffectPool.PooledEffect current;
-	public ParticleTest (PlaygroundGame game) {
+	public ParticleTest (GameReset game) {
 		super(game);
 		ParticleEffect effect = new ParticleEffect();
 		effect.load(Gdx.files.internal("particles/test.p"), Gdx.files.internal("particles"));

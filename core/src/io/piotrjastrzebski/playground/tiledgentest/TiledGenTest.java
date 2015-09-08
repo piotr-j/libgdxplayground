@@ -15,7 +15,6 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Array;
 import io.piotrjastrzebski.playground.BaseScreen;
 import io.piotrjastrzebski.playground.PlaygroundGame;
-import io.piotrjastrzebski.playground.Utils;
 import io.piotrjastrzebski.playground.tiledgentest.generators.TerrainGen;
 
 /**

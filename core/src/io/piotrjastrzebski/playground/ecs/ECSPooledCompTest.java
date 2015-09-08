@@ -3,12 +3,12 @@ package io.piotrjastrzebski.playground.ecs;
 import com.artemis.*;
 import com.artemis.systems.EntityProcessingSystem;
 import io.piotrjastrzebski.playground.BaseScreen;
-import io.piotrjastrzebski.playground.PlaygroundGame;
+import io.piotrjastrzebski.playground.GameReset;
 
 public class ECSPooledCompTest extends BaseScreen {
 
 	World world;
-	public ECSPooledCompTest (PlaygroundGame game) {
+	public ECSPooledCompTest (GameReset game) {
 		super(game);
 		WorldConfiguration config = new WorldConfiguration();
 		config.setSystem(new Adder());

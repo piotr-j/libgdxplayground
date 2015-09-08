@@ -4,11 +4,10 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
-import com.badlogic.gdx.utils.IntMap;
-import com.kotcrab.vis.ui.FocusManager;
-import com.kotcrab.vis.ui.widget.*;
+import com.kotcrab.vis.ui.widget.VisDialog;
+import com.kotcrab.vis.ui.widget.VisTextButton;
 import io.piotrjastrzebski.playground.BaseScreen;
-import io.piotrjastrzebski.playground.PlaygroundGame;
+import io.piotrjastrzebski.playground.GameReset;
 
 /**
  * Created by PiotrJ on 20/06/15.
@@ -16,7 +15,7 @@ import io.piotrjastrzebski.playground.PlaygroundGame;
 public class UIDialogTest extends BaseScreen {
 	private final static String TAG = UIDialogTest.class.getSimpleName();
 
-	public UIDialogTest (PlaygroundGame game) {
+	public UIDialogTest (GameReset game) {
 		super(game);
 
 		VisTextButton button = new VisTextButton("Show dialog");

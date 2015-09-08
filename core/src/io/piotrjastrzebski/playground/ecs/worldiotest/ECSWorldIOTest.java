@@ -3,24 +3,18 @@ package io.piotrjastrzebski.playground.ecs.worldiotest;
 import com.artemis.*;
 import com.artemis.annotations.EntityId;
 import com.artemis.annotations.Wire;
-import com.artemis.io.ComponentLookupSerializer;
-import com.artemis.io.EntitySerializer;
 import com.artemis.io.JsonArtemisSerializer;
 import com.artemis.io.SaveFileFormat;
 import com.artemis.managers.WorldSerializationManager;
-import com.artemis.systems.EntityProcessingSystem;
 import com.artemis.utils.Bag;
 import com.artemis.utils.IntBag;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.utils.Json;
-import com.badlogic.gdx.utils.JsonWriter;
 import io.piotrjastrzebski.playground.BaseScreen;
-import io.piotrjastrzebski.playground.PlaygroundGame;
+import io.piotrjastrzebski.playground.GameReset;
 
 import java.io.ByteArrayInputStream;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
-import java.util.IdentityHashMap;
 
 @Wire
 public class ECSWorldIOTest extends BaseScreen {
@@ -28,7 +22,7 @@ public class ECSWorldIOTest extends BaseScreen {
 	World world;
 	AspectSubscriptionManager subscriptions;
 
-	public ECSWorldIOTest (PlaygroundGame game) {
+	public ECSWorldIOTest (GameReset game) {
 		super(game);
 		WorldConfiguration config = new WorldConfiguration();
 

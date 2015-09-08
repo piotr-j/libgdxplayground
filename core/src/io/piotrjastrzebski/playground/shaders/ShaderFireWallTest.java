@@ -3,7 +3,7 @@ package io.piotrjastrzebski.playground.shaders;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
-import io.piotrjastrzebski.playground.PlaygroundGame;
+import io.piotrjastrzebski.playground.GameReset;
 
 /**
  * Adapted from http://forums.tigsource.com/index.php?topic=48508.msg1163762#msg1163762
@@ -13,7 +13,7 @@ import io.piotrjastrzebski.playground.PlaygroundGame;
 public class ShaderFireWallTest extends ShaderTestBase {
 	Texture noise;
 
-	public ShaderFireWallTest (PlaygroundGame game) {
+	public ShaderFireWallTest (GameReset game) {
 		super(game);
 	}
 

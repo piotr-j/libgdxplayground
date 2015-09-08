@@ -3,26 +3,10 @@ package io.piotrjastrzebski.playground.ecs;
 import com.artemis.*;
 import com.artemis.utils.Bag;
 import com.artemis.utils.ImmutableBag;
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.ai.btree.BehaviorTree;
-import com.badlogic.gdx.ai.btree.LeafTask;
-import com.badlogic.gdx.ai.btree.Task;
-import com.badlogic.gdx.ai.btree.utils.BehaviorTreeParser;
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.StreamUtils;
-import com.kotcrab.vis.ui.widget.VisLabel;
 import io.piotrjastrzebski.playground.BaseScreen;
-import io.piotrjastrzebski.playground.PlaygroundGame;
-import io.piotrjastrzebski.playground.ecs.aijobs.*;
-import io.piotrjastrzebski.playground.ecs.aijobs.components.Worker;
-import io.piotrjastrzebski.playground.ecs.aijobs.systems.JobMaker;
-import io.piotrjastrzebski.playground.ecs.aijobs.systems.Jobs;
-import io.piotrjastrzebski.playground.ecs.aijobs.systems.Workers;
-import io.piotrjastrzebski.playground.ecs.aijobs.tasks.BaseTask;
+import io.piotrjastrzebski.playground.GameReset;
 
-import java.io.Reader;
 import java.util.Comparator;
 
 /**
@@ -37,7 +21,7 @@ public abstract class ECSTestBase extends BaseScreen {
 
 	protected World world;
 
-	public ECSTestBase (PlaygroundGame game) {
+	public ECSTestBase (GameReset game) {
 		super(game);
 		WorldConfiguration config = new WorldConfiguration();
 		config.register(WIRE_GUI_CAM, guiCamera);

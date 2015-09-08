@@ -5,14 +5,14 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import io.piotrjastrzebski.playground.BaseScreen;
-import io.piotrjastrzebski.playground.PlaygroundGame;
+import io.piotrjastrzebski.playground.GameReset;
 
 public class VPTest extends BaseScreen {
 	public final static float VP_WIDTH = 40f;
 	public final static float VP_HEIGHT = 22.5f;
 	OrthographicCamera camera;
 	ExtendViewport viewport;
-	public VPTest (PlaygroundGame game) {
+	public VPTest (GameReset game) {
 		super(game);
 		camera = new OrthographicCamera();
 		viewport = new ExtendViewport(VP_WIDTH, VP_HEIGHT, camera);
