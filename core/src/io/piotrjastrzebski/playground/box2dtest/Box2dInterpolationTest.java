@@ -98,7 +98,8 @@ public class Box2dInterpolationTest extends BaseScreen {
 		accumulator += delta;
 		int steps = 0;
 		while (STEP_TIME < accumulator && MAX_STEPS > steps) {
-			box2dWorld.clearForces();
+			// TODO figure out if we need this
+//			box2dWorld.clearForces();
 			box2dWorld.step(STEP_TIME, 6, 2);
 			accumulator -= STEP_TIME;
 			steps++;
