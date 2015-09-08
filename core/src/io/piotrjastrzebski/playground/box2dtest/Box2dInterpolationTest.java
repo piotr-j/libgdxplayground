@@ -1,8 +1,11 @@
 package io.piotrjastrzebski.playground.box2dtest;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.*;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.physics.box2d.joints.MouseJoint;
@@ -121,15 +124,23 @@ public class Box2dInterpolationTest extends BaseScreen {
 	}
 
 	private void draw () {
-		if (debugDraw) {
-			debugRenderer.render(box2dWorld, gameCamera.combined);
-		}
+		Gdx.gl.glClearColor(0.5f, 0.5f, 0.5f, 1);
+		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 		batch.setProjectionMatrix(gameCamera.combined);
 		batch.begin();
 		for (Box box : boxes) {
 			box.draw(batch);
 		}
 		batch.end();
+		if (debugDraw) {
+			renderer.setProjectionMatrix(gameCamera.combined);
+			Gdx.gl.glEnable(GL20.GL_BLEND);
+			renderer.begin(ShapeRenderer.ShapeType.Filled);
+			for (Box box : boxes) {
+				box.draw(renderer);
+			}
+			renderer.end();
+		}
 	}
 
 	private class Box {
@@ -167,8 +178,17 @@ public class Box2dInterpolationTest extends BaseScreen {
 
 		public void draw (Batch batch) {
 			batch
-				.draw(texture, current.x - width / 2, current.y - height / 2, width / 2, height / 2, width, height, 1, 1, current.rot(),
-					0, 0, srcWidth, srcHeight, false, false);
+				.draw(texture, current.x - width / 2, current.y - height / 2, width / 2, height / 2, width, height, 1, 1,
+					current.rot, 0, 0, srcWidth, srcHeight, false, false);
+		}
+
+		public void draw(ShapeRenderer renderer) {
+			renderer.setColor(1, 0, 0, 0.33f);
+			renderer.rect(start.x - width / 2, start.y - height / 2, width / 2, height / 2, width, height, 1, 1, start.rot);
+			renderer.setColor(0, 1, 0, 0.33f);
+			renderer.rect(current.x - width / 2, current.y - height / 2, width / 2, height / 2, width, height, 1, 1, current.rot);
+			renderer.setColor(0, 0, 1, 0.33f);
+			renderer.rect(target.x - width / 2, target.y - height / 2, width / 2, height / 2, width, height, 1, 1, target.rot);
 		}
 
 		private class Transform {
@@ -189,22 +209,13 @@ public class Box2dInterpolationTest extends BaseScreen {
 			}
 
 			public void interpolate (Transform src, Transform dst, float alpha) {
+				// TODO this shit is busted fix!
 				x = Interpolation.linear.apply(src.x, dst.x, alpha);
 				y = Interpolation.linear.apply(src.y, dst.y, alpha);
-				// if angle > PI then angle -= PI2 where angle = angle < 0 ? PI2 - (-angle % PI2) : angle % PI2 and angle = target - source
-
 				float angle = dst.rot - src.rot;
 				angle = angle < 0 ? 360 - (-angle % 360) : angle % 360;
 				if (angle > 180) angle -= 360;
-//				rot = Interpolation.linear.apply(src.rot, dst.rot, alpha);
 				rot = src.rot + angle * alpha;
-
-//				rot = rot < 0 ? 360 - (-rot % 360) : rot % 360;
-//				if (rot > 180) rot -= 360;
-			}
-
-			public float rot() {
-				return rot;
 			}
 		}
 	}
