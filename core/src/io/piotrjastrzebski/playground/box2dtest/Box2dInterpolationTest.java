@@ -42,6 +42,8 @@ public class Box2dInterpolationTest extends BaseScreen {
 	Array<Box> boxes = new Array<>();
 	Texture largeBox;
 	Texture smallBox;
+	Texture smallCircle;
+	Texture largeCircle;
 	Box2DDebugRenderer debugRenderer;
 	boolean debugDraw = true;
 
@@ -51,6 +53,8 @@ public class Box2dInterpolationTest extends BaseScreen {
 		box2dWorld = new World(new Vector2(0, -10), true);
 		largeBox = new Texture("box2d/box64.png");
 		smallBox = new Texture("box2d/box32.png");
+		smallCircle = new Texture("box2d/circle32.png");
+		largeCircle = new Texture("box2d/circle64.png");
 		createBounds();
 		reset();
 		createSettings();
@@ -144,7 +148,7 @@ public class Box2dInterpolationTest extends BaseScreen {
 		});
 		c.add(stepInterpolated);
 		stepTypes.add(stepInterpolated);
-		stepTypes.setChecked(stepVaried.getText().toString());
+		stepTypes.setChecked(stepInterpolated.getText().toString());
 
 		window.add(c);
 		window.pack();
@@ -193,29 +197,46 @@ public class Box2dInterpolationTest extends BaseScreen {
 		}
 		boxes.clear();
 
-		for (int i = 0; i < 30; i++) {
+		for (int i = 0; i < 50; i++) {
 			float x = MathUtils.random(-15, 15);
 			float y = MathUtils.random(-8, 8);
 			float rotation = MathUtils.random(90);
-			if (MathUtils.randomBoolean()) {
-				createBox(x, y, rotation, largeBox);
-			} else {
-				createBox(x, y, rotation, smallBox);
+			switch (MathUtils.random(4)) {
+			case 0:
+				createShape(x, y, rotation, largeBox, true);
+				break;
+			case 1:
+				createShape(x, y, rotation, smallBox, true);
+				break;
+			case 2:
+				createShape(x, y, rotation, largeCircle, false);
+				break;
+			case 3:
+				createShape(x, y, rotation, smallCircle, false);
+				break;
 			}
 		}
 	}
 
-	private void createBox (float x, float y, float rotation, Texture texture) {
+	private void createShape (float x, float y, float rotation, Texture texture, boolean isBox) {
 		Box box = new Box(x, y, rotation, texture);
-
 		BodyDef def = new BodyDef();
 		def.position.set(x, y);
 		def.angle = rotation * MathUtils.degreesToRadians;
 		def.type = BodyDef.BodyType.DynamicBody;
 		box.body = box2dWorld.createBody(def);
-		PolygonShape shape = new PolygonShape();
-		shape.setAsBox(box.width / 2, box.height / 2);
+		Shape shape;
+		if (isBox) {
+			PolygonShape poly = new PolygonShape();
+			poly.setAsBox(box.width / 2, box.height / 2);
+			shape = poly;
+		} else {
+			CircleShape circle = new CircleShape();
+			circle.setRadius(box.width/2);
+			shape = circle;
+		}
 		box.body.createFixture(shape, 1);
+		box.isBox = isBox;
 		shape.dispose();
 
 		boxes.add(box);
@@ -256,10 +277,12 @@ public class Box2dInterpolationTest extends BaseScreen {
 			while (stepTime < accumulator && MAX_STEPS > steps) {
 				// TODO figure out if we need this
 				//	box2dWorld.clearForces();
+				// fixed update before step works a lot better
+				fixedUpdate();
 				box2dWorld.step(stepTime, 6, 2);
 				accumulator -= stepTime;
 				steps++;
-				fixedUpdate();
+//				fixedUpdate();
 			}
 			variableUpdate(delta, accumulator / stepTime);
 			break;
@@ -308,6 +331,7 @@ public class Box2dInterpolationTest extends BaseScreen {
 		private float height;
 		private int srcWidth;
 		private int srcHeight;
+		public boolean isBox;
 
 		public Box (float x, float y, float rotation, Texture texture) {
 			current.set(x, y, rotation);
@@ -338,16 +362,29 @@ public class Box2dInterpolationTest extends BaseScreen {
 		}
 
 		public void draw(ShapeRenderer renderer) {
-			renderer.setColor(startClr);
-			renderer.rect(start.x - width / 2, start.y - height / 2, width / 2, height / 2, width, height, 1, 1, start.rot);
-			renderer.rectLine(start.x, start.y, current.x, current.y, width * 0.05f);
+			if (isBox) {
+				renderer.setColor(startClr);
+				renderer.rect(start.x - width / 2, start.y - height / 2, width / 2, height / 2, width, height, 1, 1, start.rot);
+				renderer.rectLine(start.x, start.y, current.x, current.y, width * 0.05f);
 
-			renderer.setColor(currentClr);
-			renderer.rect(current.x - width / 2, current.y - height / 2, width / 2, height / 2, width, height, 1, 1, current.rot);
-			renderer.rectLine(current.x, current.y, target.x, target.y, width * 0.05f);
+				renderer.setColor(currentClr);
+				renderer.rect(current.x - width / 2, current.y - height / 2, width / 2, height / 2, width, height, 1, 1, current.rot);
+				renderer.rectLine(current.x, current.y, target.x, target.y, width * 0.05f);
 
-			renderer.setColor(targetClr);
-			renderer.rect(target.x - width / 2, target.y - height / 2, width / 2, height / 2, width, height, 1, 1, target.rot);
+				renderer.setColor(targetClr);
+				renderer.rect(target.x - width / 2, target.y - height / 2, width / 2, height / 2, width, height, 1, 1, target.rot);
+			} else {
+				renderer.setColor(startClr);
+				renderer.circle(start.x, start.y, width / 2, 32);
+				renderer.rectLine(start.x, start.y, current.x, current.y, width * 0.05f);
+
+				renderer.setColor(currentClr);
+				renderer.circle(current.x, current.y, width / 2, 32);
+				renderer.rectLine(current.x, current.y, target.x, target.y, width * 0.05f);
+
+				renderer.setColor(targetClr);
+				renderer.circle(target.x, target.y, width / 2, 32);
+			}
 		}
 
 		private class Transform {
@@ -463,5 +500,7 @@ public class Box2dInterpolationTest extends BaseScreen {
 		super.dispose();
 		largeBox.dispose();
 		smallBox.dispose();
+		largeCircle.dispose();
+		smallCircle.dispose();
 	}
 }
