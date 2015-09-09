@@ -2,6 +2,7 @@ package io.piotrjastrzebski.playground.box2dtest;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
@@ -247,12 +248,19 @@ public class Box2dInterpolationTest extends BaseScreen {
 					current.rot, 0, 0, srcWidth, srcHeight, false, false);
 		}
 
+		Color startClr = new Color(1, 0, 0, 0.33f);
+		Color currentClr = new Color(0, 1, 0, 0.33f);
+		Color targetClr = new Color(0, 0, 1, 0.33f);
 		public void draw(ShapeRenderer renderer) {
-			renderer.setColor(1, 0, 0, 0.33f);
+			renderer.setColor(startClr);
 			renderer.rect(start.x - width / 2, start.y - height / 2, width / 2, height / 2, width, height, 1, 1, start.rot);
-			renderer.setColor(0, 1, 0, 0.33f);
+			renderer.rectLine(start.x, start.y, current.x, current.y, 0.1f);
+
+			renderer.setColor(currentClr);
 			renderer.rect(current.x - width / 2, current.y - height / 2, width / 2, height / 2, width, height, 1, 1, current.rot);
-			renderer.setColor(0, 0, 1, 0.33f);
+			renderer.rectLine(current.x, current.y, target.x, target.y, 0.1f);
+
+			renderer.setColor(targetClr);
 			renderer.rect(target.x - width / 2, target.y - height / 2, width / 2, height / 2, width, height, 1, 1, target.rot);
 		}
 
