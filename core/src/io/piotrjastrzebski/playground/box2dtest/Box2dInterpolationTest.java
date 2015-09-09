@@ -17,10 +17,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Array;
 import com.kotcrab.vis.ui.VisUI;
-import com.kotcrab.vis.ui.widget.VisLabel;
-import com.kotcrab.vis.ui.widget.VisSlider;
-import com.kotcrab.vis.ui.widget.VisTextButton;
-import com.kotcrab.vis.ui.widget.VisWindow;
+import com.kotcrab.vis.ui.widget.*;
 import io.piotrjastrzebski.playground.BaseScreen;
 import io.piotrjastrzebski.playground.GameReset;
 
@@ -32,6 +29,10 @@ public class Box2dInterpolationTest extends BaseScreen {
 	private final static int MAX_STEPS = 3;
 	private float stepDiv = 60;
 	private float stepTime = 1f/stepDiv;
+
+	Color startClr = new Color(1, 0, 0, 0.33f);
+	Color currentClr = new Color(0, 1, 0, 0.33f);
+	Color targetClr = new Color(0, 0, 1, 0.33f);
 
 	World box2dWorld;
 	Array<Box> boxes = new Array<>();
@@ -55,6 +56,7 @@ public class Box2dInterpolationTest extends BaseScreen {
 	VisTextButton pauseBtn;
 	private void createSettings () {
 		VisWindow window = new VisWindow("Settings");
+		VisTable c = new VisTable(true);
 		VisLabel stepTimeLabel = new VisLabel("StepTime");
 		final VisSlider stepTimeSlider = new VisSlider(5, 120, 5, false);
 		final VisLabel stepTimeVal = new VisLabel("1/15f");
@@ -66,19 +68,33 @@ public class Box2dInterpolationTest extends BaseScreen {
 			}
 		});
 		stepTimeSlider.setValue(stepDiv);
-		window.add(stepTimeLabel);
-		window.add(stepTimeSlider).width(140 * VisUI.getSizes().scaleFactor);
-		window.add(stepTimeVal).width(100 * VisUI.getSizes().scaleFactor);
-		window.row();
+		c.add(stepTimeLabel);
+		c.add(stepTimeSlider).width(140 * VisUI.getSizes().scaleFactor);
+		c.add(stepTimeVal).width(100 * VisUI.getSizes().scaleFactor);
+		c.row();
 
 		pauseBtn = new VisTextButton("Pause Sim", "toggle");
-		pauseBtn.addListener(new ClickListener(){
+		pauseBtn.addListener(new ClickListener() {
 			@Override public void clicked (InputEvent event, float x, float y) {
 				toggleSim();
 			}
 		});
-		window.add(pauseBtn);
+		c.add(pauseBtn);
 
+		VisLabel debugColor = new VisLabel("Transform debug color");
+		c.add(debugColor).row();
+		VisLabel startColor = new VisLabel("START");
+		startColor.setColor(Color.RED);
+		c.add(startColor);
+		VisLabel currColor = new VisLabel("CURRENT");
+		currColor.setColor(Color.GREEN);
+		c.add(currColor);
+		VisLabel targetColor = new VisLabel("TARGET");
+		targetColor.setColor(Color.BLUE);
+		c.add(targetColor);
+
+
+		window.add(c);
 		window.pack();
 		stage.addActor(window);
 		window.setPosition(0, stage.getHeight() - window.getHeight());
@@ -248,17 +264,14 @@ public class Box2dInterpolationTest extends BaseScreen {
 					current.rot, 0, 0, srcWidth, srcHeight, false, false);
 		}
 
-		Color startClr = new Color(1, 0, 0, 0.33f);
-		Color currentClr = new Color(0, 1, 0, 0.33f);
-		Color targetClr = new Color(0, 0, 1, 0.33f);
 		public void draw(ShapeRenderer renderer) {
 			renderer.setColor(startClr);
 			renderer.rect(start.x - width / 2, start.y - height / 2, width / 2, height / 2, width, height, 1, 1, start.rot);
-			renderer.rectLine(start.x, start.y, current.x, current.y, 0.1f);
+			renderer.rectLine(start.x, start.y, current.x, current.y, width * 0.05f);
 
 			renderer.setColor(currentClr);
 			renderer.rect(current.x - width / 2, current.y - height / 2, width / 2, height / 2, width, height, 1, 1, current.rot);
-			renderer.rectLine(current.x, current.y, target.x, target.y, 0.1f);
+			renderer.rectLine(current.x, current.y, target.x, target.y, width * 0.05f);
 
 			renderer.setColor(targetClr);
 			renderer.rect(target.x - width / 2, target.y - height / 2, width / 2, height / 2, width, height, 1, 1, target.rot);
