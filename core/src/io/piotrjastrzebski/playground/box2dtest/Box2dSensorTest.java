@@ -1,7 +1,9 @@
 package io.piotrjastrzebski.playground.box2dtest;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
@@ -41,8 +43,8 @@ public class Box2dSensorTest extends BaseScreen {
 		world = new World(new Vector2(0, -10), true);
 		world.setContactListener(new ContactListener() {
 			@Override public void beginContact (Contact contact) {
-				Object udA = contact.getFixtureA().getBody().getUserData();
-				Object udB = contact.getFixtureB().getBody().getUserData();
+				Object udA = contact.getFixtureA().getUserData();
+				Object udB = contact.getFixtureB().getUserData();
 				// we only care if both objects are no null
 				// note this can be cleaner if all bodies have same type of user data and that handles the checks
 				if (udA == null || udB == null) return;
@@ -59,8 +61,8 @@ public class Box2dSensorTest extends BaseScreen {
 			}
 
 			@Override public void endContact (Contact contact) {
-				Object udA = contact.getFixtureA().getBody().getUserData();
-				Object udB = contact.getFixtureB().getBody().getUserData();
+				Object udA = contact.getFixtureA().getUserData();
+				Object udB = contact.getFixtureB().getUserData();
 				// we only care if both objects are no null
 				// note this can be cleaner if all bodies have same type of user data and that handles the checks
 				if (udA == null || udB == null) return;
@@ -119,7 +121,7 @@ public class Box2dSensorTest extends BaseScreen {
 		for (int i = 0; i < 3; i++) {
 			float x = MathUtils.random(-15, 15);
 			float y = MathUtils.random(-8, 8);
-			createSensor(x, y);
+			createSensor(x, y, 2.5f);
 		}
 	}
 
@@ -133,34 +135,50 @@ public class Box2dSensorTest extends BaseScreen {
 		box.body = world.createBody(def);
 		PolygonShape shape = new PolygonShape();
 		shape.setAsBox(box.width / 2, box.height / 2);
-		box.body.createFixture(shape, 1);
+		box.body.createFixture(shape, 1).setUserData(box);
 		shape.dispose();
-		box.body.setUserData(box);
 		boxes.add(box);
-	}
 
-	private void createSensor (float x, float y) {
 		Sensor sensor = new Sensor();
 		sensor.x = x;
 		sensor.y = y;
-		sensor.height = 5;
-		sensor.width = 5;
+		sensor.radius = box.width;
+
+		CircleShape circleShape = new CircleShape();
+		circleShape.setRadius(sensor.radius);
+		FixtureDef fixtureDef = new FixtureDef();
+		fixtureDef.shape = circleShape;
+		fixtureDef.density = 1;
+		fixtureDef.isSensor = true;
+		box.body.createFixture(fixtureDef).setUserData(sensor);
+		circleShape.dispose();
+		sensor.body = box.body;
+		sensors.add(sensor);
+
+	}
+
+	private Sensor createSensor (float x, float y, float radius) {
+		Sensor sensor = new Sensor();
+		sensor.x = x;
+		sensor.y = y;
+		sensor.radius = radius;
 
 		BodyDef def = new BodyDef();
-		def.position.set(x + sensor.width / 2, y + sensor.height / 2);
+		def.position.set(x, y);
 		Body body = world.createBody(def);
-		PolygonShape shape = new PolygonShape();
-		shape.setAsBox(sensor.width / 2, sensor.height / 2);
+		CircleShape shape = new CircleShape();
+		shape.setRadius(sensor.radius);
 		FixtureDef fixtureDef = new FixtureDef();
 		fixtureDef.shape = shape;
 		fixtureDef.density = 1;
 		fixtureDef.isSensor = true;
-		body.createFixture(fixtureDef);
+		body.createFixture(fixtureDef).setUserData(sensor);
 		shape.dispose();
 
-		body.setUserData(sensor);
 		sensor.body = body;
 		sensors.add(sensor);
+
+		return sensor;
 	}
 
 	@Override public void render (float delta) {
@@ -177,6 +195,7 @@ public class Box2dSensorTest extends BaseScreen {
 		if (debugDraw) {
 			debugRenderer.render(world, gameCamera.combined);
 		}
+		Gdx.gl.glEnable(GL20.GL_BLEND);
 		renderer.setProjectionMatrix(gameCamera.combined);
 		renderer.begin(ShapeRenderer.ShapeType.Filled);
 		for (Sensor s : sensors) {
@@ -190,27 +209,33 @@ public class Box2dSensorTest extends BaseScreen {
 		}
 		batch.end();
 	}
+
 	private class Sensor {
 		public Body body;
-		public float x, y, width, height;
+		public Box owner;
+		public float x, y, radius;
 
 		int touching = 0;
 		public void startTouching(Box box) {
+			if (owner == box) return;
 			touching++;
 		}
 
 		public void endTouching(Box box) {
+			if (owner == box) return;
 			touching--;
 		}
 
-
 		public void draw (ShapeRenderer renderer) {
+			Vector2 pos = body.getPosition();
+			x = pos.x;
+			y = pos.y;
 			if (touching > 0) {
-				renderer.setColor(Color.RED);
+				renderer.setColor(1, 0, 0, .5f);
 			} else {
-				renderer.setColor(Color.GREEN);
+				renderer.setColor(0, 1, 0, .5f);
 			}
-			renderer.rect(x, y, width, height);
+			renderer.circle(x, y, radius, 16);
 		}
 	}
 
@@ -256,7 +281,7 @@ public class Box2dSensorTest extends BaseScreen {
 		public boolean reportFixture(Fixture fixture) {
 			if (fixture.getBody() == groundBody)
 				return true;
-
+			if (fixture.isSensor()) return true;
 			if (fixture.testPoint(testPoint.x, testPoint.y)) {
 				hitBody = fixture.getBody();
 				return false;
