@@ -10,7 +10,16 @@ import com.badlogic.gdx.math.*;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.physics.box2d.joints.MouseJoint;
 import com.badlogic.gdx.physics.box2d.joints.MouseJointDef;
+import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Array;
+import com.kotcrab.vis.ui.VisUI;
+import com.kotcrab.vis.ui.widget.VisLabel;
+import com.kotcrab.vis.ui.widget.VisSlider;
+import com.kotcrab.vis.ui.widget.VisTextButton;
+import com.kotcrab.vis.ui.widget.VisWindow;
 import io.piotrjastrzebski.playground.BaseScreen;
 import io.piotrjastrzebski.playground.GameReset;
 
@@ -20,6 +29,8 @@ import io.piotrjastrzebski.playground.GameReset;
 public class Box2dInterpolationTest extends BaseScreen {
 	public final static float STEP_TIME = 1.0f / 60.0f;
 	private final static int MAX_STEPS = 3;
+	private float stepDiv = 60;
+	private float stepTime = 1f/stepDiv;
 
 	World box2dWorld;
 	Array<Box> boxes = new Array<>();
@@ -36,6 +47,56 @@ public class Box2dInterpolationTest extends BaseScreen {
 		smallBox = new Texture("box2d/box32.png");
 		createBounds();
 		reset();
+		createSettings();
+		runSim(true);
+	}
+
+	VisTextButton pauseBtn;
+	private void createSettings () {
+		VisWindow window = new VisWindow("Settings");
+		VisLabel stepTimeLabel = new VisLabel("StepTime");
+		final VisSlider stepTimeSlider = new VisSlider(5, 120, 5, false);
+		final VisLabel stepTimeVal = new VisLabel("1/15f");
+		stepTimeSlider.addListener(new ChangeListener() {
+			@Override public void changed (ChangeEvent event, Actor actor) {
+				stepDiv = stepTimeSlider.getValue();
+				stepTime = 1f / stepDiv;
+				stepTimeVal.setText(String.format("1/%d", (int)stepDiv));
+			}
+		});
+		stepTimeSlider.setValue(stepDiv);
+		window.add(stepTimeLabel);
+		window.add(stepTimeSlider).width(140 * VisUI.getSizes().scaleFactor);
+		window.add(stepTimeVal).width(100 * VisUI.getSizes().scaleFactor);
+		window.row();
+
+		pauseBtn = new VisTextButton("Pause Sim", "toggle");
+		pauseBtn.addListener(new ClickListener(){
+			@Override public void clicked (InputEvent event, float x, float y) {
+				toggleSim();
+			}
+		});
+		window.add(pauseBtn);
+
+		window.pack();
+		stage.addActor(window);
+		window.setPosition(0, stage.getHeight() - window.getHeight());
+	}
+
+	boolean simRunning;
+	private void toggleSim() {
+		runSim(!simRunning);
+	}
+
+	private void runSim (boolean enabled) {
+		simRunning = enabled;
+		if (simRunning) {
+			pauseBtn.setChecked(true);
+			pauseBtn.setText("Pause Sim");
+		} else {
+			pauseBtn.setChecked(false);
+			pauseBtn.setText("Resume Sim");
+		}
 	}
 
 	Body groundBody;
@@ -95,20 +156,24 @@ public class Box2dInterpolationTest extends BaseScreen {
 
 	@Override public void render (float delta) {
 		super.render(delta);
-		accumulator += delta;
-		int steps = 0;
-		while (STEP_TIME < accumulator && MAX_STEPS > steps) {
-			// TODO figure out if we need this
-//			box2dWorld.clearForces();
-			box2dWorld.step(STEP_TIME, 6, 4);
-			accumulator -= STEP_TIME;
-			steps++;
-			fixedUpdate();
+		if (simRunning) {
+			accumulator += delta;
+			int steps = 0;
+			while (stepTime < accumulator && MAX_STEPS > steps) {
+				// TODO figure out if we need this
+				//	box2dWorld.clearForces();
+				box2dWorld.step(stepTime, 6, 4);
+				accumulator -= stepTime;
+				steps++;
+				fixedUpdate();
+			}
+
+			variableUpdate(delta, accumulator / stepTime);
 		}
 
-		variableUpdate(delta, accumulator / STEP_TIME);
-
 		draw();
+		stage.act(delta);
+		stage.draw();
 	}
 
 	private void fixedUpdate () {
@@ -293,6 +358,9 @@ public class Box2dInterpolationTest extends BaseScreen {
 		}
 		if (keycode == Input.Keys.Z) {
 			debugDraw = !debugDraw;
+		}
+		if (keycode == Input.Keys.SPACE) {
+			toggleSim();
 		}
 		return super.keyDown(keycode);
 	}
