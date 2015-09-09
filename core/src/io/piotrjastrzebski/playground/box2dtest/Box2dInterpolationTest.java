@@ -13,6 +13,7 @@ import com.badlogic.gdx.physics.box2d.joints.MouseJoint;
 import com.badlogic.gdx.physics.box2d.joints.MouseJointDef;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.ui.ButtonGroup;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Array;
@@ -25,10 +26,13 @@ import io.piotrjastrzebski.playground.GameReset;
  * Created by PiotrJ on 31/07/15.
  */
 public class Box2dInterpolationTest extends BaseScreen {
+	enum TSType {VARIED, FIXED, FIXED_INTERPOLATED}
+
 	public final static float STEP_TIME = 1.0f / 60.0f;
 	private final static int MAX_STEPS = 3;
 	private float stepDiv = 60;
 	private float stepTime = 1f/stepDiv;
+	private TSType timeStepType = TSType.VARIED;
 
 	Color startClr = new Color(1, 0, 0, 0.33f);
 	Color currentClr = new Color(0, 1, 0, 0.33f);
@@ -53,10 +57,27 @@ public class Box2dInterpolationTest extends BaseScreen {
 		runSim(true);
 	}
 
+	int targetFPS = 60;
 	VisTextButton pauseBtn;
 	private void createSettings () {
 		VisWindow window = new VisWindow("Settings");
 		VisTable c = new VisTable(true);
+
+		VisLabel fpsLabel = new VisLabel("FPS");
+		final VisSlider fpsSlider = new VisSlider(5, 120, 5, false);
+		final VisLabel fpsVal = new VisLabel("60");
+		fpsSlider.addListener(new ChangeListener() {
+			@Override public void changed (ChangeEvent event, Actor actor) {
+				targetFPS = (int)fpsSlider.getValue();
+				fpsVal.setText(String.format("%d", targetFPS));
+			}
+		});
+		fpsSlider.setValue(targetFPS);
+		c.add(fpsLabel);
+		c.add(fpsSlider).width(140 * VisUI.getSizes().scaleFactor);
+		c.add(fpsVal).width(100 * VisUI.getSizes().scaleFactor);
+		c.row();
+
 		VisLabel stepTimeLabel = new VisLabel("StepTime");
 		final VisSlider stepTimeSlider = new VisSlider(5, 120, 5, false);
 		final VisLabel stepTimeVal = new VisLabel("1/15f");
@@ -92,7 +113,38 @@ public class Box2dInterpolationTest extends BaseScreen {
 		VisLabel targetColor = new VisLabel("TARGET");
 		targetColor.setColor(Color.BLUE);
 		c.add(targetColor);
+		c.row();
 
+		c.add(new VisLabel("Step type")).row();
+
+		ButtonGroup<VisTextButton> stepTypes = new ButtonGroup<>();
+		stepTypes.setMinCheckCount(1);
+		stepTypes.setMaxCheckCount(1);
+		VisTextButton stepVaried = new VisTextButton("VARIED", "toggle");
+		stepVaried.addListener(new ClickListener() {
+			@Override public void clicked (InputEvent event, float x, float y) {
+				timeStepType = TSType.VARIED;
+			}
+		});
+		c.add(stepVaried);
+		stepTypes.add(stepVaried);
+		VisTextButton stepFixed = new VisTextButton("FIXED", "toggle");
+		stepFixed.addListener(new ClickListener() {
+			@Override public void clicked (InputEvent event, float x, float y) {
+				timeStepType = TSType.FIXED;
+			}
+		});
+		c.add(stepFixed);
+		stepTypes.add(stepFixed);
+		VisTextButton stepInterpolated = new VisTextButton("INTERP", "toggle");
+		stepInterpolated.addListener(new ClickListener(){
+			@Override public void clicked (InputEvent event, float x, float y) {
+				timeStepType = TSType.FIXED_INTERPOLATED;
+			}
+		});
+		c.add(stepInterpolated);
+		stepTypes.add(stepInterpolated);
+		stepTypes.setChecked(stepVaried.getText().toString());
 
 		window.add(c);
 		window.pack();
@@ -169,28 +221,49 @@ public class Box2dInterpolationTest extends BaseScreen {
 		boxes.add(box);
 	}
 
-	float accumulator;
-
+	float fpsAcc;
 	@Override public void render (float delta) {
 		super.render(delta);
-		if (simRunning) {
-			accumulator += delta;
-			int steps = 0;
-			while (stepTime < accumulator && MAX_STEPS > steps) {
-				// TODO figure out if we need this
-				//	box2dWorld.clearForces();
-				box2dWorld.step(stepTime, 6, 4);
-				accumulator -= stepTime;
-				steps++;
-				fixedUpdate();
-			}
-
-			variableUpdate(delta, accumulator / stepTime);
+		fpsAcc += delta;
+		float frame = 1f/targetFPS;
+		while (frame < fpsAcc) {
+			update(frame);
+			fpsAcc -= frame;
 		}
 
 		draw();
 		stage.act(delta);
 		stage.draw();
+	}
+
+	float accumulator;
+	private void update (float delta) {
+		if (!simRunning) return;
+		switch (timeStepType) {
+		case VARIED:
+			box2dWorld.step(delta, 6, 2);
+			fixedUpdate();
+			variableUpdate(delta, 1);
+			break;
+		case FIXED:
+			box2dWorld.step(stepTime, 6, 2);
+			fixedUpdate();
+			variableUpdate(delta, 1);
+			break;
+		case FIXED_INTERPOLATED:
+			accumulator += delta;
+			int steps = 0;
+			while (stepTime < accumulator && MAX_STEPS > steps) {
+				// TODO figure out if we need this
+				//	box2dWorld.clearForces();
+				box2dWorld.step(stepTime, 6, 2);
+				accumulator -= stepTime;
+				steps++;
+				fixedUpdate();
+			}
+			variableUpdate(delta, accumulator / stepTime);
+			break;
+		}
 	}
 
 	private void fixedUpdate () {
