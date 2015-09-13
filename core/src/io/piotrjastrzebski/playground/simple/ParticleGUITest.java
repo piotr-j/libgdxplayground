@@ -4,7 +4,6 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.ParticleEffect;
 import com.badlogic.gdx.graphics.g2d.ParticleEffectPool;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Array;
@@ -18,7 +17,6 @@ import java.util.Iterator;
 public class ParticleGUITest extends BaseScreen {
 	ParticleEffectPool pool;
 	Array<ParticleEffectPool.PooledEffect> effects;
-	ParticleEffectPool.PooledEffect current;
 	public ParticleGUITest (GameReset game) {
 		super(game);
 		final ParticleEffect effect = new ParticleEffect();
@@ -76,7 +74,6 @@ public class ParticleGUITest extends BaseScreen {
 //		gameCamera.unproject(vec3.set(x, y, 0));
 		ParticleEffectPool.PooledEffect effect = pool.obtain();
 		effect.setPosition(x, y);
-		current = effect;
 		effects.add(effect);
 		effect.allowCompletion();
 	}
