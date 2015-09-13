@@ -11,14 +11,12 @@ import com.badlogic.gdx.utils.Array;
 import com.kotcrab.vis.ui.VisUI;
 import com.kotcrab.vis.ui.widget.*;
 import io.piotrjastrzebski.playground.asyncscreentest.AsyncScreenTest;
-import io.piotrjastrzebski.playground.box2dtest.Box2dInterpolationTest;
-import io.piotrjastrzebski.playground.box2dtest.Box2dLoaderTest;
-import io.piotrjastrzebski.playground.box2dtest.Box2dSensorTest;
-import io.piotrjastrzebski.playground.box2dtest.SimpleBox2dTest;
+import io.piotrjastrzebski.playground.box2dtest.*;
 import io.piotrjastrzebski.playground.btreeserializationtest.BTreeTest;
 import io.piotrjastrzebski.playground.clientserver.CSTest;
 import io.piotrjastrzebski.playground.clientserverv2.CSTestV2;
 import io.piotrjastrzebski.playground.dungeon.DungeonGeneratorTest;
+import io.piotrjastrzebski.playground.ecs.ECSDeleteTest;
 import io.piotrjastrzebski.playground.ecs.ECSOrderTest;
 import io.piotrjastrzebski.playground.ecs.aijobs.ECSAIJobsTest;
 import io.piotrjastrzebski.playground.ecs.aitest.AIECSTest;
@@ -68,6 +66,7 @@ public class PlaygroundGame extends Game implements GameReset {
 		ShaderFireWallTest.class, ShaderPortalTest.class, Shader2dRainTest.class, ECSWorldIOTest.class, ECSOrderTest.class,
 		ECSJobsTest.class, ECSAIJobsTest.class, UISpriteDrawableTest.class, SimpleTiledTest.class, ParticleTest.class, CameraMoveTest.class,
 		TiledGenTest.class, TemperatureTest.class, BiomeTest.class, Box2dInterpolationTest.class,
+		Box2dTiledTest.class,
 		RainTest.class, BlurTest.class, CompositeGenTest.class, UITest.class, UISortTest.class, UISort2Test.class, CSTest.class,
 		UIFBOTransitionTest.class, QuadTreeTest.class, RandomTest.class, ECSAssetTest.class, GpuShadowTest.class,
 		ECSPooledCompTest.class, ECSProfilerTest.class, ECSShapeProfilerTest.class, ECSPolyProfilerTest.class,
