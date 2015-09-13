@@ -31,9 +31,9 @@ public class ECSProfilerTest extends BaseScreen {
 		config.setSystem(new Renderer());
 		config.setSystem(new Stager());
 		config.setSystem(new ProfilerSystem());
+		config.setInvocationStrategy(new ProfilerInvocationStrategy());
 
 		world = new World(config);
-		world.setInvocationStrategy(new ProfilerInvocationStrategy(world));
 
 		float w = gameViewport.getWorldWidth() / 2;
 		float h = gameViewport.getWorldHeight() / 2;

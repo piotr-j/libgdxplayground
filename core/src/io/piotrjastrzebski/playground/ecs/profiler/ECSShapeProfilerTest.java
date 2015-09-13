@@ -48,9 +48,9 @@ public class ECSShapeProfilerTest extends BaseScreen {
 
 		config.setSystem(new GUISystem());
 		config.setSystem(new ProfilerGUISystem());
+		config.setInvocationStrategy(new ProfilerIS());
 
 		world = new World(config);
-		world.setInvocationStrategy(new ProfilerIS(world));
 
 		for (int i = 0; i < 17500; i++) {
 			createEntity();
@@ -83,22 +83,13 @@ public class ECSShapeProfilerTest extends BaseScreen {
 		SystemProfiler total;
 		SystemProfiler[] profilers;
 
-		public ProfilerIS (World world) {
-			total = SystemProfiler.create("Frame");
-			total.setColor(1, 1, 0, 1);
+		public ProfilerIS () {
 
-			ImmutableBag<BaseSystem> systems = world.getSystems();
-			profilers = new SystemProfiler[systems.size()];
-			for (int i = 0; i < systems.size(); i++) {
-				BaseSystem system = systems.get(i);
-				SystemProfiler old = SystemProfiler.getFor(system);
-				if (old == null) {
-					profilers[i] = SystemProfiler.createFor(system, world);
-				}
-			}
 		}
 
+		boolean initialized;
 		@Override protected void process (Bag<BaseSystem> systems) {
+			if (!initialized) initialize();
 			total.start();
 			Object[] systemsData = systems.getData();
 			for (int i = 0; i < systems.size(); i++) {
@@ -113,6 +104,22 @@ public class ECSShapeProfilerTest extends BaseScreen {
 				}
 			}
 			total.stop();
+		}
+
+		private void initialize () {
+			initialized = true;
+			total = SystemProfiler.create("Frame");
+			total.setColor(1, 1, 0, 1);
+
+			ImmutableBag<BaseSystem> systems = world.getSystems();
+			profilers = new SystemProfiler[systems.size()];
+			for (int i = 0; i < systems.size(); i++) {
+				BaseSystem system = systems.get(i);
+				SystemProfiler old = SystemProfiler.getFor(system);
+				if (old == null) {
+					profilers[i] = SystemProfiler.createFor(system, world);
+				}
+			}
 		}
 	}
 
