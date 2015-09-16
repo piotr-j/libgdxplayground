@@ -8,6 +8,7 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.ObjectMap;
 import com.kotcrab.vis.ui.VisUI;
 import com.kotcrab.vis.ui.widget.*;
 import io.piotrjastrzebski.playground.asyncscreentest.AsyncScreenTest;
@@ -102,6 +103,7 @@ public class PlaygroundGame extends Game implements GameReset {
 		Array<VisTextButton> buttons = new Array<>();
 		VisScrollPane pane;
 		VisTable data;
+		ObjectMap<VisTextButton, ClickListener> clickers = new ObjectMap<>();
 		public TestSelectScreen (PlaygroundGame game) {
 			super(game);
 			root.add(new VisLabel("Select test to run, ESC to go back"));
@@ -124,7 +126,8 @@ public class PlaygroundGame extends Game implements GameReset {
 			for (final Class cls : testScreens) {
 				final VisTextButton button;
 				button = new VisTextButton(cls.getSimpleName());
-				button.addListener(new ClickListener() {
+				ClickListener clicker;
+				button.addListener(clicker = new ClickListener() {
 					@Override public void clicked (InputEvent event, float x, float y) {
 						try {
 							Constructor constructor = cls.getConstructor(GameReset.class);
@@ -134,6 +137,7 @@ public class PlaygroundGame extends Game implements GameReset {
 						}
 					}
 				});
+				clickers.put(button, clicker);
 				buttons.add(button);
 			}
 			root.add(pane = new VisScrollPane(data));
@@ -142,11 +146,14 @@ public class PlaygroundGame extends Game implements GameReset {
 			filter("");
 		}
 
+		private Array<VisTextButton> visible = new Array<>();
 		private void filter (String text) {
 			text = text.toLowerCase();
 			data.clear();
+			visible.clear();
 			for (VisTextButton button : buttons) {
 				if (button.getText().toString().toLowerCase().contains(text)) {
+					visible.add(button);
 					data.add(button);
 					data.row();
 				}
@@ -157,6 +164,8 @@ public class PlaygroundGame extends Game implements GameReset {
 		@Override public boolean keyDown (int keycode) {
 			if (keycode == Input.Keys.ESCAPE && lastKey == Input.Keys.ESCAPE) {
 				Gdx.app.exit();
+			} else if (keycode == Input.Keys.ENTER && visible.size > 0) {
+				clickers.get(visible.first()).clicked(null, 0, 0);
 			}
 			lastKey = keycode;
 			return false;
