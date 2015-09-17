@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ai.btree.BehaviorTree;
 import com.badlogic.gdx.ai.btree.LeafTask;
 import com.badlogic.gdx.ai.btree.Task;
+import com.badlogic.gdx.ai.btree.branch.Parallel;
 import com.badlogic.gdx.ai.btree.branch.Selector;
 import com.badlogic.gdx.ai.btree.branch.Sequence;
 import com.badlogic.gdx.ai.btree.decorator.Include;
@@ -29,13 +30,16 @@ public class PolicyParallelTest extends BaseScreen {
 		run.addListener(new ClickListener() {
 			@Override public void clicked (InputEvent event, float x, float y) {
 				test(createDefParallel());
-				test(createSeqParallel());
-				test(createSelParallel());
+//				test(createSeqParallel());
+//				test(createSelParallel());
 			}
 		});
 		dialog.add(run);
 		stage.addActor(dialog);
 		dialog.centerWindow();
+		test(createDefParallel());
+//		test(createSeqParallel());
+//		test(createSelParallel());
 	}
 
 	private void test(Task<Blackboard> task) {
@@ -45,15 +49,15 @@ public class PolicyParallelTest extends BaseScreen {
 		Include<Blackboard> include = new Include<>();
 		include.lazy = false;
 		include.subtree = "brain.actual";
-		BehaviorTree<Blackboard> includeBehavior = new BehaviorTree<>(include);
-		library.registerArchetypeTree("brain", includeBehavior);
-		BehaviorTree<Blackboard> actualBehavior = new BehaviorTree<>(task);
 
-		library.registerArchetypeTree("brain.actual", actualBehavior);
+		library.registerArchetypeTree("brain", new BehaviorTree<>(include));
+		library.registerArchetypeTree("brain.actual", new BehaviorTree<>(task));
+
 		libraryManager.setLibrary(library);
-		BehaviorTree<Blackboard> tree = libraryManager.createBehaviorTree("brain", new Blackboard("1"));
+		BehaviorTree<Blackboard> tree = libraryManager.createBehaviorTree("brain.actual", new Blackboard("1"));
 
-		for (int i = 0; i < 100; i++) {
+		for (int i = 0; i <= 10; i++) {
+			Gdx.app.log("", "step");
 			tree.step();
 		}
 	}
@@ -62,18 +66,14 @@ public class PolicyParallelTest extends BaseScreen {
 		Gdx.app.log("", "createDefParallel");
 		Selector<Blackboard> selector = new Selector<>();
 
-		PolicyParallel<Blackboard> parallel = new PolicyParallel<>();
-		parallel.addChild(new TaskA());
-		parallel.addChild(new TaskB());
+		selector.addChild(new StartTask());
+		Parallel<Blackboard> parallel = new Parallel<>();
+		parallel.addChild(new CheckTask());
+		parallel.addChild(new RunningTask());
 
 		selector.addChild(parallel);
+		selector.addChild(new EndTask());
 
-		Sequence<Blackboard> sequence = new Sequence<>();
-		selector.addChild(sequence);
-
-		sequence.addChild(new TaskC("1"));
-		sequence.addChild(new TaskC("2"));
-		sequence.addChild(new TaskC("3"));
 		return selector;
 	}
 
@@ -82,17 +82,12 @@ public class PolicyParallelTest extends BaseScreen {
 		Selector<Blackboard> selector = new Selector<>();
 
 		PolicyParallel<Blackboard> parallel = new PolicyParallel<>();
-		parallel.addChild(new TaskA());
-		parallel.addChild(new TaskB());
+		parallel.sequencePolicy = false;
+		parallel.addChild(new CheckTask());
+		parallel.addChild(new RunningTask());
 
 		selector.addChild(parallel);
-
-		Sequence<Blackboard> sequence = new Sequence<>();
-		selector.addChild(sequence);
-
-		sequence.addChild(new TaskC("1"));
-		sequence.addChild(new TaskC("2"));
-		sequence.addChild(new TaskC("3"));
+		selector.addChild(new EndTask());
 		return selector;
 	}
 
@@ -101,17 +96,14 @@ public class PolicyParallelTest extends BaseScreen {
 		Selector<Blackboard> selector = new Selector<>();
 
 		PolicyParallel<Blackboard> parallel = new PolicyParallel<>();
-		parallel.addChild(new TaskA());
-		parallel.addChild(new TaskB());
+		parallel.sequencePolicy = true;
+
+		parallel.addChild(new CheckTask());
+		parallel.addChild(new RunningTask());
 
 		selector.addChild(parallel);
+		selector.addChild(new EndTask());
 
-		Sequence<Blackboard> sequence = new Sequence<>();
-		selector.addChild(sequence);
-
-		sequence.addChild(new TaskC("1"));
-		sequence.addChild(new TaskC("2"));
-		sequence.addChild(new TaskC("3"));
 		return selector;
 	}
 
@@ -129,42 +121,54 @@ public class PolicyParallelTest extends BaseScreen {
 		}
 	}
 
-	public static class TaskA extends LeafTask<Blackboard> {
-		private final static String TAG = TaskA.class.getSimpleName();
+	public static class CheckTask extends LeafTask<Blackboard> {
+		private final static String TAG = CheckTask.class.getSimpleName();
 
+		int runs;
 		@Override public void run () {
-			if (MathUtils.random() > 0.8f) {
-				Gdx.app.log(TAG, "Success");
-				success();
-			} else {
-				Gdx.app.log(TAG, "Fail");
+			if (runs++ >= 2) {
+				System.out.print(" Fail! " );
 				fail();
+			} else {
+				System.out.print(" Success! ");
+				success();
+//				runs = 0;
 			}
 		}
 
+		@Override public void start () {
+			System.out.print(TAG + " Start! ");
+		}
+
 		@Override public void end () {
-			Gdx.app.log(TAG, "end");
+			System.out.println(" End! ");
 		}
 
 		@Override protected Task<Blackboard> copyTo (Task<Blackboard> task) {
 			return task;
 		}
 	}
-	public static class TaskB extends LeafTask<Blackboard> {
-		private final static String TAG = TaskB.class.getSimpleName();
 
+	public static class RunningTask extends LeafTask<Blackboard> {
+		private final static String TAG = RunningTask.class.getSimpleName();
+
+		int runs;
 		@Override public void run () {
-//			if (MathUtils.random() > 0.5f) {
-//				Gdx.app.log(TAG, "Success");
-//				success();
-//			} else {
-				Gdx.app.log(TAG, "Running");
+			if (runs++ > 5) {
+				System.out.print(TAG + " Fail! ");
+				fail();
+			} else {
+				System.out.println(TAG + " Running! ");
 				running();
-//			}
+			}
+		}
+
+		@Override public void start () {
+			System.out.print(TAG + " Start! ");
 		}
 
 		@Override public void end () {
-			Gdx.app.log(TAG, "end");
+			System.out.println(" End! ");
 		}
 
 		@Override protected Task<Blackboard> copyTo (Task<Blackboard> task) {
@@ -172,28 +176,43 @@ public class PolicyParallelTest extends BaseScreen {
 		}
 	}
 
-	public static class TaskC extends LeafTask<Blackboard> {
-		private final static String TAG = TaskC.class.getSimpleName();
-		public String name;
-
-		public TaskC () { this("");}
-		public TaskC (String name) {
-			this.name = name;
-		}
+	public static class EndTask extends LeafTask<Blackboard> {
+		private final static String TAG = EndTask.class.getSimpleName();
 
 		@Override public void run () {
-			if (MathUtils.random() > 0.5f) {
-				Gdx.app.log(TAG+name, "Success");
-				success();
-			} else {
-				Gdx.app.log(TAG+name, "Fail");
-				fail();
-			}
+			System.out.print(" Success! ");
+			success();
+		}
+
+		@Override public void start () {
+			System.out.print(TAG+" Start! ");
+		}
+
+		@Override public void end () {
+			System.out.println(" End! ");
 		}
 
 		@Override protected Task<Blackboard> copyTo (Task<Blackboard> task) {
-			TaskC taskC = (TaskC)task;
-			taskC.name = name;
+			return task;
+		}
+	}
+	public static class StartTask extends LeafTask<Blackboard> {
+		private final static String TAG = StartTask.class.getSimpleName();
+
+		@Override public void run () {
+			System.out.print(" Success! ");
+			fail();
+		}
+
+		@Override public void start () {
+			System.out.print(TAG+" Start! ");
+		}
+
+		@Override public void end () {
+			System.out.println(" End! ");
+		}
+
+		@Override protected Task<Blackboard> copyTo (Task<Blackboard> task) {
 			return task;
 		}
 	}
