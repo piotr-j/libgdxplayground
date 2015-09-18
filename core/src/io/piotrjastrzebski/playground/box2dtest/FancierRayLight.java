@@ -14,15 +14,15 @@ import com.badlogic.gdx.utils.Array;
 public class FancierRayLight implements RayCastCallback, QueryCallback {
 	private Vector2 pos = new Vector2();
 	private World world;
-	int rays = 32;
+	int rays = 16;
 	float radius = 1;
-	float[] txs = new float[rays];
-	float[] tys = new float[rays];
-	float[] xs = new float[rays * 2];
-	float[] ys = new float[rays * 2];
+	float[] txs = new float[rays * 9];
+	float[] tys = new float[rays * 9];
+	float[] xs = new float[rays * 10];
+	float[] ys = new float[rays * 10];
 	float[] exs = new float[rays];
 	float[] eys = new float[rays];
-	float[] fs = new float[rays * 2];
+	float[] fs = new float[rays * 9];
 
 	public FancierRayLight (float x, float y, float radius, World world) {
 		pos.set(x, y);
@@ -93,14 +93,18 @@ public class FancierRayLight implements RayCastCallback, QueryCallback {
 		return fraction;
 	}
 
-
+	float extra = 0.5f;
+	float cExtra = 1.5f;
+	boolean ignoreRadius = true;
 	Array<Vector2> tmps = new Array<>();
 	int tmpsLen;
 	Vector2 tmp = new Vector2();
+	Vector2 tmp2 = new Vector2();
 	@Override public boolean reportFixture (Fixture fixture) {
 		Shape shape = fixture.getShape();
 		Body body = fixture.getBody();
 		Vector2 p = body.getPosition();
+		// TODO add rays to the side of the found positions
 		switch (shape.getType()) {
 		case Polygon:
 			Gdx.app.log("Fixture", "Polygon");
@@ -109,9 +113,14 @@ public class FancierRayLight implements RayCastCallback, QueryCallback {
 			for (int i = 0; i < vertexCount; i++) {
 				polygon.getVertex(i, tmp);
 				tmp.set(body.getWorldPoint(tmp));
-				if (tmp.dst2(pos) <= radius * radius) {
+				if (ignoreRadius || tmp.dst2(pos) <= radius * radius) {
 					tmps.get(tmpsLen).set(tmp);
 					tmpsLen++;
+					tmps.get(tmpsLen).set(tmp2.set(tmp).rotate(extra).setLength(radius));
+					tmpsLen++;
+					tmps.get(tmpsLen).set(tmp2.set(tmp).rotate(-extra).setLength(radius));
+					tmpsLen++;
+
 				}
 			}
 			break;
@@ -121,25 +130,29 @@ public class FancierRayLight implements RayCastCallback, QueryCallback {
 			float r = circle.getRadius();
 			float angle = tmp.set(pos).sub(p).angle();
 			Gdx.app.log("Fixture", "Circle ");
-			// TODO cast rays between top and bottom of the circle with some specific spacing
-			if (tmp.dst2(pos) <= radius * radius) {
+			// TODO this is brokenwhen circle is close to origin, need to find proper points somehow
+			tmp.set(cp.x + r * MathUtils.sinDeg(angle), cp.y - r * MathUtils.cosDeg(angle));
+			if (ignoreRadius || tmp.dst2(pos) <= radius * radius) {
+				// right edge
+				tmps.get(tmpsLen).set(tmp);
+				tmpsLen++;
+				tmps.get(tmpsLen).set(tmp2.set(tmp).rotate(cExtra).setLength(radius));
+				tmpsLen++;
+			}
+			tmp.set(cp.x + r * MathUtils.sinDeg(angle + 90), cp.y - r * MathUtils.cosDeg(angle + 90));
+			if (ignoreRadius || tmp.dst2(pos) <= radius * radius) {
+				// top
 				tmps.get(tmpsLen).set(tmp);
 				tmpsLen++;
 			}
-			tmps.get(tmpsLen).set(cp.x + r * MathUtils.sinDeg(angle), cp.y - r * MathUtils.cosDeg(angle));
-			if (tmps.get(tmpsLen).dst2(pos)<= radius * radius) {
+			tmp.set(cp.x + r * MathUtils.sinDeg(angle + 180), cp.y - r * MathUtils.cosDeg(angle + 180));
+			if (ignoreRadius || tmp.dst2(pos) <= radius * radius) {
+				// left edge
+				tmps.get(tmpsLen).set(tmp);
+				tmpsLen++;
+				tmps.get(tmpsLen).set(tmp2.set(tmp).rotate(-cExtra).setLength(radius));
 				tmpsLen++;
 			}
-			tmps.get(tmpsLen).set(cp.x + r * MathUtils.sinDeg(angle + 90), cp.y - r * MathUtils.cosDeg(angle + 90));
-			if (tmps.get(tmpsLen).dst2(pos)<= radius * radius) {
-				tmpsLen++;
-			}
-//			tmpsLen++;
-			tmps.get(tmpsLen).set(cp.x + r * MathUtils.sinDeg(angle + 180), cp.y - r * MathUtils.cosDeg(angle + 180));
-			if (tmps.get(tmpsLen).dst2(pos)<= radius * radius) {
-				tmpsLen++;
-			}
-//			tmpsLen++;
 			break;
 		case Chain:
 			Gdx.app.log("Fixture", "Chain");
@@ -148,7 +161,7 @@ public class FancierRayLight implements RayCastCallback, QueryCallback {
 			for (int i = 0; i < vc; i++) {
 				chain.getVertex(i, tmp);
 				tmp.set(body.getWorldPoint(tmp));
-				if (tmp.dst2(pos) <= radius * radius) {
+				if (ignoreRadius || tmp.dst2(pos) <= radius * radius) {
 					tmps.get(tmpsLen).set(tmp);
 					tmpsLen++;
 				}
@@ -169,11 +182,11 @@ public class FancierRayLight implements RayCastCallback, QueryCallback {
 		for (int i = 0; i < rays; i++) {
 			renderer.line(pos.x, pos.y, xs[i], ys[i]);
 		}
-
-		renderer.setColor(Color.GREEN);
-		for (int i = 0; i < tmpsLen; i++) {
-			renderer.line(pos.x, pos.y, txs[i], tys[i]);
-		}
+//
+//		renderer.setColor(Color.GREEN);
+//		for (int i = 0; i < tmpsLen; i++) {
+//			renderer.line(pos.x, pos.y, txs[i], tys[i]);
+//		}
 
 		renderer.setColor(Color.RED);
 		for (int i = rays; i < rays + tmpsLen; i++) {
