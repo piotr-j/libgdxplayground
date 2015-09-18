@@ -14,32 +14,36 @@ import com.badlogic.gdx.utils.Array;
 public class FancierRayLight implements RayCastCallback, QueryCallback {
 	private Vector2 pos = new Vector2();
 	private World world;
-	int rays = 16;
+	int rayNum = 37;
 	float radius = 1;
-	float[] txs = new float[rays * 9];
-	float[] tys = new float[rays * 9];
-	float[] xs = new float[rays * 10];
-	float[] ys = new float[rays * 10];
-	float[] exs = new float[rays];
-	float[] eys = new float[rays];
-	float[] fs = new float[rays * 9];
+//	float[] txs = new float[rayNum * 9];
+//	float[] tys = new float[rayNum * 9];
+//	float[] xs = new float[rayNum * 10];
+//	float[] ys = new float[rayNum * 10];
+//	float[] exs = new float[rayNum];
+//	float[] eys = new float[rayNum];
+//	float[] fs = new float[rayNum * 9];
+	Array<Ray> rays = new Array<>();
 
 	public FancierRayLight (float x, float y, float radius, World world) {
 		pos.set(x, y);
 		this.radius = radius;
 		this.world = world;
 		setEndPoints();
-		for (int i = 0; i < 100; i++) {
-			tmps.add(new Vector2());
-		}
+//		for (int i = 0; i < 100; i++) {
+//			tmps.add(new Vector2());
+//		}
 	}
 
 	void setEndPoints() {
-		float angleNum = 360f / (rays - 1);
-		for (int i = 0; i < rays; i++) {
+		float angleNum = 360f / (rayNum - 1);
+		for (int i = 0; i < rayNum; i++) {
 			final float angle = angleNum * i;
-			exs[i] = radius * MathUtils.sinDeg(angle);
-			eys[i] = radius * MathUtils.cosDeg(angle);
+//			exs[i] = radius * MathUtils.sinDeg(angle);
+//			eys[i] = radius * MathUtils.cosDeg(angle);
+			rays.add(new Ray(
+				radius * MathUtils.sinDeg(angle),
+				radius * MathUtils.cosDeg(angle), angle));
 		}
 	}
 
@@ -56,48 +60,70 @@ public class FancierRayLight implements RayCastCallback, QueryCallback {
 	Vector2 target = new Vector2();
 	int rayId;
 	public void fixedUpdate() {
-		for (int i = 0; i < rays; i++) {
+		for (int i = 0; i < rayNum; i++) {
+			Ray ray = rays.get(i);
+			ray.reset(pos);
 			rayId = i;
-			target.x = exs[i] + pos.x;
-			xs[i] = target.x;
-			target.y = eys[i] + pos.y;
-			ys[i] = target.y;
-			fs[i] = 1;
+			target.x = pos.x + ray.x;
+			target.y = pos.y + ray.y;
 			world.rayCast(this, pos, target);
 		}
+//		for (int i = 0; i < rayNum; i++) {
+//			rayId = i;
+//			target.x = exs[i] + pos.x;
+//			xs[i] = target.x;
+//			target.y = eys[i] + pos.y;
+//			ys[i] = target.y;
+//			fs[i] = 1;
+//			world.rayCast(this, pos, target);
+//		}
 
-		tmpsLen = 0;
+		rayTmpOff = 0;
 		// first find all fixtures that are withing our bounding box
 		world.QueryAABB(this, pos.x - radius, pos.y - radius, pos.x + radius, pos.y + radius);
 
-		for (int i = 0; i < tmpsLen; i++) {
-			Vector2 e = tmps.get(i);
-			txs[i] = e.x;
-			tys[i] = e.y;
-			e.sub(pos);
-			e.limit(radius);
-			rayId = rays + i;
-			target.x = e.x + pos.x;
-			xs[rayId] = target.x;
-			target.y = e.y + pos.y;
-			ys[rayId] = target.y;
-			fs[rayId] = 1;
+		for (int i = 0; i < rayTmpOff; i++) {
+			rayId = rayNum + i;
+			Ray ray = rays.get(rayId);
+//			target.x = pos.x + ray.ex;
+			target.x = ray.ex;
+//			target.y = pos.y + ray.ey;
+			target.y = ray.ey;
 			world.rayCast(this, pos, target);
 		}
+
+//		for (int i = 0; i < rayTmpOff; i++) {
+//			Vector2 e = tmps.get(i);
+//			txs[i] = e.x;
+//			tys[i] = e.y;
+//			e.sub(pos);
+//			e.limit(radius);
+//			rayId = rayNum + i;
+//			target.x = e.x + pos.x;
+//			xs[rayId] = target.x;
+//			target.y = e.y + pos.y;
+//			ys[rayId] = target.y;
+//			fs[rayId] = 1;
+//			world.rayCast(this, pos, target);
+//		}
 	}
 
 	@Override public float reportRayFixture (Fixture fixture, Vector2 point, Vector2 normal, float fraction) {
-		xs[rayId] = point.x;
-		ys[rayId] = point.y;
-		fs[rayId] = fraction;
+		Ray ray = rays.get(rayId);
+//		ray.set(0, 0, point.x, point.y);
+		ray.set(point);
+		ray.f = fraction;
+//		xs[rayId] = point.x;
+//		ys[rayId] = point.y;
+//		fs[rayId] = fraction;
 		return fraction;
 	}
 
 	float extra = 0.5f;
 	float cExtra = 1.5f;
-	boolean ignoreRadius = true;
-	Array<Vector2> tmps = new Array<>();
-	int tmpsLen;
+	boolean ignoreRadius = false;
+//	Array<Vector2> tmps = new Array<>();
+	int rayTmpOff;
 	Vector2 tmp = new Vector2();
 	Vector2 tmp2 = new Vector2();
 	Vector2 tanA = new Vector2();
@@ -116,12 +142,16 @@ public class FancierRayLight implements RayCastCallback, QueryCallback {
 				polygon.getVertex(i, tmp);
 				tmp.set(body.getWorldPoint(tmp));
 				if (ignoreRadius || tmp.dst2(pos) <= radius * radius) {
-					tmps.get(tmpsLen).set(tmp);
-					tmpsLen++;
-					tmps.get(tmpsLen).set(tmp2.set(tmp).rotate(extra).setLength(radius));
-					tmpsLen++;
-					tmps.get(tmpsLen).set(tmp2.set(tmp).rotate(-extra).setLength(radius));
-					tmpsLen++;
+//					getTmpRay().set(tmp);
+					getTmpRay().set(tmp);
+					getTmpRay().set(tmp2.set(tmp).sub(pos).rotate(extra).setLength(radius).add(pos));
+					getTmpRay().set(tmp2.set(tmp).sub(pos).rotate(-extra).setLength(radius).add(pos));
+//					tmps.get(rayTmpOff).set(tmp);
+//					rayTmpOff++;
+//					tmps.get(rayTmpOff).set(tmp2.set(tmp).rotate(extra).setLength(radius));
+//					rayTmpOff++;
+//					tmps.get(rayTmpOff).set(tmp2.set(tmp).rotate(-extra).setLength(radius));
+//					rayTmpOff++;
 
 				}
 			}
@@ -132,22 +162,18 @@ public class FancierRayLight implements RayCastCallback, QueryCallback {
 			CircleShape circle = (CircleShape)shape;
 			Vector2 cp = body.getWorldPoint(circle.getPosition());
 			float r = circle.getRadius();
-
-			if (ignoreRadius || cp.dst2(pos) <= radius * radius) {
-				// top
-				tmps.get(tmpsLen).set(cp).sub(pos);
-				tmpsLen++;
-			}
-
-			if (findTangents(cp, r, pos, tanA, tanB)) {
-				tmps.get(tmpsLen).set(tanA);
-				tmpsLen++;
-				tmps.get(tmpsLen).set(tmp.set(tanA).rotate(cExtra).setLength(radius));
-				tmpsLen++;
-				tmps.get(tmpsLen).set(tanB);
-				tmpsLen++;
-				tmps.get(tmpsLen).set(tmp.set(tanB).rotate(-cExtra).setLength(radius));
-				tmpsLen++;
+			float dst2 = cp.dst2(pos);
+			float r2 = radius * radius;
+			if (ignoreRadius || dst2 <= (radius + r) * (radius + r)) {
+				getTmpRay().set(cp);
+				if (findTangents(cp, r, pos, tanA, tanB)) {
+//					getTmpRay().set(tanA);
+					getTmpRay().set(tmp.set(tanA).sub(pos).limit2(r2).add(pos));
+					getTmpRay().set(tmp.set(tanA).sub(pos).rotate(cExtra).setLength2(r2).add(pos));
+//					getTmpRay().set(tanB);
+					getTmpRay().set(tmp.set(tanB).sub(pos).limit2(r2).add(pos));
+					getTmpRay().set(tmp.set(tanB).sub(pos).rotate(-cExtra).setLength2(r2).add(pos));
+				}
 			}
 			break;
 		case Chain:
@@ -158,8 +184,7 @@ public class FancierRayLight implements RayCastCallback, QueryCallback {
 				chain.getVertex(i, tmp);
 				tmp.set(body.getWorldPoint(tmp));
 				if (ignoreRadius || tmp.dst2(pos) <= radius * radius) {
-					tmps.get(tmpsLen).set(tmp);
-					tmpsLen++;
+					getTmpRay().set(tmp);
 				}
 			}
 		default:
@@ -167,6 +192,14 @@ public class FancierRayLight implements RayCastCallback, QueryCallback {
 		}
 		// we want all
 		return true;
+	}
+
+	private Ray getTmpRay () {
+		rayTmpOff++;
+		if (rays.size < rayNum + rayTmpOff) {
+			rays.add(new Ray());
+		}
+		return rays.get(rayNum + rayTmpOff - 1);
 	}
 
 	private boolean findTangents (Vector2 center, float radius,
@@ -243,20 +276,81 @@ public class FancierRayLight implements RayCastCallback, QueryCallback {
 		renderer.circle(pos.x, pos.y, 0.05f, 8);
 		renderer.circle(pos.x, pos.y, radius, 32);
 
-		renderer.setColor(Color.CYAN);
-		for (int i = 0; i < rays; i++) {
-			renderer.line(pos.x, pos.y, xs[i], ys[i]);
-		}
+//		renderer.setColor(Color.CYAN);
+//		for (int i = 0; i < rayNum; i++) {
+//			renderer.line(pos.x, pos.y, xs[i], ys[i]);
+//		}
 //
 //		renderer.setColor(Color.GREEN);
-//		for (int i = 0; i < tmpsLen; i++) {
+//		for (int i = 0; i < rayTmpOff; i++) {
 //			renderer.line(pos.x, pos.y, txs[i], tys[i]);
 //		}
 
-		renderer.setColor(Color.RED);
-		for (int i = rays; i < rays + tmpsLen; i++) {
-			renderer.line(pos.x, pos.y, xs[i], ys[i]);
+//		renderer.setColor(Color.RED);
+//		for (int i = rayNum; i < rayNum + rayTmpOff; i++) {
+//			renderer.line(pos.x, pos.y, xs[i], ys[i]);
+//		}
+
+		renderer.setColor(Color.GREEN);
+		for (int i = 0; i < rayNum + rayTmpOff; i++) {
+			Ray ray = rays.get(i);
+			if (ray.main) {
+				renderer.setColor(Color.GREEN);
+			} else {
+				renderer.setColor(Color.RED);
+//				renderer.line(pos.x, pos.y, ray.ex, ray.ey);
+			}
+//			renderer.line(pos.x, pos.y, pos.x + ray.ex, pos.y + ray.ey);
+			renderer.line(pos.x, pos.y, ray.ex, ray.ey);
 		}
+//		for (Ray ray : rays) {
+//			if (ray.main) {
+//				renderer.setColor(Color.GREEN);
+//			} else {
+//				renderer.setColor(Color.RED);
+//			}
+//			renderer.line(pos.x, pos.y, pos.x + ray.ex, pos.y + ray.ey);
+//			renderer.line(pos.x, pos.y, ray.ex, ray.ey);
+//		}
 	}
 
+	private Vector2 aTmp = new Vector2();
+	private class Ray implements Comparable<Ray> {
+		float x, y, a, f;
+		float ex, ey;
+		boolean main;
+		public Ray (float x, float y, float a) {
+			this.x = ex = x;
+			this.y = ey = y;
+			this.a = a;
+			f = 1;
+			main = true;
+		}
+
+		public Ray () {
+
+		}
+
+		public void reset (Vector2 pos) {
+			ex = pos.x + x;
+			ey = pos.y + y;
+			f = 1;
+		}
+
+		public void set (Vector2 e) {
+//			x = e.x - pos.x;
+//			y = e.y - pos.y;
+			set(pos.x, pos.y, e.x, e.y);
+		}
+
+		public void set(float cx, float cy, float ex, float ey) {
+			this.ex = ex;
+			this.ey = ey;
+			a = aTmp.set(cx, cy).sub(ex, ey).angle();
+		}
+
+		@Override public int compareTo (Ray o) {
+			return Float.compare(a, o.a);
+		}
+	}
 }
