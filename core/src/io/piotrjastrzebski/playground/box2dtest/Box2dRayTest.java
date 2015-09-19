@@ -155,7 +155,7 @@ public class Box2dRayTest extends BaseScreen {
 	}
 
 	private void draw () {
-		Gdx.gl.glClearColor(0.5f, 0.5f, 0.5f, 1);
+		Gdx.gl.glClearColor(0.8f, 0.8f, 0.8f, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 		batch.setProjectionMatrix(gameCamera.combined);
 		batch.begin();
