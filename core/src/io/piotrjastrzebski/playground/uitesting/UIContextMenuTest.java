@@ -1,6 +1,7 @@
 package io.piotrjastrzebski.playground.uitesting;
 
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
@@ -35,6 +36,12 @@ public class UIContextMenuTest extends BaseScreen {
 		}
 		root.add(contextMenu).width(150);
 		contextMenu.addAction(Actions.alpha(0));
+	}
+
+	@Override public void render (float delta) {
+		super.render(delta);
+		stage.act(delta);
+		stage.draw();
 	}
 
 	Vector3 pos = new Vector3();

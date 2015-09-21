@@ -1,6 +1,7 @@
 package io.piotrjastrzebski.playground.uitesting;
 
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
 import com.kotcrab.vis.ui.widget.VisTable;
 import com.kotcrab.vis.ui.widget.VisTextButton;
@@ -23,6 +24,13 @@ public class UIContextMenuTest2 extends BaseScreen {
 		// TODO play with this
 		root.addActor(contextMenu);
 	}
+
+	@Override public void render (float delta) {
+		super.render(delta);
+		stage.act(delta);
+		stage.draw();
+	}
+
 	int lastId;
 	Vector3 pos = new Vector3();
 	@Override public boolean touchDown (int screenX, int screenY, int pointer, int button) {
