@@ -5,6 +5,8 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.graphics.g2d.PolygonSpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.MathUtils;
@@ -36,10 +38,15 @@ public class Box2dRayTest extends BaseScreen {
 	boolean debugDraw = false;
 //	SimpleRayLight light;
 //	FancyRayLight light;
-	FancierRayLight light;
+//	FancierRayLight light;
+	PolyRayLight light;
+	PolygonSpriteBatch pBatch;
+	Texture lightTexture;
 
 	public Box2dRayTest (GameReset game) {
 		super(game);
+		lightTexture = new Texture("simplelighttest/light.png");
+		pBatch = new PolygonSpriteBatch();
 		debugRenderer = new Box2DDebugRenderer();
 		box2dWorld = new World(new Vector2(0, -10), true);
 		largeBox = new Texture("box2d/box64.png");
@@ -97,7 +104,8 @@ public class Box2dRayTest extends BaseScreen {
 
 //		light = new SimpleRayLight(0, 0, 4, box2dWorld);
 //		light = new FancyRayLight(0, 0, 4, box2dWorld);
-		light = new FancierRayLight(0, 0, 4, box2dWorld);
+//		light = new FancierRayLight(0, 0, 4, box2dWorld);
+		light = new PolyRayLight(0, 0, 4, box2dWorld, new TextureRegion(lightTexture));
 	}
 
 	private void createShape (float x, float y, float rotation, Texture texture, boolean isBox) {
@@ -169,6 +177,11 @@ public class Box2dRayTest extends BaseScreen {
 		renderer.begin(ShapeRenderer.ShapeType.Line);
 		light.draw(renderer);
 		renderer.end();
+
+		pBatch.setProjectionMatrix(gameCamera.combined);
+		pBatch.begin();
+		light.draw(pBatch);
+		pBatch.end();
 	}
 
 	private class Box {
@@ -332,5 +345,7 @@ public class Box2dRayTest extends BaseScreen {
 		smallBox.dispose();
 		largeCircle.dispose();
 		smallCircle.dispose();
+		pBatch.dispose();
+		lightTexture.dispose();
 	}
 }
