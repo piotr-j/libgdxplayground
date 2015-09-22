@@ -1,4 +1,4 @@
-package io.piotrjastrzebski.playground.box2dtest;
+package io.piotrjastrzebski.playground.box2dtest.lights;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
@@ -91,6 +91,8 @@ public class PolyRayLight implements RayCastCallback, QueryCallback {
 			target.x = pos.x + ray.x;
 			target.y = pos.y + ray.y;
 			world.rayCast(this, pos, target);
+			vertices[(i + 1) * 2] = (ray.ex * 16 + 64);
+			vertices[(i + 1) * 2 + 1] = (ray.ey * 16 + 64);
 		}
 //		rayTmpOff = 0;
 		// first find all fixtures that are withing our bounding box
@@ -283,8 +285,8 @@ public class PolyRayLight implements RayCastCallback, QueryCallback {
 			renderer.line(pos.x, pos.y, ray.ex, ray.ey);
 		}
 
-		renderer.setColor(Color.GREEN);
-		drawPoly(renderer);
+//		renderer.setColor(Color.GREEN);
+//		drawPoly(renderer);
 	}
 
 	private void drawPoly (ShapeRenderer renderer) {

@@ -1,10 +1,7 @@
-package io.piotrjastrzebski.playground.box2dtest;
+package io.piotrjastrzebski.playground.box2dtest.lights;
 
-import box2dLight.DirectionalLight;
-import box2dLight.PositionalLight;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.g2d.PolygonRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;

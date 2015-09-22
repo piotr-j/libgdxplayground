@@ -1,4 +1,4 @@
-package io.piotrjastrzebski.playground.box2dtest;
+package io.piotrjastrzebski.playground.box2dtest.lightsv2;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
@@ -18,11 +18,12 @@ import com.badlogic.gdx.physics.box2d.joints.MouseJointDef;
 import com.badlogic.gdx.utils.Array;
 import io.piotrjastrzebski.playground.BaseScreen;
 import io.piotrjastrzebski.playground.GameReset;
+import io.piotrjastrzebski.playground.box2dtest.lights.PolyRayLight;
 
 /**
  * Created by PiotrJ on 31/07/15.
  */
-public class Box2dRayTest extends BaseScreen {
+public class Box2dRay2Test extends BaseScreen {
 	public final static float STEP_TIME = 1.0f / 60.0f;
 	private final static int MAX_STEPS = 3;
 	private float stepDiv = 60;
@@ -36,17 +37,9 @@ public class Box2dRayTest extends BaseScreen {
 	Texture largeCircle;
 	Box2DDebugRenderer debugRenderer;
 	boolean debugDraw = false;
-//	SimpleRayLight light;
-//	FancyRayLight light;
-//	FancierRayLight light;
-	PolyRayLight light;
-	PolygonSpriteBatch pBatch;
-	Texture lightTexture;
 
-	public Box2dRayTest (GameReset game) {
+	public Box2dRay2Test (GameReset game) {
 		super(game);
-		lightTexture = new Texture("simplelighttest/light.png");
-		pBatch = new PolygonSpriteBatch();
 		debugRenderer = new Box2DDebugRenderer();
 		box2dWorld = new World(new Vector2(0, -10), true);
 		largeBox = new Texture("box2d/box64.png");
@@ -55,6 +48,10 @@ public class Box2dRayTest extends BaseScreen {
 		largeCircle = new Texture("box2d/circle64.png");
 		createBounds();
 		reset();
+	}
+
+	private void setLightPos (float x, float y) {
+
 	}
 
 	Body groundBody;
@@ -102,10 +99,6 @@ public class Box2dRayTest extends BaseScreen {
 			}
 		}
 
-//		light = new SimpleRayLight(0, 0, 4, box2dWorld);
-//		light = new FancyRayLight(0, 0, 4, box2dWorld);
-//		light = new FancierRayLight(0, 0, 4, box2dWorld);
-		light = new PolyRayLight(0, 0, 4, box2dWorld, new TextureRegion(lightTexture));
 	}
 
 	private void createShape (float x, float y, float rotation, Texture texture, boolean isBox) {
@@ -153,7 +146,6 @@ public class Box2dRayTest extends BaseScreen {
 		for (Box box : boxes) {
 			box.fixedUpdate();
 		}
-		light.fixedUpdate();
 	}
 
 	private void variableUpdate (float delta, float alpha) {
@@ -175,13 +167,8 @@ public class Box2dRayTest extends BaseScreen {
 		Gdx.gl.glEnable(GL20.GL_BLEND);
 		renderer.setProjectionMatrix(gameCamera.combined);
 		renderer.begin(ShapeRenderer.ShapeType.Line);
-		light.draw(renderer);
+//		light.draw(renderer);
 		renderer.end();
-
-		pBatch.setProjectionMatrix(gameCamera.combined);
-		pBatch.begin();
-		light.draw(pBatch);
-		pBatch.end();
 	}
 
 	private class Box {
@@ -277,8 +264,7 @@ public class Box2dRayTest extends BaseScreen {
 		// ask the world which bodies are within the given
 		// bounding box around the mouse pointer
 		hitBody = null;
-		box2dWorld.QueryAABB(callback, testPoint.x - 0.1f, testPoint.y - 0.1f,
-			testPoint.x + 0.1f, testPoint.y + 0.1f);
+		box2dWorld.QueryAABB(callback, testPoint.x - 0.1f, testPoint.y - 0.1f, testPoint.x + 0.1f, testPoint.y + 0.1f);
 
 		// if we hit something we create a new mouse joint
 		// and attach it to the hit body.
@@ -290,10 +276,10 @@ public class Box2dRayTest extends BaseScreen {
 			def.target.set(testPoint.x, testPoint.y);
 			def.maxForce = 1000.0f * hitBody.getMass();
 
-			mouseJoint = (MouseJoint) box2dWorld.createJoint(def);
+			mouseJoint = (MouseJoint)box2dWorld.createJoint(def);
 			hitBody.setAwake(true);
 		} else if (button == Input.Buttons.LEFT) {
-			light.setPos(testPoint.x, testPoint.y);
+			setLightPos(testPoint.x, testPoint.y);
 			dragLight = true;
 		}
 
@@ -311,7 +297,7 @@ public class Box2dRayTest extends BaseScreen {
 		if (mouseJoint != null) {
 			mouseJoint.setTarget(target);
 		} else if (dragLight){
-			light.setPos(testPoint.x, testPoint.y);
+			setLightPos(testPoint.x, testPoint.y);
 		}
 		return false;
 	}
@@ -323,7 +309,7 @@ public class Box2dRayTest extends BaseScreen {
 			box2dWorld.destroyJoint(mouseJoint);
 			mouseJoint = null;
 		} else if (dragLight) {
-			light.setPos(testPoint.x, testPoint.y);
+			setLightPos(testPoint.x, testPoint.y);
 			dragLight = false;
 		}
 		return false;
@@ -345,7 +331,5 @@ public class Box2dRayTest extends BaseScreen {
 		smallBox.dispose();
 		largeCircle.dispose();
 		smallCircle.dispose();
-		pBatch.dispose();
-		lightTexture.dispose();
 	}
 }
