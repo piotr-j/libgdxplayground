@@ -17,42 +17,58 @@ import com.badlogic.gdx.utils.Array;
 public class PolyRayLight implements RayCastCallback, QueryCallback {
 	private Vector2 pos = new Vector2();
 	private World world;
-	int rayNum = 37;
+	int rayNum = 128;
 	float radius = 1;
 	Array<Ray> rays = new Array<>();
 	Array<Ray> sorted = new Array<>();
 	boolean dirty;
 
 	PolygonRegion poly;
+	TextureRegion region;
 
 	public PolyRayLight (float x, float y, float radius, World world, TextureRegion region) {
 		pos.set(x, y);
 		this.radius = radius;
 		this.world = world;
-		setEndPoints();
+		this.region = region;
 		dirty = true;
-		float[] vertices = new float[]{
-			0, 0,
-			128, 0,
-			128, 128,
-			0, 128,
-		};
-		short[] triangles = new short[]{
-			0, 1, 2,
-			0, 2, 3,
-		};
-		poly = new PolygonRegion(region, vertices, triangles);
+		setEndPoints();
 	}
 
+	float[] vertices = new float[rayNum * 2 + 2];
+	short[] triangles = new short[rayNum * 3];
 	void setEndPoints() {
-		float angleNum = 360f / (rayNum - 1);
+		// center in pixel size
+		int w = region.getRegionWidth();
+		int h = region.getRegionHeight();
+		vertices[0] = w/2;
+		vertices[1] = h/2;
+		float angleNum = 360f / (rayNum);
 		for (int i = 0; i < rayNum; i++) {
 			final float angle = angleNum * i;
 			rays.add(new Ray(
 				radius * MathUtils.sinDeg(angle),
 				radius * MathUtils.cosDeg(angle), angle));
+			// verts must be in pixel space, normalize sin/cos and scale
+			vertices[(i + 1) * 2] = w * (MathUtils.sinDeg(angle) + 1) / 2f;
+			vertices[(i + 1) * 2 + 1] = h * (MathUtils.cosDeg(angle) + 1) / 2f;
+
 		}
 		sorted.addAll(rays);
+
+		short vert = 1;
+		for (int i = 0; i < triangles.length; i+=3) {
+			// all start at 0
+			triangles[i] = 0;
+			triangles[i + 1] = vert;
+			triangles[i + 2] = ++vert;
+			// we want last one to point to 2nd vert to form complete fan
+			if (i + 2 == triangles.length -1) {
+				triangles[i + 2] = 1;
+			}
+		}
+
+		poly = new PolygonRegion(region, vertices, triangles);
 	}
 
 	public PolyRayLight setRadius (float radius) {
@@ -76,23 +92,24 @@ public class PolyRayLight implements RayCastCallback, QueryCallback {
 			target.y = pos.y + ray.y;
 			world.rayCast(this, pos, target);
 		}
-		rayTmpOff = 0;
+//		rayTmpOff = 0;
 		// first find all fixtures that are withing our bounding box
-		world.QueryAABB(this, pos.x - radius, pos.y - radius, pos.x + radius, pos.y + radius);
-
-		for (int i = 0; i < rayTmpOff; i++) {
-			rayId = rayNum + i;
-			Ray ray = rays.get(rayId);
-			target.x = ray.ex;
-			target.y = ray.ey;
-			world.rayCast(this, pos, target);
-		}
+//		world.QueryAABB(this, pos.x - radius, pos.y - radius, pos.x + radius, pos.y + radius);
+//
+//		for (int i = 0; i < rayTmpOff; i++) {
+//			rayId = rayNum + i;
+//			Ray ray = rays.get(rayId);
+//			target.x = ray.ex;
+//			target.y = ray.ey;
+//			world.rayCast(this, pos, target);
+//		}
 	}
 
 	@Override public float reportRayFixture (Fixture fixture, Vector2 point, Vector2 normal, float fraction) {
 		Ray ray = rays.get(rayId);
 		ray.set(point);
 		ray.f = fraction;
+		if (ray.f < 1) dirty = true;
 		return fraction;
 	}
 
@@ -243,6 +260,8 @@ public class PolyRayLight implements RayCastCallback, QueryCallback {
 	int lastVers;
 	private void rebuildMesh () {
 		// need to resize mesh if needed
+		Gdx.app.log("", "rebuild!");
+
 	}
 
 
@@ -262,6 +281,29 @@ public class PolyRayLight implements RayCastCallback, QueryCallback {
 			float v = i/(float)(rayNum + rayTmpOff);
 			renderer.setColor(v, 0, 1-v, 1);
 			renderer.line(pos.x, pos.y, ray.ex, ray.ey);
+		}
+
+		renderer.setColor(Color.GREEN);
+		drawPoly(renderer);
+	}
+
+	private void drawPoly (ShapeRenderer renderer) {
+		float scale = 1/128f * radius;
+		for (int i = 0, n = triangles.length; i < n; i += 3) {
+			short v1 = triangles[i];
+			short v2 = triangles[i + 1];
+			short v3 = triangles[i + 2];
+
+			float x1 = pos.x + vertices[v1 * 2] * scale;
+			float y1 = pos.y + vertices[v1 * 2 + 1] * scale;
+			float x2 = pos.x + vertices[v2 * 2] * scale;
+			float y2 = pos.y + vertices[v2 * 2 + 1] * scale;
+			float x3 = pos.x + vertices[v3 * 2] * scale;
+			float y3 = pos.y + vertices[v3 * 2 + 1] * scale;
+
+			renderer.line(x1, y1, x2, y2);
+			renderer.line(x2, y2, x3, y3);
+			renderer.line(x3, y3, x1, y1);
 		}
 	}
 
