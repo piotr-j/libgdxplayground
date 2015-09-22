@@ -1,7 +1,10 @@
 package io.piotrjastrzebski.playground.box2dtest;
 
+import box2dLight.DirectionalLight;
+import box2dLight.PositionalLight;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g2d.PolygonRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
@@ -24,12 +27,15 @@ public class FancierRayLight implements RayCastCallback, QueryCallback {
 //	float[] eys = new float[rayNum];
 //	float[] fs = new float[rayNum * 9];
 	Array<Ray> rays = new Array<>();
+	Array<Ray> sorted = new Array<>();
+	boolean dirty;
 
 	public FancierRayLight (float x, float y, float radius, World world) {
 		pos.set(x, y);
 		this.radius = radius;
 		this.world = world;
 		setEndPoints();
+		dirty = true;
 //		for (int i = 0; i < 100; i++) {
 //			tmps.add(new Vector2());
 //		}
@@ -45,6 +51,7 @@ public class FancierRayLight implements RayCastCallback, QueryCallback {
 				radius * MathUtils.sinDeg(angle),
 				radius * MathUtils.cosDeg(angle), angle));
 		}
+		sorted.addAll(rays);
 	}
 
 	public FancierRayLight setRadius (float radius) {
@@ -77,7 +84,9 @@ public class FancierRayLight implements RayCastCallback, QueryCallback {
 //			fs[i] = 1;
 //			world.rayCast(this, pos, target);
 //		}
-
+//		for (int i = 0; i < rayTmpOff; i++) {
+//			rays.get(i).a = -1;
+//		}
 		rayTmpOff = 0;
 		// first find all fixtures that are withing our bounding box
 		world.QueryAABB(this, pos.x - radius, pos.y - radius, pos.x + radius, pos.y + radius);
@@ -196,8 +205,11 @@ public class FancierRayLight implements RayCastCallback, QueryCallback {
 
 	private Ray getTmpRay () {
 		rayTmpOff++;
+		dirty = true;
 		if (rays.size < rayNum + rayTmpOff) {
-			rays.add(new Ray());
+			Ray ray = new Ray();
+			rays.add(ray);
+			sorted.add(ray);
 		}
 		return rays.get(rayNum + rayTmpOff - 1);
 	}
@@ -271,7 +283,17 @@ public class FancierRayLight implements RayCastCallback, QueryCallback {
 		}
 	}
 
+	int lastVers;
+	private void rebuildMesh () {
+		// need to resize mesh if needed
+	}
+
+
 	public void draw(ShapeRenderer renderer) {
+		if (dirty) {
+			dirty = false;
+			rebuildMesh();
+		}
 		renderer.setColor(Color.RED);
 		renderer.circle(pos.x, pos.y, 0.05f, 8);
 		renderer.circle(pos.x, pos.y, radius, 32);
@@ -292,14 +314,33 @@ public class FancierRayLight implements RayCastCallback, QueryCallback {
 //		}
 
 		renderer.setColor(Color.GREEN);
-		for (int i = 0; i < rayNum + rayTmpOff; i++) {
-			Ray ray = rays.get(i);
-			if (ray.main) {
-				renderer.setColor(Color.GREEN);
-			} else {
-				renderer.setColor(Color.RED);
+//		for (int i = 0; i < rayNum + rayTmpOff; i++) {
+//			Ray ray = rays.get(i);
+//			if (ray.main) {
+//				renderer.setColor(Color.GREEN);
+//			} else {
+//				renderer.setColor(Color.RED);
 //				renderer.line(pos.x, pos.y, ray.ex, ray.ey);
-			}
+//			}
+
+//			float v = i/(float)(rayNum + rayTmpOff);
+//			renderer.setColor(v, 0, 1-v, 1);
+//			renderer.line(pos.x, pos.y, pos.x + ray.ex, pos.y + ray.ey);
+//			renderer.line(pos.x, pos.y, ray.ex, ray.ey);
+//		}
+
+//		sorted.sort();
+		for (int i = 0; i < rayNum + rayTmpOff; i++) {
+			Ray ray = sorted.get(i);
+//			if (ray.main) {
+//				renderer.setColor(Color.GREEN);
+//			} else {
+//				renderer.setColor(Color.RED);
+//				renderer.line(pos.x, pos.y, ray.ex, ray.ey);
+//			}
+
+			float v = i/(float)(rayNum + rayTmpOff);
+			renderer.setColor(v, 0, 1-v, 1);
 //			renderer.line(pos.x, pos.y, pos.x + ray.ex, pos.y + ray.ey);
 			renderer.line(pos.x, pos.y, ray.ex, ray.ey);
 		}
@@ -328,13 +369,20 @@ public class FancierRayLight implements RayCastCallback, QueryCallback {
 		}
 
 		public Ray () {
-
+			a = -1;
+			f = 1;
 		}
+
+//		public void reset () {
+//			f = 1;
+//			a = -1;
+//		}
 
 		public void reset (Vector2 pos) {
 			ex = pos.x + x;
 			ey = pos.y + y;
 			f = 1;
+//			a = -1;
 		}
 
 		public void set (Vector2 e) {
