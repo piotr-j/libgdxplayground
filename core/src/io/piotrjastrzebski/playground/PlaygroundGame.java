@@ -27,6 +27,7 @@ import io.piotrjastrzebski.playground.ecs.assettest.ECSAssetTest;
 import io.piotrjastrzebski.playground.ecs.deferredsystemtest.DeferredSystemTest;
 import io.piotrjastrzebski.playground.ecs.entityedittest.EntityEditTest;
 import io.piotrjastrzebski.playground.ecs.entityonecomptest.EntityOneCompTest;
+import io.piotrjastrzebski.playground.ecs.fancywalltest.ECSFancyWallsTest;
 import io.piotrjastrzebski.playground.ecs.jobs.ECSJobsTest;
 import io.piotrjastrzebski.playground.ecs.profiler.ECSPolyProfilerTest;
 import io.piotrjastrzebski.playground.ecs.profiler.ECSShapeProfilerTest;
@@ -80,6 +81,7 @@ public class PlaygroundGame extends Game implements GameReset {
 		UIDialogTest.class, UITableBuilderTest.class, JobTest.class, ECSJobTest.class, AIECSJobTest.class, AIECSTest.class,
 		ShadowTest.class, GpuShadows.class, CircleTest.class, ShapeRendererTest.class, BTreeTest.class, FitVPTest.class, VPTest.class,
 		SimpleLightTest.class, UIImageButtonTest.class, IsoTest.class, UISelectRowTest.class, TMWTest.class, Box2dRayTest.class,
+		ECSFancyWallsTest.class,
 	};
 
 	PlatformBridge bridge;
