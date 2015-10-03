@@ -6,12 +6,10 @@ import com.badlogic.gdx.ai.btree.LeafTask;
 import com.badlogic.gdx.ai.btree.Task;
 import com.badlogic.gdx.ai.btree.branch.Parallel;
 import com.badlogic.gdx.ai.btree.branch.Selector;
-import com.badlogic.gdx.ai.btree.branch.Sequence;
 import com.badlogic.gdx.ai.btree.decorator.Include;
 import com.badlogic.gdx.ai.btree.utils.BehaviorTreeLibrary;
 import com.badlogic.gdx.ai.btree.utils.BehaviorTreeLibraryManager;
 import com.badlogic.gdx.ai.btree.utils.BehaviorTreeParser;
-import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.kotcrab.vis.ui.widget.VisTextButton;
@@ -82,7 +80,7 @@ public class PolicyParallelTest extends BaseScreen {
 		Selector<Blackboard> selector = new Selector<>();
 
 		PolicyParallel<Blackboard> parallel = new PolicyParallel<>();
-		parallel.sequencePolicy = false;
+//		parallel.sequencePolicy = false;
 		parallel.addChild(new CheckTask());
 		parallel.addChild(new RunningTask());
 
@@ -96,7 +94,7 @@ public class PolicyParallelTest extends BaseScreen {
 		Selector<Blackboard> selector = new Selector<>();
 
 		PolicyParallel<Blackboard> parallel = new PolicyParallel<>();
-		parallel.sequencePolicy = true;
+//		parallel.sequencePolicy = true;
 
 		parallel.addChild(new CheckTask());
 		parallel.addChild(new RunningTask());

@@ -23,8 +23,16 @@ public class PolicyParallel<E> extends BranchTask<E> {
 	private boolean noRunningTasks;
 	private int currentChildIndex;
 
+//	enum Policy {DEFAULT, SEQUENCE, SELECTOR}
+
+//	public Policy policyActual = Policy.DEFAULT;
+
+	public final static String POLICY_DEFAULT = "default";
+	public final static String POLICY_SEQUENCE = "sequence";
+	public final static String POLICY_SELECTOR = "selector";
+
 	@TaskAttribute
-	public boolean sequencePolicy;
+	public String policy = POLICY_DEFAULT;
 
 	/** Creates a parallel task with no children */
 	public PolicyParallel () {
@@ -112,7 +120,8 @@ public class PolicyParallel<E> extends BranchTask<E> {
 
 	@Override protected Task<E> copyTo (Task<E> task) {
 		PolicyParallel<E> parallel = (PolicyParallel<E>)task;
-		parallel.sequencePolicy = sequencePolicy;
+		parallel.policy = policy;
+
 		return super.copyTo(task);
 	}
 }
