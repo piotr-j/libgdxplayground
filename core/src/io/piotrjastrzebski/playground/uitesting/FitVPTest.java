@@ -6,6 +6,9 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.kotcrab.vis.ui.widget.VisLabel;
+import com.kotcrab.vis.ui.widget.VisScrollPane;
+import com.kotcrab.vis.ui.widget.VisWindow;
 import io.piotrjastrzebski.playground.BaseScreen;
 import io.piotrjastrzebski.playground.GameReset;
 
@@ -19,6 +22,9 @@ public class FitVPTest extends BaseScreen {
 		super(game);
 		fitCamera = new OrthographicCamera();
 		fitViewport = new FitViewport(1000, 1000, fitCamera);
+		VisWindow window = new VisWindow("Test Window");
+		stage.addActor(window);
+		window.centerWindow();
 	}
 	Vector3 cursor = new Vector3();
 	@Override public void render (float delta) {
@@ -27,14 +33,24 @@ public class FitVPTest extends BaseScreen {
 		fitViewport.unproject(cursor);
 
 		renderer.setProjectionMatrix(fitCamera.combined);
+		renderer.setColor(Color.GRAY);
+		renderer.begin(ShapeRenderer.ShapeType.Filled);
+		renderer.rect(0, 0, 1000, 1000);
+		renderer.end();
+
 		renderer.setColor(Color.RED);
 		renderer.begin(ShapeRenderer.ShapeType.Line);
 		renderer.circle(cursor.x, cursor.y, 25);
 		renderer.end();
+
+		stage.setViewport(fitViewport);
+		stage.act(delta);
+		stage.draw();
 	}
 
 	@Override public void resize (int width, int height) {
 		super.resize(width, height);
-		fitViewport.update(width, height, true);
+		if (fitViewport != null)
+			fitViewport.update(width, height, true);
 	}
 }
