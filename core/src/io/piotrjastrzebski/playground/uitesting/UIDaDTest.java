@@ -1,7 +1,10 @@
 package io.piotrjastrzebski.playground.uitesting;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.Tree;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
@@ -31,6 +34,7 @@ public class UIDaDTest extends BaseScreen {
 	VisTextButton rebuild;
 	DragAndDrop dadAdd;
 	DragAndDrop dadMove;
+	Separator separator;
 
 	public UIDaDTest (GameReset game) {
 		super(game);
@@ -54,6 +58,11 @@ public class UIDaDTest extends BaseScreen {
 
 		tree = new VisTree();
 		window.add(tree).expand().fill();
+
+		separator = new Separator();
+		separator.setSize(100, 4);
+		separator.setColor(Color.GREEN);
+		window.addActor(separator);
 
 		VisTable nodes = new VisTable();
 		VisLabel nodeA = new VisLabel("NodeA");
@@ -80,6 +89,7 @@ public class UIDaDTest extends BaseScreen {
 			@Override public void drop (Source source, Payload payload, float x, float y, int pointer) {
 				ViewNode node = (ViewNode)payload.getObject();
 				node.remove();
+				// TODO handle dads so we dont have dangling refs
 			}
 		});
 
@@ -145,7 +155,10 @@ public class UIDaDTest extends BaseScreen {
 		tree.expandAll();
 	}
 
+	protected static Vector2 tmp = new Vector2();
 	private class ViewNode extends Tree.Node {
+		public static final float MARGIN = 0.3f;
+
 		public ViewNode (String text) {
 			super(new VisLabel(text));
 			setObject(this);
@@ -164,24 +177,45 @@ public class UIDaDTest extends BaseScreen {
 			dadMove.addSource(source((VisLabel)getActor(), this));
 			dadMove.addTarget(new Target(getActor()) {
 				@Override public boolean drag (Source source, Payload payload, float x, float y, int pointer) {
+					separator.setPosition(-100, 0);
 					// check if we want the pay
 					ViewNode node = (ViewNode)payload.getObject();
-//					if (ViewNode.this.findNode(node) != null) {
-//						return false;
-//					}
 					if (node.findNode(ViewNode.this) != null) {
 						return false;
 					}
+					Actor actor = ViewNode.this.getActor();
+					float height = actor.getHeight();
+					float a = y / height;
+					Tree.Node parent = ViewNode.this.getParent();
+					if (a < MARGIN) {
+						// if parent is null this is the root
+						if (parent != null) {
+							Gdx.app.log("", "BELOW");
+							separator.setPosition(actor.getX(), actor.getY());
+							separator.setWidth(actor.getWidth());
+							return true;
+						}
+					} else if (a > 1 - MARGIN) {
+						// insert above this node
+						if (parent != null) {
+							Gdx.app.log("", "ABOVE");
+							separator.setPosition(actor.getX(), actor.getY() + actor.getHeight());
+							separator.setWidth(actor.getWidth());
+							return true;
+						}
+					}
+					Gdx.app.log("", "CENTER");
 					return true;
 				}
 
 				@Override public void drop (Source source, Payload payload, float x, float y, int pointer) {
+					separator.setPosition(-100, 0);
 					float height = source.getActor().getHeight();
 					float a = y / height;
 					// could use a to determine if we want to add the node as child or insert bofore/after this one
 					ViewNode node = (ViewNode)payload.getObject();
 					Tree.Node parent = ViewNode.this.getParent();
-					if (a < 0.3f) {
+					if (a < MARGIN) {
 						// insert below this node
 						Gdx.app.log("", "Insert below");
 						if (parent != null) {
@@ -190,7 +224,7 @@ public class UIDaDTest extends BaseScreen {
 							parent.insert(id+1, node);
 							return;
 						}
-					} else if (a > 0.7f) {
+					} else if (a > 1-MARGIN) {
 						// insert above this node
 						Gdx.app.log("", "Insert above");
 						if (parent != null) {
@@ -221,5 +255,10 @@ public class UIDaDTest extends BaseScreen {
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 		stage.act(delta);
 		stage.draw();
+
+//		batch.setProjectionMatrix(stage.getCamera().combined);
+//		batch.begin();
+//		separator.draw(batch, 1);
+//		batch.end();
 	}
 }
