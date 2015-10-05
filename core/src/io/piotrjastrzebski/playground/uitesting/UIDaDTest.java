@@ -59,6 +59,7 @@ public class UIDaDTest extends BaseScreen {
 		tree = new VisTree();
 		window.add(tree).expand().fill();
 
+		// TODO white separator so it can be colored nicely
 		separator = new Separator();
 		separator.setSize(100, 4);
 		separator.setColor(Color.GREEN);
@@ -92,8 +93,6 @@ public class UIDaDTest extends BaseScreen {
 				// TODO handle dads so we dont have dangling refs
 			}
 		});
-
-
 
 		window.add(nodes);
 		rebuild();
@@ -134,11 +133,11 @@ public class UIDaDTest extends BaseScreen {
 		ViewNode nodeBA = new ViewNode("nodeBA");
 		ViewNode nodeBB = new ViewNode("nodeBB");
 		ViewNode nodeBC = new ViewNode("nodeBC");
-		ViewNode nodeBCA = new ViewNode("nodeBCA");
-		ViewNode nodeBCB = new ViewNode("nodeBCB");
-		ViewNode nodeC = new ViewNode("nodeC");
-		ViewNode nodeCA = new ViewNode("nodeCA");
-		ViewNode nodeD = new ViewNode("nodeD");
+//		ViewNode nodeBCA = new ViewNode("nodeBCA");
+//		ViewNode nodeBCB = new ViewNode("nodeBCB");
+//		ViewNode nodeC = new ViewNode("nodeC");
+//		ViewNode nodeCA = new ViewNode("nodeCA");
+//		ViewNode nodeD = new ViewNode("nodeD");
 		node.add(nodeA);
 		nodeA.add(nodeAA);
 		nodeA.add(nodeAB);
@@ -146,11 +145,11 @@ public class UIDaDTest extends BaseScreen {
 		nodeB.add(nodeBA);
 		nodeB.add(nodeBB);
 		nodeB.add(nodeBC);
-		nodeBC.add(nodeBCA);
-		nodeBC.add(nodeBCB);
-		node.add(nodeC);
-		nodeC.add(nodeCA);
-		node.add(nodeD);
+//		nodeBC.add(nodeBCA);
+//		nodeBC.add(nodeBCB);
+//		node.add(nodeC);
+//		nodeC.add(nodeCA);
+//		node.add(nodeD);
 		tree.add(node);
 		tree.expandAll();
 	}
@@ -168,6 +167,7 @@ public class UIDaDTest extends BaseScreen {
 					separator.setPosition(-100, 0);
 					// check if we want the pay
 					Actor actor = ViewNode.this.getActor();
+					actor.setColor(Color.WHITE);
 					float height = actor.getHeight();
 					float a = y / height;
 					Tree.Node parent = ViewNode.this.getParent();
@@ -177,6 +177,7 @@ public class UIDaDTest extends BaseScreen {
 							Gdx.app.log("", "BELOW");
 							separator.setPosition(actor.getX(), actor.getY());
 							separator.setWidth(actor.getWidth());
+							return true;
 						}
 					} else if (a > 1 - MARGIN) {
 						// insert above this node
@@ -184,14 +185,22 @@ public class UIDaDTest extends BaseScreen {
 							Gdx.app.log("", "ABOVE");
 							separator.setPosition(actor.getX(), actor.getY() + actor.getHeight());
 							separator.setWidth(actor.getWidth());
+							return true;
 						}
 					}
+					actor.setColor(Color.GREEN);
 					Gdx.app.log("", "CENTER");
 					return true;
 				}
 
+				@Override public void reset (Source source, Payload payload) {
+					ViewNode.this.getActor().setColor(Color.WHITE);
+					separator.setPosition(-100, 0);
+				}
+
 				@Override public void drop (Source source, Payload payload, float x, float y, int pointer) {
 					separator.setPosition(-100, 0);
+					ViewNode.this.getActor().setColor(Color.WHITE);
 					VisLabel label = (VisLabel)source.getActor();
 					ViewNode node = new ViewNode(label.getText().toString());
 					Actor actor = ViewNode.this.getActor();
@@ -225,11 +234,13 @@ public class UIDaDTest extends BaseScreen {
 				@Override public boolean drag (Source source, Payload payload, float x, float y, int pointer) {
 					separator.setPosition(-100, 0);
 					// check if we want the pay
+					Actor actor = ViewNode.this.getActor();
 					ViewNode node = (ViewNode)payload.getObject();
 					if (node.findNode(ViewNode.this) != null) {
+						actor.setColor(Color.RED);
 						return false;
 					}
-					Actor actor = ViewNode.this.getActor();
+					actor.setColor(Color.WHITE);
 					float height = actor.getHeight();
 					float a = y / height;
 					Tree.Node parent = ViewNode.this.getParent();
@@ -250,22 +261,29 @@ public class UIDaDTest extends BaseScreen {
 							return true;
 						}
 					}
+					actor.setColor(Color.GREEN);
 					Gdx.app.log("", "CENTER");
 					return true;
 				}
 
+				@Override public void reset (Source source, Payload payload) {
+					ViewNode.this.getActor().setColor(Color.WHITE);
+					separator.setPosition(-100, 0);
+				}
+
 				@Override public void drop (Source source, Payload payload, float x, float y, int pointer) {
 					separator.setPosition(-100, 0);
+					ViewNode.this.getActor().setColor(Color.WHITE);
 					float height = ViewNode.this.getActor().getHeight();
 					float a = y / height;
 					// could use a to determine if we want to add the node as child or insert bofore/after this one
 					ViewNode node = (ViewNode)payload.getObject();
 					Tree.Node parent = ViewNode.this.getParent();
+					node.remove();
 					if (a < MARGIN) {
 						// insert below this node
 						Gdx.app.log("", "Insert below");
 						if (parent != null) {
-							node.remove();
 							int id = ViewNode.this.getIndex();
 							parent.insert(id + 1, node);
 							return;
@@ -274,7 +292,6 @@ public class UIDaDTest extends BaseScreen {
 						// insert above this node
 						Gdx.app.log("", "Insert above");
 						if (parent != null) {
-							node.remove();
 							int id = ViewNode.this.getIndex();
 							parent.insert(id, node);
 							return;
@@ -282,7 +299,6 @@ public class UIDaDTest extends BaseScreen {
 					}
 					// add to this node as default
 					Gdx.app.log("", "Add");
-					node.remove();
 					ViewNode.this.add(node);
 					expandAll();
 				}
@@ -301,10 +317,5 @@ public class UIDaDTest extends BaseScreen {
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 		stage.act(delta);
 		stage.draw();
-
-//		batch.setProjectionMatrix(stage.getCamera().combined);
-//		batch.begin();
-//		separator.draw(batch, 1);
-//		batch.end();
 	}
 }
