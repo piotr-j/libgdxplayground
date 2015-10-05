@@ -165,12 +165,58 @@ public class UIDaDTest extends BaseScreen {
 			dadAdd.addTarget(new Target(getActor()) {
 				@Override public boolean drag (Source source, Payload payload, float x, float y, int pointer) {
 					// check if we want the payload
+					separator.setPosition(-100, 0);
+					// check if we want the pay
+					Actor actor = ViewNode.this.getActor();
+					float height = actor.getHeight();
+					float a = y / height;
+					Tree.Node parent = ViewNode.this.getParent();
+					if (a < MARGIN) {
+						// if parent is null this is the root
+						if (parent != null) {
+							Gdx.app.log("", "BELOW");
+							separator.setPosition(actor.getX(), actor.getY());
+							separator.setWidth(actor.getWidth());
+						}
+					} else if (a > 1 - MARGIN) {
+						// insert above this node
+						if (parent != null) {
+							Gdx.app.log("", "ABOVE");
+							separator.setPosition(actor.getX(), actor.getY() + actor.getHeight());
+							separator.setWidth(actor.getWidth());
+						}
+					}
+					Gdx.app.log("", "CENTER");
 					return true;
 				}
 
 				@Override public void drop (Source source, Payload payload, float x, float y, int pointer) {
+					separator.setPosition(-100, 0);
 					VisLabel label = (VisLabel)source.getActor();
-					add(new ViewNode(label.getText().toString()));
+					ViewNode node = new ViewNode(label.getText().toString());
+					Actor actor = ViewNode.this.getActor();
+					float height = actor.getHeight();
+					float a = y / height;
+					// could use a to determine if we want to add the node as child or insert bofore/after this one
+					Tree.Node parent = ViewNode.this.getParent();
+					if (a < MARGIN) {
+						// insert below this node
+						Gdx.app.log("", "Insert below");
+						if (parent != null) {
+							int id = ViewNode.this.getIndex();
+							parent.insert(id + 1, node);
+							return;
+						}
+					} else if (a > 1-MARGIN) {
+						// insert above this node
+						Gdx.app.log("", "Insert above");
+						if (parent != null) {
+							int id = ViewNode.this.getIndex();
+							parent.insert(id, node);
+							return;
+						}
+					}
+					add(node);
 					expandAll();
 				}
 			});
@@ -210,7 +256,7 @@ public class UIDaDTest extends BaseScreen {
 
 				@Override public void drop (Source source, Payload payload, float x, float y, int pointer) {
 					separator.setPosition(-100, 0);
-					float height = source.getActor().getHeight();
+					float height = ViewNode.this.getActor().getHeight();
 					float a = y / height;
 					// could use a to determine if we want to add the node as child or insert bofore/after this one
 					ViewNode node = (ViewNode)payload.getObject();
@@ -221,7 +267,7 @@ public class UIDaDTest extends BaseScreen {
 						if (parent != null) {
 							node.remove();
 							int id = ViewNode.this.getIndex();
-							parent.insert(id+1, node);
+							parent.insert(id + 1, node);
 							return;
 						}
 					} else if (a > 1-MARGIN) {
