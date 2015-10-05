@@ -43,24 +43,26 @@ public class SimpleTouchTest extends BaseScreen {
 	Vector3 tp = new Vector3();
 	@Override public boolean touchDown (int screenX, int screenY, int pointer, int button) {
 		if (button != Input.Buttons.LEFT) return false;
-		gameCamera.unproject(tp.set(screenX, screenY, 0));
+		camera.unproject(tp.set(screenX, screenY, 0));
 		return true;
 	}
 
 	@Override public boolean touchDragged (int screenX, int screenY, int pointer) {
-		gameCamera.unproject(tp.set(screenX, screenY, 0));
+		camera.unproject(tp.set(screenX, screenY, 0));
 		return true;
 	}
 
 	@Override public boolean touchUp (int screenX, int screenY, int pointer, int button) {
 		if (button != Input.Buttons.LEFT) return false;
-		gameCamera.unproject(tp.set(screenX, screenY, 0));
+		camera.unproject(tp.set(screenX, screenY, 0));
 		return true;
 	}
 
 	@Override public void resize (int width, int height) {
 		super.resize(width, height);
-		viewport.update(width, height, true);
+		// this check is necessary cus BaseScreen calls this prematurely
+		if (viewport != null)
+			viewport.update(width, height, true);
 	}
 
 	@Override public void dispose () {
