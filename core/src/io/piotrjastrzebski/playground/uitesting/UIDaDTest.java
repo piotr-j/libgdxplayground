@@ -3,16 +3,18 @@ package io.piotrjastrzebski.playground.uitesting;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Tree;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop;
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop.Payload;
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop.Source;
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop.Target;
-import com.badlogic.gdx.utils.Array;
+import com.kotcrab.vis.ui.VisUI;
 import com.kotcrab.vis.ui.widget.*;
 import io.piotrjastrzebski.playground.BaseScreen;
 import io.piotrjastrzebski.playground.GameReset;
@@ -34,10 +36,14 @@ public class UIDaDTest extends BaseScreen {
 	VisTextButton rebuild;
 	DragAndDrop dadAdd;
 	DragAndDrop dadMove;
-	Separator separator;
+	Image separator;
 
 	public UIDaDTest (GameReset game) {
 		super(game);
+
+		// kinda hacky
+		TextureAtlas.AtlasRegion white = VisUI.getSkin().getAtlas().findRegion("white");
+		separator = new Image(white);
 
 		window = new VisWindow("BTE");
 		window.setSize(700, 700);
@@ -60,7 +66,6 @@ public class UIDaDTest extends BaseScreen {
 		window.add(tree).expand().fill();
 
 		// TODO white separator so it can be colored nicely
-		separator = new Separator();
 		separator.setSize(100, 4);
 		separator.setColor(Color.GREEN);
 		window.addActor(separator);
