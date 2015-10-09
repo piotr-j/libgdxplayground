@@ -4,36 +4,27 @@ import com.badlogic.gdx.ai.btree.BranchTask;
 import com.badlogic.gdx.ai.btree.Decorator;
 import com.badlogic.gdx.ai.btree.LeafTask;
 import com.badlogic.gdx.ai.btree.Task;
+import com.badlogic.gdx.ai.btree.annotation.TaskConstraint;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import com.badlogic.gdx.utils.Pools;
+import com.badlogic.gdx.utils.reflect.Annotation;
+import com.badlogic.gdx.utils.reflect.ClassReflection;
 
 /**
  * Created by EvilEntity on 10/10/2015.
  */
 public class ModelTask<E> implements Pool.Poolable {
-	public static final int ANY = -1;
-	public static final int GREATER_THAN_0 = -2;
-
 	public enum Type {
-		BRANCH(GREATER_THAN_0), DECORATOR(1), LEAF(0);
-		private int children;
-		Type (int children) {
-			this.children = children;
-		}
-
-		public boolean isValid(int count) {
-			if (children == -1) return true;
-			if (children == -2) return count > 0;
-			return children == count;
-		}
+		BRANCH, DECORATOR, LEAF;
 	}
-
 	protected Type type;
 	protected Task<E> task;
 	// if parent is null, this is a root task
 	protected ModelTask<E> parent;
  	protected Array<ModelTask<E>> children = new Array<>();
+	protected int minChildCount = 0;
+	protected int maxChildCount = Integer.MAX_VALUE;
 
 	protected ModelTask<E> init (ModelTask<E> parent, Task<E> task) {
 		this.parent = parent;
@@ -45,6 +36,14 @@ public class ModelTask<E> implements Pool.Poolable {
 		} else if (task instanceof LeafTask) {
 			type = Type.LEAF;
 		}
+
+		Annotation annotation = ClassReflection.getAnnotation(task.getClass(), TaskConstraint.class);
+		if (annotation != null) {
+			TaskConstraint tc = annotation.getAnnotation(TaskConstraint.class);
+			minChildCount = tc.minChildren();
+			maxChildCount = tc.maxChildren();
+		}
+
 		children.clear();
 		for (int i = 0; i < task.getChildCount(); i++) {
 			Task<E> child = task.getChild(i);
@@ -55,17 +54,24 @@ public class ModelTask<E> implements Pool.Poolable {
 	}
 
 	/**
-	 * Possible count of children for this task, -1 for "infinite"
+	 * Possible min count of children for this task
 	 */
-	public int getChildrenCount () {
-		return type.children;
+	public int getMinChildrenCount () {
+		return minChildCount;
+	}
+
+	/**
+	 * Possible max count of children for this task
+	 */
+	public int getMaxChildrenCount () {
+		return maxChildCount;
 	}
 
 	/**
 	 * If this task is valid, ie has proper count of children
 	 */
 	public boolean isValid() {
-		return type.isValid(children.size);
+		return minChildCount <= children.size && children.size <= maxChildCount;
 	}
 
 	@Override public void reset () {
