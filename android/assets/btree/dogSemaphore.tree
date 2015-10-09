@@ -1,5 +1,5 @@
-import bark:"io.piotrjastrzebski.playground.btreeserializationtest.dog.BarkTask"
-import walk:"io.piotrjastrzebski.playground.btreeserializationtest.dog.WalkTask"
+import bark:"io.piotrjastrzebski.playground.bttests.btreeserializationtest.dog.BarkTask"
+import walk:"io.piotrjastrzebski.playground.bttests.btreeserializationtest.dog.WalkTask"
 
 root
   selector
