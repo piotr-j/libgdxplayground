@@ -21,13 +21,12 @@ import java.io.Reader;
  */
 public class BTEditTest extends BaseScreen {
 
-	private MyBTree<Dog> dogBehaviorTreeA;
-	private MyBTree<Dog> dogBehaviorTreeB;
+	private BehaviorTree<Dog> dogBehaviorTreeA;
+	private BehaviorTree<Dog> dogBehaviorTreeB;
 
 	BehaviorTree<Dog> dogBehaviorTreeArchetype;
 	public BTEditTest (GameReset game) {
 		super(game);
-
 
 		dogBehaviorTreeArchetype = null;
 
@@ -37,7 +36,7 @@ public class BTEditTest extends BaseScreen {
 			BehaviorTreeParser<Dog> parser = new BehaviorTreeParser<Dog>(BehaviorTreeParser.DEBUG_NONE) {
 				protected BehaviorTree<Dog> createBehaviorTree (Task<Dog> root, Dog object) {
 					if (debug > BehaviorTreeParser.DEBUG_LOW) printTree(root, 0);
-					return new MyBTree<>(root, object);
+					return new BehaviorTree<>(root, object);
 				}
 			};
 			dogBehaviorTreeArchetype = parser.parse(reader, null);
@@ -46,13 +45,20 @@ public class BTEditTest extends BaseScreen {
 		}
 
 		if (dogBehaviorTreeArchetype != null) {
-			dogBehaviorTreeA = (MyBTree<Dog>)dogBehaviorTreeArchetype.cloneTask();
+			dogBehaviorTreeA = (BehaviorTree<Dog>)dogBehaviorTreeArchetype.cloneTask();
 			dogBehaviorTreeA.setObject(new Dog("Dog A"));
 
-			dogBehaviorTreeB = (MyBTree<Dog>)dogBehaviorTreeArchetype.cloneTask();
+			dogBehaviorTreeB = (BehaviorTree<Dog>)dogBehaviorTreeArchetype.cloneTask();
 			dogBehaviorTreeB.setObject(new Dog("Dog B"));
 		}
 
+		createModel(dogBehaviorTreeA);
+	}
+
+	private void createModel (BehaviorTree<Dog> dogBehaviorTreeA) {
+		// do we want a real model?
+		ModelTree<Dog> modelTree = new ModelTree<>();
+		modelTree.init(dogBehaviorTreeA);
 
 	}
 
