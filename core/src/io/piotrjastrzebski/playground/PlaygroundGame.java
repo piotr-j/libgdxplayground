@@ -15,7 +15,8 @@ import io.piotrjastrzebski.playground.asyncscreentest.AsyncScreenTest;
 import io.piotrjastrzebski.playground.box2dtest.*;
 import io.piotrjastrzebski.playground.box2dtest.lights.Box2dRayTest;
 import io.piotrjastrzebski.playground.box2dtest.lightsv2.Box2dRay2Test;
-import io.piotrjastrzebski.playground.btreeserializationtest.BTreeTest;
+import io.piotrjastrzebski.playground.bttests.btedittest.BTEditTest;
+import io.piotrjastrzebski.playground.bttests.btreeserializationtest.BTreeTest;
 import io.piotrjastrzebski.playground.clientserver.CSTest;
 import io.piotrjastrzebski.playground.clientserverv2.CSTestV2;
 import io.piotrjastrzebski.playground.dungeon.DungeonGeneratorTest;
@@ -81,7 +82,7 @@ public class PlaygroundGame extends Game implements GameReset {
 		UIDialogTest.class, UITableBuilderTest.class, JobTest.class, ECSJobTest.class, AIECSJobTest.class, AIECSTest.class,
 		ShadowTest.class, GpuShadows.class, CircleTest.class, ShapeRendererTest.class, BTreeTest.class, FitVPTest.class, VPTest.class,
 		SimpleLightTest.class, UIImageButtonTest.class, IsoTest.class, UISelectRowTest.class, TMWTest.class, Box2dRayTest.class,
-		ECSFancyWallsTest.class, PuncherTest.class, UIRotateTestTest.class, SimpleTouchTest.class, UITAPaneTest.class,
+		ECSFancyWallsTest.class, PuncherTest.class, UIRotateTestTest.class, SimpleTouchTest.class, UITAPaneTest.class, BTEditTest.class,
 	};
 
 	PlatformBridge bridge;

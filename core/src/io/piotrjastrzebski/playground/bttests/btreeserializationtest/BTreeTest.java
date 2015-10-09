@@ -1,4 +1,4 @@
-package io.piotrjastrzebski.playground.btreeserializationtest;
+package io.piotrjastrzebski.playground.bttests.btreeserializationtest;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
@@ -11,7 +11,7 @@ import com.badlogic.gdx.utils.JsonWriter;
 import com.badlogic.gdx.utils.StreamUtils;
 import io.piotrjastrzebski.playground.BaseScreen;
 import io.piotrjastrzebski.playground.GameReset;
-import io.piotrjastrzebski.playground.btreeserializationtest.dog.Dog;
+import io.piotrjastrzebski.playground.bttests.btreeserializationtest.dog.Dog;
 
 import java.io.Reader;
 

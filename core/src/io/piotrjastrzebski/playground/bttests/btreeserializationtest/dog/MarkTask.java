@@ -14,7 +14,7 @@
  * limitations under the License.
  ******************************************************************************/
 
-package io.piotrjastrzebski.playground.btreeserializationtest.dog;
+package io.piotrjastrzebski.playground.bttests.btreeserializationtest.dog;
 
 import com.badlogic.gdx.ai.btree.Task;
 import com.badlogic.gdx.ai.btree.LeafTask;

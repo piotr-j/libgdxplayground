@@ -1,4 +1,4 @@
-package io.piotrjastrzebski.playground.btreeserializationtest;
+package io.piotrjastrzebski.playground.bttests.btreeserializationtest;
 
 import com.badlogic.gdx.ai.btree.BehaviorTree;
 import com.badlogic.gdx.ai.btree.Task;

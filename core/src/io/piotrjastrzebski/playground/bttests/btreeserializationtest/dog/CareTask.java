@@ -14,40 +14,35 @@
  * limitations under the License.
  ******************************************************************************/
 
-package io.piotrjastrzebski.playground.btreeserializationtest.dog;
+package io.piotrjastrzebski.playground.bttests.btreeserializationtest.dog;
 
-import com.badlogic.gdx.ai.btree.LeafTask;
 import com.badlogic.gdx.ai.btree.Task;
+import com.badlogic.gdx.ai.btree.LeafTask;
 import com.badlogic.gdx.ai.btree.annotation.TaskAttribute;
-import com.badlogic.gdx.ai.utils.random.ConstantIntegerDistribution;
-import com.badlogic.gdx.ai.utils.random.IntegerDistribution;
 
 /** @author implicit-invocation
  * @author davebaol */
-public class BarkTask extends LeafTask<Dog> {
+public class CareTask extends LeafTask<Dog> {
 
-	@TaskAttribute
-	public IntegerDistribution times = ConstantIntegerDistribution.ONE;
-
-	private int t;
-
-	@Override
-	public void start () {
-		super.start();
-		t = times.nextInt();
-	}
+	@TaskAttribute(required=true)
+	public float urgentProb = 0.8f;
 
 	@Override
 	public void run () {
-		for (int i = 0; i < t; i++)
-			getObject().bark();
-		success();
+		if (Math.random() < urgentProb) {
+			success();
+		} else {
+			Dog dog = getObject();
+			dog.brainLog("It's leaking out!!!");
+			dog.setUrgent(true);
+			success();
+		}
 	}
 
 	@Override
 	protected Task<Dog> copyTo (Task<Dog> task) {
-		BarkTask bark = (BarkTask)task;
-		bark.times = times;
+		CareTask care = (CareTask)task;
+		care.urgentProb = urgentProb;
 
 		return task;
 	}

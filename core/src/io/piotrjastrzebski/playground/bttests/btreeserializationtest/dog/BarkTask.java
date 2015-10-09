@@ -14,30 +14,41 @@
  * limitations under the License.
  ******************************************************************************/
 
-package io.piotrjastrzebski.playground.btreeserializationtest.dog;
+package io.piotrjastrzebski.playground.bttests.btreeserializationtest.dog;
 
-import com.badlogic.gdx.ai.btree.Task;
 import com.badlogic.gdx.ai.btree.LeafTask;
+import com.badlogic.gdx.ai.btree.Task;
+import com.badlogic.gdx.ai.btree.annotation.TaskAttribute;
+import com.badlogic.gdx.ai.utils.random.ConstantIntegerDistribution;
+import com.badlogic.gdx.ai.utils.random.IntegerDistribution;
 
 /** @author implicit-invocation
  * @author davebaol */
-public class RestTask extends LeafTask<Dog> {
+public class BarkTask extends LeafTask<Dog> {
+
+	@TaskAttribute
+	public IntegerDistribution times = ConstantIntegerDistribution.ONE;
+
+	private int t;
+
+	@Override
+	public void start () {
+		super.start();
+		t = times.nextInt();
+	}
 
 	@Override
 	public void run () {
-		Dog dog = getObject();
-		if (dog.isUrgent()) {
-			dog.brainLog("No time to rest");
-			fail();
-		} else {
-			dog.brainLog("zz zz");
-			running();
-		}
-
+		for (int i = 0; i < t; i++)
+			getObject().bark();
+		success();
 	}
 
 	@Override
 	protected Task<Dog> copyTo (Task<Dog> task) {
+		BarkTask bark = (BarkTask)task;
+		bark.times = times;
+
 		return task;
 	}
 

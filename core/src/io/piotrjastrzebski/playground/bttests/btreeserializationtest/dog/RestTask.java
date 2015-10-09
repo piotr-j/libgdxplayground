@@ -14,37 +14,26 @@
  * limitations under the License.
  ******************************************************************************/
 
-package io.piotrjastrzebski.playground.btreeserializationtest.dog;
+package io.piotrjastrzebski.playground.bttests.btreeserializationtest.dog;
 
-import com.badlogic.gdx.ai.btree.LeafTask;
 import com.badlogic.gdx.ai.btree.Task;
+import com.badlogic.gdx.ai.btree.LeafTask;
 
 /** @author implicit-invocation
  * @author davebaol */
-public class WalkTask extends LeafTask<Dog> {
-
-	private int i = 0;
-
-	@Override
-	public void start () {
-		i = 0;
-		getObject().startWalking();
-	}
+public class RestTask extends LeafTask<Dog> {
 
 	@Override
 	public void run () {
-		i++;
-		getObject().randomlyWalk();
-		if (i < 3) {
-			running();
+		Dog dog = getObject();
+		if (dog.isUrgent()) {
+			dog.brainLog("No time to rest");
+			fail();
 		} else {
-			success();
+			dog.brainLog("zz zz");
+			running();
 		}
-	}
 
-	@Override
-	public void end () {
-		getObject().stopWalking();
 	}
 
 	@Override

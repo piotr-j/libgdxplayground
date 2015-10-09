@@ -14,36 +14,41 @@
  * limitations under the License.
  ******************************************************************************/
 
-package io.piotrjastrzebski.playground.btreeserializationtest.dog;
+package io.piotrjastrzebski.playground.bttests.btreeserializationtest.dog;
 
-import com.badlogic.gdx.ai.btree.Task;
 import com.badlogic.gdx.ai.btree.LeafTask;
-import com.badlogic.gdx.ai.btree.annotation.TaskAttribute;
+import com.badlogic.gdx.ai.btree.Task;
 
 /** @author implicit-invocation
  * @author davebaol */
-public class CareTask extends LeafTask<Dog> {
+public class WalkTask extends LeafTask<Dog> {
 
-	@TaskAttribute(required=true)
-	public float urgentProb = 0.8f;
+	private int i = 0;
+
+	@Override
+	public void start () {
+		i = 0;
+		getObject().startWalking();
+	}
 
 	@Override
 	public void run () {
-		if (Math.random() < urgentProb) {
-			success();
+		i++;
+		getObject().randomlyWalk();
+		if (i < 3) {
+			running();
 		} else {
-			Dog dog = getObject();
-			dog.brainLog("It's leaking out!!!");
-			dog.setUrgent(true);
 			success();
 		}
 	}
 
 	@Override
-	protected Task<Dog> copyTo (Task<Dog> task) {
-		CareTask care = (CareTask)task;
-		care.urgentProb = urgentProb;
+	public void end () {
+		getObject().stopWalking();
+	}
 
+	@Override
+	protected Task<Dog> copyTo (Task<Dog> task) {
 		return task;
 	}
 
