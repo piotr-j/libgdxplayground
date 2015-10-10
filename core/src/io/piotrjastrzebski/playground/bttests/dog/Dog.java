@@ -14,7 +14,7 @@
  * limitations under the License.
  ******************************************************************************/
 
-package io.piotrjastrzebski.playground.bttests.btreeserializationtest.dog;
+package io.piotrjastrzebski.playground.bttests.dog;
 
 import com.badlogic.gdx.Gdx;
 
