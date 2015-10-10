@@ -10,10 +10,14 @@ import com.badlogic.gdx.utils.Pool;
 import com.badlogic.gdx.utils.reflect.Annotation;
 import com.badlogic.gdx.utils.reflect.ClassReflection;
 
+import java.util.Iterator;
+import java.util.Spliterator;
+import java.util.function.Consumer;
+
 /**
  * Created by EvilEntity on 10/10/2015.
  */
-public class ModelTask<E> implements Pool.Poolable {
+public class ModelTask<E> implements Pool.Poolable, Iterable<ModelTask<E>> {
 	protected Pool<ModelTask<E>> pool;
 	public ModelTask (Pool<ModelTask<E>> pool) {
 		this.pool = pool;
@@ -72,10 +76,16 @@ public class ModelTask<E> implements Pool.Poolable {
 	}
 
 	/**
-	 * If this task is valid, ie has proper count of children
+	 * If this task is valid, ie has proper count of children and all of its children
 	 */
 	public boolean isValid() {
-		return minChildCount <= children.size && children.size <= maxChildCount;
+		boolean valid = minChildCount <= children.size && children.size <= maxChildCount;
+		if (!valid) return false;
+
+		for (ModelTask<E> child : children) {
+			if (!child.isValid()) return false;
+		}
+		return true;
 	}
 
 	@Override public void reset () {
@@ -95,5 +105,21 @@ public class ModelTask<E> implements Pool.Poolable {
 			", task=" + task.getClass().getSimpleName() +
 			", children=" + children.size +
 			'}';
+	}
+
+	public String getName () {
+		return task.getClass().getSimpleName();
+	}
+
+	@Override public Iterator<ModelTask<E>> iterator () {
+		return children.iterator();
+	}
+
+	@Override public void forEach (Consumer<? super ModelTask<E>> action) {
+		children.forEach(action);
+	}
+
+	@Override public Spliterator<ModelTask<E>> spliterator () {
+		return children.spliterator();
 	}
 }
