@@ -21,19 +21,20 @@ public class ModelTree<E> implements Pool.Poolable, BehaviorTree.Listener<E> {
 				return new ModelTask<>(this);
 			}
 		};
-		root = pool.obtain();
 	}
 
 	public void init (BehaviorTree<E> bt) {
+		if (this.bt != null) reset();
 		this.bt = bt;
+		root = pool.obtain();
 		root.init(null, bt.getChild(0));
 		bt.addListener(this);
 	}
 
 	@Override public void reset () {
-		bt.removeListener(this);
+		if (bt != null) bt.removeListener(this);
 		bt = null;
-		pool.free(root);
+		if (root != null) pool.free(root);
 	}
 
 	@Override public void statusUpdated (Task<E> task, Task.Status previousStatus) {
