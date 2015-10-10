@@ -3,8 +3,10 @@ package io.piotrjastrzebski.playground.bttests.btedittest;
 import com.badlogic.gdx.ai.btree.Task;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Interpolation;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Tree;
+import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop;
 import com.badlogic.gdx.utils.*;
 import com.kotcrab.vis.ui.widget.VisLabel;
 import com.kotcrab.vis.ui.widget.VisTable;
@@ -13,24 +15,33 @@ import com.kotcrab.vis.ui.widget.VisTree;
 /**
  * Created by EvilEntity on 10/10/2015.
  */
-public class ViewTask<E> extends VisTree.Node implements Pool.Poolable, ModelTask.StatusListener {
+public class ViewTask<E> extends VisTree.Node implements Pool.Poolable, ModelTask.ModelTaskListener {
 	protected Pool<ViewTask<E>> pool;
 	protected VisLabel name;
 	protected VisLabel status;
 	protected ModelTask<E> task;
+	protected DragAndDrop dad;
+	protected ViewTree.TaskSource source;
+	protected VisTable container;
 
-	public ViewTask (Pool<ViewTask<E>> pool) {
+	public ViewTask (ViewTree<E> owner) {
 		super(new VisTable());
-		this.pool = pool;
-		VisTable container = (VisTable)getActor();
+		// object is used to find this node in tree
+		setObject(this);
+		pool = owner.pool;
+		dad = owner.dad;
+		container = (VisTable)getActor();
 		name = new VisLabel();
 		status = new VisLabel();
 		container.add(name).padRight(10);
 		container.add(status);
+
+		source = new ViewTree.TaskSource(this);
 	}
 
 	public ViewTask<E> init (ModelTask<E> task) {
 		this.task = task;
+		dad.addSource(source);
 		name.setText(task.getName());
 		statusChanged(null, task.getStatus());
 		task.addListener(this);
@@ -47,10 +58,10 @@ public class ViewTask<E> extends VisTree.Node implements Pool.Poolable, ModelTas
 		name.setText("");
 		task.removeListener(this);
 		task = null;
+		dad.removeSource(source);
 		for (Tree.Node node : getChildren()) {
 			pool.free((ViewTask<E>)node);
 		}
-		remove();
 	}
 
 	@Override public String toString () {
@@ -82,5 +93,26 @@ public class ViewTask<E> extends VisTree.Node implements Pool.Poolable, ModelTas
 		default:
 			return Color.GRAY;
 		}
+	}
+
+	@Override public void validChanged (boolean valid) {
+		if (valid) {
+			name.setColor(Color.WHITE);
+		} else {
+			// TODO some sort of a hint?
+			name.setColor(Color.RED);
+		}
+	}
+
+	public Actor getSourceActor () {
+		return container;
+	}
+
+	public void initPayload (ViewTree.TaskPayload payload) {
+		payload.init(name.getText().toString(), this);
+	}
+
+	public ModelTask<E> getModelTask () {
+		return task;
 	}
 }

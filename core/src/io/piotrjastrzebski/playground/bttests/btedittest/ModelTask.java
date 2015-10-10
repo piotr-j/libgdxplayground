@@ -29,9 +29,10 @@ public class ModelTask<E> implements Pool.Poolable, Iterable<ModelTask<E>> {
 	protected Array<ModelTask<E>> children = new Array<>();
 	protected int minChildCount = 0;
 	protected int maxChildCount = Integer.MAX_VALUE;
-	protected Array<StatusListener> listeners = new Array<>();
+	protected Array<ModelTaskListener> listeners = new Array<>();
 	protected Pool<ModelTask<E>> pool;
 	protected ModelTree<E> tree;
+	private boolean isValid;
 
 	public ModelTask (Pool<ModelTask<E>> pool, ModelTree<E> tree) {
 		this.pool = pool;
@@ -64,12 +65,27 @@ public class ModelTask<E> implements Pool.Poolable, Iterable<ModelTask<E>> {
 			Task<E> child = task.getChild(i);
 			children.add(pool.obtain().init(this, child));
 		}
-
+		validate();
 		return this;
 	}
 
-	public void update (Task.Status previousStatus) {
-		for (StatusListener listener : listeners) {
+	public void remove (ModelTask<E> toRemove) {
+		Iterator<ModelTask<E>> it = children.iterator();
+		while (it.hasNext()) {
+			ModelTask<E> next = it.next();
+			if (next == toRemove) {
+				it.remove();
+				pool.free(next);
+				break;
+			} else {
+				next.remove(toRemove);
+			}
+		}
+		validate();
+	}
+
+	public void statusUpdated (Task.Status previousStatus) {
+		for (ModelTaskListener listener : listeners) {
 			listener.statusChanged(previousStatus, task.getStatus());
 		}
 	}
@@ -97,18 +113,38 @@ public class ModelTask<E> implements Pool.Poolable, Iterable<ModelTask<E>> {
 	 * If this task is valid, ie has proper count of children and all of its children
 	 */
 	public boolean isValid() {
+		return isValid;
+	}
+
+	public boolean validate () {
 		boolean valid = minChildCount <= children.size && children.size <= maxChildCount;
-		if (!valid) return false;
+		if (!valid) {
+			setValid(false);
+			return false;
+		}
 
 		for (ModelTask<E> child : children) {
-			if (!child.isValid()) return false;
+			if (!child.isValid()) {
+				setValid(false);
+				return false;
+			}
 		}
+		setValid(true);
 		return true;
+	}
+
+	private void setValid (boolean valid) {
+		if (isValid == valid) return;
+		isValid = valid;
+		for (ModelTaskListener listener : listeners) {
+			listener.validChanged(valid);
+		}
 	}
 
 	@Override public void reset () {
 		parent = null;
 		task = null;
+		isValid = false;
 		pool.freeAll(children);
 		children.clear();
 	}
@@ -141,17 +177,18 @@ public class ModelTask<E> implements Pool.Poolable, Iterable<ModelTask<E>> {
 		return children.spliterator();
 	}
 
-	public void addListener(StatusListener listener) {
+	public void addListener(ModelTaskListener listener) {
 		if (!listeners.contains(listener, true)) {
 			listeners.add(listener);
 		}
 	}
 
-	public void removeListener(StatusListener listener) {
+	public void removeListener(ModelTaskListener listener) {
 		listeners.removeValue(listener, true);
 	}
 
-	public interface StatusListener {
+	public interface ModelTaskListener {
 		void statusChanged(Task.Status from, Task.Status to);
+		void validChanged(boolean valid);
 	}
 }

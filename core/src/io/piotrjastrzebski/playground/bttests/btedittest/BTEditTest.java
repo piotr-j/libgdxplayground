@@ -5,8 +5,12 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.ai.btree.BehaviorTree;
 import com.badlogic.gdx.ai.btree.Task;
 import com.badlogic.gdx.ai.btree.utils.BehaviorTreeParser;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop;
 import com.badlogic.gdx.utils.StreamUtils;
 import com.badlogic.gdx.utils.TimeUtils;
+import com.kotcrab.vis.ui.widget.VisLabel;
+import com.kotcrab.vis.ui.widget.VisTable;
 import com.kotcrab.vis.ui.widget.VisWindow;
 import io.piotrjastrzebski.playground.BaseScreen;
 import io.piotrjastrzebski.playground.GameReset;
@@ -24,6 +28,7 @@ public class BTEditTest extends BaseScreen implements ViewTree.ViewTaskSelectedL
 	ModelTree<Dog> modelTree;
 	ViewTree<Dog> viewTree;
 	VisWindow window;
+	VisLabel trash;
 
 	BehaviorTree<Dog> dogBehaviorTreeArchetype;
 	public BTEditTest (GameReset game) {
@@ -53,9 +58,18 @@ public class BTEditTest extends BaseScreen implements ViewTree.ViewTaskSelectedL
 		window.setSize(600, 600);
 		window.centerWindow();
 
+		VisTable container = new VisTable(true);
+		window.add(container);
+
+		trash = new VisLabel("Trash -> [_]");
+		container.add(trash);
+		container.row();
+
 		viewTree = new ViewTree<>();
 		viewTree.addListener(this);
-		window.add(viewTree);
+		viewTree.addTrash(trash);
+		container.add(viewTree);
+
 		modelTree = new ModelTree<>();
 		createModel(tree);
 	}

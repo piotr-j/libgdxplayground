@@ -55,7 +55,7 @@ public class ModelTree<E> implements Pool.Poolable, BehaviorTree.Listener<E> {
 		Gdx.app.log(TAG, " task " + name + " updated from " + task.getStatus() + " to " + previousStatus);
 		ModelTask modelTask = taskToModel.get(task, null);
 		if (modelTask != null) {
-			modelTask.update(previousStatus);
+			modelTask.statusUpdated(previousStatus);
 		} else {
 			Gdx.app.log(TAG, "Task mapping not found for " + task);
 		}
@@ -71,5 +71,10 @@ public class ModelTree<E> implements Pool.Poolable, BehaviorTree.Listener<E> {
 
 	public ModelTask<E> getRoot () {
 		return root;
+	}
+
+	public void remove (ModelTask<E> toRemove) {
+		if (root == toRemove) reset();
+		root.remove(toRemove);
 	}
 }
