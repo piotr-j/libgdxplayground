@@ -3,6 +3,7 @@ package io.piotrjastrzebski.playground.bttests.btedittest;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ai.btree.BehaviorTree;
 import com.badlogic.gdx.ai.btree.Task;
+import com.badlogic.gdx.utils.ObjectMap;
 import com.badlogic.gdx.utils.Pool;
 
 /**
@@ -17,8 +18,7 @@ public class ModelTree<E> implements Pool.Poolable, BehaviorTree.Listener<E> {
 	public ModelTree () {
 		pool = new Pool<ModelTask<E>>() {
 			@Override protected ModelTask<E> newObject () {
-				// we want a pool so we can get children
-				return new ModelTask<>(this);
+				return new ModelTask<>(this, ModelTree.this);
 			}
 		};
 	}
@@ -37,13 +37,32 @@ public class ModelTree<E> implements Pool.Poolable, BehaviorTree.Listener<E> {
 		if (root != null) pool.free(root);
 	}
 
+	protected ObjectMap<Task, ModelTask> taskToModel = new ObjectMap<>();
+	protected void map (Task<E> task, ModelTask<E> modelTask) {
+		taskToModel.put(task, modelTask);
+	}
+
 	@Override public void statusUpdated (Task<E> task, Task.Status previousStatus) {
-		if (task.getStatus() != previousStatus) {
-			Gdx.app.log(TAG, " task " + task + " updated from " + task.getStatus() + " to " + previousStatus);
+//		if (task.getStatus() == previousStatus) return;
+		String name = task.getClass().getSimpleName();
+		Gdx.app.log(TAG, " task " + name + " updated from " + task.getStatus() + " to " + previousStatus);
+		ModelTask modelTask = taskToModel.get(task, null);
+		if (modelTask != null) {
+			modelTask.update(previousStatus);
+		} else {
+			Gdx.app.log(TAG, "Task mapping not found for " + task);
 		}
 	}
 
 	@Override public void childAdded (Task<E> task, int index) {
 
+	}
+
+	public boolean isValid () {
+		return root.isValid();
+	}
+
+	public ModelTask<E> getRoot () {
+		return root;
 	}
 }

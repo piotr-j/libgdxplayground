@@ -6,6 +6,7 @@ import com.badlogic.gdx.ai.btree.BehaviorTree;
 import com.badlogic.gdx.ai.btree.Task;
 import com.badlogic.gdx.ai.btree.utils.BehaviorTreeParser;
 import com.badlogic.gdx.utils.StreamUtils;
+import com.kotcrab.vis.ui.widget.VisWindow;
 import io.piotrjastrzebski.playground.BaseScreen;
 import io.piotrjastrzebski.playground.GameReset;
 import io.piotrjastrzebski.playground.bttests.dog.Dog;
@@ -19,6 +20,8 @@ public class BTEditTest extends BaseScreen {
 
 	private BehaviorTree<Dog> tree;
 	ModelTree<Dog> modelTree;
+	ViewTree<Dog> viewTree;
+	VisWindow window;
 
 	BehaviorTree<Dog> dogBehaviorTreeArchetype;
 	public BTEditTest (GameReset game) {
@@ -42,12 +45,21 @@ public class BTEditTest extends BaseScreen {
 
 		tree = (BehaviorTree<Dog>)dogBehaviorTreeArchetype.cloneTask();
 		tree.setObject(new Dog("Dog A"));
+
+		window = new VisWindow("Stuff");
+		stage.addActor(window);
+		window.setSize(600, 600);
+		window.centerWindow();
+
+		viewTree = new ViewTree<>();
+		window.add(viewTree);
 		modelTree = new ModelTree<>();
 		createModel(tree);
 	}
 
 	private void createModel (BehaviorTree<Dog> tree) {
 		modelTree.init(tree);
+		viewTree.init(modelTree);
 	}
 
 	float elapsedTime;
@@ -62,6 +74,9 @@ public class BTEditTest extends BaseScreen {
 			tree.step();
 			elapsedTime -= 1;
 		}
+		viewTree.update(delta);
+		stage.act(delta);
+		stage.draw();
 	}
 
 	@Override public boolean keyDown (int keycode) {
