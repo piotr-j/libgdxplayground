@@ -17,7 +17,7 @@ import java.io.Reader;
 /**
  * Created by PiotrJ on 20/06/15.
  */
-public class BTEditTest extends BaseScreen {
+public class BTEditTest extends BaseScreen implements ViewTree.ViewTaskSelectedListener<Dog> {
 	private static final String TAG = BTEditTest.class.getSimpleName();
 
 	private BehaviorTree<Dog> tree;
@@ -54,6 +54,7 @@ public class BTEditTest extends BaseScreen {
 		window.centerWindow();
 
 		viewTree = new ViewTree<>();
+		viewTree.addListener(this);
 		window.add(viewTree);
 		modelTree = new ModelTree<>();
 		createModel(tree);
@@ -89,5 +90,13 @@ public class BTEditTest extends BaseScreen {
 			break;
 		}
 		return super.keyDown(keycode);
+	}
+
+	@Override public void selected (ViewTask<Dog> task) {
+		Gdx.app.log(TAG, "Selected " + task);
+	}
+
+	@Override public void deselected () {
+		Gdx.app.log(TAG, "Deselected");
 	}
 }

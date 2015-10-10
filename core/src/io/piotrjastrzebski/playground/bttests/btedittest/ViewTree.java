@@ -3,6 +3,7 @@ package io.piotrjastrzebski.playground.bttests.btedittest;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import com.kotcrab.vis.ui.widget.VisTree;
 
@@ -36,9 +37,13 @@ public class ViewTree<E> extends VisTree implements Pool.Poolable {
 
 	private void changed (ViewTask<E> selection) {
 		if (selection != null) {
-			Gdx.app.log(TAG, "Selected " + selection);
+			for (ViewTaskSelectedListener<E> listener : listeners) {
+				listener.selected(selection);
+			}
 		} else {
-			Gdx.app.log(TAG, "Deselected ");
+			for (ViewTaskSelectedListener<E> listener : listeners) {
+				listener.deselected();
+			}
 		}
 	}
 
@@ -63,6 +68,22 @@ public class ViewTree<E> extends VisTree implements Pool.Poolable {
 	}
 
 	@Override public void reset () {
+		listeners.clear();
+	}
 
+	protected Array<ViewTaskSelectedListener<E>> listeners = new Array<>();
+	public void addListener(ViewTaskSelectedListener<E> listener) {
+		if (!listeners.contains(listener, true)) {
+			listeners.add(listener);
+		}
+	}
+
+	public void removeListener(ViewTaskSelectedListener<E> listener) {
+		listeners.removeValue(listener, true);
+	}
+
+	public interface ViewTaskSelectedListener<E> {
+		void selected(ViewTask<E> task);
+		void deselected();
 	}
 }
