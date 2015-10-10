@@ -3,6 +3,7 @@ package io.piotrjastrzebski.playground;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
@@ -97,6 +98,9 @@ public class PlaygroundGame extends Game implements GameReset {
 		} else {
 			VisUI.load(VisUI.SkinScale.X1);
 		}
+		// enable markup so we can colorize parts of text
+		VisUI.getSkin().get("default-font", BitmapFont.class)
+			.getData().markupEnabled = true;
 		reset();
 	}
 
