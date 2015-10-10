@@ -3,10 +3,10 @@
 #
 
 # Alias definitions
-import bark:"BarkTask"
-import care:"CareTask"
-import mark:"MarkTask"
-import walk:"WalkTask"
+import bark:"io.piotrjastrzebski.playground.bttests.dog.BarkTask"
+import care:"io.piotrjastrzebski.playground.bttests.dog.CareTask"
+import mark:"io.piotrjastrzebski.playground.bttests.dog.MarkTask"
+import walk:"io.piotrjastrzebski.playground.bttests.dog.WalkTask"
 
 # Tree definition (note that root is optional)
 root
@@ -14,9 +14,9 @@ root
     parallel
       care urgentProb:0.8
       alwaysFail
-        RestTask # fully qualified task
+        io.piotrjastrzebski.playground.bttests.dog.RestTask # fully qualified task
     sequence
       bark times:"uniform,1,5"
       walk
-      BarkTask # fully qualified task
+      io.piotrjastrzebski.playground.bttests.dog.BarkTask # fully qualified task
       mark

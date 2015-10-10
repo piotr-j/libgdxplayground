@@ -17,15 +17,16 @@ allprojects {
     version = '1.0'
     ext {
         appName = 'playground'
-        gdxVersion = '1.6.5'
+        gdxVersion = '1.7.0'
         roboVMVersion = '1.2.0'
         box2DLightsVersion = '1.4'
         ashleyVersion = '1.4.0'
-        aiVersion = '1.5.1-SNAPSHOT'
+        aiVersion = '1.6.1-SNAPSHOT'
         visuiVersion = '0.8.1'
         artemisOdbVersion = "0.13.1"
         artemisOdbcontribVersion = "0.11.4"
         gdxVideoVersion = "0.0.1"
+        kryoVersion = "3.0.3"
     }
 
     repositories {
@@ -62,7 +63,7 @@ project(":core") {
         compile "net.onedaybeard.artemis:artemis-odb:$artemisOdbVersion"
         compile "net.onedaybeard.artemis:artemis-odb-serializer-json:$artemisOdbVersion"
         compile "net.mostlyoriginal.artemis-odb:contrib-core:$artemisOdbcontribVersion"
-        compile 'com.esotericsoftware:kryo:3.0.2'
+        compile "com.esotericsoftware:kryo:$kryoVersion"
 
 //        compile "com.badlogicgames.gdxvideo:gdx-video:$gdxVideoVersion"
 

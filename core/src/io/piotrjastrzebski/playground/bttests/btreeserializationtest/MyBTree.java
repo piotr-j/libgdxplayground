@@ -14,7 +14,7 @@ public class MyBTree<E> extends BehaviorTree<E> {
 		super(rootTask, object);
 	}
 
-	public Task<E> getRunningTask() {
-		return runningTask;
-	}
+//	public Task<E> getRunningTask() {
+//		return runningTask;
+//	}
 }

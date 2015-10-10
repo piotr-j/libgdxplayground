@@ -5,13 +5,14 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.ai.btree.BehaviorTree;
 import com.badlogic.gdx.ai.btree.Task;
 import com.badlogic.gdx.ai.btree.utils.BehaviorTreeParser;
-import com.badlogic.gdx.utils.Json;
-import com.badlogic.gdx.utils.JsonValue;
-import com.badlogic.gdx.utils.JsonWriter;
-import com.badlogic.gdx.utils.StreamUtils;
+import com.badlogic.gdx.utils.*;
+import com.esotericsoftware.kryo.Kryo;
+import com.esotericsoftware.kryo.io.ByteBufferInput;
+import com.esotericsoftware.kryo.io.OutputChunked;
 import io.piotrjastrzebski.playground.BaseScreen;
 import io.piotrjastrzebski.playground.GameReset;
-import io.piotrjastrzebski.playground.bttests.btreeserializationtest.dog.Dog;
+import io.piotrjastrzebski.playground.bttests.dog.Dog;
+import org.objenesis.strategy.StdInstantiatorStrategy;
 
 import java.io.Reader;
 
@@ -20,11 +21,11 @@ import java.io.Reader;
  */
 public class BTreeTest extends BaseScreen {
 
-	private MyBTree<Dog> dogBehaviorTreeA;
-	private MyBTree<Dog> dogBehaviorTreeB;
+	private BehaviorTree<Dog> dogBehaviorTreeA;
+	private BehaviorTree<Dog> dogBehaviorTreeB;
 
-	Json json;
 	BehaviorTree<Dog> dogBehaviorTreeArchetype;
+
 	public BTreeTest (GameReset game) {
 		super(game);
 
@@ -37,7 +38,7 @@ public class BTreeTest extends BaseScreen {
 			BehaviorTreeParser<Dog> parser = new BehaviorTreeParser<Dog>(BehaviorTreeParser.DEBUG_NONE) {
 				protected BehaviorTree<Dog> createBehaviorTree (Task<Dog> root, Dog object) {
 					if (debug > BehaviorTreeParser.DEBUG_LOW) printTree(root, 0);
-					return new MyBTree<>(root, object);
+					return new BehaviorTree<>(root, object);
 				}
 			};
 			dogBehaviorTreeArchetype = parser.parse(reader, null);
@@ -45,71 +46,15 @@ public class BTreeTest extends BaseScreen {
 			StreamUtils.closeQuietly(reader);
 		}
 
+		KryoUtils.initKryo();
+
 		if (dogBehaviorTreeArchetype != null) {
-			dogBehaviorTreeA = (MyBTree<Dog>)dogBehaviorTreeArchetype.cloneTask();
+			dogBehaviorTreeA = (BehaviorTree<Dog>)dogBehaviorTreeArchetype.cloneTask();
 			dogBehaviorTreeA.setObject(new Dog("Dog A"));
 
-			dogBehaviorTreeB = (MyBTree<Dog>)dogBehaviorTreeArchetype.cloneTask();
+			dogBehaviorTreeB = (BehaviorTree<Dog>)dogBehaviorTreeArchetype.cloneTask();
 			dogBehaviorTreeB.setObject(new Dog("Dog B"));
 		}
-
-		json = new Json();
-		json.setOutputType(JsonWriter.OutputType.json);
-		json.setUsePrototypes(false);
-
-		json.setSerializer(BehaviorTree.class, new Json.Serializer<BehaviorTree>() {
-			@Override public void write (Json json, BehaviorTree object, Class knownType) {
-				Gdx.app.log("", "tree: " + object);
-			}
-
-			@Override public BehaviorTree read (Json json, JsonValue jsonData, Class type) {
-				return null;
-			}
-		});
-
-		json.setSerializer(MyBTree.class, new Json.Serializer<MyBTree>() {
-			@Override public void write (Json json, MyBTree tree, Class knownType) {
-				Gdx.app.log("", "my tree: "+tree);
-				// what do we need to save here?
-				// probably some id of the tree, ie dog.tree
-				// running stuff only? amd running stuff of that etc?
-
-				Task runningTask = tree.getRunningTask();
-				Gdx.app.log("", "running task "+runningTask);
-				for (int i = 0; i < tree.getChildCount(); i++) {
-					Task child = tree.getChild(i);
-					Gdx.app.log("", "child task "+child);
-					if (child == runningTask) {
-						Gdx.app.log("", "running id: " + i);
-					}
-				}
-				Gdx.app.log("", "end");
-			}
-
-			@Override public MyBTree read (Json json, JsonValue jsonData, Class type) {
-				// how does reading work?
-				// must be cast to correct type at some point, and object set
-				// String path = json.readString()...;
-				// MyBTree tree = trees.obtain(path);
-
-				// lets pretend this is correct tree
-				MyBTree myBTree = (MyBTree)dogBehaviorTreeArchetype.cloneTask();
-
-				// now we need to read the json shit and figure out what should run?
-
-				return myBTree;
-			}
-		});
-
-		json.setSerializer(Task.class, new Json.Serializer<Task>() {
-			@Override public void write (Json json, Task object, Class knownType) {
-				Gdx.app.log("", "Task: "+object);
-			}
-
-			@Override public Task read (Json json, JsonValue jsonData, Class type) {
-				return null;
-			}
-		});
 	}
 
 	float elapsedTime;
@@ -127,21 +72,78 @@ public class BTreeTest extends BaseScreen {
 		}
 	}
 
-	String jsonA;
+	public void save () {
+		Array<BehaviorTree.Listener<Dog>> listeners = dogBehaviorTreeA.listeners;
+		dogBehaviorTreeA.listeners = null;
+
+		KryoUtils.save(new SaveObject<>(dogBehaviorTreeA, step));
+
+		dogBehaviorTreeA.listeners = listeners;
+
+	}
+
+	public void load () {
+		@SuppressWarnings("unchecked")
+		SaveObject<Dog> saveObject = KryoUtils.load(SaveObject.class);
+		BehaviorTree<Dog> oldTree = dogBehaviorTreeA;
+		dogBehaviorTreeA = saveObject.tree;
+		dogBehaviorTreeA.listeners = oldTree.listeners;
+
+		step = saveObject.step;
+	}
+
 	@Override public boolean keyDown (int keycode) {
 		switch (keycode) {
 		case Input.Keys.F5:
 			Gdx.app.log("", "save");
-//			Task<Dog> runningTask = dogBehaviorTreeA.getRunningTask();
-			jsonA = json.toJson(dogBehaviorTreeA);
-			Gdx.app.log("", json.prettyPrint(jsonA));
-
+			save();
 			break;
 		case Input.Keys.F9:
 			Gdx.app.log("", "load");
-			dogBehaviorTreeA = json.fromJson(MyBTree.class, jsonA);
+			load();
 			break;
 		}
 		return super.keyDown(keycode);
+	}
+
+	static class SaveObject<T> {
+		BehaviorTree<T> tree;
+		int step;
+
+		SaveObject (BehaviorTree<T> tree, int step) {
+			this.tree = tree;
+			this.step = step;
+		}
+	}
+
+	public static final class KryoUtils {
+
+		private static Kryo kryo;
+		private static final OutputChunked output = new OutputChunked();
+
+		private KryoUtils () {
+		}
+
+		public static void initKryo () {
+			if (kryo == null) {
+				kryo = new Kryo();
+				kryo.setInstantiatorStrategy(new StdInstantiatorStrategy());
+				kryo.register(BehaviorTree.class);
+				// FieldSerializer fieldSerializer = new FieldSerializer(kryo, BehaviorTree.class);
+				// fieldSerializer.removeField("object");
+				// kryo.register(BehaviorTree.class, fieldSerializer);
+			}
+		}
+
+		public static void save (Object obj) {
+			output.clear();
+			kryo.writeObjectOrNull(output, obj, obj.getClass());
+			// System.out.println(output.total());
+		}
+
+		public static <T> T load (Class<T> type) {
+			com.esotericsoftware.kryo.io.Input input = new ByteBufferInput(output.getBuffer());
+			return kryo.readObjectOrNull(input, type);
+		}
 	}
 }
