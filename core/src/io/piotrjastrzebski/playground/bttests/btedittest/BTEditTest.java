@@ -5,14 +5,10 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.ai.btree.BehaviorTree;
 import com.badlogic.gdx.ai.btree.Task;
 import com.badlogic.gdx.ai.btree.utils.BehaviorTreeParser;
-import com.badlogic.gdx.utils.Json;
-import com.badlogic.gdx.utils.JsonValue;
-import com.badlogic.gdx.utils.JsonWriter;
 import com.badlogic.gdx.utils.StreamUtils;
 import io.piotrjastrzebski.playground.BaseScreen;
 import io.piotrjastrzebski.playground.GameReset;
-import io.piotrjastrzebski.playground.bttests.btreeserializationtest.MyBTree;
-import io.piotrjastrzebski.playground.bttests.btreeserializationtest.dog.Dog;
+import io.piotrjastrzebski.playground.bttests.dog.Dog;
 
 import java.io.Reader;
 
@@ -21,8 +17,7 @@ import java.io.Reader;
  */
 public class BTEditTest extends BaseScreen {
 
-	private BehaviorTree<Dog> dogBehaviorTreeA;
-	private BehaviorTree<Dog> dogBehaviorTreeB;
+	private BehaviorTree<Dog> tree;
 
 	BehaviorTree<Dog> dogBehaviorTreeArchetype;
 	public BTEditTest (GameReset game) {
@@ -44,22 +39,16 @@ public class BTEditTest extends BaseScreen {
 			StreamUtils.closeQuietly(reader);
 		}
 
-		if (dogBehaviorTreeArchetype != null) {
-			dogBehaviorTreeA = (BehaviorTree<Dog>)dogBehaviorTreeArchetype.cloneTask();
-			dogBehaviorTreeA.setObject(new Dog("Dog A"));
+		tree = (BehaviorTree<Dog>)dogBehaviorTreeArchetype.cloneTask();
+		tree.setObject(new Dog("Dog A"));
 
-			dogBehaviorTreeB = (BehaviorTree<Dog>)dogBehaviorTreeArchetype.cloneTask();
-			dogBehaviorTreeB.setObject(new Dog("Dog B"));
-		}
-
-		createModel(dogBehaviorTreeA);
+		createModel(tree);
 	}
 
 	private void createModel (BehaviorTree<Dog> dogBehaviorTreeA) {
 		// do we want a real model?
 		ModelTree<Dog> modelTree = new ModelTree<>();
 		modelTree.init(dogBehaviorTreeA);
-
 	}
 
 	float elapsedTime;
@@ -71,8 +60,7 @@ public class BTEditTest extends BaseScreen {
 
 		if (elapsedTime > 1) {
 			System.out.println("\nStep: " + (++step));
-			dogBehaviorTreeA.step();
-			dogBehaviorTreeB.step();
+			tree.step();
 			elapsedTime -= 1;
 		}
 	}
