@@ -4,17 +4,26 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.ai.btree.BehaviorTree;
 import com.badlogic.gdx.ai.btree.Task;
+import com.badlogic.gdx.ai.btree.branch.Parallel;
+import com.badlogic.gdx.ai.btree.branch.Selector;
+import com.badlogic.gdx.ai.btree.branch.Sequence;
+import com.badlogic.gdx.ai.btree.decorator.*;
+import com.badlogic.gdx.ai.btree.leaf.Failure;
+import com.badlogic.gdx.ai.btree.leaf.Success;
+import com.badlogic.gdx.ai.btree.leaf.Wait;
 import com.badlogic.gdx.ai.btree.utils.BehaviorTreeParser;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop;
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.StreamUtils;
 import com.badlogic.gdx.utils.TimeUtils;
 import com.kotcrab.vis.ui.widget.VisLabel;
+import com.kotcrab.vis.ui.widget.VisScrollPane;
 import com.kotcrab.vis.ui.widget.VisTable;
 import com.kotcrab.vis.ui.widget.VisWindow;
 import io.piotrjastrzebski.playground.BaseScreen;
 import io.piotrjastrzebski.playground.GameReset;
-import io.piotrjastrzebski.playground.bttests.dog.Dog;
+import io.piotrjastrzebski.playground.bttests.dog.*;
 
 import java.io.Reader;
 
@@ -31,6 +40,8 @@ public class BTEditTest extends BaseScreen implements ViewTree.ViewTaskSelectedL
 	VisLabel trash;
 
 	BehaviorTree<Dog> dogBehaviorTreeArchetype;
+
+	Array<TaskNode> nodes = new Array<>();
 	public BTEditTest (GameReset game) {
 		super(game);
 
@@ -62,13 +73,47 @@ public class BTEditTest extends BaseScreen implements ViewTree.ViewTaskSelectedL
 		window.add(container);
 
 		trash = new VisLabel("Trash -> [_]");
-		container.add(trash);
+		container.add(trash).colspan(2);
 		container.row();
 
 		viewTree = new ViewTree<>();
 		viewTree.addListener(this);
 		viewTree.addTrash(trash);
+
+		nodes.add(new TaskNode(Sequence.class));
+		nodes.add(new TaskNode(Selector.class));
+		nodes.add(new TaskNode(Parallel.class));
+
+		nodes.add(new TaskNode(AlwaysFail.class));
+		nodes.add(new TaskNode(AlwaysSucceed.class));
+//		nodes.add(new TaskNode(Include.class));
+		nodes.add(new TaskNode(Invert.class));
+//		nodes.add(new TaskNode(Random.class));
+		nodes.add(new TaskNode(Repeat.class));
+		nodes.add(new TaskNode(SemaphoreGuard.class));
+		nodes.add(new TaskNode(UntilFail.class));
+		nodes.add(new TaskNode(UntilSuccess.class));
+
+		nodes.add(new TaskNode(Wait.class));
+		nodes.add(new TaskNode(Success.class));
+		nodes.add(new TaskNode(Failure.class));
+
+		nodes.add(new TaskNode(BarkTask.class));
+		nodes.add(new TaskNode(CareTask.class));
+		nodes.add(new TaskNode(MarkTask.class));
+		nodes.add(new TaskNode(RestTask.class));
+		nodes.add(new TaskNode(WalkTask.class));
+
+		VisTable taskNodes = new VisTable();
+		for (TaskNode node : nodes) {
+			taskNodes.add(node.label).row();
+			viewTree.addSource(node.label, node.taskClass);
+		}
+
 		container.add(viewTree);
+		VisScrollPane pane = new VisScrollPane(taskNodes);
+		container.add(pane);
+		pane.setScrollingDisabled(true, false);
 
 		modelTree = new ModelTree<>();
 		createModel(tree);
@@ -112,5 +157,15 @@ public class BTEditTest extends BaseScreen implements ViewTree.ViewTaskSelectedL
 
 	@Override public void deselected () {
 		Gdx.app.log(TAG, "Deselected");
+	}
+
+	public static class TaskNode {
+		public Class<? extends Task> taskClass;
+		public VisLabel label = new VisLabel();
+
+		public TaskNode (Class<? extends Task> taskClass) {
+			label.setText(taskClass.getSimpleName());
+			this.taskClass = taskClass;
+		}
 	}
 }

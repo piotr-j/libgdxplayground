@@ -1,5 +1,6 @@
 package io.piotrjastrzebski.playground.bttests.btedittest;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ai.btree.BranchTask;
 import com.badlogic.gdx.ai.btree.Decorator;
 import com.badlogic.gdx.ai.btree.LeafTask;
@@ -9,6 +10,8 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import com.badlogic.gdx.utils.reflect.Annotation;
 import com.badlogic.gdx.utils.reflect.ClassReflection;
+import com.badlogic.gdx.utils.reflect.Field;
+import com.badlogic.gdx.utils.reflect.ReflectionException;
 
 import java.util.Iterator;
 import java.util.Spliterator;
@@ -18,6 +21,8 @@ import java.util.function.Consumer;
  * Created by EvilEntity on 10/10/2015.
  */
 public class ModelTask<E> implements Pool.Poolable, Iterable<ModelTask<E>> {
+	private static final String TAG = ModelTask.class.getSimpleName();
+
 	public enum Type {
 		BRANCH, DECORATOR, LEAF
 	}
@@ -74,6 +79,7 @@ public class ModelTask<E> implements Pool.Poolable, Iterable<ModelTask<E>> {
 		while (it.hasNext()) {
 			ModelTask<E> next = it.next();
 			if (next == toRemove) {
+				removeChild(task, next.task);
 				it.remove();
 				pool.free(next);
 				break;
@@ -82,6 +88,26 @@ public class ModelTask<E> implements Pool.Poolable, Iterable<ModelTask<E>> {
 			}
 		}
 		validate();
+	}
+
+	private void removeChild(Task<E> parent, Task<E> child) {
+		try {
+			// hacky, gotta wait for removeTask
+			if (parent instanceof BranchTask) {
+				Field field = ClassReflection.getDeclaredField(BranchTask.class, "children");
+				field.setAccessible(true);
+				Array<Task> children = (Array<Task>)field.get(parent);
+				children.removeValue(child, true);
+			} else if (parent instanceof Decorator) {
+				Field field = ClassReflection.getDeclaredField(Decorator.class, "child");
+				field.setAccessible(true);
+				field.set(parent, null);
+			} else {
+				Gdx.app.error(TAG, "Invalid parent type " + parent);
+			}
+		} catch (ReflectionException e) {
+			Gdx.app.error(TAG, "Failed to remove child from " + parent, e);
+		}
 	}
 
 	public void statusUpdated (Task.Status previousStatus) {

@@ -76,5 +76,6 @@ public class ModelTree<E> implements Pool.Poolable, BehaviorTree.Listener<E> {
 	public void remove (ModelTask<E> toRemove) {
 		if (root == toRemove) reset();
 		root.remove(toRemove);
+		bt.reset();
 	}
 }

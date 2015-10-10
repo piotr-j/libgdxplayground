@@ -1,10 +1,10 @@
 package io.piotrjastrzebski.playground.bttests.btedittest;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.ai.btree.Task;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
-import com.badlogic.gdx.scenes.scene2d.ui.Tree;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop;
 import com.badlogic.gdx.utils.Array;
@@ -94,6 +94,25 @@ public class ViewTree<E> extends VisTree implements Pool.Poolable {
 		listeners.removeValue(listener, true);
 	}
 
+	/**
+	 * register given actor as source with task that can be added to the tree
+	 */
+	public void addSource (Actor actor, final Class<? extends Task> task) {
+		dad.addSource(new DragAndDrop.Source(actor) {
+			@Override public DragAndDrop.Payload dragStart (InputEvent event, float x, float y, int pointer) {
+				TaskPayload payload = payloadPool.obtain();
+				payload.init(task);
+				payload.addTarget(TaskPayload.TARGET_ADD);
+				return payload;
+			}
+
+			@Override public void dragStop (InputEvent event, float x, float y, int pointer, DragAndDrop.Payload payload,
+				DragAndDrop.Target target) {
+				payloadPool.free((TaskPayload)payload);
+			}
+		});
+	}
+
 	public interface ViewTaskSelectedListener<E> {
 		void selected(ViewTask<E> task);
 		void deselected();
@@ -108,7 +127,7 @@ public class ViewTree<E> extends VisTree implements Pool.Poolable {
 			TaskPayload p = (TaskPayload)payload;
 
 			// TODO check if payload contains proper target
-			return true;
+			return p.hasTarget(TaskPayload.TARGET_TRASH);
 		}
 
 		@Override public void drop (DragAndDrop.Source source, DragAndDrop.Payload payload, float x, float y, int pointer) {
@@ -121,16 +140,38 @@ public class ViewTree<E> extends VisTree implements Pool.Poolable {
 		}
 	}
 
-	protected static class TaskSource extends DragAndDrop.Source {
-		private static Pool<TaskPayload> payloadPool = new Pool<TaskPayload>() {
-			@Override protected TaskPayload newObject () {
-				return new TaskPayload();
-			}
-		};
+	protected static class AddTarget extends DragAndDrop.Target {
+		protected ViewTask owner;
+		public AddTarget (ViewTask owner) {
+			super(owner.getDaDActor());
+			this.owner = owner;
+		}
 
+		@Override public boolean drag (DragAndDrop.Source source, DragAndDrop.Payload payload, float x, float y, int pointer) {
+			TaskPayload p = (TaskPayload)payload;
+
+			// TODO check if payload contains proper target
+			return p.hasTarget(TaskPayload.TARGET_ADD);
+		}
+
+		@Override public void drop (DragAndDrop.Source source, DragAndDrop.Payload payload, float x, float y, int pointer) {
+			TaskPayload p = (TaskPayload)payload;
+			// delete the node
+			Gdx.app.log(TAG, "Add " + p.getTaskClass());
+
+		}
+	}
+
+	private static Pool<TaskPayload> payloadPool = new Pool<TaskPayload>() {
+		@Override protected TaskPayload newObject () {
+			return new TaskPayload();
+		}
+	};
+
+	protected static class TaskSource extends DragAndDrop.Source {
 		protected ViewTask owner;
 		public TaskSource (ViewTask owner) {
-			super(owner.getSourceActor());
+			super(owner.getDaDActor());
 			this.owner = owner;
 		}
 
@@ -147,10 +188,14 @@ public class ViewTree<E> extends VisTree implements Pool.Poolable {
 	}
 
 	protected static class TaskPayload extends DragAndDrop.Payload implements Pool.Poolable {
+		public static final int TARGET_TRASH = 1;
+		public static final int TARGET_ADD = 1 << 1;
 		private VisLabel drag;
 		private VisLabel valid;
 		private VisLabel invalid;
 		private ViewTask viewTask;
+		private Class<? extends Task> taskClass;
+		private int target = 0;
 
 		public TaskPayload () {
 			setDragActor(drag = new VisLabel());
@@ -161,18 +206,40 @@ public class ViewTree<E> extends VisTree implements Pool.Poolable {
 		}
 
 		public void init (String text, ViewTask viewTask) {
+			setText(text);
+			this.viewTask = viewTask;
+		}
+
+		public void setText(String text) {
 			drag.setText(text);
 			valid.setText(text);
 			invalid.setText(text);
-			this.viewTask = viewTask;
+		}
+
+		public void init (Class<? extends Task> taskClass) {
+			setText(taskClass.getSimpleName());
+			this.taskClass = taskClass;
+		}
+
+		public void addTarget(int target) {
+			this.target |= target;
+		}
+
+		public boolean hasTarget (int target) {
+			return (this.target & target) != 0;
 		}
 
 		public ViewTask getViewTask () {
 			return viewTask;
 		}
 
+		public Class<? extends Task> getTaskClass () {
+			return taskClass;
+		}
+
 		@Override public void reset () {
 			init("<?>", null);
+			target = 0;
 		}
 
 		@Override public String toString () {

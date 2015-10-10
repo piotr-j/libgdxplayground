@@ -22,6 +22,7 @@ public class ViewTask<E> extends VisTree.Node implements Pool.Poolable, ModelTas
 	protected ModelTask<E> task;
 	protected DragAndDrop dad;
 	protected ViewTree.TaskSource source;
+	protected ViewTree.AddTarget target;
 	protected VisTable container;
 
 	public ViewTask (ViewTree<E> owner) {
@@ -37,11 +38,13 @@ public class ViewTask<E> extends VisTree.Node implements Pool.Poolable, ModelTas
 		container.add(status);
 
 		source = new ViewTree.TaskSource(this);
+		target = new ViewTree.AddTarget(this);
 	}
 
 	public ViewTask<E> init (ModelTask<E> task) {
 		this.task = task;
 		dad.addSource(source);
+		dad.addTarget(target);
 		name.setText(task.getName());
 		statusChanged(null, task.getStatus());
 		task.addListener(this);
@@ -59,6 +62,7 @@ public class ViewTask<E> extends VisTree.Node implements Pool.Poolable, ModelTas
 		task.removeListener(this);
 		task = null;
 		dad.removeSource(source);
+		dad.removeTarget(target);
 		for (Tree.Node node : getChildren()) {
 			pool.free((ViewTask<E>)node);
 		}
@@ -104,12 +108,13 @@ public class ViewTask<E> extends VisTree.Node implements Pool.Poolable, ModelTas
 		}
 	}
 
-	public Actor getSourceActor () {
+	public Actor getDaDActor () {
 		return container;
 	}
 
 	public void initPayload (ViewTree.TaskPayload payload) {
 		payload.init(name.getText().toString(), this);
+		payload.addTarget(ViewTree.TaskPayload.TARGET_TRASH);
 	}
 
 	public ModelTask<E> getModelTask () {
