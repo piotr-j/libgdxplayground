@@ -18,6 +18,7 @@ import java.io.Reader;
 public class BTEditTest extends BaseScreen {
 
 	private BehaviorTree<Dog> tree;
+	ModelTree<Dog> modelTree;
 
 	BehaviorTree<Dog> dogBehaviorTreeArchetype;
 	public BTEditTest (GameReset game) {
@@ -41,14 +42,12 @@ public class BTEditTest extends BaseScreen {
 
 		tree = (BehaviorTree<Dog>)dogBehaviorTreeArchetype.cloneTask();
 		tree.setObject(new Dog("Dog A"));
-
+		modelTree = new ModelTree<>();
 		createModel(tree);
 	}
 
-	private void createModel (BehaviorTree<Dog> dogBehaviorTreeA) {
-		// do we want a real model?
-		ModelTree<Dog> modelTree = new ModelTree<>();
-		modelTree.init(dogBehaviorTreeA);
+	private void createModel (BehaviorTree<Dog> tree) {
+		modelTree.init(tree);
 	}
 
 	float elapsedTime;
