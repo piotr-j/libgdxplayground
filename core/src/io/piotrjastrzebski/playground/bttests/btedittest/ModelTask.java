@@ -7,7 +7,6 @@ import com.badlogic.gdx.ai.btree.Task;
 import com.badlogic.gdx.ai.btree.annotation.TaskConstraint;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import com.badlogic.gdx.utils.Pools;
 import com.badlogic.gdx.utils.reflect.Annotation;
 import com.badlogic.gdx.utils.reflect.ClassReflection;
 
@@ -15,6 +14,11 @@ import com.badlogic.gdx.utils.reflect.ClassReflection;
  * Created by EvilEntity on 10/10/2015.
  */
 public class ModelTask<E> implements Pool.Poolable {
+	protected Pool<ModelTask<E>> pool;
+	public ModelTask (Pool<ModelTask<E>> pool) {
+		this.pool = pool;
+	}
+
 	public enum Type {
 		BRANCH, DECORATOR, LEAF;
 	}
@@ -47,7 +51,7 @@ public class ModelTask<E> implements Pool.Poolable {
 		children.clear();
 		for (int i = 0; i < task.getChildCount(); i++) {
 			Task<E> child = task.getChild(i);
-			children.add(Pools.obtain(ModelTask.class).init(this, child));
+			children.add(pool.obtain().init(this, child));
 		}
 
 		return this;
@@ -77,7 +81,19 @@ public class ModelTask<E> implements Pool.Poolable {
 	@Override public void reset () {
 		parent = null;
 		task = null;
-		Pools.freeAll(children, true);
+		pool.freeAll(children);
 		children.clear();
+	}
+
+	public boolean isRoot () {
+		return parent == null;
+	}
+
+	@Override public String toString () {
+		return "ModelTask{" +
+			"type=" + type +
+			", task=" + task.getClass().getSimpleName() +
+			", children=" + children.size +
+			'}';
 	}
 }
