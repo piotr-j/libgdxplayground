@@ -63,6 +63,7 @@ public class UIDaDTest extends BaseScreen {
 		window.row();
 
 		tree = new VisTree();
+		tree.setYSpacing(0);
 		window.add(tree).expand().fill();
 
 		// TODO white separator so it can be colored nicely
