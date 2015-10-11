@@ -39,6 +39,7 @@ public class ModelTree<E> implements Pool.Poolable, BehaviorTree.Listener<E> {
 	}
 
 	@Override public void reset () {
+		Gdx.app.log(TAG, "reset()");
 		if (bt != null) bt.removeListener(this);
 		bt = null;
 		if (root != null) pool.free(root);
@@ -74,7 +75,10 @@ public class ModelTree<E> implements Pool.Poolable, BehaviorTree.Listener<E> {
 	}
 
 	public void remove (ModelTask<E> toRemove) {
-		if (root == toRemove) reset();
+		if (root == toRemove) {
+			reset();
+			return;
+		}
 		root.remove(toRemove);
 		bt.reset();
 	}
