@@ -132,7 +132,7 @@ public class BTEditTest extends BaseScreen implements ViewTree.ViewTaskSelectedL
 		elapsedTime += delta;
 
 		if (elapsedTime > 1 && modelTree.isValid()) {
-			Gdx.app.log(TAG, "Step: " + (++step));
+//			Gdx.app.log(TAG, "Step: " + (++step));
 			modelTree.step();
 			elapsedTime -= 1;
 		}

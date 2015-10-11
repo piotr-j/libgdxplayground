@@ -35,7 +35,7 @@ public class ModelTree<E> implements Pool.Poolable, BehaviorTree.Listener<E> {
 	public void step () {
 		if (bt == null) return;
 		step++;
-		bt.step();
+//		bt.step();
 	}
 
 	@Override public void reset () {
@@ -53,7 +53,7 @@ public class ModelTree<E> implements Pool.Poolable, BehaviorTree.Listener<E> {
 	@Override public void statusUpdated (Task<E> task, Task.Status previousStatus) {
 //		if (task.getStatus() == previousStatus) return;
 		String name = task.getClass().getSimpleName();
-		Gdx.app.log(TAG, " task " + name + " updated from " + task.getStatus() + " to " + previousStatus);
+//		Gdx.app.log(TAG, " task " + name + " updated from " + task.getStatus() + " to " + previousStatus);
 		ModelTask modelTask = taskToModel.get(task, null);
 		if (modelTask != null) {
 			modelTask.statusUpdated(previousStatus);

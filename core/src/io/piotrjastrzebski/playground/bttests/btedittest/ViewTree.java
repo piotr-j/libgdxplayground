@@ -9,6 +9,8 @@ import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import com.kotcrab.vis.ui.VisUI;
+import com.kotcrab.vis.ui.widget.VisImage;
 import com.kotcrab.vis.ui.widget.VisLabel;
 import com.kotcrab.vis.ui.widget.VisTree;
 
@@ -21,10 +23,17 @@ public class ViewTree<E> extends VisTree implements Pool.Poolable {
 	protected ModelTree<E> model;
 
 	protected DragAndDrop dad;
+	private Actor separator;
 
 	public ViewTree () {
 		// remove y spacing so we dont have gaps for DaD
 		setYSpacing(0);
+		separator = new VisImage(VisUI.getSkin().getDrawable("white"));
+		separator.setColor(Color.GREEN);
+		separator.setHeight(4 * VisUI.getSizes().scaleFactor);
+		separator.setVisible(false);
+		addActor(separator);
+
 		dad = new DragAndDrop();
 		pool = new Pool<ViewTask<E>>() {
 			@Override protected ViewTask<E> newObject () {
@@ -113,6 +122,27 @@ public class ViewTree<E> extends VisTree implements Pool.Poolable {
 				payloadPool.free((TaskPayload)payload);
 			}
 		});
+	}
+
+	public Actor getSeparator () {
+		return separator;
+	}
+
+	public void addAbove (ViewTask<E> vt, DragAndDrop.Payload payload) {
+
+	}
+
+	public void addTo (ViewTask<E> vt, DragAndDrop.Payload payload) {
+
+	}
+
+	public void addBelow (ViewTask<E> vt, DragAndDrop.Payload payload) {
+
+	}
+
+	public boolean canDropTo (ViewTask<E> vt, DragAndDrop.Payload payload, ViewTask.DropPoint dp) {
+
+		return true;
 	}
 
 	public interface ViewTaskSelectedListener<E> {
