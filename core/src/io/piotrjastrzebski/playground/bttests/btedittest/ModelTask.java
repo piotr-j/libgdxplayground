@@ -92,6 +92,9 @@ public class ModelTask<E> implements Pool.Poolable, Iterable<ModelTask<E>> {
 
 	private void removeChild(Task<E> parent, Task<E> child) {
 		try {
+			if (child.getStatus() == Task.Status.RUNNING) {
+				child.cancel();
+			}
 			// hacky, gotta wait for removeTask
 			if (parent instanceof BranchTask) {
 				Field field = ClassReflection.getDeclaredField(BranchTask.class, "children");
