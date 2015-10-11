@@ -14,6 +14,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Array;
 import io.piotrjastrzebski.playground.BaseScreen;
+import io.piotrjastrzebski.playground.GameReset;
 import io.piotrjastrzebski.playground.PlaygroundGame;
 import io.piotrjastrzebski.playground.tiledgentest.generators.TerrainGen;
 
@@ -25,7 +26,7 @@ public class TiledGenTest extends BaseScreen {
 	MapData data;
 	Interpolation interp;
 	float gain;
-	public TiledGenTest (PlaygroundGame game) {
+	public TiledGenTest (GameReset game) {
 		super(game);
 		map = new MapWidget(
 			new TextureRegion(new Texture(Gdx.files.internal("white.png"))));
@@ -257,7 +258,8 @@ public class TiledGenTest extends BaseScreen {
 
 	@Override public void render (float delta) {
 		super.render(delta);
-
+		stage.act(delta);
+		stage.draw();
 	}
 
 	@Override public void resize (int width, int height) {

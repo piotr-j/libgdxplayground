@@ -193,7 +193,8 @@ public class CompositeGenTest extends BaseScreen {
 
 	@Override public void render (float delta) {
 		super.render(delta);
-
+		stage.act(delta);
+		stage.draw();
 	}
 
 	@Override public void resize (int width, int height) {
