@@ -4,6 +4,7 @@ import com.badlogic.gdx.ai.btree.Task;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Tree;
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop;
@@ -36,6 +37,8 @@ public class ViewTask<E> extends VisTree.Node implements Pool.Poolable, ModelTas
 		status = new VisLabel();
 		container.add(name).padRight(10);
 		container.add(status);
+		// dad prefers touchable things, we want entire node to be a valid target
+		container.setTouchable(Touchable.enabled);
 
 		source = new ViewTree.TaskSource(this);
 		target = new ViewTree.AddTarget(this);
