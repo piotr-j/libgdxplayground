@@ -23,6 +23,8 @@ public class ViewTree<E> extends VisTree implements Pool.Poolable {
 	protected DragAndDrop dad;
 
 	public ViewTree () {
+		// remove y spacing so we dont have gaps for DaD
+		setYSpacing(0);
 		dad = new DragAndDrop();
 		pool = new Pool<ViewTask<E>>() {
 			@Override protected ViewTask<E> newObject () {
