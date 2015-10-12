@@ -128,21 +128,74 @@ public class ViewTree<E> extends VisTree implements Pool.Poolable {
 		return separator;
 	}
 
-	public void addAbove (ViewTask<E> vt, DragAndDrop.Payload payload) {
+	public boolean canAddTo (ViewTask<E> vt, ViewTask<E> target, DropPoint to) {
+		switch (to) {
+		case ABOVE:
+			// insert vt above target into targets parent
 
+			break;
+		case MIDDLE:
+			// insert vt into target
+
+			break;
+		case BELOW:
+			// insert vt below target into targets parent
+
+			break;
+		}
+		return false;
 	}
 
-	public void addTo (ViewTask<E> vt, DragAndDrop.Payload payload) {
+	public void addTo(ViewTask<E> vt, ViewTask<E> target, DropPoint to) {
+		switch (to) {
+		case ABOVE:
+			// insert vt above target into targets parent
 
+			break;
+		case MIDDLE:
+			// insert vt into target
+
+			break;
+		case BELOW:
+			// insert vt below target into targets parent
+
+			break;
+		}
 	}
 
-	public void addBelow (ViewTask<E> vt, DragAndDrop.Payload payload) {
+	public boolean canMoveTo (ViewTask<E> vt, ViewTask<E> target, DropPoint to) {
+		switch (to) {
+		case ABOVE:
+			// insert vt above target into targets parent
 
+			break;
+		case MIDDLE:
+			// insert vt into target
+
+			break;
+		case BELOW:
+			// insert vt below target into targets parent
+
+			break;
+		}
+		return false;
 	}
 
-	public boolean canDropTo (ViewTask<E> vt, DragAndDrop.Payload payload, ViewTask.DropPoint dp) {
+	public void moveTo(ViewTask<E> vt, ViewTask<E> target, DropPoint to) {
+		switch (to) {
+		case ABOVE:
+			// insert vt above target into targets parent
 
-		return true;
+			break;
+		case MIDDLE:
+			// insert vt into target
+
+			break;
+		case BELOW:
+			// insert vt below target into targets parent
+
+			break;
+		}
 	}
 
 	public interface ViewTaskSelectedListener<E> {

@@ -28,8 +28,6 @@ public class ViewTask<E> extends VisTree.Node implements Pool.Poolable, ModelTas
 	protected ViewTree.AddTarget target;
 	protected VisTable container;
 
-	enum DropPoint {ABOVE, MIDDLE, BELOW}
-
 	DragAndDrop.Target target2;
 	Actor separator;
 	Drawable containerBG;
@@ -58,23 +56,13 @@ public class ViewTask<E> extends VisTree.Node implements Pool.Poolable, ModelTas
 				// TODO check if we can add given payload to this target
 				Actor actor = getActor();
 				DropPoint dropPoint = getDropPoint(actor, y);
-				boolean isValid = owner.canDropTo(ViewTask.this, payload, dropPoint);
+				boolean isValid = owner.canMoveTo(ViewTask.this, (ViewTask<E>)payload.getObject(), dropPoint);
 				updateSeparator(dropPoint, isValid);
 				return isValid;
 			}
 
 			@Override public void drop (DragAndDrop.Source source, DragAndDrop.Payload payload, float x, float y, int pointer) {
-				switch (getDropPoint(getActor(), y)) {
-				case ABOVE:
-					owner.addAbove(ViewTask.this, payload);
-					break;
-				case MIDDLE:
-					owner.addTo(ViewTask.this, payload);
-					break;
-				case BELOW:
-					owner.addBelow(ViewTask.this, payload);
-					break;
-				}
+				owner.moveTo(ViewTask.this, (ViewTask<E>)payload.getObject(), getDropPoint(getActor(), y));
 			}
 
 			@Override public void reset (DragAndDrop.Source source, DragAndDrop.Payload payload) {
@@ -189,6 +177,7 @@ public class ViewTask<E> extends VisTree.Node implements Pool.Poolable, ModelTas
 	}
 
 	public void initPayload (ViewTree.TaskPayload payload) {
+		payload.setObject(this);
 		payload.init(name.getText().toString(), this);
 		payload.addTarget(ViewTree.TaskPayload.TARGET_TRASH);
 	}
