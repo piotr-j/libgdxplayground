@@ -172,10 +172,6 @@ public class ViewTask<E> extends VisTree.Node implements Pool.Poolable, ModelTas
 		}
 	}
 
-	public Actor getDaDActor () {
-		return container;
-	}
-
 	public void initPayload (ViewTree.TaskPayload payload) {
 		payload.setObject(this);
 		payload.init(name.getText().toString(), this);

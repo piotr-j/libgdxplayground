@@ -5,6 +5,7 @@ import com.badlogic.gdx.ai.btree.Task;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.ui.Tree;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop;
 import com.badlogic.gdx.utils.Array;
@@ -198,6 +199,13 @@ public class ViewTree<E> extends VisTree implements Pool.Poolable {
 		}
 	}
 
+	public void trash (ViewTask<E> vt) {
+		Gdx.app.log(TAG, "Remove " + vt);
+		model.remove(vt.getModelTask());
+		pool.free(vt);
+		remove(vt);
+	}
+
 	public interface ViewTaskSelectedListener<E> {
 		void selected(ViewTask<E> task);
 		void deselected();
@@ -216,19 +224,14 @@ public class ViewTree<E> extends VisTree implements Pool.Poolable {
 		}
 
 		@Override public void drop (DragAndDrop.Source source, DragAndDrop.Payload payload, float x, float y, int pointer) {
-			TaskPayload p = (TaskPayload)payload;
-			// delete the node
-			Gdx.app.log(TAG, "Remove " + p.getViewTask());
-			model.remove(p.getViewTask().getModelTask());
-			pool.free(p.getViewTask());
-			remove(p.getViewTask());
+			trash((ViewTask<E>)payload.getObject());
 		}
 	}
 
 	protected static class AddTarget extends DragAndDrop.Target {
 		protected ViewTask owner;
 		public AddTarget (ViewTask owner) {
-			super(owner.getDaDActor());
+			super(owner.getActor());
 			this.owner = owner;
 		}
 
@@ -256,7 +259,7 @@ public class ViewTree<E> extends VisTree implements Pool.Poolable {
 	protected static class TaskSource extends DragAndDrop.Source {
 		protected ViewTask owner;
 		public TaskSource (ViewTask owner) {
-			super(owner.getDaDActor());
+			super(owner.getActor());
 			this.owner = owner;
 		}
 
@@ -293,6 +296,7 @@ public class ViewTree<E> extends VisTree implements Pool.Poolable {
 		public void init (String text, ViewTask viewTask) {
 			setText(text);
 			this.viewTask = viewTask;
+			setObject(viewTask);
 		}
 
 		public void setText(String text) {
@@ -325,6 +329,7 @@ public class ViewTree<E> extends VisTree implements Pool.Poolable {
 		@Override public void reset () {
 			init("<?>", null);
 			target = 0;
+			setObject(null);
 		}
 
 		@Override public String toString () {
