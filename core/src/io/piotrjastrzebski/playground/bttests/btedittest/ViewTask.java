@@ -1,9 +1,11 @@
 package io.piotrjastrzebski.playground.bttests.btedittest;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ai.btree.Task;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
@@ -25,19 +27,20 @@ public class ViewTask<E> extends VisTree.Node implements Pool.Poolable, ModelTas
 	protected VisLabel status;
 	protected ModelTask<E> task;
 	protected DragAndDrop dad;
-	protected ViewTree.TaskSource source;
-	protected ViewTree.AddTarget target;
 	protected VisTable container;
 
-	DragAndDrop.Target target2;
-	Actor separator;
-	Drawable containerBG;
+	protected BTESource source;
+	protected BTETarget target;
+
+	protected Actor separator;
+	protected Drawable containerBG;
+
 	public ViewTask (final ViewTree<E> owner) {
 		super(new VisTable());
 		// object is used to find this node in tree
 		setObject(this);
 		separator = owner.getSeparator();
-		pool = owner.pool;
+		pool = owner.vtPool;
 		dad = owner.dad;
 		container = (VisTable)getActor();
 		name = new VisLabel();
@@ -49,24 +52,40 @@ public class ViewTask<E> extends VisTree.Node implements Pool.Poolable, ModelTas
 		containerBG = VisUI.getSkin().getDrawable("white");
 		container.setColor(Color.GREEN);
 
-		source = new ViewTree.TaskSource(this);
-		target = new ViewTree.AddTarget(this);
+		source = new BTESource(getActor()) {
+			@Override public BTEPayload dragStart (InputEvent event, float x, float y, int pointer, BTEPayload out) {
+				out.setAsMove(ViewTask.this);
+				return out;
+			}
+		};
 
-		target2 = new DragAndDrop.Target(container) {
-			@Override public boolean drag (DragAndDrop.Source source, DragAndDrop.Payload payload, float x, float y, int pointer) {
-				// TODO check if we can add given payload to this target
+		target = new BTETarget(getActor()) {
+			@Override public boolean onDrag (BTESource source, BTEPayload payload, float x, float y, int pointer) {
 				Actor actor = getActor();
 				DropPoint dropPoint = getDropPoint(actor, y);
-				boolean isValid = owner.canMoveTo(ViewTask.this, (ViewTask<E>)payload.getObject(), dropPoint);
+				boolean isValid = false;
+				if (payload.hasTarget(BTEPayload.TARGET_MOVE)) {
+					// TODO sometime we cant move, ie inside itself
+					isValid = false;
+				} else if (payload.hasTarget(BTEPayload.TARGET_ADD)) {
+					// we can always add probably
+					isValid = true;
+				}
 				updateSeparator(dropPoint, isValid, separator, container);
 				return isValid;
 			}
 
-			@Override public void drop (DragAndDrop.Source source, DragAndDrop.Payload payload, float x, float y, int pointer) {
-				owner.moveTo(ViewTask.this, (ViewTask<E>)payload.getObject(), getDropPoint(getActor(), y));
+			@Override public void onDrop (BTESource source, BTEPayload payload, float x, float y, int pointer) {
+				// TODO execute proper action
+				DropPoint dropPoint = getDropPoint(getActor(), y);
+				if (payload.hasTarget(BTEPayload.TARGET_ADD)) {
+					Gdx.app.log("ViewTask", "add " + payload.getAddTaskClass() + " at " + dropPoint);
+				} else if (payload.hasTarget(BTEPayload.TARGET_MOVE)) {
+					Gdx.app.log("ViewTask", "move " + payload.getMoveTask() + " at " + dropPoint);
+				}
 			}
 
-			@Override public void reset (DragAndDrop.Source source, DragAndDrop.Payload payload) {
+			@Override public void onReset (BTESource source, BTEPayload payload) {
 				updateSeparator(null, true, separator, container);
 			}
 		};
@@ -75,7 +94,7 @@ public class ViewTask<E> extends VisTree.Node implements Pool.Poolable, ModelTas
 	public ViewTask<E> init (ModelTask<E> task) {
 		this.task = task;
 		dad.addSource(source);
-		dad.addTarget(target2);
+		dad.addTarget(target);
 		name.setText(task.getName());
 		statusChanged(null, task.getStatus());
 		task.addListener(this);
@@ -93,7 +112,7 @@ public class ViewTask<E> extends VisTree.Node implements Pool.Poolable, ModelTas
 		task.removeListener(this);
 		task = null;
 		dad.removeSource(source);
-		dad.removeTarget(target2);
+		dad.removeTarget(target);
 		for (Tree.Node node : getChildren()) {
 			pool.free((ViewTask<E>)node);
 		}
@@ -131,12 +150,6 @@ public class ViewTask<E> extends VisTree.Node implements Pool.Poolable, ModelTas
 			// TODO some sort of a hint?
 			name.setColor(Color.RED);
 		}
-	}
-
-	public void initPayload (ViewTree.TaskPayload payload) {
-		payload.setObject(this);
-		payload.init(name.getText().toString(), this);
-		payload.addTarget(ViewTree.TaskPayload.TARGET_TRASH);
 	}
 
 	public ModelTask<E> getModelTask () {
