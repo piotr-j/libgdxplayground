@@ -220,4 +220,8 @@ public class ModelTask<E> implements Pool.Poolable, Iterable<ModelTask<E>> {
 		void statusChanged(Task.Status from, Task.Status to);
 		void validChanged(boolean valid);
 	}
+
+	public ModelTask<E> getParent () {
+		return parent;
+	}
 }
