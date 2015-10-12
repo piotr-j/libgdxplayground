@@ -6,6 +6,7 @@ import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.Tree;
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
@@ -57,7 +58,7 @@ public class ViewTask<E> extends VisTree.Node implements Pool.Poolable, ModelTas
 				Actor actor = getActor();
 				DropPoint dropPoint = getDropPoint(actor, y);
 				boolean isValid = owner.canMoveTo(ViewTask.this, (ViewTask<E>)payload.getObject(), dropPoint);
-				updateSeparator(dropPoint, isValid);
+				updateSeparator(dropPoint, isValid, separator, container);
 				return isValid;
 			}
 
@@ -66,7 +67,7 @@ public class ViewTask<E> extends VisTree.Node implements Pool.Poolable, ModelTas
 			}
 
 			@Override public void reset (DragAndDrop.Source source, DragAndDrop.Payload payload) {
-				updateSeparator(null, true);
+				updateSeparator(null, true, separator, container);
 			}
 		};
 	}
@@ -109,29 +110,6 @@ public class ViewTask<E> extends VisTree.Node implements Pool.Poolable, ModelTas
 		return DropPoint.MIDDLE;
 	}
 
-	private void updateSeparator (DropPoint dropPoint, boolean isValid) {
-		separator.setVisible(false);
-		container.setBackground((Drawable)null);
-		Color color = isValid?Color.GREEN:Color.RED;
-		separator.setColor(color);
-		container.setColor(color);
-		if (dropPoint == null) return;
-		separator.setWidth(container.getWidth());
-		switch (dropPoint) {
-		case ABOVE:
-			separator.setVisible(true);
-			separator.setPosition(container.getX(), container.getY() + container.getHeight() - separator.getHeight());
-			break;
-		case MIDDLE:
-			container.setBackground(containerBG);
-			break;
-		case BELOW:
-			separator.setVisible(true);
-			separator.setPosition(container.getX(), container.getY());
-			break;
-		}
-	}
-
 	@Override public String toString () {
 		return "ViewTask{" +
 			"label=" + name.getText() +
@@ -144,23 +122,6 @@ public class ViewTask<E> extends VisTree.Node implements Pool.Poolable, ModelTas
 		status.setColor(getColor(to));
 		status.clearActions();
 		status.addAction(Actions.color(Color.GRAY, fadeTime, Interpolation.pow3In));
-	}
-
-	private static Color getColor (Task.Status status) {
-		if (status == null) return Color.GRAY;
-		switch (status) {
-		case SUCCEEDED:
-			return Color.GREEN;
-		case RUNNING:
-			return Color.ORANGE;
-		case FAILED:
-			return Color.RED;
-		case CANCELLED:
-			return Color.PURPLE;
-		case FRESH:
-		default:
-			return Color.GRAY;
-		}
 	}
 
 	@Override public void validChanged (boolean valid) {
@@ -180,5 +141,48 @@ public class ViewTask<E> extends VisTree.Node implements Pool.Poolable, ModelTas
 
 	public ModelTask<E> getModelTask () {
 		return task;
+	}
+
+	private static Color getColor (Task.Status status) {
+		if (status == null) return Color.GRAY;
+		switch (status) {
+		case SUCCEEDED:
+			return Color.GREEN;
+		case RUNNING:
+			return Color.ORANGE;
+		case FAILED:
+			return Color.RED;
+		case CANCELLED:
+			return Color.PURPLE;
+		case FRESH:
+		default:
+			return Color.GRAY;
+		}
+	}
+
+	private static void updateSeparator (DropPoint dropPoint, boolean isValid, Actor sep, Table cont) {
+		sep.setVisible(false);
+		cont.setBackground((Drawable)null);
+		Color color = isValid? Color.GREEN : Color.RED;
+		sep.setColor(color);
+		cont.setColor(color);
+		// if dp is null we just hide the separator
+		if (dropPoint == null)
+			return;
+
+		sep.setWidth(cont.getWidth());
+		switch (dropPoint) {
+		case ABOVE:
+			sep.setVisible(true);
+			sep.setPosition(cont.getX(), cont.getY() + cont.getHeight() - sep.getHeight());
+			break;
+		case MIDDLE:
+			cont.setBackground("white");
+			break;
+		case BELOW:
+			sep.setVisible(true);
+			sep.setPosition(cont.getX(), cont.getY());
+			break;
+		}
 	}
 }
