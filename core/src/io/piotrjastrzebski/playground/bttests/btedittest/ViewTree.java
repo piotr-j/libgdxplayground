@@ -19,7 +19,7 @@ import com.kotcrab.vis.ui.widget.VisTree;
 /**
  * Created by EvilEntity on 10/10/2015.
  */
-public class ViewTree<E> extends VisTree implements Pool.Poolable {
+public class ViewTree<E> extends VisTree implements Pool.Poolable, ModelTree.TaskListener<E> {
 	private static final String TAG = ViewTree.class.getSimpleName();
 	protected Pool<ViewTask<E>> vtPool;
 	protected ModelTree<E> model;
@@ -72,8 +72,9 @@ public class ViewTree<E> extends VisTree implements Pool.Poolable {
 	public void init (ModelTree<E> model) {
 		if (this.model != null) reset();
 		this.model = model;
+		model.addListener(this);
 		ModelTask<E> root = model.getRoot();
-		add(viewRoot = vtPool.obtain().init(root));
+		add(viewRoot = initVT(root));
 		for (ModelTask<E> task : root) {
 			addViewTask(viewRoot, task);
 		}
@@ -81,14 +82,30 @@ public class ViewTree<E> extends VisTree implements Pool.Poolable {
 	}
 
 	protected void addViewTask (ViewTask<E> parent, ModelTask<E> task) {
-		ViewTask<E> node = vtPool.obtain().init(task);
+		ViewTask<E> node = initVT(task);
 		parent.add(node);
 		for (ModelTask<E> child : task) {
 			addViewTask(node, child);
 		}
 	}
 
+	protected ViewTask<E> initVT (ModelTask<E> task) {
+		ViewTask<E> out = vtPool.obtain();
+		out.init(task);
+		modelToView.put(task, out);
+		return out;
+	}
+
+	protected void freeVT(ViewTask<E> vt) {
+		modelToView.remove(vt.getModelTask());
+		vtPool.free(vt);
+	}
+
 	@Override public void reset () {
+		if (model != null) {
+			model.removeListener(this);
+		}
+		model = null;
 		listeners.clear();
 	}
 
@@ -123,11 +140,9 @@ public class ViewTree<E> extends VisTree implements Pool.Poolable {
 		dad.addSource(new BTESource(source) {
 			@Override public BTEPayload dragStart (InputEvent event, float x, float y, int pointer, BTEPayload out) {
 				// TODO should this create a node for this already?
-				ViewTask<E> vt = vtPool.obtain();
 				ModelTask<E> mt = model.pool.obtain();
 				mt.init(null, classToTask.get(task).cloneTask());
-				vt.init(mt);
-//				out.setAsMove(vt);
+				ViewTask<E> vt = initVT(mt);
 				out.setAsAdd(vt);
 				return out;
 			}
@@ -140,7 +155,7 @@ public class ViewTree<E> extends VisTree implements Pool.Poolable {
 				if (vt.getParent() == null) {
 					Gdx.app.log("Add", "Free" + vt.getModelTask().getName());
 					model.pool.free(vt.getModelTask());
-					vtPool.free(vt);
+					freeVT(vt);
 				}
 			}
 		});
@@ -205,8 +220,39 @@ public class ViewTree<E> extends VisTree implements Pool.Poolable {
 	public void trash (ViewTask<E> vt) {
 		Gdx.app.log(TAG, "Remove " + vt);
 		model.remove(vt.getModelTask());
-		vtPool.free(vt);
+		freeVT(vt);
 		remove(vt);
+	}
+
+	ObjectMap<ModelTask<E>, ViewTask<E>> modelToView = new ObjectMap<>();
+	@Override public void statusChanged (ModelTask<E> task, Task.Status from, Task.Status to) {
+		ViewTask<E> vt = find(viewRoot, task);
+		if (vt == null) {
+			Gdx.app.log(TAG, "VT for" + task + " in statusChanged not found!");
+			return;
+		}
+		vt.statusChanged(from, to);
+	}
+
+	@Override public void validChanged (ModelTask<E> task, boolean valid) {
+		ViewTask<E> vt = find(viewRoot, task);
+		if (vt == null) {
+			Gdx.app.log(TAG, "VT for" + task + " int validChanged not found!");
+			return;
+		}
+		vt.validChanged(valid);
+	}
+
+	private ViewTask<E> find(ViewTask<E> parent, ModelTask<E> task) {
+		// do we want ref only here?
+		if (parent.getModelTask() == task) {
+			return parent;
+		}
+		for (Node node : parent.getChildren()) {
+			ViewTask<E> found = find((ViewTask<E>)node, task);
+			if (found != null) return found;
+ 		}
+		return null;
 	}
 
 	public interface ViewTaskSelectedListener<E> {

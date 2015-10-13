@@ -3,6 +3,7 @@ package io.piotrjastrzebski.playground.bttests.btedittest;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ai.btree.BehaviorTree;
 import com.badlogic.gdx.ai.btree.Task;
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ObjectMap;
 import com.badlogic.gdx.utils.Pool;
 
@@ -14,6 +15,7 @@ public class ModelTree<E> implements Pool.Poolable, BehaviorTree.Listener<E> {
 	protected BehaviorTree<E> bt;
 	protected ModelTask<E> root;
 	protected Pool<ModelTask<E>> pool;
+	private Array<TaskListener<E>> listeners = new Array<>();
 
 	public ModelTree () {
 		pool = new Pool<ModelTask<E>>() {
@@ -45,20 +47,25 @@ public class ModelTree<E> implements Pool.Poolable, BehaviorTree.Listener<E> {
 		if (root != null) pool.free(root);
 	}
 
-	protected ObjectMap<Task, ModelTask> taskToModel = new ObjectMap<>();
+	protected ObjectMap<Task, ModelTask<E>> taskToModel = new ObjectMap<>();
 	protected void map (Task<E> task, ModelTask<E> modelTask) {
 		taskToModel.put(task, modelTask);
 	}
 
 	@Override public void statusUpdated (Task<E> task, Task.Status previousStatus) {
-//		if (task.getStatus() == previousStatus) return;
-		String name = task.getClass().getSimpleName();
-//		Gdx.app.log(TAG, " task " + name + " updated from " + task.getStatus() + " to " + previousStatus);
-		ModelTask modelTask = taskToModel.get(task, null);
+	ModelTask<E> modelTask = taskToModel.get(task, null);
 		if (modelTask != null) {
-			modelTask.statusUpdated(previousStatus);
+			for (TaskListener<E> listener : listeners) {
+				listener.statusChanged(modelTask, previousStatus, task.getStatus());
+			}
 		} else {
 			Gdx.app.log(TAG, "Task mapping not found for " + task);
+		}
+	}
+
+	protected void validChanged (ModelTask<E> task, boolean valid) {
+		for (TaskListener<E> listener : listeners) {
+			listener.validChanged(task, valid);
 		}
 	}
 
@@ -81,5 +88,20 @@ public class ModelTree<E> implements Pool.Poolable, BehaviorTree.Listener<E> {
 		}
 		root.remove(toRemove);
 		bt.reset();
+	}
+
+	public interface TaskListener<E> {
+		void statusChanged(ModelTask<E> task, Task.Status from, Task.Status to);
+		void validChanged(ModelTask<E> task, boolean valid);
+	}
+
+	public void addListener(TaskListener<E> listener) {
+		if (!listeners.contains(listener, true)) {
+			listeners.add(listener);
+		}
+	}
+
+	public void removeListener(TaskListener<E> listener) {
+		listeners.removeValue(listener, true);
 	}
 }
