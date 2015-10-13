@@ -8,7 +8,10 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.ObjectMap;
 import com.badlogic.gdx.utils.Pool;
+import com.badlogic.gdx.utils.reflect.ClassReflection;
+import com.badlogic.gdx.utils.reflect.ReflectionException;
 import com.kotcrab.vis.ui.VisUI;
 import com.kotcrab.vis.ui.widget.VisImage;
 import com.kotcrab.vis.ui.widget.VisTree;
@@ -100,22 +103,45 @@ public class ViewTree<E> extends VisTree implements Pool.Poolable {
 		listeners.removeValue(listener, true);
 	}
 
+	protected ObjectMap<Class<? extends Task>, Task<E>> classToTask = new ObjectMap<>();
+
 	/**
 	 * register given actor as source with task that can be added to the tree
 	 */
 	public void addSource (Actor source, final Class<? extends Task> task) {
+		if (classToTask.containsKey(task)) {
+			Gdx.app.log(TAG, "Task class already added: " + task);
+			return;
+		}
+		try {
+			Task instance = ClassReflection.newInstance(task);
+			classToTask.put(task, instance);
+		} catch (ReflectionException e) {
+			Gdx.app.error(TAG, "Failed to instantience task " + task, e);
+			return;
+		}
 		dad.addSource(new BTESource(source) {
 			@Override public BTEPayload dragStart (InputEvent event, float x, float y, int pointer, BTEPayload out) {
 				// TODO should this create a node for this already?
-//				ViewTask<E> obtain = vtPool.obtain();
-				out.setAsAdd(task);
+				ViewTask<E> vt = vtPool.obtain();
+				ModelTask<E> mt = model.pool.obtain();
+				mt.init(null, classToTask.get(task).cloneTask());
+				vt.init(mt);
+//				out.setAsMove(vt);
+				out.setAsAdd(vt);
 				return out;
 			}
 
 			@Override public void onDragStop (InputEvent event, float x, float y, int pointer, BTEPayload payload,
 				BTETarget target) {
 				Gdx.app.log("Add", "OnStop");
-
+				ViewTask vt = payload.getViewTask();
+				// vt wasnt added
+				if (vt.getParent() == null) {
+					Gdx.app.log("Add", "Free" + vt.getModelTask().getName());
+					model.pool.free(vt.getModelTask());
+					vtPool.free(vt);
+				}
 			}
 		});
 	}
@@ -127,10 +153,8 @@ public class ViewTree<E> extends VisTree implements Pool.Poolable {
 			}
 
 			@Override public void onDrop (BTESource source, BTEPayload payload, float x, float y, int pointer) {
-				// do we put the task in source on in payload?
 				// TODO confirm?
-				Gdx.app.log(TAG, "trash " + payload.getMoveTask());
-//				trash(payload.getMoveTask());
+				trash(payload.getViewTask());
 			}
 		});
 	}
@@ -139,72 +163,41 @@ public class ViewTree<E> extends VisTree implements Pool.Poolable {
 		return separator;
 	}
 
+	/**
+	 * @return if we can add new vt to target at given drop point
+	 */
 	public boolean canAddTo (ViewTask<E> vt, ViewTask<E> target, DropPoint to) {
-		switch (to) {
-		case ABOVE:
-			// insert vt above target into targets parent
-
-			break;
-		case MIDDLE:
-			// insert vt into target
-
-			break;
-		case BELOW:
-			// insert vt below target into targets parent
-
-			break;
-		}
-		return false;
+		// we cant add to own children, thats about it
+		// some thing might result in broken tree, but it will be indicated
+		return vt.findNode(target) == null;
 	}
 
+	/**
+	 * Add new node to target at dp
+	 */
 	public void addTo(ViewTask<E> vt, ViewTask<E> target, DropPoint to) {
-		switch (to) {
-		case ABOVE:
-			// insert vt above target into targets parent
-
-			break;
-		case MIDDLE:
-			// insert vt into target
-
-			break;
-		case BELOW:
-			// insert vt below target into targets parent
-
-			break;
+		// TODO do we want to double check?
+		if (!canAddTo(vt, target, to)) {
+			Gdx.app.log(TAG, target + " cant be added to " + vt + " at " + to);
+			return;
 		}
-	}
+		// TODO change model as well
+		// if the view task is already in the tree, remove it
+		vt.remove();
 
-	public boolean canMoveTo (ViewTask<E> vt, ViewTask<E> target, DropPoint to) {
+		Gdx.app.log(TAG, "Add " + vt + " to " + target + " at " + to);
 		switch (to) {
 		case ABOVE:
-			// insert vt above target into targets parent
-
+			// insert vt before target
+			target.getParent().insert(target.getIndexInParent(), vt);
 			break;
 		case MIDDLE:
-			// insert vt into target
-
+			// add vt to target
+			target.add(vt);
 			break;
 		case BELOW:
-			// insert vt below target into targets parent
-
-			break;
-		}
-		return false;
-	}
-
-	public void moveTo(ViewTask<E> vt, ViewTask<E> target, DropPoint to) {
-		switch (to) {
-		case ABOVE:
-			// insert vt above target into targets parent
-
-			break;
-		case MIDDLE:
-			// insert vt into target
-
-			break;
-		case BELOW:
-			// insert vt below target into targets parent
-
+			// insert vt after target
+			target.getParent().insert(target.getIndexInParent() + 1, vt);
 			break;
 		}
 	}

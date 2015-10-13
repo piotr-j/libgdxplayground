@@ -63,14 +63,7 @@ public class ViewTask<E> extends VisTree.Node implements Pool.Poolable, ModelTas
 			@Override public boolean onDrag (BTESource source, BTEPayload payload, float x, float y, int pointer) {
 				Actor actor = getActor();
 				DropPoint dropPoint = getDropPoint(actor, y);
-				boolean isValid = false;
-				if (payload.hasTarget(BTEPayload.TARGET_MOVE)) {
-					// TODO sometime we cant move, ie inside itself
-					isValid = false;
-				} else if (payload.hasTarget(BTEPayload.TARGET_ADD)) {
-					// we can always add probably
-					isValid = true;
-				}
+				boolean isValid = owner.canAddTo(payload.getViewTask(), ViewTask.this, dropPoint);
 				updateSeparator(dropPoint, isValid, separator, container);
 				return isValid;
 			}
@@ -78,11 +71,8 @@ public class ViewTask<E> extends VisTree.Node implements Pool.Poolable, ModelTas
 			@Override public void onDrop (BTESource source, BTEPayload payload, float x, float y, int pointer) {
 				// TODO execute proper action
 				DropPoint dropPoint = getDropPoint(getActor(), y);
-				if (payload.hasTarget(BTEPayload.TARGET_ADD)) {
-					Gdx.app.log("ViewTask", "add " + payload.getAddTaskClass() + " at " + dropPoint);
-				} else if (payload.hasTarget(BTEPayload.TARGET_MOVE)) {
-					Gdx.app.log("ViewTask", "move " + payload.getMoveTask() + " at " + dropPoint);
-				}
+//				Gdx.app.log("ViewTask", "add " + payload.getViewTask() + " at " + dropPoint);
+				owner.addTo(payload.getViewTask(), ViewTask.this, dropPoint);
 			}
 
 			@Override public void onReset (BTESource source, BTEPayload payload) {
@@ -150,6 +140,12 @@ public class ViewTask<E> extends VisTree.Node implements Pool.Poolable, ModelTas
 			// TODO some sort of a hint?
 			name.setColor(Color.RED);
 		}
+	}
+
+	protected int getIndexInParent() {
+		Tree.Node parent = getParent();
+		if (parent == null) return 0;
+		return parent.getChildren().indexOf(this, true);
 	}
 
 	public ModelTask<E> getModelTask () {

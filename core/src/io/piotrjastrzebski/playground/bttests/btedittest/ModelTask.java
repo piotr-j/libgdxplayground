@@ -190,6 +190,9 @@ public class ModelTask<E> implements Pool.Poolable, Iterable<ModelTask<E>> {
 			'}';
 	}
 
+	/**
+	 * @return text used for display
+	 */
 	public String getName () {
 		return task.getClass().getSimpleName();
 	}
@@ -216,6 +219,7 @@ public class ModelTask<E> implements Pool.Poolable, Iterable<ModelTask<E>> {
 		listeners.removeValue(listener, true);
 	}
 
+	// TODO move this to tree itself and sub to tree?
 	public interface ModelTaskListener {
 		void statusChanged(Task.Status from, Task.Status to);
 		void validChanged(boolean valid);

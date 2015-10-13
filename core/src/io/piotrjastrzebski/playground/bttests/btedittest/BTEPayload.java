@@ -1,6 +1,5 @@
 package io.piotrjastrzebski.playground.bttests.btedittest;
 
-import com.badlogic.gdx.ai.btree.Task;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop;
 import com.badlogic.gdx.utils.Pool;
@@ -51,8 +50,9 @@ public class BTEPayload extends DragAndDrop.Payload implements Pool.Poolable {
 		invalid.setText(text);
 	}
 
-	public void addTarget(int target) {
+	public BTEPayload addTarget(int target) {
 		targetMask |= target;
+		return this;
 	}
 
 	public boolean hasTarget (int target) {
@@ -61,29 +61,25 @@ public class BTEPayload extends DragAndDrop.Payload implements Pool.Poolable {
 
 	@Override public void reset () {
 		targetMask = 0;
+		vt = null;
 		setDragText("<?>");
 	}
 
-	protected Class<? extends Task> addTaskClass;
-	public void setAsAdd (Class<? extends Task> task) {
-		addTaskClass = task;
-		setDragText(task.getSimpleName());
+	public void setAsAdd (ViewTask task) {
+		vt = task;
+		setDragText(task.getModelTask().getName());
 		addTarget(TARGET_ADD);
 	}
 
-	protected ViewTask moveTask;
+	protected ViewTask vt;
 	public void setAsMove (ViewTask task) {
-		moveTask = task;
-		setDragText(task.getClass().getSimpleName());
+		vt = task;
+		setDragText(task.getModelTask().getName());
 		addTarget(TARGET_MOVE);
 		addTarget(TARGET_TRASH);
 	}
 
-	public Class<? extends Task> getAddTaskClass () {
-		return addTaskClass;
-	}
-
-	public ViewTask getMoveTask () {
-		return moveTask;
+	public ViewTask getViewTask () {
+		return vt;
 	}
 }
