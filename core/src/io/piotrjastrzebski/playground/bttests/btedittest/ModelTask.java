@@ -34,7 +34,6 @@ public class ModelTask<E> implements Pool.Poolable, Iterable<ModelTask<E>> {
 	protected Array<ModelTask<E>> children = new Array<>();
 	protected int minChildCount = 0;
 	protected int maxChildCount = Integer.MAX_VALUE;
-	protected Array<ModelTaskListener> listeners = new Array<>();
 	protected Pool<ModelTask<E>> pool;
 	protected ModelTree<E> tree;
 	private boolean isValid;
@@ -113,12 +112,6 @@ public class ModelTask<E> implements Pool.Poolable, Iterable<ModelTask<E>> {
 		}
 	}
 
-	public void statusUpdated (Task.Status previousStatus) {
-		for (ModelTaskListener listener : listeners) {
-			listener.statusChanged(previousStatus, task.getStatus());
-		}
-	}
-
 	public Task.Status getStatus () {
 		if (task == null) return null;
 		return task.getStatus();
@@ -165,9 +158,7 @@ public class ModelTask<E> implements Pool.Poolable, Iterable<ModelTask<E>> {
 	private void setValid (boolean valid) {
 		if (isValid == valid) return;
 		isValid = valid;
-		for (ModelTaskListener listener : listeners) {
-			listener.validChanged(valid);
-		}
+		tree.validChanged(this, valid);
 	}
 
 	@Override public void reset () {
@@ -185,7 +176,7 @@ public class ModelTask<E> implements Pool.Poolable, Iterable<ModelTask<E>> {
 	@Override public String toString () {
 		return "ModelTask{" +
 			"type=" + type +
-			", task=" + task.getClass().getSimpleName() +
+			", task=" + (task==null?"<no-task>":task.getClass().getSimpleName()) +
 			", children=" + children.size +
 			'}';
 	}
@@ -207,22 +198,6 @@ public class ModelTask<E> implements Pool.Poolable, Iterable<ModelTask<E>> {
 
 	@Override public Spliterator<ModelTask<E>> spliterator () {
 		return children.spliterator();
-	}
-
-	public void addListener(ModelTaskListener listener) {
-		if (!listeners.contains(listener, true)) {
-			listeners.add(listener);
-		}
-	}
-
-	public void removeListener(ModelTaskListener listener) {
-		listeners.removeValue(listener, true);
-	}
-
-	// TODO move this to tree itself and sub to tree?
-	public interface ModelTaskListener {
-		void statusChanged(Task.Status from, Task.Status to);
-		void validChanged(boolean valid);
 	}
 
 	public ModelTask<E> getParent () {

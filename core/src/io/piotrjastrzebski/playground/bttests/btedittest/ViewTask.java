@@ -1,6 +1,5 @@
 package io.piotrjastrzebski.playground.bttests.btedittest;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ai.btree.Task;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Interpolation;
@@ -21,8 +20,7 @@ import com.kotcrab.vis.ui.widget.VisTree;
 /**
  * Created by EvilEntity on 10/10/2015.
  */
-public class ViewTask<E> extends VisTree.Node implements Pool.Poolable, ModelTask.ModelTaskListener {
-	protected Pool<ViewTask<E>> pool;
+public class ViewTask<E> extends VisTree.Node implements Pool.Poolable {
 	protected VisLabel name;
 	protected VisLabel status;
 	protected ModelTask<E> task;
@@ -34,13 +32,14 @@ public class ViewTask<E> extends VisTree.Node implements Pool.Poolable, ModelTas
 
 	protected Actor separator;
 	protected Drawable containerBG;
+	protected ViewTree<E> owner;
 
 	public ViewTask (final ViewTree<E> owner) {
 		super(new VisTable());
+		this.owner = owner;
 		// object is used to find this node in tree
 		setObject(this);
 		separator = owner.getSeparator();
-		pool = owner.vtPool;
 		dad = owner.dad;
 		container = (VisTable)getActor();
 		name = new VisLabel();
@@ -71,7 +70,6 @@ public class ViewTask<E> extends VisTree.Node implements Pool.Poolable, ModelTas
 			@Override public void onDrop (BTESource source, BTEPayload payload, float x, float y, int pointer) {
 				// TODO execute proper action
 				DropPoint dropPoint = getDropPoint(getActor(), y);
-//				Gdx.app.log("ViewTask", "add " + payload.getViewTask() + " at " + dropPoint);
 				owner.addTo(payload.getViewTask(), ViewTask.this, dropPoint);
 			}
 
@@ -87,7 +85,6 @@ public class ViewTask<E> extends VisTree.Node implements Pool.Poolable, ModelTas
 		dad.addTarget(target);
 		name.setText(task.getName());
 		statusChanged(null, task.getStatus());
-		task.addListener(this);
 		return this;
 	}
 
@@ -99,12 +96,11 @@ public class ViewTask<E> extends VisTree.Node implements Pool.Poolable, ModelTas
 
 	@Override public void reset () {
 		name.setText("");
-		task.removeListener(this);
 		task = null;
 		dad.removeSource(source);
 		dad.removeTarget(target);
 		for (Tree.Node node : getChildren()) {
-			pool.free((ViewTask<E>)node);
+			owner.freeVT((ViewTask<E>)node);
 		}
 	}
 
@@ -126,14 +122,14 @@ public class ViewTask<E> extends VisTree.Node implements Pool.Poolable, ModelTas
 	}
 
 	protected float fadeTime = 1.5f;
-	@Override public void statusChanged (Task.Status from, Task.Status to) {
+	protected void statusChanged (Task.Status from, Task.Status to) {
 		status.setText(to.toString());
 		status.setColor(getColor(to));
 		status.clearActions();
 		status.addAction(Actions.color(Color.GRAY, fadeTime, Interpolation.pow3In));
 	}
 
-	@Override public void validChanged (boolean valid) {
+	protected void validChanged (boolean valid) {
 		if (valid) {
 			name.setColor(Color.WHITE);
 		} else {
