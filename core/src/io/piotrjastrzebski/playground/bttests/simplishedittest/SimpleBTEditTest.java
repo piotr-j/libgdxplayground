@@ -36,6 +36,7 @@ public class SimpleBTEditTest extends BaseScreen {
 	private BehaviorTree<Dog> tree;
 
 	BehaviorTree<Dog> dogBehaviorTreeArchetype;
+	BTModel<Dog> btModel;
 
 	public SimpleBTEditTest (GameReset game) {
 		super(game);
@@ -59,6 +60,13 @@ public class SimpleBTEditTest extends BaseScreen {
 		tree = (BehaviorTree<Dog>)dogBehaviorTreeArchetype.cloneTask();
 		tree.setObject(new Dog("Dog A"));
 
+		btModel = new BTModel<>();
+		btModel.init(tree);
+
+
+
+
+
 	}
 
 	float elapsedTime;
@@ -70,7 +78,7 @@ public class SimpleBTEditTest extends BaseScreen {
 
 		if (elapsedTime > 1) {
 //			Gdx.app.log(TAG, "Step: " + (++step));
-			tree.step();
+			btModel.step();
 			elapsedTime -= 1;
 		}
 		stage.act(delta);
