@@ -22,9 +22,9 @@ public class EntityEditTest extends BaseScreen {
 
 		world = new World(cfg);
 		Entity entity = world.createEntity();
-		Gdx.app.log("", "e: "+ world.getEntity(entity.id));
+		Gdx.app.log("", "e: "+ world.getEntity(entity.getId()));
 		world.process();
-		Gdx.app.log("", "e: "+ world.getEntity(entity.id));
+		Gdx.app.log("", "e: "+ world.getEntity(entity.getId()));
 		entity.edit().create(TestComponentA.class).data = "first A";
 		entity.edit().create(TestComponentB.class).data = "first B";
 		world.process(); // TestSystem: inserted, process

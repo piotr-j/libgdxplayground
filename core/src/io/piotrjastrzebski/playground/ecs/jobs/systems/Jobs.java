@@ -5,6 +5,7 @@ import com.artemis.ComponentMapper;
 import com.artemis.Entity;
 import com.artemis.annotations.Wire;
 import com.artemis.systems.EntityProcessingSystem;
+import com.artemis.systems.IteratingSystem;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.IntMap;
@@ -15,7 +16,7 @@ import io.piotrjastrzebski.playground.ecs.jobs.components.Job;
  * Created by EvilEntity on 17/08/2015.
  */
 @Wire
-public class Jobs extends EntityProcessingSystem{
+public class Jobs extends IteratingSystem {
 	private final static String TAG = Jobs.class.getSimpleName();
 	private ComponentMapper<Job> mJob;
 
@@ -32,7 +33,7 @@ public class Jobs extends EntityProcessingSystem{
 		jobs.add(job);
 	}
 
-	@Override protected void process (Entity e) {
+	@Override protected void process (int e) {
 
 	}
 

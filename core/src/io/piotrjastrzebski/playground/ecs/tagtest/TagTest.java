@@ -26,8 +26,8 @@ public class TagTest extends BaseScreen {
 		WorldConfiguration cfg = new WorldConfiguration();
 
 		TagSystem tagSystem;
-		cfg.setSystem(tagSystem = new TagSystem(), true);
-		cfg.setManager(new UuidEntityManager());
+		cfg.setSystem(tagSystem = new TagSystem());
+		cfg.setSystem(new UuidEntityManager());
 		cfg.setSystem(new BuildSystem());
 		cfg.setSystem(new OrderSystem());
 		JobSystem jobSystem;

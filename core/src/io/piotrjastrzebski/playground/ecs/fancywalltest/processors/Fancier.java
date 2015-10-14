@@ -6,6 +6,7 @@ import com.artemis.Entity;
 import com.artemis.EntityEdit;
 import com.artemis.annotations.Wire;
 import com.artemis.systems.EntityProcessingSystem;
+import com.artemis.systems.IteratingSystem;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
@@ -19,7 +20,7 @@ import io.piotrjastrzebski.playground.ecs.fancywalltest.components.*;
  * Created by PiotrJ on 30/09/15.
  */
 @Wire
-public class Fancier extends EntityProcessingSystem {
+public class Fancier extends IteratingSystem {
 	protected ComponentMapper<Transform> mTransform;
 	protected ComponentMapper<Wall> mWall;
 	protected ComponentMapper<Tint> mTint;
@@ -100,7 +101,7 @@ public class Fancier extends EntityProcessingSystem {
 		IntArray parts = wallToParts.get(entityId, null);
 		if (parts == null) return;
 		for (int i = 0; i < parts.size; i++) {
-			world.deleteEntity(parts.get(i));
+			world.delete(parts.get(i));
 		}
 		parts.clear();
 
@@ -112,7 +113,7 @@ public class Fancier extends EntityProcessingSystem {
 	}
 
 	Vector2 tmp = new Vector2();
-	@Override protected void process (Entity e) {
+	@Override protected void process (int e) {
 		Transform src = mTransform.get(e);
 		Wall wall = mWall.get(e);
 		Tint tint = mTint.get(e);
@@ -121,7 +122,7 @@ public class Fancier extends EntityProcessingSystem {
 			if (!mTransformed.has(e)) {
 				tint.color.set(Color.RED);
 			}
-			IntArray parts = wallToParts.get(e.getId(), null);
+			IntArray parts = wallToParts.get(e, null);
 			if (parts == null) return;
 			for (int i = 0; i < parts.size; i++) {
 				int id = parts.get(i);
@@ -133,8 +134,8 @@ public class Fancier extends EntityProcessingSystem {
 			}
 		} else {
 			tint.color.set(Color.GREEN);
-			e.edit().remove(Transformed.class);
-			IntArray parts = wallToParts.get(e.getId(), null);
+			mTransformed.remove(e);
+			IntArray parts = wallToParts.get(e, null);
 			if (parts == null) return;
 			for (int i = 0; i < parts.size; i++) {
 				int id = parts.get(i);

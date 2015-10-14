@@ -5,6 +5,7 @@ import com.artemis.ComponentMapper;
 import com.artemis.Entity;
 import com.artemis.annotations.Wire;
 import com.artemis.systems.EntityProcessingSystem;
+import com.artemis.systems.IteratingSystem;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
@@ -25,7 +26,7 @@ import io.piotrjastrzebski.playground.ecs.jobs.systems.Workers;
  * Created by EvilEntity on 17/08/2015.
  */
 @Wire
-public class GUI extends EntityProcessingSystem {
+public class GUI extends IteratingSystem {
 	private ComponentMapper<Godlike> mGodlike;
 	protected ComponentMapper<Job> mJob;
 	protected ComponentMapper<Worker> mWorker;
@@ -92,7 +93,7 @@ public class GUI extends EntityProcessingSystem {
 	}
 
 	Vector3 temp = new Vector3();
-	@Override protected void process (Entity e) {
+	@Override protected void process (int e) {
 		Godlike godlike = mGodlike.get(e);
 		camera.project(temp.set(godlike.x + godlike.width / 2 , godlike.y + godlike.height / 2, 0));
 		VisLabel label = godlike.actor;
@@ -137,7 +138,7 @@ public class GUI extends EntityProcessingSystem {
 		label.setPosition(temp.x - label.getWidth() / 2, temp.y - label.getHeight() / 2);
 		if (godlike.selected) {
 			name.setText(godlike.name);
-			entity.setText(ECSJobsTest.entityToStr(world, e.id));
+			entity.setText(ECSJobsTest.entityToStr(world, e));
 		}
 	}
 

@@ -6,6 +6,7 @@ import com.artemis.ComponentMapper;
 import com.artemis.Entity;
 import com.artemis.annotations.Wire;
 import com.artemis.systems.EntityProcessingSystem;
+import com.artemis.systems.IteratingSystem;
 import com.artemis.utils.Bag;
 import com.badlogic.gdx.Gdx;
 import io.piotrjastrzebski.playground.ecs.tagtest.components.BuildJobComponent;
@@ -14,13 +15,13 @@ import io.piotrjastrzebski.playground.ecs.tagtest.components.BuildTagComponent;
 /**
  * Created by PiotrJ on 25/06/15.
  */
-@Wire public class BuildSystem extends EntityProcessingSystem implements JobHandler {
+@Wire public class BuildSystem extends IteratingSystem implements JobHandler {
     @Wire TagSystem tags;
     @Wire JobSystem jobs;
     ComponentMapper<BuildJobComponent> buildM;
 
     public BuildSystem() {
-        super(Aspect.getAspectForAll(BuildJobComponent.class));
+        super(Aspect.all(BuildJobComponent.class));
     }
 
     @Override
@@ -39,7 +40,7 @@ import io.piotrjastrzebski.playground.ecs.tagtest.components.BuildTagComponent;
     }
 
     @Override
-    protected void process(Entity e) {
+    protected void process(int e) {
 
     }
 

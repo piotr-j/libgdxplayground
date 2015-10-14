@@ -1,6 +1,7 @@
 package io.piotrjastrzebski.playground.ecs.sat.processors;
 
 import com.artemis.Aspect;
+import com.artemis.BaseEntitySystem;
 import com.artemis.ComponentMapper;
 import com.artemis.EntitySystem;
 import com.artemis.annotations.Wire;
@@ -13,7 +14,7 @@ import io.piotrjastrzebski.playground.ecs.sat.components.GUIActor;
  * Created by PiotrJ on 27/08/15.
  */
 @Wire
-public class GUI extends EntitySystem implements Input {
+public class GUI extends BaseEntitySystem implements Input {
 	protected ComponentMapper<GUIActor> mGUIActor;
 
 	@Wire Stage stage;

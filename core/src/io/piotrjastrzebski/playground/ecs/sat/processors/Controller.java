@@ -5,6 +5,7 @@ import com.artemis.ComponentMapper;
 import com.artemis.Entity;
 import com.artemis.annotations.Wire;
 import com.artemis.systems.EntityProcessingSystem;
+import com.artemis.systems.IteratingSystem;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.math.MathUtils;
@@ -21,7 +22,7 @@ import io.piotrjastrzebski.playground.ecs.sat.components.Transform;
  * Created by PiotrJ on 27/08/15.
  */
 @Wire
-public class Controller extends EntityProcessingSystem implements Input, InputProcessor {
+public class Controller extends IteratingSystem implements Input, InputProcessor {
 	protected ComponentMapper<Transform> mTransform;
 	protected ComponentMapper<Polygon> mPolygon;
 	protected ComponentMapper<Circle> mCircle;
@@ -39,20 +40,20 @@ public class Controller extends EntityProcessingSystem implements Input, InputPr
 	boolean reset;
 	boolean touching;
 	Vector3 touch = new Vector3();
-	@Override protected void process (Entity e) {
-		if (selected >= 0 && selected != e.id) return;
+	@Override protected void process (int e) {
+		if (selected >= 0 && selected != e) return;
 
 		Polygon polygon = mPolygon.getSafe(e);
 		if (polygon != null && polygon.polygon.contains(touch.x, touch.y)) {
-			selected = e.id;
+			selected = e;
 		}
 
 		Circle circle = mCircle.getSafe(e);
 		if (circle != null && circle.circle.contains(touch.x, touch.y)) {
-			selected = e.id;
+			selected = e;
 		}
 
-		if (selected == e.id) {
+		if (selected == e) {
 			Transform transform = mTransform.get(e);
 			transform.pos.set(touch.x, touch.y);
 			if (reset) {

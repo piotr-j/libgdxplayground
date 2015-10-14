@@ -92,7 +92,7 @@ public class ECSAIJobsTest extends BaseScreen {
 	private void createWorker (String name) {
 		Entity e = world.createEntity();
 		Worker worker = e.edit().create(Worker.class);
-		worker.eid = e.id;
+		worker.eid = e.getId();
 		worker.name = name;
 		worker.ai = (BehaviorTree<Worker>)btArchetype.cloneTask();
 

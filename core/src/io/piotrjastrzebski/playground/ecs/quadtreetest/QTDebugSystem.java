@@ -311,7 +311,7 @@ public class QTDebugSystem extends BaseSystem {
 					Size size = mSize.get(e);
 					temp1.set(position.x, position.y, size.width, size.height);
 					if (selected.overlaps(temp1)) {
-						fill.add(e.id);
+						fill.add(e.getId());
 					}
 				}
 			}

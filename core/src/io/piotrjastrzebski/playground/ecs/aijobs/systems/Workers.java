@@ -5,6 +5,7 @@ import com.artemis.ComponentMapper;
 import com.artemis.Entity;
 import com.artemis.annotations.Wire;
 import com.artemis.systems.EntityProcessingSystem;
+import com.artemis.systems.IteratingSystem;
 import com.badlogic.gdx.Gdx;
 import io.piotrjastrzebski.playground.ecs.aijobs.ECSAIJobsTest;
 import io.piotrjastrzebski.playground.ecs.aijobs.Godlike;
@@ -15,7 +16,7 @@ import io.piotrjastrzebski.playground.ecs.aijobs.components.Worker;
  * Created by EvilEntity on 17/08/2015.
  */
 @Wire
-public class Workers extends EntityProcessingSystem {
+public class Workers extends IteratingSystem {
 	private final static String TAG = Workers.class.getSimpleName();
 	protected ComponentMapper<Worker> mWorker;
 //	protected ComponentMapper<Godlike> mGodlike;
@@ -30,7 +31,7 @@ public class Workers extends EntityProcessingSystem {
 
 	}
 
-	@Override protected void process (Entity e) {
+	@Override protected void process (int e) {
 //		Godlike godlike = mGodlike.get(e);
 		Worker worker = mWorker.get(e);
 		worker.ai.setObject(worker);

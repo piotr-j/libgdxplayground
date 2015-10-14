@@ -5,13 +5,14 @@ import com.artemis.ComponentMapper;
 import com.artemis.Entity;
 import com.artemis.annotations.Wire;
 import com.artemis.systems.EntityProcessingSystem;
+import com.artemis.systems.IteratingSystem;
 import com.badlogic.gdx.Gdx;
 
 /**
  * Created by EvilEntity on 09/07/2015.
  */
 @Wire
-public class TestSystem extends EntityProcessingSystem {
+public class TestSystem extends IteratingSystem {
 
 	public TestSystem () {
 		super(Aspect.all(TestComponentA.class, TestComponentB.class));
@@ -21,8 +22,8 @@ public class TestSystem extends EntityProcessingSystem {
 		Gdx.app.log("Inserted","" + EntityEditTest.entityToStr(world, e));
 	}
 
-	@Override protected void process (Entity e) {
-		Gdx.app.log("Process","" + EntityEditTest.entityToStr(world, e.id));
+	@Override protected void process (int e) {
+		Gdx.app.log("Process","" + EntityEditTest.entityToStr(world, e));
 
 	}
 	private ComponentMapper<TestComponentA> mTestComponentA;

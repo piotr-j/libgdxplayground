@@ -2,6 +2,7 @@ package io.piotrjastrzebski.playground.ecs.assettest;
 
 import com.artemis.*;
 import com.artemis.systems.EntityProcessingSystem;
+import com.artemis.systems.IteratingSystem;
 import io.piotrjastrzebski.playground.BaseScreen;
 import io.piotrjastrzebski.playground.GameReset;
 
@@ -25,11 +26,10 @@ public class ECSAssetTest extends BaseScreen {
 		world.process();
 	}
 
-	public static class SpriteRenderableInitSystem extends EntityProcessingSystem {
+	public static class SpriteRenderableInitSystem extends IteratingSystem {
 		protected ComponentMapper<SpriteRenderableDef> mSpriteRenderableDef;
 		public SpriteRenderableInitSystem () {
 			super(Aspect.all(SpriteRenderableDef.class));
-			setPassive(true);
 		}
 
 		@Override protected void inserted (int e) {
@@ -40,7 +40,7 @@ public class ECSAssetTest extends BaseScreen {
 			//renderable.sprite =
 		}
 
-		@Override protected void process (Entity e) {
+		@Override protected void process (int e) {
 			// passive we dont care
 		}
 	}

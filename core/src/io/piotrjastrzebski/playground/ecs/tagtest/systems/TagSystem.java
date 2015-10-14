@@ -11,7 +11,7 @@ import io.piotrjastrzebski.playground.ecs.tagtest.components.TagComponent;
 /**
  * Created by PiotrJ on 25/06/15.
  */
-@Wire public class TagSystem extends EntitySystem {
+@Wire public class TagSystem extends BaseEntitySystem {
     ComponentMapper<TagComponent> tagM;
     ObjectMap<String, Class> tagToClass = new ObjectMap<>();
     ObjectMap<String, IntArray> tagToEntities = new ObjectMap<>();

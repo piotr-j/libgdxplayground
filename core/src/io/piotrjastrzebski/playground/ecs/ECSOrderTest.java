@@ -2,6 +2,7 @@ package io.piotrjastrzebski.playground.ecs;
 
 import com.artemis.*;
 import com.artemis.systems.EntityProcessingSystem;
+import com.artemis.systems.IteratingSystem;
 import com.badlogic.gdx.Gdx;
 import io.piotrjastrzebski.playground.BaseScreen;
 import io.piotrjastrzebski.playground.GameReset;
@@ -35,9 +36,9 @@ public class ECSOrderTest extends BaseScreen {
 
 	}
 
-	public static class Selector extends EntityProcessingSystem {
+	public static class Selector extends IteratingSystem {
 		private final static String TAG = "  "+Selector.class.getSimpleName();
-
+		protected ComponentMapper<Selected> mSelected;
 		public Selector () {
 			super(Aspect.all(Spec1.class).exclude(Selected.class));
 		}
@@ -46,9 +47,9 @@ public class ECSOrderTest extends BaseScreen {
 			Gdx.app.log(TAG, "inserted e:" + entityId);
 		}
 
-		@Override protected void process (Entity e) {
-			Gdx.app.log(TAG, "process e:" + e.id);
-			e.edit().create(Selected.class);
+		@Override protected void process (int e) {
+			Gdx.app.log(TAG, "process e:" + e);
+			mSelected.create(e);
 		}
 
 		@Override protected void removed (int entityId) {
@@ -56,9 +57,9 @@ public class ECSOrderTest extends BaseScreen {
 		}
 	}
 
-	public static class Reactor extends EntityProcessingSystem {
+	public static class Reactor extends IteratingSystem {
 		private final static String TAG = "  "+Reactor.class.getSimpleName();
-
+		protected ComponentMapper<Selected> mSelected;
 		public Reactor () {
 			super(Aspect.all(Spec1.class, Selected.class));
 		}
@@ -67,21 +68,22 @@ public class ECSOrderTest extends BaseScreen {
 			Gdx.app.log(TAG, "inserted e:" + entityId);
 		}
 
-		@Override protected void process (Entity e) {
-			Gdx.app.log(TAG, "process e:" + e.id);
-			e.edit().remove(Selected.class);
+		@Override protected void process (int e) {
+			Gdx.app.log(TAG, "process e:" + e);
+			mSelected.remove(e);
 		}
 
 		@Override protected void removed (int entityId) {
 			Gdx.app.log(TAG, "removed e:" + entityId);
 		}
 	}
-	public static class Dummy extends EntityProcessingSystem {
+	public static class Dummy extends BaseEntitySystem {
 		public Dummy () {
 			super(Aspect.all(Spec1.class, Selected.class));
 		}
 
-		@Override protected void process (Entity e) {
+		@Override protected void processSystem () {
+
 		}
 	}
 

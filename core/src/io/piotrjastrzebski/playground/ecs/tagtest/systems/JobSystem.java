@@ -6,6 +6,7 @@ import com.artemis.Entity;
 import com.artemis.annotations.Wire;
 import com.artemis.managers.UuidEntityManager;
 import com.artemis.systems.EntityProcessingSystem;
+import com.artemis.systems.IteratingSystem;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.IntMap;
@@ -21,7 +22,7 @@ import java.util.UUID;
 /**
  * Created by PiotrJ on 25/06/15.
  */
-@Wire public class JobSystem extends EntityProcessingSystem {
+@Wire public class JobSystem extends IteratingSystem {
     ComponentMapper<JobDelegateComponent> delegateM;
     ComponentMapper<WorkerComponent> workerM;
 
@@ -29,11 +30,9 @@ import java.util.UUID;
     ObjectMap<String, Array<Job>> claimedJobsByTag = new ObjectMap<>();
     // we need a fast way to find a job via entity id
     IntMap<Job> jobByID = new IntMap<>();
-    ObjectMap<UUID, Job> jobByUUID = new ObjectMap<>();
 
     public JobSystem() {
-        super(Aspect.getAspectForAll(JobDelegateComponent.class));
-        setPassive(true);
+        super(Aspect.all(JobDelegateComponent.class));
     }
 
     ObjectMap<String, JobHandler> tagToHandler = new ObjectMap<>();
@@ -76,20 +75,19 @@ import java.util.UUID;
             }
             Job job;
             // note should be pooled
-            jobs.add(job = new Job(e, world.getEntity(e).getUuid(), actual));
+            jobs.add(job = new Job(e, actual));
             // quick access by entity id, we cant get it via mapper as we dont know the class
             jobByID.put(job.id, job);
-            jobByUUID.put(job.uuid, job);
 
             // we are reloading the game, restore the job
-            if (job.comp.claimedBy != null) {
-                restoreJob(job);
-            }
+//            if (job.comp.claimedBy != null) {
+//                restoreJob(job);
+//            }
         }
     }
 
     @Override
-    protected void process(Entity e) {
+    protected void process(int e) {
         // note passive system, do nothing
     }
 
@@ -179,24 +177,21 @@ import java.util.UUID;
 
     @Wire private UuidEntityManager uuidManager;
     private void restoreJob(Job job) {
-        Entity worker = uuidManager.getEntity(job.comp.claimedBy);
-        WorkerComponent workerComponent = workerM.get(worker);
-        workerComponent.job = job.comp;
-        job.comp.claim(worker);
-        workerComponent.jobEntityID = job.id;
-        workerComponent.setJob(job);
+//        Entity worker = uuidManager.getEntity(job.comp.claimedBy);
+//        WorkerComponent workerComponent = workerM.get(worker);
+//        workerComponent.job = job.comp;
+//        job.comp.claim(worker);
+//        workerComponent.jobEntityID = job.id;
+//        workerComponent.setJob(job);
     }
 
     public class Job {
         // we can use this for access during single session, wont work after re/load
         public int id;
         public JobComponent comp;
-        // permanent id of the entity that contains the component
-        public UUID uuid;
 
-        public Job(int id, UUID uuid, JobComponent jobComponent) {
+        public Job(int id, JobComponent jobComponent) {
             this.id = id;
-            this.uuid = uuid;
             this.comp = jobComponent;
         }
 

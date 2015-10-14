@@ -46,7 +46,7 @@ public class Job extends Component {
 	}
 
 	public void parent(Entity e) {
-		eid = e.id;
+		eid = e.getId();
 	}
 
 	@Override public String toString () {

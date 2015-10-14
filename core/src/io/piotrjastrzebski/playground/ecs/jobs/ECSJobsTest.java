@@ -56,7 +56,7 @@ public class ECSJobsTest extends BaseScreen {
 	private void createWorker (String name) {
 		Entity e = world.createEntity();
 		Worker worker = e.edit().create(Worker.class);
-		worker.eid = e.id;
+		worker.eid = e.getId();
 		worker.name = name;
 		Godlike godlike = e.edit().create(Godlike.class);
 		godlike.color.set(Color.BLUE);

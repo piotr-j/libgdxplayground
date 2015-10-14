@@ -19,12 +19,9 @@ public abstract class JobComponent extends Component {
 
     // TODO other stuff
 
-    // entity that is working on this
-    public UUID claimedBy;
 
     public void claim(Entity worker) {
         // NOTE support for multiple would be nice at some point
-        claimedBy = worker.getUuid();
         claimed = true;
     }
 }

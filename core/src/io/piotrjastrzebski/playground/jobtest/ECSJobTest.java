@@ -3,6 +3,7 @@ package io.piotrjastrzebski.playground.jobtest;
 import com.artemis.*;
 import com.artemis.annotations.Wire;
 import com.artemis.systems.EntityProcessingSystem;
+import com.artemis.systems.IteratingSystem;
 import com.artemis.utils.Bag;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.utils.Array;
@@ -39,7 +40,7 @@ public class ECSJobTest extends BaseScreen {
 	private void createWorker (String name) {
 		Entity e = world.createEntity();
 		Worker worker = e.edit().create(Worker.class);
-		worker.eid = e.id;
+		worker.eid = e.getId();
 		worker.name = name;
 	}
 
@@ -136,7 +137,7 @@ public class ECSJobTest extends BaseScreen {
 		}
 
 		public void parent(Entity e) {
-			eid = e.id;
+			eid = e.getId();
 		}
 
 		@Override public String toString () {
@@ -171,7 +172,7 @@ public class ECSJobTest extends BaseScreen {
 	}
 
 	@Wire
-	public static class JobSystem extends EntityProcessingSystem {
+	public static class JobSystem extends IteratingSystem {
 		private final static String TAG = JobSystem.class.getSimpleName();
 		private ComponentMapper<Job> mJob;
 
@@ -188,7 +189,7 @@ public class ECSJobTest extends BaseScreen {
 			jobs.add(job);
 		}
 
-		@Override protected void process (Entity e) {
+		@Override protected void process (int e) {
 
 		}
 
@@ -252,7 +253,7 @@ public class ECSJobTest extends BaseScreen {
 	}
 
 	@Wire
-	public static class WorkerSystem extends EntityProcessingSystem {
+	public static class WorkerSystem extends IteratingSystem {
 		private final static String TAG = WorkerSystem.class.getSimpleName();
 		private ComponentMapper<Worker> mWorker;
 		JobSystem jobs;
@@ -266,7 +267,7 @@ public class ECSJobTest extends BaseScreen {
 
 		}
 
-		@Override protected void process (Entity e) {
+		@Override protected void process (int e) {
 			Worker worker = mWorker.get(e);
 			// job set
 			if (worker.jobID != NULL_ID) {

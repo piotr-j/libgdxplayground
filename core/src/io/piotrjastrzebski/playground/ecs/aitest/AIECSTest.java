@@ -3,6 +3,7 @@ package io.piotrjastrzebski.playground.ecs.aitest;
 import com.artemis.*;
 import com.artemis.annotations.Wire;
 import com.artemis.systems.EntityProcessingSystem;
+import com.artemis.systems.IteratingSystem;
 import com.artemis.utils.Bag;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ai.btree.BehaviorTree;
@@ -70,7 +71,7 @@ public class AIECSTest extends BaseScreen {
 	}
 
 	@Wire
-	public static class AISystem extends EntityProcessingSystem {
+	public static class AISystem extends IteratingSystem {
 		private final static String TAG = AISystem.class.getSimpleName();
 		private ComponentMapper<AI> mAI;
 		private ComponentMapper<Dog> mDog;
@@ -94,7 +95,7 @@ public class AIECSTest extends BaseScreen {
 			Gdx.app.log(TAG, entityToStr(world, e));
 		}
 
-		@Override protected void process (Entity e) {
+		@Override protected void process (int e) {
 			AI ai = mAI.get(e);
 			Dog brain = mDog.get(e);
 			ai.bTree.setObject(brain);

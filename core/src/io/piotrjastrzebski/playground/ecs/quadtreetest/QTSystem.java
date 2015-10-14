@@ -5,9 +5,10 @@ import com.artemis.ComponentMapper;
 import com.artemis.Entity;
 import com.artemis.annotations.Wire;
 import com.artemis.systems.EntityProcessingSystem;
+import com.artemis.systems.IteratingSystem;
 
 @Wire
-public class QTSystem extends EntityProcessingSystem {
+public class QTSystem extends IteratingSystem {
 	private ComponentMapper<Position> mPosition;
 	private ComponentMapper<Size> mSize;
 
@@ -41,13 +42,13 @@ public class QTSystem extends EntityProcessingSystem {
 		base.insert(e, position.x, position.y, size.width, size.height);
 	}
 
-	@Override protected void process (Entity e) {
+	@Override protected void process (int e) {
 		Position position = mPosition.get(e);
 		Size size = mSize.get(e);
 		if (rebuild) {
-			base.insert(e.id, position.x, position.y, size.width, size.height);
+			base.insert(e, position.x, position.y, size.width, size.height);
 		} else if (position.dirty) {
-			base.update(e.id, position.x, position.y, size.width, size.height);
+			base.update(e, position.x, position.y, size.width, size.height);
 		}
 	}
 

@@ -5,6 +5,7 @@ import com.artemis.ComponentMapper;
 import com.artemis.Entity;
 import com.artemis.annotations.Wire;
 import com.artemis.systems.EntityProcessingSystem;
+import com.artemis.systems.IteratingSystem;
 import com.artemis.utils.IntBag;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -16,7 +17,7 @@ import com.badlogic.gdx.math.Vector3;
  * Created by EvilEntity on 17/08/2015.
  */
 @Wire
-public class Selector extends EntityProcessingSystem implements InputProcessor {
+public class Selector extends IteratingSystem implements InputProcessor {
 	private ComponentMapper<Godlike> mGodlike;
 	@Wire(name = "game-cam") OrthographicCamera camera;
 	public Selector () {
@@ -37,13 +38,13 @@ public class Selector extends EntityProcessingSystem implements InputProcessor {
 	IntBag selected = new IntBag();
 	int last = -1;
 	Rectangle bounds = new Rectangle();
-	@Override protected void process (Entity e) {
+	@Override protected void process (int e) {
 		if (up) {
 			Godlike godlike = mGodlike.get(e);
 			bounds.set(godlike.x, godlike.y, godlike.width, godlike.height);
 			if (bounds.contains(tp.x, tp.y)) {
 				godlike.selected = true;
-				last = e.id;
+				last = e;
 			}
 		}
 	}

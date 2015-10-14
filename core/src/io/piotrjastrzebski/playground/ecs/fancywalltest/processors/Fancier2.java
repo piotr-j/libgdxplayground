@@ -17,7 +17,7 @@ import io.piotrjastrzebski.playground.ecs.fancywalltest.components.*;
  * Created by PiotrJ on 30/09/15.
  */
 @Wire
-public class Fancier2 extends EntitySystem {
+public class Fancier2 extends BaseEntitySystem {
 	protected ComponentMapper<Transform> mTransform;
 	protected ComponentMapper<Wall> mWall;
 	protected ComponentMapper<Transformed> mTransformed;
@@ -92,11 +92,12 @@ public class Fancier2 extends EntitySystem {
 		IntArray parts = wallToParts.get(entityId, null);
 		if (parts == null) return;
 		for (int i = 0; i < parts.size; i++) {
-			world.deleteEntity(parts.get(i));
+			world.delete(parts.get(i));
 		}
 		parts.clear();
-
 	}
 
-	@Override protected void processSystem () {}
+	@Override protected void processSystem () {
+
+	}
 }

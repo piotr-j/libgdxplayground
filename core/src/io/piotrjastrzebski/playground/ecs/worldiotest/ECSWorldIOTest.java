@@ -29,7 +29,7 @@ public class ECSWorldIOTest extends BaseScreen {
 
 
 		WorldSerializationManager manager = new WorldSerializationManager();
-		config.setManager(manager);
+		config.setSystem(manager);
 
 		world = new World(config);
 		world.inject(this);
@@ -69,15 +69,15 @@ public class ECSWorldIOTest extends BaseScreen {
 		ee.add(reusedComponent);
 
 		componentRef0.e = e1;
-		componentRef0.id = e1.id;
+		componentRef0.id = e1.getId();
 		componentRef0.x = componentX1;
 
 		componentRef1.e = e2;
-		componentRef1.id = e2.id;
+		componentRef1.id = e2.getId();
 		componentRef1.x = componentX2;
 
 		componentRef2.e = e0;
-		componentRef2.id = e0.id;
+		componentRef2.id = e0.getId();
 		componentRef2.x = componentX0;
 
 
@@ -129,7 +129,7 @@ public class ECSWorldIOTest extends BaseScreen {
 	private void deleteAll(EntitySubscription sub) {
 		IntBag entities = sub.getEntities();
 		for (int i = 0; entities.size() > i; i++) {
-			world.deleteEntity(entities.get(i));
+			world.delete(entities.get(i));
 		}
 		world.process();
 	}

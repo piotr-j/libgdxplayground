@@ -96,17 +96,17 @@ public class ECSShapeProfilerTest extends BaseScreen {
 				updateEntityStates();
 
 				BaseSystem system = (BaseSystem)systemsData[i];
-				if (!system.isPassive()) {
+//				if (!system.isPassive()) {
 					SystemProfiler profiler = profilers[i];
 					if (profiler != null) profiler.start();
 					system.process();
 					if (profiler != null) profiler.stop();
-				}
+//				}
 			}
 			total.stop();
 		}
 
-		private void initialize () {
+		protected void initialize () {
 			initialized = true;
 			total = SystemProfiler.create("Frame");
 			total.setColor(1, 1, 0, 1);

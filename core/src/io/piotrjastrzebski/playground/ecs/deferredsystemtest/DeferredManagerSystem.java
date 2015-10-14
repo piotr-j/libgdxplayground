@@ -17,10 +17,10 @@ public class DeferredManagerSystem extends BaseSystem implements DeferredSystem{
 	}
 
 	private Array<Job> jobs = new Array<>();
-	@Override public void inserted (Entity e, SubSystem system) {
+	@Override public void inserted (int e, SubSystem system) {
 		Gdx.app.log("deferred", "inserted "+ e);
 		// not a whole lot of insert/remove cycles probably fine to not pool this
-		jobs.add(new Job(e.getId(), system));
+		jobs.add(new Job(e, system));
 		dirty = true;
 	}
 
@@ -39,7 +39,7 @@ public class DeferredManagerSystem extends BaseSystem implements DeferredSystem{
 				active.begin();
 			}
 
-			active.process(world.getEntity(job.eid));
+			active.process(job.eid);
 		}
 
 		if (active != null) {
@@ -47,11 +47,11 @@ public class DeferredManagerSystem extends BaseSystem implements DeferredSystem{
 		}
 	}
 
-	@Override public void removed (Entity e, SubSystem system) {
+	@Override public void removed (int e, SubSystem system) {
 		Gdx.app.log("deferred", "remove "+ e);
 		for (int i = 0; i < jobs.size; i++) {
 			Job job = jobs.get(i);
-			if (job.eid == e.id && job.system == system) {
+			if (job.eid == e && job.system == system) {
 				jobs.removeIndex(i);
 				break;
 			}
