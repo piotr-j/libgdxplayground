@@ -18,6 +18,7 @@ import io.piotrjastrzebski.playground.box2dtest.lights.Box2dRayTest;
 import io.piotrjastrzebski.playground.box2dtest.lightsv2.Box2dRay2Test;
 import io.piotrjastrzebski.playground.bttests.btedittest.BTEditTest;
 import io.piotrjastrzebski.playground.bttests.btreeserializationtest.BTreeTest;
+import io.piotrjastrzebski.playground.bttests.simplishedittest.SimpleBTEditTest;
 import io.piotrjastrzebski.playground.clientserver.CSTest;
 import io.piotrjastrzebski.playground.clientserverv2.CSTestV2;
 import io.piotrjastrzebski.playground.dungeon.DungeonGeneratorTest;
@@ -72,6 +73,7 @@ public class PlaygroundGame extends Game implements GameReset {
 	final Class[] testScreens = new Class[]{DungeonGeneratorTest.class, SATTest.class, ParticleFaceTest.class, SimpleTiledCropTest.class,
 		AIParallelTest.class, SimpleBox2dTest.class, Box2dLoaderTest.class, RadialSpriteTest.class, Box2dSensorTest.class, UIReAddTest.class,
 		ShaderFireWallTest.class, ShaderPortalTest.class, Shader2dRainTest.class, ECSWorldIOTest.class, ECSOrderTest.class,
+		SimpleBTEditTest.class,
 		ECSJobsTest.class, ECSAIJobsTest.class, UISpriteDrawableTest.class, SimpleTiledTest.class, ParticleTest.class, CameraMoveTest.class,
 		TiledGenTest.class, TemperatureTest.class, BiomeTest.class, Box2dInterpolationTest.class, PolicyParallelTest.class,
 		Box2dTiledTest.class, ParticleGUITest.class, ShortcutTest.class, SimpleTiledNonPotTest.class, Box2dRay2Test.class, UIDaDTest.class,
