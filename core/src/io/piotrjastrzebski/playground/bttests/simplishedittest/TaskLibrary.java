@@ -66,6 +66,16 @@ public class TaskLibrary<E> {
 	}
 
 	/**
+	 * @param aClass type of {@link Task}
+	 * @return if this type has been added
+	 */
+	public boolean has (Class<? extends Task> aClass) {
+		if (aClass == null)
+			throw new IllegalArgumentException("Task class cannot be null!");
+		return classToInstance.containsKey(aClass);
+	}
+
+	/**
 	 * @param aClass type of {@link Task} to remove
 	 * @return removed {@link Task} or null
 	 */
