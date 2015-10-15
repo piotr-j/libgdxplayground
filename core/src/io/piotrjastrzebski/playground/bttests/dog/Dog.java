@@ -69,11 +69,11 @@ public class Dog {
 	}
 
 	public void log (String msg) {
-		Gdx.app.log(name, msg);
+		System.out.println(name + " : " + msg);
 	}
 
 	public void brainLog (String msg) {
-		Gdx.app.log(brainLog, msg);
+		System.out.println(brainLog + " : " + msg);
 	}
 
 }
