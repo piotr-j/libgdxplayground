@@ -6,16 +6,28 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 
 /**
+ * Model that represents {@link BehaviorTree} so it can be edited
+ *
+ * Stuff we want to do:
+ * modify the tree
+ *  - remove any node
+ *  - move any node to a another valid node, ie not inside own children
+ *  - add new node at specified place
+ * validate the tree, node child count must be valid before the tree is running
+ * if model is valid, update the underlying {@link BehaviorTree}
+ * notify observers that node status changed, valid, position in tree, removed etc
+ * edit params of {@link Task}s
+ *
  * Created by EvilEntity on 14/10/2015.
  */
 public class BTModel<E> implements Pool.Poolable {
-
+	private TaskLibrary<E> taskLibrary;
 	private BehaviorTree<E> bt;
 	private boolean valid;
 	private BTTask<E> root;
 
 	public BTModel () {
-
+		taskLibrary = new TaskLibrary<>();
 	}
 
 	public void init(BehaviorTree<E> bt) {
@@ -62,7 +74,11 @@ public class BTModel<E> implements Pool.Poolable {
 		if (root == null) {
 			return valid = false;
 		}
-		return valid = root.validate();
+		valid = root.validate();
+		if (valid) {
+			// update the bt, in here or in nodes themselfs?
+		}
+		return valid;
 	}
 
 	public boolean isValid () {
@@ -80,6 +96,10 @@ public class BTModel<E> implements Pool.Poolable {
 			"bt=" + bt +
 			", valid=" + valid +
 			'}';
+	}
+
+	public TaskLibrary<E> getTaskLibrary () {
+		return taskLibrary;
 	}
 
 	public static class BTTask<E> implements Pool.Poolable {
