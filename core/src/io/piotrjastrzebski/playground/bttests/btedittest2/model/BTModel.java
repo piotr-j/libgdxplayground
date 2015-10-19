@@ -189,6 +189,40 @@ public class BTModel<E> implements Pool.Poolable, BTTaskPool<E>, BehaviorTree.Li
 		return valid;
 	}
 
+	Array<BTModelListener<E>> listeners = new Array<>();
+	public void addListener(BTModelListener<E> listener) {
+		if (!listeners.contains(listener, true)) {
+			listeners.add(listener);
+		}
+	}
+
+	public void removeListener(BTModelListener<E> listener) {
+		listeners.removeValue(listener, true);
+	}
+
+
+	@Override public void statusUpdated (Task<E> task, Task.Status previousStatus) {
+		BTTask<E> btTask = findBTTask(task);
+		if (btTask == null) {
+			error(TAG, "ModelTask not found for " + task);
+			return;
+		}
+		for (BTModelListener<E> listener : listeners) {
+			listener.statusChanged(btTask, previousStatus, btTask.getStatus());
+		}
+	}
+
+	@Override public void childAdded (Task<E> task, int index) {
+
+	}
+
+	@Override public void validChanged (BTTask<E> task, boolean isValid) {
+		for (BTModelListener<E> listener : listeners) {
+			listener.validityChanged(task, isValid);
+		}
+	}
+
+
 	@Override public void reset () {
 		if (root != null) root.reset();
 		root = null;
@@ -214,45 +248,11 @@ public class BTModel<E> implements Pool.Poolable, BTTaskPool<E>, BehaviorTree.Li
 		return root;
 	}
 
-	Array<BTModelListener<E>> listeners = new Array<>();
-	public void addListener(BTModelListener<E> listener) {
-		if (!listeners.contains(listener, true)) {
-			listeners.add(listener);
-		}
-	}
-
-	public void removeListener(BTModelListener<E> listener) {
-		listeners.removeValue(listener, true);
-	}
-
-
 	private void error (String tag, String msg) {
 		Gdx.app.error(tag, msg);
 	}
 
 	private void log (String tag, String msg) {
 		Gdx.app.log(tag, msg);
-	}
-
-	@Override public void statusUpdated (Task<E> task, Task.Status previousStatus) {
-		BTTask<E> btTask = findBTTask(task);
-		if (btTask == null) {
-			error(TAG, "ModelTask not found for " + task);
-			return;
-		}
-		for (BTModelListener<E> listener : listeners) {
-			listener.statusChanged(btTask, previousStatus, btTask.getStatus());
-		}
-
-	}
-
-	@Override public void childAdded (Task<E> task, int index) {
-
-	}
-
-	@Override public void validChanged (BTTask<E> task, boolean isValid) {
-		for (BTModelListener<E> listener : listeners) {
-			listener.validityChanged(task, isValid);
-		}
 	}
 }

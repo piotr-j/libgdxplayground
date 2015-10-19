@@ -33,8 +33,6 @@ public class BTTask<E> implements Pool.Poolable {
 			addChild(task.getChild(i));
 		}
 		validate();
-		// can we do this here?
-//		executePending();
 	}
 
 	public int addChild (Task<E> task) {
@@ -65,10 +63,6 @@ public class BTTask<E> implements Pool.Poolable {
 		return children.size - 1;
 	}
 
-	public BTTask<E> getChild (int i) {
-		return children.get(i);
-	}
-
 	public BTTask<E> removeChild (int i) {
 		return removeChild(getChild(i));
 	}
@@ -94,6 +88,14 @@ public class BTTask<E> implements Pool.Poolable {
 		return isValid;
 	}
 
+	public void setValid (boolean newValid) {
+		if (isValid != newValid) {
+			isValid = newValid;
+			// notify that valid status changed
+			if (changeListener != null) changeListener.validChanged(this, isValid);
+		}
+	}
+
 	public void executePending () {
 		// do how do we handle multiple actions?
 		// they shouldnt break validity...
@@ -102,7 +104,6 @@ public class BTTask<E> implements Pool.Poolable {
 				taskAction.execute();
 			}
 			pending.clear();
-//				validate();
 		}
 		// fori as it may be nested
 		for (int i = 0; i < children.size; i++) {
@@ -110,12 +111,32 @@ public class BTTask<E> implements Pool.Poolable {
 		}
 	}
 
-	public void setValid (boolean newValid) {
-		if (isValid != newValid) {
-			isValid = newValid;
-			// notify that valid status changed
-			if (changeListener != null) changeListener.validChanged(this, isValid);
+	public boolean isDirty () {
+		for (BTTask<E> child : children) {
+			if (child.isDirty()) {
+				return true;
+			}
 		}
+		return pending.size > 0;
+	}
+
+	protected BTTask<E> find (Task<E> target) {
+		if (task == target) return this;
+		for (BTTask<E> child : children) {
+			BTTask<E> found = child.find(target);
+			if (found != null) return found;
+		}
+		return null;
+	}
+
+	public int getIndexInParent () {
+		if (parent == null) return -1;
+		for (int i = 0; i < parent.getChildCount(); i++) {
+			if (parent.getChild(i) == this) {
+				return i;
+			}
+		}
+		return -1;
 	}
 
 	@Override public void reset () {
@@ -140,14 +161,14 @@ public class BTTask<E> implements Pool.Poolable {
 			'}';
 	}
 
-	public boolean isDirty () {
-		for (BTTask<E> child : children) {
-			if (child.isDirty()) {
-				return true;
-			}
-		}
-		return pending.size > 0;
+	public Task.Status getStatus () {
+		return task.getStatus();
 	}
+
+	public String getName () {
+		return task.getClass().getSimpleName();
+	}
+
 
 	public Task<E> getTask () {
 		return task;
@@ -155,6 +176,10 @@ public class BTTask<E> implements Pool.Poolable {
 
 	public int getChildCount () {
 		return children.size;
+	}
+
+	public BTTask<E> getChild (int i) {
+		return children.get(i);
 	}
 
 	public boolean isValid () {
@@ -165,35 +190,8 @@ public class BTTask<E> implements Pool.Poolable {
 		return type;
 	}
 
-	public BTTask<E> find (Task<E> target) {
-		if (task == target) return this;
-		for (BTTask<E> child : children) {
-			BTTask<E> found = child.find(target);
-			if (found != null) return found;
-		}
-		return null;
-	}
-
 	public BTTask<E> getParent () {
 		return parent;
-	}
-
-	public int getIndexInParent () {
-		if (parent == null) return -1;
-		for (int i = 0; i < parent.getChildCount(); i++) {
-			if (parent.getChild(i) == this) {
-				return i;
-			}
-		}
-		return -1;
-	}
-
-	public Task.Status getStatus () {
-		return task.getStatus();
-	}
-
-	public String getName () {
-		return task.getClass().getSimpleName();
 	}
 
 	protected void setChangeListener(ValidChangeListener<E> listener) {
