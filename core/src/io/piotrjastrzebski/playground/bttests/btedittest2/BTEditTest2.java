@@ -21,6 +21,7 @@ import com.kotcrab.vis.ui.widget.VisWindow;
 import io.piotrjastrzebski.playground.BaseScreen;
 import io.piotrjastrzebski.playground.GameReset;
 import io.piotrjastrzebski.playground.bttests.btedittest2.model.BTModel;
+import io.piotrjastrzebski.playground.bttests.btedittest2.model.TaskLibrary;
 import io.piotrjastrzebski.playground.bttests.dog.*;
 
 import java.io.Reader;
@@ -78,6 +79,7 @@ public class BTEditTest2 extends BaseScreen implements ViewTree.ViewTaskSelected
 		viewTree.addListener(this);
 		viewTree.addTrash(trash);
 
+
 		nodes.add(new TaskNode(Sequence.class));
 		nodes.add(new TaskNode(Selector.class));
 		nodes.add(new TaskNode(Parallel.class));
@@ -114,6 +116,28 @@ public class BTEditTest2 extends BaseScreen implements ViewTree.ViewTaskSelected
 		pane.setScrollingDisabled(true, false);
 
 		modelTree = new BTModel<>();
+		TaskLibrary<Dog> tl = modelTree.getTaskLibrary();
+		tl.add(Sequence.class);
+		tl.add(Selector.class);
+		tl.add(Parallel.class);
+		tl.add(AlwaysFail.class);
+		tl.add(AlwaysSucceed.class);
+//		tl.add(Include.class);
+		tl.add(Invert.class);
+//		tl.add(Random.class);
+		tl.add(Repeat.class);
+		tl.add(SemaphoreGuard.class);
+		tl.add(UntilFail.class);
+		tl.add(UntilSuccess.class);
+		tl.add(Wait.class);
+		tl.add(Success.class);
+		tl.add(Failure.class);
+		tl.add(BarkTask.class);
+		tl.add(CareTask.class);
+		tl.add(MarkTask.class);
+		tl.add(RestTask.class);
+		tl.add(WalkTask.class);
+
 		createModel(tree);
 	}
 
