@@ -1,5 +1,6 @@
 package io.piotrjastrzebski.playground.bttests.btedittest2.model;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ai.btree.BehaviorTree;
 import com.badlogic.gdx.ai.btree.Task;
 import com.badlogic.gdx.utils.Array;
@@ -45,10 +46,12 @@ public class BTModel<E> implements Pool.Poolable, BTTaskPool<E>, BehaviorTree.Li
 	}
 
 	public void step () {
-		if (!isValid())
+		if (!isValid()) {
+			log(TAG, "invalid");
 			return;
+		}
 		if (dirty) {
-			log("", "reset");
+			log(TAG, "dirty, reset bt");
 			dirty = false;
 			bt.reset();
 		}
@@ -133,7 +136,11 @@ public class BTModel<E> implements Pool.Poolable, BTTaskPool<E>, BehaviorTree.Li
 		BTTask<E> parent = target.getParent();
 		// root has null parent
 		if (parent == null) {
-			reset();
+			if (target == root) {
+				reset();
+			} else {
+				error(TAG, "Target is not part of the model!");
+			}
 			return target;
 		}
 		parent.removeChild(target);
@@ -212,11 +219,11 @@ public class BTModel<E> implements Pool.Poolable, BTTaskPool<E>, BehaviorTree.Li
 
 
 	private void error (String tag, String msg) {
-//		Gdx.app.error(tag, msg);
+		Gdx.app.error(tag, msg);
 	}
 
 	private void log (String tag, String msg) {
-//		Gdx.app.log(tag, msg);
+		Gdx.app.log(tag, msg);
 	}
 
 	@Override public void statusUpdated (Task<E> task, Task.Status previousStatus) {
