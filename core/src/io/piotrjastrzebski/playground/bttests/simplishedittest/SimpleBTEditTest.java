@@ -12,17 +12,10 @@ import com.badlogic.gdx.ai.btree.leaf.Failure;
 import com.badlogic.gdx.ai.btree.leaf.Success;
 import com.badlogic.gdx.ai.btree.leaf.Wait;
 import com.badlogic.gdx.ai.btree.utils.BehaviorTreeParser;
-import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.ai.utils.random.ConstantIntegerDistribution;
 import com.badlogic.gdx.utils.StreamUtils;
-import com.kotcrab.vis.ui.widget.VisLabel;
-import com.kotcrab.vis.ui.widget.VisScrollPane;
-import com.kotcrab.vis.ui.widget.VisTable;
-import com.kotcrab.vis.ui.widget.VisWindow;
 import io.piotrjastrzebski.playground.BaseScreen;
 import io.piotrjastrzebski.playground.GameReset;
-import io.piotrjastrzebski.playground.bttests.btedittest.ModelTree;
-import io.piotrjastrzebski.playground.bttests.btedittest.ViewTask;
-import io.piotrjastrzebski.playground.bttests.btedittest.ViewTree;
 import io.piotrjastrzebski.playground.bttests.dog.*;
 
 import java.io.Reader;
@@ -60,13 +53,49 @@ public class SimpleBTEditTest extends BaseScreen {
 		tree = (BehaviorTree<Dog>)dogBehaviorTreeArchetype.cloneTask();
 		tree.setObject(new Dog("Dog A"));
 
+		TaskAction.setLogger(new Logger() {
+			@Override public void log (String tag, String msg) {
+				Gdx.app.log(tag, msg);
+			}
+
+			@Override public void error (String tag, String msg) {
+				Gdx.app.error(tag, msg);
+			}
+
+			@Override public void error (String tag, String msg, Exception e) {
+				Gdx.app.error(tag, msg, e);
+			}
+		});
+
+		// we probably could use BehaviorTreeLibrary for task store for add?
 		btModel = new BTModel<>();
+
+		TaskLibrary<Dog> lib = btModel.getTaskLibrary();
+		lib.add(Sequence.class);
+		lib.add(Selector.class);
+		lib.add(Parallel.class);
+
+		lib.add(AlwaysFail.class);
+		lib.add(AlwaysSucceed.class);
+		lib.add(Include.class);
+		lib.add(Invert.class);
+		lib.add(Random.class);
+		lib.add(Repeat.class);
+		lib.add(SemaphoreGuard.class);
+		lib.add(UntilFail.class);
+		lib.add(UntilSuccess.class);
+
+		lib.add(Wait.class);
+		lib.add(Success.class);
+		lib.add(Failure.class);
+
+		lib.add(BarkTask.class);
+		lib.add(CareTask.class);
+		lib.add(MarkTask.class);
+		lib.add(RestTask.class);
+		lib.add(WalkTask.class);
+
 		btModel.init(tree);
-
-
-
-
-
 	}
 
 	float elapsedTime;
