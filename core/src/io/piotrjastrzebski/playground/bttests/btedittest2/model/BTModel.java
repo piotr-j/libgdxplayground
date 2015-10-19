@@ -78,18 +78,21 @@ public class BTModel<E> implements Pool.Poolable, BTTaskPool<E>, BehaviorTree.Li
 
 
 	public BTTask<E> add (BTTask<E> target, Task<E> task) {
-		if (!checkAdd(target, task)) {
+		BTTask<E> node = obtain();
+		node.init(task);
+		return add(target, node);
+ 	}
+
+	public BTTask<E> add (BTTask<E> target, BTTask<E> task) {
+		if (!checkAdd(target, task.getTask())) {
 			error(TAG, task + " is not a valid add target to " + target);
 			return null;
 		}
-		BTTask<E> node = obtain();
-		node.init(task);
 		target.addChild(task);
-
 		validate();
 		dirty = true;
-		return node;
- 	}
+		return task;
+	}
 
 	public boolean checkInsert(BTTask<E> target, Task<E> task, int at) {
 		return checkInsert(target, task.getClass(), at);
@@ -110,17 +113,21 @@ public class BTModel<E> implements Pool.Poolable, BTTaskPool<E>, BehaviorTree.Li
 	}
 
 	public BTTask<E> insert (BTTask<E> target, Task<E> task, int at) {
-		if (!checkInsert(target, task, at)) {
+		BTTask<E> node = obtain();
+		node.init(task);
+		return insert(target, node, at);
+	}
+
+	public BTTask<E> insert (BTTask<E> target, BTTask<E> task, int at) {
+		if (!checkInsert(target, task.getTask(), at)) {
 			error(TAG, task + " is not a valid insert target to " + target + " at " + at);
 			return null;
 		}
-		BTTask<E> node = obtain();
-		node.init(task);
 		target.insertChild(at, task);
-
+		task.
 		validate();
 		dirty = true;
-		return node;
+		return task;
 	}
 
 	public BTTask<E> remove (Task<E> target) {
@@ -178,6 +185,7 @@ public class BTModel<E> implements Pool.Poolable, BTTaskPool<E>, BehaviorTree.Li
 	}
 
 	public boolean isValid () {
+		validate();
 		return valid;
 	}
 

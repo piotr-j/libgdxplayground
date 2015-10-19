@@ -40,11 +40,11 @@ public class BTTask<E> implements Pool.Poolable {
 	public int addChild (Task<E> task) {
 		BTTask<E> child = pool.obtain();
 		child.init(task);
-		child.parent = this;
 		return addChild(child);
 	}
 
 	public int addChild (BTTask<E> child) {
+		child.parent = this;
 		children.add(child);
 		pending.add(TaskAction.add(task, child.getTask()));
 		validate();
@@ -54,11 +54,11 @@ public class BTTask<E> implements Pool.Poolable {
 	public int insertChild (int index, Task<E> task) {
 		BTTask<E> child = pool.obtain();
 		child.init(task);
-		child.parent = this;
 		return insertChild(index, child);
 	}
 
 	public int insertChild (int index, BTTask<E> child) {
+		child.parent = this;
 		children.insert(index, child);
 		pending.add(TaskAction.insert(task, child.getTask(), index));
 		validate();
@@ -104,17 +104,18 @@ public class BTTask<E> implements Pool.Poolable {
 			pending.clear();
 //				validate();
 		}
-		for (BTTask<E> child : children) {
-			child.executePending();
+		// fori as it may be nested
+		for (int i = 0; i < children.size; i++) {
+			children.get(i).executePending();
 		}
 	}
 
 	public void setValid (boolean newValid) {
 		if (isValid != newValid) {
+			isValid = newValid;
 			// notify that valid status changed
 			if (changeListener != null) changeListener.validChanged(this, isValid);
 		}
-		isValid = newValid;
 	}
 
 	@Override public void reset () {
@@ -175,6 +176,16 @@ public class BTTask<E> implements Pool.Poolable {
 
 	public BTTask<E> getParent () {
 		return parent;
+	}
+
+	public int getIndexInParent () {
+		if (parent == null) return -1;
+		for (int i = 0; i < parent.getChildCount(); i++) {
+			if (parent.getChild(i) == this) {
+				return i;
+			}
+		}
+		return -1;
 	}
 
 	public Task.Status getStatus () {

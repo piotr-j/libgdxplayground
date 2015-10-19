@@ -65,7 +65,7 @@ public class BTEditTest2 extends BaseScreen implements ViewTree.ViewTaskSelected
 
 		window = new VisWindow("Stuff");
 		stage.addActor(window);
-		window.setSize(600, 600);
+		window.setSize(600, 800);
 		window.centerWindow();
 
 		VisTable container = new VisTable(true);
@@ -153,7 +153,7 @@ public class BTEditTest2 extends BaseScreen implements ViewTree.ViewTaskSelected
 
 		elapsedTime += delta;
 
-		if (elapsedTime > 1 && modelTree.isValid()) {
+		if (elapsedTime > 1) {
 //			Gdx.app.log(TAG, "Step: " + (++step));
 			modelTree.step();
 			elapsedTime -= 1;

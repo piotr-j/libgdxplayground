@@ -15,7 +15,6 @@ import com.badlogic.gdx.utils.reflect.ReflectionException;
 import com.kotcrab.vis.ui.VisUI;
 import com.kotcrab.vis.ui.widget.VisImage;
 import com.kotcrab.vis.ui.widget.VisTree;
-import io.piotrjastrzebski.playground.bttests.btedittest.ModelTask;
 import io.piotrjastrzebski.playground.bttests.btedittest2.model.BTModel;
 import io.piotrjastrzebski.playground.bttests.btedittest2.model.BTModelListener;
 import io.piotrjastrzebski.playground.bttests.btedittest2.model.BTTask;
@@ -96,12 +95,10 @@ public class ViewTree<E> extends VisTree implements Pool.Poolable, BTModelListen
 	protected ViewTask<E> initVT (BTTask<E> task) {
 		ViewTask<E> out = vtPool.obtain();
 		out.init(task);
-//		modelToView.put(task, out);
 		return out;
 	}
 
 	protected void freeVT(ViewTask<E> vt) {
-//		modelToView.remove(vt.getModelTask());
 		vtPool.free(vt);
 	}
 
@@ -124,6 +121,7 @@ public class ViewTree<E> extends VisTree implements Pool.Poolable, BTModelListen
 		listeners.removeValue(listener, true);
 	}
 
+	// TODO use model for this crap
 	protected ObjectMap<Class<? extends Task>, Task<E>> classToTask = new ObjectMap<>();
 
 	/**
@@ -189,6 +187,11 @@ public class ViewTree<E> extends VisTree implements Pool.Poolable, BTModelListen
 	public boolean canAddTo (ViewTask<E> vt, ViewTask<E> target, DropPoint to) {
 		// we cant add to own children, thats about it
 		// some thing might result in broken tree, but it will be indicated
+		// TODO add check add mt mt to model?
+		if (!model.checkAdd(target.getModelTask(), vt.getModelTask().getTask())
+			&& to.equals(DropPoint.MIDDLE)) {
+			return false;
+		}
 		return vt.findNode(target) == null;
 	}
 
@@ -205,21 +208,33 @@ public class ViewTree<E> extends VisTree implements Pool.Poolable, BTModelListen
 		// if the view task is already in the tree, remove it
 		vt.remove();
 
+		BTTask<E> toAdd = vt.getModelTask();
+		if (toAdd.getParent() != null) {
+			model.remove(toAdd);
+		}
+
 		Gdx.app.log(TAG, "Add " + vt + " to " + target + " at " + to);
+		ViewTask<E> parent = (ViewTask<E>)target.getParent();
+		BTTask<E> targetMT = target.getModelTask();
 		switch (to) {
 		case ABOVE:
 			// insert vt before target
-			target.getParent().insert(target.getIndexInParent(), vt);
+			parent.insert(target.getIndexInParent(), vt);
+			model.insert(parent.getModelTask(), toAdd, targetMT.getIndexInParent());
 			break;
 		case MIDDLE:
 			// add vt to target
 			target.add(vt);
+			vt.init(toAdd);
+			model.add(targetMT, toAdd);
 			break;
 		case BELOW:
 			// insert vt after target
-			target.getParent().insert(target.getIndexInParent() + 1, vt);
+			parent.insert(target.getIndexInParent() + 1, vt);
+			model.insert(parent.getModelTask(), toAdd, targetMT.getIndexInParent() + 1);
 			break;
 		}
+		parent.expandAll();
 	}
 
 	public void trash (ViewTask<E> vt) {
