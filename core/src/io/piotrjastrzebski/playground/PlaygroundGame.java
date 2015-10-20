@@ -44,10 +44,7 @@ import io.piotrjastrzebski.playground.gdxai.AIParallelTest;
 import io.piotrjastrzebski.playground.gdxai.policyparalleltest.PolicyParallelTest;
 import io.piotrjastrzebski.playground.gpushadows.GpuShadowTest;
 import io.piotrjastrzebski.playground.gpushadows.GpuShadows;
-import io.piotrjastrzebski.playground.isotiled.IsoTest;
-import io.piotrjastrzebski.playground.isotiled.SimpleTiledCropTest;
-import io.piotrjastrzebski.playground.isotiled.SimpleTiledNonPotTest;
-import io.piotrjastrzebski.playground.isotiled.SimpleTiledTest;
+import io.piotrjastrzebski.playground.isotiled.*;
 import io.piotrjastrzebski.playground.jobtest.AIECSJobTest;
 import io.piotrjastrzebski.playground.jobtest.ECSJobTest;
 import io.piotrjastrzebski.playground.jobtest.JobTest;
@@ -74,7 +71,7 @@ public class PlaygroundGame extends Game implements GameReset {
 	final Class[] testScreens = new Class[]{DungeonGeneratorTest.class, SATTest.class, ParticleFaceTest.class, SimpleTiledCropTest.class,
 		AIParallelTest.class, SimpleBox2dTest.class, Box2dLoaderTest.class, RadialSpriteTest.class, Box2dSensorTest.class, UIReAddTest.class,
 		ShaderFireWallTest.class, ShaderPortalTest.class, Shader2dRainTest.class, ECSWorldIOTest.class, ECSOrderTest.class,
-		SimpleBTEditTest.class, BTEditTest2.class,
+		SimpleBTEditTest.class, BTEditTest2.class, SimpleTiledBrickTest.class,
 		ECSJobsTest.class, ECSAIJobsTest.class, UISpriteDrawableTest.class, SimpleTiledTest.class, ParticleTest.class, CameraMoveTest.class,
 		TiledGenTest.class, TemperatureTest.class, BiomeTest.class, Box2dInterpolationTest.class, PolicyParallelTest.class,
 		Box2dTiledTest.class, ParticleGUITest.class, ShortcutTest.class, SimpleTiledNonPotTest.class, Box2dRay2Test.class, UIDaDTest.class,
