@@ -73,6 +73,39 @@ public class ModelTask<E> implements Pool.Poolable, Iterable<ModelTask<E>> {
 		return this;
 	}
 
+	boolean dirty;
+	/**
+	 * Add task as child
+	 */
+	public void add (ModelTask<E> modelTask) {
+		// TODO how to we handle this?
+		// TODO we cant actually add to task if its decorator or leaf, because we will crash...
+		// TODO should we add only if the tree validates properly? sounds reasonable
+//		task.addChild(modelTask.getTask());
+		dirty = true;
+		children.add(modelTask);
+	}
+
+	/**
+	 * Insert task as child at given position
+	 */
+	public void insert (int at, ModelTask<E> modelTask) {
+		dirty = true;
+		children.insert(at, modelTask);
+	}
+
+	/**
+	 * Remove this task from tree
+	 */
+	public void remove () {
+		// TODO same as in insert/add but we can probably set the child in parent to null/remove
+		// TODO then tree wont be valid and wont run
+	}
+
+	public Task<E> getTask () {
+		return task;
+	}
+
 	public void remove (ModelTask<E> toRemove) {
 		Iterator<ModelTask<E>> it = children.iterator();
 		while (it.hasNext()) {

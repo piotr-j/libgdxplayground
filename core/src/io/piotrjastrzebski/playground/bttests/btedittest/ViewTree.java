@@ -198,21 +198,26 @@ public class ViewTree<E> extends VisTree implements Pool.Poolable, ModelTree.Tas
 		}
 		// TODO change model as well
 		// if the view task is already in the tree, remove it
+		vt.getModelTask().remove();
 		vt.remove();
 
 		Gdx.app.log(TAG, "Add " + vt + " to " + target + " at " + to);
+		int id = target.getIndexInParent();
 		switch (to) {
 		case ABOVE:
 			// insert vt before target
-			target.getParent().insert(target.getIndexInParent(), vt);
+			target.getParent().insert(id, vt);
+			target.getModelTask().getParent().insert(id, vt.getModelTask());
 			break;
 		case MIDDLE:
 			// add vt to target
 			target.add(vt);
+			target.getModelTask().add(vt.getModelTask());
 			break;
 		case BELOW:
 			// insert vt after target
-			target.getParent().insert(target.getIndexInParent() + 1, vt);
+			target.getParent().insert(id + 1, vt);
+			target.getModelTask().getParent().insert(id, vt.getModelTask());
 			break;
 		}
 	}
