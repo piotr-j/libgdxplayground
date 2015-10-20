@@ -35,9 +35,13 @@ public class ModelTree<E> implements Pool.Poolable, BehaviorTree.Listener<E> {
 
 	int step;
 	public void step () {
-		if (bt == null) return;
+		if (bt == null)
+			return;
 		step++;
-//		bt.step();
+
+//		if (isValid()) {
+//			bt.step();
+//		}
 	}
 
 	@Override public void reset () {
