@@ -13,7 +13,7 @@ import com.badlogic.gdx.ai.btree.leaf.Failure;
 import com.badlogic.gdx.ai.btree.leaf.Success;
 import com.badlogic.gdx.ai.btree.leaf.Wait;
 import com.badlogic.gdx.ai.btree.utils.BehaviorTreeParser;
-import com.badlogic.gdx.ai.utils.random.Distribution;
+import com.badlogic.gdx.ai.utils.random.*;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.StreamUtils;
@@ -81,7 +81,7 @@ public class BTSaveTest extends BaseScreen {
 		savePath.writeString(save, false);
 	}
 
-	private String writeTask (Task task, int inset) {
+	private static String writeTask (Task task, int inset) {
 		// this is horrible :c
 		String save = "";
 		for (int i = 0; i < inset; i++) {
@@ -97,7 +97,7 @@ public class BTSaveTest extends BaseScreen {
 		return save;
 	}
 
-	private String getTaskAttributes (Task task) {
+	private static String getTaskAttributes (Task task) {
 		String atts = "";
 		Class<?> aClass = task.getClass();
 		Field[] fields = ClassReflection.getFields(aClass);
@@ -111,7 +111,7 @@ public class BTSaveTest extends BaseScreen {
 		return atts;
 	}
 
-	private String getFieldString (Task task, TaskAttribute ann, Field field) {
+	private static String getFieldString (Task task, TaskAttribute ann, Field field) {
 		// prefer name from annotation if there is one
 		String name = ann.name();
 		if (name == null || name.length() == 0) {
@@ -132,21 +132,75 @@ public class BTSaveTest extends BaseScreen {
 			return name + ":\"" + value + "\"";
 		}
 		if (Distribution.class.isAssignableFrom(field.getType())) {
-			Gdx.app.log("", "Distribution... " + o);
-//			return name + ":\"" + value + "\"";
-			return "";
+			return name + ":\"" + distToString((Distribution)o) + "\"";
 		}
 		return name + ":" + value;
+	}
+
+	private static String distToString(Distribution dist) {
+		if (dist instanceof ConstantIntegerDistribution) {
+			return "constant," + ((ConstantIntegerDistribution)dist).getValue();
+		}
+		if (dist instanceof ConstantLongDistribution) {
+			return "constant," + ((ConstantLongDistribution)dist).getValue();
+		}
+		if (dist instanceof ConstantFloatDistribution) {
+			return "constant," + ((ConstantFloatDistribution)dist).getValue();
+		}
+		if (dist instanceof ConstantDoubleDistribution) {
+			return "constant," + ((ConstantDoubleDistribution)dist).getValue();
+		}
+		if (dist instanceof GaussianFloatDistribution) {
+			GaussianFloatDistribution gfd = (GaussianFloatDistribution)dist;
+			return "gaussian," + gfd.getMean() + "," + gfd.getStandardDeviation();
+		}
+		if (dist instanceof GaussianDoubleDistribution) {
+			GaussianDoubleDistribution gdd = (GaussianDoubleDistribution)dist;
+			return "gaussian," + gdd.getMean() + ","+ gdd.getStandardDeviation();
+		}
+		if (dist instanceof TriangularIntegerDistribution) {
+			TriangularIntegerDistribution tid = (TriangularIntegerDistribution)dist;
+			return "triangular," + tid.getLow() + "," + tid.getHigh() + "," + tid.getMode();
+		}
+		if (dist instanceof TriangularLongDistribution) {
+			TriangularLongDistribution tld = (TriangularLongDistribution)dist;
+			return "triangular," + tld.getLow() + "," + tld.getHigh() + "," + tld.getMode();
+		}
+		if (dist instanceof TriangularFloatDistribution) {
+			TriangularFloatDistribution tfd = (TriangularFloatDistribution)dist;
+			return "triangular," + tfd.getLow() + "," + tfd.getHigh() + "," + tfd.getMode();
+		}
+		if (dist instanceof TriangularDoubleDistribution) {
+			TriangularDoubleDistribution tdd = (TriangularDoubleDistribution)dist;
+			return "triangular," + tdd.getLow() + "," + tdd.getHigh() + "," + tdd.getMode();
+		}
+		if (dist instanceof UniformIntegerDistribution) {
+			UniformIntegerDistribution uid = (UniformIntegerDistribution)dist;
+			return "uniform," + uid.getLow() + "," + uid.getHigh();
+		}
+		if (dist instanceof UniformLongDistribution) {
+			UniformLongDistribution uld = (UniformLongDistribution)dist;
+			return "uniform," + uld.getLow() + "," + uld.getHigh();
+		}
+		if (dist instanceof UniformFloatDistribution) {
+			UniformFloatDistribution ufd = (UniformFloatDistribution)dist;
+			return "uniform," + ufd.getLow() + "," + ufd.getHigh();
+		}
+		if (dist instanceof UniformDoubleDistribution) {
+			UniformDoubleDistribution udd = (UniformDoubleDistribution)dist;
+			return "uniform," + udd.getLow() + "," + udd.getHigh();
+		}
+		throw new IllegalArgumentException("Unknown distribution type " + dist);
 	}
 
 	private static String toAlias (String name) {
 		return Character.toLowerCase(name.charAt(0)) + (name.length() > 1 ? name.substring(1) : "");
 	}
 
-	Array<Class<? extends Task>> defClasses = new Array<Class<? extends Task>>(new Class[]{Selector.class, Sequence.class,
+	private static Array<Class<? extends Task>> defClasses = new Array<Class<? extends Task>>(new Class[]{Selector.class, Sequence.class,
 		Selector.class, Parallel.class, AlwaysFail.class, AlwaysSucceed.class, Include.class, Invert.class, Random.class,
 		Repeat.class, SemaphoreGuard.class, UntilFail.class, UntilSuccess.class, Wait.class, Success.class, Failure.class});
-	private void findClasses (Task task, Array<Class<? extends Task>> classes) {
+	private static void findClasses (Task task, Array<Class<? extends Task>> classes) {
 		Class<? extends Task> aClass = task.getClass();
 		if (!defClasses.contains(aClass, true) && !classes.contains(aClass, true)) {
 			classes.add(aClass);
