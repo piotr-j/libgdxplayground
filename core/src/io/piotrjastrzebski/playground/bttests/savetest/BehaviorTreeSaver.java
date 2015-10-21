@@ -15,6 +15,8 @@ import com.badlogic.gdx.utils.reflect.ReflectionException;
 import java.util.Comparator;
 
 /**
+ * Utility class for serialization of {@link BehaviorTree}s in a format readable by {@link com.badlogic.gdx.ai.btree.utils.BehaviorTreeParser}
+ *
  * Created by PiotrJ on 21/10/15.
  */
 public class BehaviorTreeSaver {
@@ -23,13 +25,21 @@ public class BehaviorTreeSaver {
 	 * @param tree behaviour tree to save
 	 * @param path external file path to save to, can't be a folder
 	 */
-
 	public static void save (BehaviorTree tree, String path) {
 		FileHandle savePath = Gdx.files.external(path);
 		if (savePath.isDirectory()) {
 			Gdx.app.error("BehaviorTreeSaver", "save path cannot be a directory!");
 			return;
 		}
+		savePath.writeString(serialize(tree), false);
+	}
+
+	/**
+	 * Serialize the tree to parser readable format
+	 * @param tree tree to serialize
+	 * @return serialized tree
+	 */
+	public static String serialize(BehaviorTree tree) {
 		Array<Class<? extends Task>> classes = new Array<>();
 		findClasses(tree.getChild(0), classes);
 		classes.sort(new Comparator<Class<? extends Task>>() {
@@ -47,8 +57,7 @@ public class BehaviorTreeSaver {
 		save += "\n";
 		save +="root\n";
 		save += writeTask(tree.getChild(0), 1);
-
-		savePath.writeString(save, false);
+		return save;
 	}
 
 	private static String writeTask (Task task, int depth) {
@@ -104,6 +113,11 @@ public class BehaviorTreeSaver {
 		return name + ":" + value;
 	}
 
+	/**
+	 * Attempts to create a parseable string for given distribution
+	 * @param distribution distribution to create parsable string for
+	 * @return string that can be parsed by distribution classes
+	 */
 	public static String toParseableString (Distribution distribution) {
 		if (distribution == null) throw new IllegalArgumentException("Distribution cannot be null");
 		if (distribution instanceof ConstantIntegerDistribution) {
