@@ -5,13 +5,6 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.ai.btree.BehaviorTree;
 import com.badlogic.gdx.ai.btree.Task;
 import com.badlogic.gdx.ai.btree.annotation.TaskAttribute;
-import com.badlogic.gdx.ai.btree.branch.Selector;
-import com.badlogic.gdx.ai.btree.branch.Parallel;
-import com.badlogic.gdx.ai.btree.branch.Sequence;
-import com.badlogic.gdx.ai.btree.decorator.*;
-import com.badlogic.gdx.ai.btree.leaf.Failure;
-import com.badlogic.gdx.ai.btree.leaf.Success;
-import com.badlogic.gdx.ai.btree.leaf.Wait;
 import com.badlogic.gdx.ai.btree.utils.BehaviorTreeParser;
 import com.badlogic.gdx.ai.utils.random.*;
 import com.badlogic.gdx.files.FileHandle;
@@ -197,12 +190,11 @@ public class BTSaveTest extends BaseScreen {
 		return Character.toLowerCase(name.charAt(0)) + (name.length() > 1 ? name.substring(1) : "");
 	}
 
-	private static Array<Class<? extends Task>> defClasses = new Array<Class<? extends Task>>(new Class[]{Selector.class, Sequence.class,
-		Selector.class, Parallel.class, AlwaysFail.class, AlwaysSucceed.class, Include.class, Invert.class, Random.class,
-		Repeat.class, SemaphoreGuard.class, UntilFail.class, UntilSuccess.class, Wait.class, Success.class, Failure.class});
 	private static void findClasses (Task task, Array<Class<? extends Task>> classes) {
 		Class<? extends Task> aClass = task.getClass();
-		if (!defClasses.contains(aClass, true) && !classes.contains(aClass, true)) {
+		String cName = aClass.getCanonicalName();
+		// ignore task classes from gdx-ai, as they are already accessible by the parser
+		if (!cName.startsWith("com.badlogic.gdx.ai.btree.") && !classes.contains(aClass, true)) {
 			classes.add(aClass);
 		}
 		for (int i = 0; i < task.getChildCount(); i++) {
