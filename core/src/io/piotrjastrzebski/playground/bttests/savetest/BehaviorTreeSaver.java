@@ -41,7 +41,7 @@ public class BehaviorTreeSaver {
 		String save = "# Alias definitions\n";
 
 		for (Class<? extends Task> aClass : classes) {
-			save += "import " + toAlias(aClass.getSimpleName()) + ":\"" + aClass.getCanonicalName()+"\"\n";
+			save += "import " + toAlias(aClass) + ":\"" + aClass.getCanonicalName()+"\"\n";
 		}
 
 		save += "\n";
@@ -56,7 +56,7 @@ public class BehaviorTreeSaver {
 		for (int i = 0; i < depth; i++) {
 			save += "  ";
 		}
-		save += toAlias(task.getClass().getSimpleName());
+		save += toAlias(task.getClass());
 		save += getTaskAttributes(task);
 		save += "\n";
 		for (int i = 0; i < task.getChildCount(); i++) {
@@ -99,65 +99,66 @@ public class BehaviorTreeSaver {
 			return name + ":\"" + value + "\"";
 		}
 		if (Distribution.class.isAssignableFrom(field.getType())) {
-			return name + ":\"" + distToString((Distribution)o) + "\"";
+			return name + ":\"" + toParseableString((Distribution)o) + "\"";
 		}
 		return name + ":" + value;
 	}
 
-	private static String distToString(Distribution dist) {
-		if (dist instanceof ConstantIntegerDistribution) {
-			return "constant," + ((ConstantIntegerDistribution)dist).getValue();
+	public static String toParseableString (Distribution distribution) {
+		if (distribution == null) throw new IllegalArgumentException("Distribution cannot be null");
+		if (distribution instanceof ConstantIntegerDistribution) {
+			return "constant," + ((ConstantIntegerDistribution)distribution).getValue();
 		}
-		if (dist instanceof ConstantLongDistribution) {
-			return "constant," + ((ConstantLongDistribution)dist).getValue();
+		if (distribution instanceof ConstantLongDistribution) {
+			return "constant," + ((ConstantLongDistribution)distribution).getValue();
 		}
-		if (dist instanceof ConstantFloatDistribution) {
-			return "constant," + ((ConstantFloatDistribution)dist).getValue();
+		if (distribution instanceof ConstantFloatDistribution) {
+			return "constant," + ((ConstantFloatDistribution)distribution).getValue();
 		}
-		if (dist instanceof ConstantDoubleDistribution) {
-			return "constant," + ((ConstantDoubleDistribution)dist).getValue();
+		if (distribution instanceof ConstantDoubleDistribution) {
+			return "constant," + ((ConstantDoubleDistribution)distribution).getValue();
 		}
-		if (dist instanceof GaussianFloatDistribution) {
-			GaussianFloatDistribution gfd = (GaussianFloatDistribution)dist;
+		if (distribution instanceof GaussianFloatDistribution) {
+			GaussianFloatDistribution gfd = (GaussianFloatDistribution)distribution;
 			return "gaussian," + gfd.getMean() + "," + gfd.getStandardDeviation();
 		}
-		if (dist instanceof GaussianDoubleDistribution) {
-			GaussianDoubleDistribution gdd = (GaussianDoubleDistribution)dist;
+		if (distribution instanceof GaussianDoubleDistribution) {
+			GaussianDoubleDistribution gdd = (GaussianDoubleDistribution)distribution;
 			return "gaussian," + gdd.getMean() + ","+ gdd.getStandardDeviation();
 		}
-		if (dist instanceof TriangularIntegerDistribution) {
-			TriangularIntegerDistribution tid = (TriangularIntegerDistribution)dist;
+		if (distribution instanceof TriangularIntegerDistribution) {
+			TriangularIntegerDistribution tid = (TriangularIntegerDistribution)distribution;
 			return "triangular," + tid.getLow() + "," + tid.getHigh() + "," + tid.getMode();
 		}
-		if (dist instanceof TriangularLongDistribution) {
-			TriangularLongDistribution tld = (TriangularLongDistribution)dist;
+		if (distribution instanceof TriangularLongDistribution) {
+			TriangularLongDistribution tld = (TriangularLongDistribution)distribution;
 			return "triangular," + tld.getLow() + "," + tld.getHigh() + "," + tld.getMode();
 		}
-		if (dist instanceof TriangularFloatDistribution) {
-			TriangularFloatDistribution tfd = (TriangularFloatDistribution)dist;
+		if (distribution instanceof TriangularFloatDistribution) {
+			TriangularFloatDistribution tfd = (TriangularFloatDistribution)distribution;
 			return "triangular," + tfd.getLow() + "," + tfd.getHigh() + "," + tfd.getMode();
 		}
-		if (dist instanceof TriangularDoubleDistribution) {
-			TriangularDoubleDistribution tdd = (TriangularDoubleDistribution)dist;
+		if (distribution instanceof TriangularDoubleDistribution) {
+			TriangularDoubleDistribution tdd = (TriangularDoubleDistribution)distribution;
 			return "triangular," + tdd.getLow() + "," + tdd.getHigh() + "," + tdd.getMode();
 		}
-		if (dist instanceof UniformIntegerDistribution) {
-			UniformIntegerDistribution uid = (UniformIntegerDistribution)dist;
+		if (distribution instanceof UniformIntegerDistribution) {
+			UniformIntegerDistribution uid = (UniformIntegerDistribution)distribution;
 			return "uniform," + uid.getLow() + "," + uid.getHigh();
 		}
-		if (dist instanceof UniformLongDistribution) {
-			UniformLongDistribution uld = (UniformLongDistribution)dist;
+		if (distribution instanceof UniformLongDistribution) {
+			UniformLongDistribution uld = (UniformLongDistribution)distribution;
 			return "uniform," + uld.getLow() + "," + uld.getHigh();
 		}
-		if (dist instanceof UniformFloatDistribution) {
-			UniformFloatDistribution ufd = (UniformFloatDistribution)dist;
+		if (distribution instanceof UniformFloatDistribution) {
+			UniformFloatDistribution ufd = (UniformFloatDistribution)distribution;
 			return "uniform," + ufd.getLow() + "," + ufd.getHigh();
 		}
-		if (dist instanceof UniformDoubleDistribution) {
-			UniformDoubleDistribution udd = (UniformDoubleDistribution)dist;
+		if (distribution instanceof UniformDoubleDistribution) {
+			UniformDoubleDistribution udd = (UniformDoubleDistribution)distribution;
 			return "uniform," + udd.getLow() + "," + udd.getHigh();
 		}
-		throw new IllegalArgumentException("Unknown distribution type " + dist);
+		throw new IllegalArgumentException("Unknown distribution type " + distribution);
 	}
 
 	private static void findClasses (Task task, Array<Class<? extends Task>> classes) {
@@ -172,9 +173,14 @@ public class BehaviorTreeSaver {
 		}
 	}
 
-	public static String toAlias (String name) {
-		if (name == null) throw new IllegalArgumentException("Name cannot be null");
-		if (name.length() == 0) throw new IllegalArgumentException("Name cannot be 0 length");
+	/**
+	 * Create a valid alias name
+	 * @param aClass class of task
+	 * @return valid alias for the class
+	 */
+	public static String toAlias (Class<? extends Task> aClass) {
+		if (aClass == null) throw new IllegalArgumentException("Class cannot be null");
+		String name = aClass.getSimpleName();
 		return Character.toLowerCase(name.charAt(0)) + (name.length() > 1 ? name.substring(1) : "");
 	}
 }
