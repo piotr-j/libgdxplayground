@@ -3,6 +3,7 @@ package io.piotrjastrzebski.playground.isotiled;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
@@ -17,12 +18,13 @@ import io.piotrjastrzebski.playground.GameReset;
  * Created by EvilEntity on 07/06/2015.
  */
 public class SimpleTiledBrickTest extends BaseScreen {
-	public final static float SCALE = 16f; // size of single tile in pixels
+	public final static float SCALE = 32f; // size of single tile in pixels
 	public final static float INV_SCALE = 1.f/SCALE;
 	public final static float VP_WIDTH = 1280/SCALE;
 	public final static float VP_HEIGHT = 720/SCALE;
 
 	OrthogonalTiledMapRenderer mapRenderer;
+	TiledMap map;
 	public SimpleTiledBrickTest (GameReset game) {
 		super(game);
 		// fields in super class
@@ -31,8 +33,11 @@ public class SimpleTiledBrickTest extends BaseScreen {
 		guiCamera = new OrthographicCamera();
 		guiViewport = new ScreenViewport(guiCamera);
 
-		TiledMap map = new TmxMapLoader().load("tiled/simple-brick.tmx");
-		mapRenderer = new OrthogonalTiledMapRenderer(map, INV_SCALE * 2, batch);
+		TmxMapLoader.Parameters parameters = new TmxMapLoader.Parameters();
+		parameters.textureMagFilter = Texture.TextureFilter.Nearest;
+		parameters.textureMinFilter = Texture.TextureFilter.Nearest;
+		map = new TmxMapLoader().load("tiled/simple-brick.tmx", parameters);
+		mapRenderer = new OrthogonalTiledMapRenderer(map, INV_SCALE * 4, batch);
 	}
 
 	int moveX;
@@ -101,5 +106,10 @@ public class SimpleTiledBrickTest extends BaseScreen {
 			break;
 		}
 		return super.keyUp(keycode);
+	}
+
+	@Override public void dispose () {
+		super.dispose();
+		map.dispose();
 	}
 }
