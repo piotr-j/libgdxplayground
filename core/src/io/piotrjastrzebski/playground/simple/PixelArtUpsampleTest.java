@@ -2,6 +2,7 @@ package io.piotrjastrzebski.playground.simple;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
@@ -180,6 +181,7 @@ public class PixelArtUpsampleTest extends BaseScreen {
 		}
 		gameCamera.update();
 
+		batch.setColor(Color.WHITE);
 		batch.setProjectionMatrix(gameCamera.combined);
 		batch.begin();
 		batch.draw(current, -width/2, -height/2, width, height);
