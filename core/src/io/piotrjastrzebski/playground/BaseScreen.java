@@ -17,10 +17,10 @@ import com.kotcrab.vis.ui.VisUI;
  */
 public abstract class BaseScreen implements Screen, InputProcessor {
 	private final static String TAG = "BaseScreen";
-	public final static float VP_WIDTH = 40;
-	public final static float VP_HEIGHT = 22.5f;
 	public final static float SCALE = 32f;
-	public final static float INV_SCALE = 1.f/32f;
+	public final static float INV_SCALE = 1.f/SCALE;
+	public final static float VP_WIDTH = 1280 * INV_SCALE;
+	public final static float VP_HEIGHT = 720 * INV_SCALE;
 
 	protected OrthographicCamera gameCamera;
 	protected OrthographicCamera guiCamera;
