@@ -37,6 +37,7 @@ public class PixelArtUpsampleTest extends BaseScreen {
 
 	private float width;
 	private float height;
+	private ShaderProgram batchShader = null;
 
 	public PixelArtUpsampleTest (GameReset game) {
 		// ignore this
@@ -51,6 +52,9 @@ public class PixelArtUpsampleTest extends BaseScreen {
 		height = current.getHeight() * INV_SCALE * 4;
 
 		shader = new ShaderProgram(Gdx.files.internal("pixels/upscaler.vsh"), Gdx.files.internal("pixels/upscaler.fsh"));
+		shader.begin();
+		shader.setUniformf("u_tex_dim", current.getWidth(), current.getHeight());
+		shader.end();
 		if (!shader.isCompiled())
 			throw new IllegalArgumentException("Error compiling shader: " + shader.getLog());
 
@@ -68,6 +72,9 @@ public class PixelArtUpsampleTest extends BaseScreen {
 			@Override public void changed (ChangeEvent event, Actor actor) {
 				TexWrapper lastSelected = selectBox.getSelection().getLastSelected();
 				current = lastSelected.texture;
+				shader.begin();
+				shader.setUniformf("u_tex_dim", current.getWidth(), current.getHeight());
+				shader.end();
 			}
 		});
 		VisWindow window = new VisWindow("Options");
@@ -77,9 +84,9 @@ public class PixelArtUpsampleTest extends BaseScreen {
 		cb.addListener(new ChangeListener() {
 			@Override public void changed (ChangeEvent event, Actor actor) {
 				if (cb.isChecked()) {
-					batch.setShader(shader);
+					batchShader = shader;
 				} else {
-					batch.setShader(null);
+					batchShader = null;
 				}
 			}
 		});
@@ -182,11 +189,15 @@ public class PixelArtUpsampleTest extends BaseScreen {
 		gameCamera.update();
 
 		batch.setColor(Color.WHITE);
+		shader.begin();
+		shader.setUniformf("u_tex_dim", current.getWidth(), current.getHeight());
+		shader.end();
+		batch.setShader(batchShader);
 		batch.setProjectionMatrix(gameCamera.combined);
 		batch.begin();
 		batch.draw(current, -width/2, -height/2, width, height);
 		batch.end();
-
+		batch.setShader(null);
 		stage.act(delta);
 		stage.draw();
 	}
