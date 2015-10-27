@@ -174,6 +174,7 @@ public class PixelArtUpsampleTest extends BaseScreen {
 	int moveX;
 	int moveY;
 	int shift = 1;
+	float rotation;
 	@Override public void render (float delta) {
 		super.render(delta);
 		if (moveX > 0) {
@@ -195,7 +196,7 @@ public class PixelArtUpsampleTest extends BaseScreen {
 		batch.setShader(batchShader);
 		batch.setProjectionMatrix(gameCamera.combined);
 		batch.begin();
-		batch.draw(current, -width/2, -height/2, width, height);
+		batch.draw(current, -width/2, -height/2, width/2, height/2, width, height, 1, 1, rotation, 0, 0, current.getWidth(), current.getHeight(), false, false);
 		batch.end();
 		batch.setShader(null);
 		stage.act(delta);
@@ -222,6 +223,12 @@ public class PixelArtUpsampleTest extends BaseScreen {
 
 	@Override public boolean keyDown (int keycode) {
 		switch (keycode) {
+		case Input.Keys.Q:
+			rotation+= 11.25f;
+			break;
+		case Input.Keys.E:
+			rotation-= 11.25f;
+			break;
 		case Input.Keys.W:
 		case Input.Keys.UP:
 			moveY++;
