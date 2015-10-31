@@ -12,6 +12,7 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.ObjectMap;
 import io.piotrjastrzebski.playground.BaseScreen;
 import io.piotrjastrzebski.playground.GameReset;
@@ -90,16 +91,19 @@ public class AssetReloadTest extends BaseScreen {
 		void setRegion(TextureRegion region);
 	}
 
-	public static class Atlas {
+	public static class Atlas implements Disposable {
 		private TextureAtlas atlas;
-		ObjectMap<String, TextureAtlas.AtlasRegion> cache = new ObjectMap<>();
-		ObjectMap<String, Array<AssetOwner>> owners = new ObjectMap<>();
+		private ObjectMap<String, TextureAtlas.AtlasRegion> cache = new ObjectMap<>();
+		private ObjectMap<String, Array<AssetOwner>> owners = new ObjectMap<>();
+
+		boolean disposed;
 
 		public Atlas () {
 			this.atlas = new TextureAtlas();
 		}
 
 		public TextureAtlas.AtlasRegion get (String name, AssetOwner owner) {
+			if (disposed) throw new IllegalStateException("Atlas is disposed!");
 			TextureAtlas.AtlasRegion region = get(name);
 			Array<AssetOwner> list = owners.get(name);
 			if (list == null) {
@@ -113,6 +117,7 @@ public class AssetReloadTest extends BaseScreen {
 		}
 
 		protected TextureAtlas.AtlasRegion get (String name) {
+			if (disposed) throw new IllegalStateException("Atlas is disposed!");
 			TextureAtlas.AtlasRegion region = cache.get(name);
 			if (region == null) {
 				region = atlas.findRegion(name);
@@ -122,6 +127,7 @@ public class AssetReloadTest extends BaseScreen {
 		}
 
 		public void reload (PixmapPacker packer) {
+			if (disposed) throw new IllegalStateException("Atlas is disposed!");
 			// we cant fully clear atlas without reflection, so we will make new one
 			atlas.dispose();
 			atlas = new TextureAtlas();
@@ -142,6 +148,13 @@ public class AssetReloadTest extends BaseScreen {
 					}
 				}
 			}
+		}
+
+		public void dispose () {
+			disposed = true;
+			atlas.dispose();
+			owners.clear();
+			cache.clear();
 		}
 	}
 
@@ -235,5 +248,6 @@ public class AssetReloadTest extends BaseScreen {
 	@Override public void dispose () {
 		super.dispose();
 		manager.dispose();
+		atlas.dispose();
 	}
 }
