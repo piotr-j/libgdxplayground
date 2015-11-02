@@ -1,5 +1,6 @@
 package io.piotrjastrzebski.playground.uitesting;
 
+import com.badlogic.gdx.assets.loaders.I18NBundleLoader;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
@@ -20,7 +21,6 @@ public class VPTest extends BaseScreen {
 
 	@Override public void render (float delta) {
 		super.render(delta);
-
 		renderer.setProjectionMatrix(camera.combined);
 		renderer.setColor(Color.RED);
 		renderer.begin(ShapeRenderer.ShapeType.Line);
