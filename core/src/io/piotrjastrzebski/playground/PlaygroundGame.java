@@ -24,6 +24,7 @@ import io.piotrjastrzebski.playground.bttests.simplishedittest.SimpleBTEditTest;
 import io.piotrjastrzebski.playground.clientserver.CSTest;
 import io.piotrjastrzebski.playground.clientserverv2.CSTestV2;
 import io.piotrjastrzebski.playground.dungeon.DungeonGeneratorTest;
+import io.piotrjastrzebski.playground.ecs.AshleyPhysicsTest;
 import io.piotrjastrzebski.playground.ecs.ECSOrderTest;
 import io.piotrjastrzebski.playground.ecs.aijobs.ECSAIJobsTest;
 import io.piotrjastrzebski.playground.ecs.aitest.AIECSTest;
@@ -73,9 +74,9 @@ public class PlaygroundGame extends Game implements GameReset {
 		AIParallelTest.class, SimpleBox2dTest.class, Box2dLoaderTest.class, RadialSpriteTest.class, Box2dSensorTest.class, UIReAddTest.class,
 		ShaderFireWallTest.class, ShaderPortalTest.class, Shader2dRainTest.class, ECSWorldIOTest.class, ECSOrderTest.class,
 		SimpleBTEditTest.class, BTEditTest2.class, SimpleTiledBrickTest.class, BTSaveTest.class, PixelArtUpsampleTest.class, UIUndoRedoTest.class,
-		UIDaDSpriteTest.class, UILabelWrapTest.class, UIColorPickerTest.class, UISImpleGraphTest.class, ResolutionResolverTest.class,
+		UIDaDSpriteTest.class, UILabelWrapTest.class, UIColorPickerTest.class, AshleyPhysicsTest.class, UISImpleGraphTest.class, ResolutionResolverTest.class,
 		ECSJobsTest.class, ECSAIJobsTest.class, UISpriteDrawableTest.class, SimpleTiledTest.class, ParticleTest.class, CameraMoveTest.class,
-		TiledGenTest.class, TemperatureTest.class, BiomeTest.class, Box2dInterpolationTest.class, PolicyParallelTest.class,
+		TiledGenTest.class, TemperatureTest.class, BiomeTest.class, Box2dInterpolationTest.class, PolicyParallelTest.class, AssetReloadTest.class,
 		Box2dTiledTest.class, ParticleGUITest.class, ShortcutTest.class, SimpleTiledNonPotTest.class, Box2dRay2Test.class, UIDaDTest.class,
 		RainTest.class, BlurTest.class, CompositeGenTest.class, UITest.class, UISortTest.class, UISort2Test.class, CSTest.class,
 		UIFBOTransitionTest.class, QuadTreeTest.class, RandomTest.class, ECSAssetTest.class, GpuShadowTest.class, UIDoublePaneTest.class,
