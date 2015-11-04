@@ -13,19 +13,21 @@ import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import io.piotrjastrzebski.playground.BaseScreen;
-import io.piotrjastrzebski.playground.PlaygroundGame;
+import io.piotrjastrzebski.playground.GameReset;
+
 
 /**
  * Created by EvilEntity on 07/06/2015.
  */
 public class BlurTest extends BaseScreen {
 	private boolean blurEnabled = true;
-	private int blurDst = 10;
+	private float blurDst = 5;
 	MapWidget map;
 	MapData data;
+	MapData.Tile[][] tmpTiles;
 	Interpolation interp;
 	float gain;
-	public BlurTest (PlaygroundGame game) {
+	public BlurTest (GameReset game) {
 		super(game);
 		map = new MapWidget(
 			new TextureRegion(new Texture(Gdx.files.internal("white.png"))));
@@ -47,14 +49,20 @@ public class BlurTest extends BaseScreen {
 		data.height = 225;
 
 		data.tiles = new MapData.Tile[data.width][data.height];
+		tmpTiles = new MapData.Tile[data.width][data.height];
 		for (int mx = 0; mx < data.width; mx++) {
 			for (int my = 0; my < data.height; my++) {
 				MapData.Tile tile = new MapData.Tile();
 				tile.x = mx;
 				tile.y = my;
 				data.tiles[mx][my] = tile;
+				tile = new MapData.Tile();
+				tile.x = mx;
+				tile.y = my;
+				tmpTiles[mx][my] = tile;
 			}
 		}
+
 
 		Table container = new Table();
 		// put it in container so it is always centered in the pane
@@ -118,37 +126,22 @@ public class BlurTest extends BaseScreen {
 		settings.add(cbRain);
 		settings.row();
 
-		final Slider rainS = new Slider(1f, 200.0f, 1f, false, skin);
+		final Slider rainS = new Slider(0f, 15.0f, .5f, false, skin);
 		rainS.setValue(blurDst);
 		rainS.addListener(new ChangeListener() {
 			@Override public void changed (ChangeEvent event, Actor actor) {
-				blurDst = (int)rainS.getValue();
-				cbRain.setText(String.format("RainDst %d", blurDst));
+				blurDst = rainS.getValue();
+				cbRain.setText(String.format("RainDst %.2f", blurDst));
 				refresh();
 			}
 		});
-		settings.add(rainS);
+		settings.add(rainS).width(300);
 		settings.row();
-
 		root.add(settings).expandY().fillY();
 		root.add(pane).expand().fill();
 		root.getStage().setScrollFocus(map);
 
 		refresh();
-	}
-
-	private class Interp {
-		String text;
-		Interpolation interpolation;
-
-		public Interp (Interpolation interpolation, String text) {
-			this.interpolation = interpolation;
-			this.text = text;
-		}
-
-		@Override public String toString () {
-			return text;
-		}
 	}
 
 	public void refresh() {
@@ -183,50 +176,21 @@ public class BlurTest extends BaseScreen {
 			}
 		}
 
-		for (int mx = 0; mx < xResolution; mx++) {
-			for (int my = 0; my < yResolution; my++) {
-				blur(data.tiles[mx][my], false);
-			}
-		}
-		for (int mx = 0; mx < xResolution; mx++) {
-			for (int my = 0; my < yResolution; my++) {
-				MapData.Tile tile = data.tiles[mx][my];
-				tile.rainfall += tile.blur;
-				tile.blur = 0;
-			}
-		}
-
-		for (int mx = 0; mx < xResolution; mx++) {
-			for (int my = 0; my < yResolution; my++) {
-				blur(data.tiles[mx][my], true);
-			}
-		}
-		for (int mx = 0; mx < xResolution; mx++) {
-			for (int my = 0; my < yResolution; my++) {
-				MapData.Tile tile = data.tiles[mx][my];
-				tile.rainfall += tile.blur;
-				tile.blur = 0;
-			}
-		}
-		// find max value so we can normalize
-		float maxRF = 0;
-		for (int mx = 0; mx < xResolution; mx++) {
-			for (int my = 0; my < yResolution; my++) {
-				MapData.Tile tile = data.tiles[mx][my];
-				if (tile.rainfall > maxRF) maxRF = tile.rainfall;
-			}
-		}
+		blur(data.tiles, tmpTiles, blurDst);
 
 		for (int mx = 0; mx < xResolution; mx++) {
 			for (int my = 0; my < yResolution; my++) {
 				MapData.Tile tile = data.tiles[mx][my];
-				// normalize
-				tile.rainfall /= maxRF;
 				// remove some rainfall based on elevation
 //				tile.rainfall -= Interpolation.exp10In.apply(tile.elevation);// * 0.5f;
-				if (blurEnabled && tile.rainfall > 0.05f) {
+				if (blurEnabled) {
 					float c = tile.rainfall;
-					tile.color.add(new Color(c, c, c, 1));
+//					tile.addColor(c, c, c);
+					Color tc = tile.color;
+					tc.r = (tc.r + c)/2;
+					tc.g = (tc.g + c)/2;
+					tc.b = (tc.b + c)/2;
+//					tile.mulColor(c, c, c);
 				}
 			}
 		}
@@ -234,47 +198,68 @@ public class BlurTest extends BaseScreen {
 		map.setData(data);
 	}
 
-	private void blur (MapData.Tile tile, boolean horizontal) {
-		// do some magic to blur stuff a bit
-		if (horizontal) {
-			for (int x = -blurDst; x <= blurDst; x++) {
-				if (x == 0) continue;
-				int mx = tile.x + x;
-				if (mx < 0 || mx >= data.width) continue;
-				MapData.Tile other = data.tiles[mx][tile.y];
-				if (other.blur >= 1) continue;
-				int dx = x;
-				if (dx < 0) dx = -dx;
-				float rf = tile.rainfall * (1-(dx/(1.1f * blurDst)))/10;
-				other.blur += rf;
+	private void blur(MapData.Tile[][] src, MapData.Tile[][] dst, float str) {
+		double[] kernel = create1DGK(str);
+		int kernelRadius = kernel.length/2;
+		int kernelSize = kernel.length;
+
+		// horizontal
+		int width = src.length;
+		int height = src[0].length;
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++) {
+				double rT = 0.0, kT = 0.0;
+
+				for (int u = 0; u < kernelSize; u++) {
+					int cX = x + u - kernelRadius;
+					if (cX < 0 || cX > width - 1) {
+						continue;
+					}
+
+					rT += src[cX][y].rainfall * kernel[u];
+					kT += kernel[u];
+				}
+
+				dst[x][y].rainfall = (float)(rT / kT);
 			}
-		} else {
-			for (int y = -blurDst; y <= blurDst; y++) {
-				if (y == 0) continue;
-				int my = tile.y + y;
-				if (my < 0 || my >= data.height) continue;
-				MapData.Tile other = data.tiles[tile.x][my];
-				if (other.blur >= 1) continue;
-				int dy = y;
-				if (dy < 0) dy = -dy;
-				float rf = tile.rainfall * (1-(dy/(1.1f * blurDst)))/10;
-				other.blur += rf;
+		}
+		// vertical
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++) {
+				double rT = 0.0, kT = 0.0;
+
+				for (int v = 0; v < kernelSize; v++) {
+					int cY = y + v - kernelRadius;
+					if (cY < 0 || cY > height - 1) {
+						continue;
+					}
+
+					rT += dst[x][cY].rainfall * kernel[v];
+					kT += kernel[v];
+				}
+
+				src[x][y].rainfall = (float)(rT / kT);
 			}
 		}
 	}
 
+	private double[] create1DGK(double sd) {
+		int radius = (int)Math.ceil(sd * 2.5);
+		double[] kernel = new double[radius * 2 + 1];
+
+		int kPos = 0;
+		double norm = 1./Math.sqrt(2 * Math.PI * sd * sd);
+		for (int u = -radius; u <= radius; u++) {
+			kernel[kPos++] = norm * Math.exp(-(u * u) / (2 * sd * sd));
+		}
+
+		return kernel;
+	}
+
 	@Override public void render (float delta) {
 		super.render(delta);
-
-	}
-
-	@Override public void resize (int width, int height) {
-		super.resize(width, height);
-
-	}
-
-	@Override public void dispose () {
-		super.dispose();
+		stage.act(delta);
+		stage.draw();
 	}
 
 	@Override public boolean keyDown (int keycode) {
