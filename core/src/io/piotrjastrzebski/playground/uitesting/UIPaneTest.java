@@ -52,6 +52,12 @@ public class UIPaneTest extends BaseScreen {
 			}
 		});
 		pane.setCancelTouchFocus(false);
+		root.validate();
+//		pane.setScrollPercentX(0);
+		pane.setSmoothScrolling(false);
+		pane.setScrollPercentY(1);
+		pane.act(0);
+		pane.setSmoothScrolling(true);
 	}
 
 	@Override public void render (float delta) {
