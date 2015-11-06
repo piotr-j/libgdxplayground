@@ -15,7 +15,6 @@ import com.kotcrab.vis.ui.widget.*;
 import io.piotrjastrzebski.playground.asyncscreentest.AsyncScreenTest;
 import io.piotrjastrzebski.playground.box2dtest.*;
 import io.piotrjastrzebski.playground.box2dtest.lights.Box2dRayTest;
-import io.piotrjastrzebski.playground.box2dtest.lightsv2.Box2dRay2Test;
 import io.piotrjastrzebski.playground.bttests.btedittest.BTEditTest;
 import io.piotrjastrzebski.playground.bttests.btedittest2.BTEditTest2;
 import io.piotrjastrzebski.playground.bttests.btreeserializationtest.BTreeTest;
@@ -77,7 +76,7 @@ public class PlaygroundGame extends Game implements GameReset {
 		UIDaDSpriteTest.class, UILabelWrapTest.class, UIColorPickerTest.class, AshleyPhysicsTest.class, UISImpleGraphTest.class, ResolutionResolverTest.class,
 		ECSJobsTest.class, ECSAIJobsTest.class, UISpriteDrawableTest.class, SimpleTiledTest.class, ParticleTest.class, CameraMoveTest.class,
 		TiledGenTest.class, TemperatureTest.class, BiomeTest.class, Box2dInterpolationTest.class, PolicyParallelTest.class, AssetReloadTest.class,
-		Box2dTiledTest.class, ParticleGUITest.class, ShortcutTest.class, SimpleTiledNonPotTest.class, Box2dRay2Test.class, UIDaDTest.class,
+		Box2dTiledTest.class, ParticleGUITest.class, ShortcutTest.class, SimpleTiledNonPotTest.class, UIDaDTest.class,
 		RainTest.class, BlurTest.class, CompositeGenTest.class, UITest.class, UISortTest.class, UISort2Test.class, CSTest.class, PathTest.class,
 		UIFBOTransitionTest.class, QuadTreeTest.class, RandomTest.class, ECSAssetTest.class, GpuShadowTest.class, UIDoublePaneTest.class,
 		ECSPooledCompTest.class, ECSProfilerTest.class, ECSShapeProfilerTest.class, ECSPolyProfilerTest.class, SplineTrailTest.class,

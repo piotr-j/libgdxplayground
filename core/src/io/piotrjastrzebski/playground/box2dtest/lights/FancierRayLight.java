@@ -2,6 +2,7 @@ package io.piotrjastrzebski.playground.box2dtest.lights;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g2d.PolygonSpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
@@ -11,7 +12,7 @@ import com.badlogic.gdx.utils.Array;
 /**
  * Created by PiotrJ on 18/09/15.
  */
-public class FancierRayLight implements RayCastCallback, QueryCallback {
+public class FancierRayLight implements RayCastCallback, QueryCallback, Light {
 	private Vector2 pos = new Vector2();
 	private World world;
 	int rayNum = 37;
@@ -350,6 +351,10 @@ public class FancierRayLight implements RayCastCallback, QueryCallback {
 //			renderer.line(pos.x, pos.y, pos.x + ray.ex, pos.y + ray.ey);
 //			renderer.line(pos.x, pos.y, ray.ex, ray.ey);
 //		}
+	}
+
+	@Override public void draw (PolygonSpriteBatch batch) {
+
 	}
 
 	private Vector2 aTmp = new Vector2();

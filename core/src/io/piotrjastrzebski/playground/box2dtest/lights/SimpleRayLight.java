@@ -1,6 +1,7 @@
 package io.piotrjastrzebski.playground.box2dtest.lights;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g2d.PolygonSpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Fixture;
@@ -11,7 +12,7 @@ import com.badlogic.gdx.physics.box2d.World;
 /**
  * Created by PiotrJ on 18/09/15.
  */
-public class SimpleRayLight implements RayCastCallback {
+public class SimpleRayLight implements RayCastCallback, Light {
 	private Vector2 pos = new Vector2();
 	private World world;
 	int rays = 360;
@@ -69,4 +70,7 @@ public class SimpleRayLight implements RayCastCallback {
 		}
 	}
 
+	@Override public void draw (PolygonSpriteBatch batch) {
+
+	}
 }

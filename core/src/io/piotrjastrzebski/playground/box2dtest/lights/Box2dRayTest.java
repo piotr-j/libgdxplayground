@@ -39,8 +39,10 @@ public class Box2dRayTest extends BaseScreen {
 //	SimpleRayLight light;
 //	FancyRayLight light;
 //	FancierRayLight light;
-	PolyRayLight light;
+//	PolyRayLight light;
 	PolygonSpriteBatch pBatch;
+
+	Light light;
 	Texture lightTexture;
 
 	public Box2dRayTest (GameReset game) {
@@ -102,10 +104,10 @@ public class Box2dRayTest extends BaseScreen {
 			}
 		}
 
-//		light = new SimpleRayLight(0, 0, 4, box2dWorld);
+		light = new SimpleRayLight(0, 0, 4, box2dWorld);
 //		light = new FancyRayLight(0, 0, 4, box2dWorld);
 //		light = new FancierRayLight(0, 0, 4, box2dWorld);
-		light = new PolyRayLight(0, 0, 4, box2dWorld, new TextureRegion(lightTexture));
+//		light = new PolyRayLight(0, 0, 4, box2dWorld, new TextureRegion(lightTexture));
 	}
 
 	private void createShape (float x, float y, float rotation, Texture texture, boolean isBox) {
@@ -335,6 +337,18 @@ public class Box2dRayTest extends BaseScreen {
 		}
 		if (keycode == Input.Keys.Z) {
 			debugDraw = !debugDraw;
+		}
+		if (keycode == Input.Keys.NUM_1) {
+			light = new SimpleRayLight(0, 0, 4, box2dWorld);
+		}
+		if (keycode == Input.Keys.NUM_2) {
+			light = 	new FancyRayLight(0, 0, 4, box2dWorld);
+		}
+		if (keycode == Input.Keys.NUM_3) {
+			light = new FancierRayLight(0, 0, 4, box2dWorld);
+		}
+		if (keycode == Input.Keys.NUM_4) {
+			light = new PolyRayLight(0, 0, 4, box2dWorld, new TextureRegion(lightTexture));
 		}
 		return super.keyDown(keycode);
 	}

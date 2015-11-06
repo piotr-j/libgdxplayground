@@ -14,7 +14,7 @@ import com.badlogic.gdx.utils.Array;
 /**
  * Created by PiotrJ on 18/09/15.
  */
-public class PolyRayLight implements RayCastCallback, QueryCallback {
+public class PolyRayLight implements RayCastCallback, QueryCallback, Light {
 	private Vector2 pos = new Vector2();
 	private World world;
 	int rayNum = 128;
