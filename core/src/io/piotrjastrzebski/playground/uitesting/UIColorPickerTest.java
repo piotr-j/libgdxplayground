@@ -20,8 +20,12 @@ public class UIColorPickerTest extends BaseScreen {
 		stage.setDebugAll(true);
 
 		colorPicker = new ColorPicker("", new ColorPickerListener() {
-			@Override public void canceled () {
-				Gdx.app.log("", "Cancelled");
+			@Override public void canceled (Color oldColor) {
+
+			}
+
+			@Override public void changed (Color newColor) {
+
 			}
 
 			@Override public void finished (Color newColor) {

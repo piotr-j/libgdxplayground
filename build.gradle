@@ -22,7 +22,7 @@ allprojects {
         box2DLightsVersion = '1.4'
         ashleyVersion = '1.4.0'
         aiVersion = '1.6.1-SNAPSHOT'
-        visuiVersion = '0.8.1'
+        visuiVersion = '0.9.2'
         artemisOdbVersion = "1.0.1"
         artemisOdbcontribVersion = "1.1.0"
         gdxVideoVersion = "0.0.1"

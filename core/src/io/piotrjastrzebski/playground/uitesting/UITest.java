@@ -77,7 +77,7 @@ public class UITest extends BaseScreen {
 
 		public void execute() {
 			Gdx.app.log("", ""+owner);
-			FocusManager.getFocus(owner);
+//			FocusManager.getFocus(owner);
 		}
 
 		public void setOwner (VisTextButton owner) {

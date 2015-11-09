@@ -36,8 +36,8 @@ public class CSTestV2 extends BaseScreen {
 		NumberSelector serverFPSSelector = new NumberSelector("Server FPS", 5, 5, 120, 5);
 		serverFPSSelector.addChangeListener(new NumberSelector.NumberSelectorListener() {
 			@Override
-			public void changed(int number) {
-				server.setFPS(number);
+			public void changed(float number) {
+				server.setFPS((int)number);
 			}
 		});
 		serverFPSSelector.setValue(5);
@@ -58,8 +58,8 @@ public class CSTestV2 extends BaseScreen {
 		NumberSelector lagSelector = new NumberSelector("Lag", 250, 0, 1000, 10);
 		lagSelector.addChangeListener(new NumberSelector.NumberSelectorListener() {
 			@Override
-			public void changed(int number) {
-				client.setLag(number);
+			public void changed(float number) {
+				client.setLag((int)number);
 			}
 		});
 		lagSelector.setValue(250);
