@@ -35,14 +35,14 @@ public class WalkTask extends DogTask {
 	}
 
 	@Override
-	public void run () {
+	public Status execute () {
 		i++;
 		Dog dog = getObject();
 		dogSystem.randomlyWalk(dog);
 		if (i < 3) {
-			running();
+			return Status.RUNNING;
 		} else {
-			success();
+			return Status.SUCCEEDED;
 		}
 	}
 

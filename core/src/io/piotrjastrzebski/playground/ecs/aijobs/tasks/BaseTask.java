@@ -12,10 +12,7 @@ import io.piotrjastrzebski.playground.ecs.aijobs.components.Worker;
  * Created by PiotrJ on 19/08/15.
  */
 @Wire
-public class BaseTask extends LeafTask<Worker> {
-	@Override public void run () {
-
-	}
+public abstract class BaseTask extends LeafTask<Worker> {
 
 	@Override protected Task<Worker> copyTo (Task<Worker> task) {
 		// TODO add any injected fields

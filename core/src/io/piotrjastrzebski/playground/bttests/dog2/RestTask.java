@@ -29,9 +29,9 @@ public class RestTask extends LeafTask<Dog> {
 	}
 
 	@Override
-	public void run () {
+	public Status execute () {
 		getObject().brainLog("zz zz zz");
-		running();
+		return Status.RUNNING;
 	}
 
 	@Override

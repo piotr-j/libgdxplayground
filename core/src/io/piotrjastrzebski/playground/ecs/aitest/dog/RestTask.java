@@ -26,16 +26,15 @@ import com.badlogic.gdx.ai.btree.LeafTask;
 public class RestTask extends DogTask {
 
 	@Override
-	public void run () {
+	public Status execute () {
 		Dog dog = getObject();
 		if (dog.isUrgent()) {
 			dogSystem.brainLog(dog, "No time to rest");
-			fail();
+			return Status.FAILED;
 		} else {
 			dogSystem.brainLog(dog, "zz zz");
-			running();
+			return Status.RUNNING;
 		}
-
 	}
 
 	@Override

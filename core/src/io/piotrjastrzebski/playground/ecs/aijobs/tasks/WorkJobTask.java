@@ -15,18 +15,19 @@ public class WorkJobTask extends BaseTask {
 
 	Jobs jobs;
 
-	@Override public void run () {
+	@Override
+	public Status execute () {
 		Worker worker = getObject();
 		// no job
 		if (!jobs.hasJob(worker)){
 //			Gdx.app.log(TAG, "No job " + worker.eid);
-			fail();
+			return Status.FAILED;
 		} else if (jobs.workDone(worker)) {
 			Gdx.app.log(TAG, "Done " + worker.eid);
-			success();
+			return Status.SUCCEEDED;
 		} else {
 //			Gdx.app.log(TAG, "Working " + worker.eid);
-			running();
+			return Status.RUNNING;
 		}
 	}
 

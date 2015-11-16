@@ -7,7 +7,7 @@ import com.artemis.annotations.Wire;
  */
 @Wire
 public class DummyTask extends BaseTask {
-	@Override public void run () {
-
+	public Status execute () {
+		return Status.SUCCEEDED;
 	}
 }

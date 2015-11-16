@@ -15,18 +15,19 @@ public class MoveTask extends BaseTask {
 
 	Mover mover;
 
-	@Override public void run () {
+	@Override
+	public Status execute () {
 		// move to target -> done
 		Worker worker = getObject();
 		if (mover.atTarget(worker.eid)){
 			Gdx.app.log(TAG, "At target " + worker.eid);
-			success();
+			return Status.SUCCEEDED;
 		} else if (mover.isUnreachable(worker.eid)){
 			Gdx.app.log(TAG, "Unreachable " + worker.eid);
-			fail();
+			return Status.FAILED;
 		} else {
 //			Gdx.app.log(TAG, "Moving " + worker.eid);
-			running();
+			return Status.RUNNING;
 		}
 	}
 

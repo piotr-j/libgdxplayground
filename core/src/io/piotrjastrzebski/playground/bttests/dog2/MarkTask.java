@@ -32,16 +32,16 @@ public class MarkTask extends LeafTask<Dog> {
 	}
 
 	@Override
-	public void run () {
+	public Status execute () {
 		Dog dog = getObject();
 		Boolean result = dog.markATree(i++);
 		if (result == null) {
-			running();
+			return Status.RUNNING;
 		}
 		else if (result) {
-			success();
+			return Status.SUCCEEDED;
 		} else {
-			fail();
+			return Status.FAILED;
 		}
 	}
 

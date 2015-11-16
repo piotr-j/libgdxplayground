@@ -24,14 +24,14 @@ import com.badlogic.gdx.ai.btree.LeafTask;
 public class MarkTask extends LeafTask<Dog> {
 
 	@Override
-	public void run () {
+	public Status execute () {
 		Dog dog = getObject();
 		if (dog.standBesideATree()) {
 			dog.markATree();
 			dog.setUrgent(false);
-			success();
+			return Status.SUCCEEDED;
 		} else {
-			this.fail();
+			return Status.FAILED;
 		}
 	}
 

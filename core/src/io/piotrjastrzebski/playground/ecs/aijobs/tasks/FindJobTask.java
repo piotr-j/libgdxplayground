@@ -14,13 +14,14 @@ public class FindJobTask extends BaseTask {
 	private final static String TAG = FindJobTask.class.getSimpleName();
 
 	Jobs jobs;
-	@Override public void run () {
+	@Override
+	public Status execute () {
 		if (jobs.findJobFor(getObject())) {
 			Gdx.app.log(TAG, "Found job for " + getObject());
-			success();
+			return Status.SUCCEEDED;
 		} else {
 //			Gdx.app.log(TAG, "No job for " + getObject());
-			fail();
+			return Status.FAILED;
 		}
 	}
 

@@ -11,8 +11,9 @@ import com.badlogic.gdx.math.MathUtils;
 public class IdleTask extends BaseTask {
 	private final static String TAG = IdleTask.class.getSimpleName();
 
-	@Override public void run () {
+	@Override
+	public Status execute () {
 //		Gdx.app.log(TAG, "idle " + getObject());
-		success();
+		return Status.SUCCEEDED;
 	}
 }

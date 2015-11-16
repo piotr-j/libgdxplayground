@@ -40,12 +40,12 @@ public class BarkTask extends DogTask {
 	}
 
 	@Override
-	public void run () {
+	public Status execute () {
 		Dog dog = getObject();
 		for (int i = 0; i < t; i++) {
 			dogSystem.bark(dog);
 		}
-		success();
+		return Status.SUCCEEDED;
 	}
 
 	@Override
