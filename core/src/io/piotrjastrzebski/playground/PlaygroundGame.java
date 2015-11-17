@@ -73,7 +73,7 @@ public class PlaygroundGame extends Game implements GameReset {
 		SimpleBTEditTest.class, BTEditTest2.class, SimpleTiledBrickTest.class, BTSaveTest.class, PixelArtUpsampleTest.class, UIUndoRedoTest.class,
 		UIDaDSpriteTest.class, UILabelWrapTest.class, UIColorPickerTest.class, AshleyPhysicsTest.class, UISImpleGraphTest.class, ResolutionResolverTest.class,
 		ECSJobsTest.class, ECSAIJobsTest.class, UISpriteDrawableTest.class, SimpleTiledTest.class, ParticleTest.class, CameraMoveTest.class,
-		TiledGenTest.class, TemperatureTest.class, BiomeTest.class, Box2dInterpolationTest.class, AssetReloadTest.class,
+		TiledGenTest.class, TemperatureTest.class, BiomeTest.class, Box2dInterpolationTest.class, AssetReloadTest.class, MouseDragTest.class,
 		Box2dTiledTest.class, ParticleGUITest.class, ShortcutTest.class, SimpleTiledNonPotTest.class, UIDaDTest.class, UIReplaceFontTest.class,
 		RainTest.class, BlurTest.class, CompositeGenTest.class, UITest.class, UISortTest.class, UISort2Test.class, CSTest.class, PathTest.class,
 		UIFBOTransitionTest.class, QuadTreeTest.class, RandomTest.class, ECSAssetTest.class, GpuShadowTest.class, UIDoublePaneTest.class,
