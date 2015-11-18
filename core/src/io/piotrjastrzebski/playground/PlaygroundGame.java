@@ -41,6 +41,7 @@ import io.piotrjastrzebski.playground.ecs.quadtreetest.QuadTreeTest;
 import io.piotrjastrzebski.playground.ecs.sat.SATTest;
 import io.piotrjastrzebski.playground.ecs.tagtest.TagTest;
 import io.piotrjastrzebski.playground.ecs.worldiotest.ECSWorldIOTest;
+import io.piotrjastrzebski.playground.fogofwar.FogOfWarTest;
 import io.piotrjastrzebski.playground.gpushadows.GpuShadowTest;
 import io.piotrjastrzebski.playground.gpushadows.GpuShadows;
 import io.piotrjastrzebski.playground.isotiled.*;
@@ -68,7 +69,7 @@ public class PlaygroundGame extends Game implements GameReset {
 
 	// should be a class that extends BaseScreen
 	final Class[] testScreens = new Class[]{DungeonGeneratorTest.class, SATTest.class, ParticleFaceTest.class, SimpleTiledCropTest.class,
-		SimpleBox2dTest.class, Box2dLoaderTest.class, RadialSpriteTest.class, Box2dSensorTest.class, UIReAddTest.class,
+		SimpleBox2dTest.class, Box2dLoaderTest.class, RadialSpriteTest.class, Box2dSensorTest.class, UIReAddTest.class, FogOfWarTest.class,
 		ShaderFireWallTest.class, ShaderPortalTest.class, Shader2dRainTest.class, ECSWorldIOTest.class, ECSOrderTest.class, JarUtilsTest.class,
 		SimpleBTEditTest.class, BTEditTest2.class, SimpleTiledBrickTest.class, BTSaveTest.class, PixelArtUpsampleTest.class, UIUndoRedoTest.class,
 		UIDaDSpriteTest.class, UILabelWrapTest.class, UIColorPickerTest.class, AshleyPhysicsTest.class, UISImpleGraphTest.class, ResolutionResolverTest.class,
