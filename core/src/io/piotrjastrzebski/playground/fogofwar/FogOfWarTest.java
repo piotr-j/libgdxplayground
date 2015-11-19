@@ -43,7 +43,7 @@ public class FogOfWarTest extends BaseScreen {
 		gameCamera.position.set(center.x, center.y, 0);
 
 		// 128x128
-		lightTex = new Texture("simplelighttest/light.png");
+		lightTex = new Texture("fogofwar/los.png");
 		// 32x32
 		unitTex = new Texture("box2d/circle32.png");
 
@@ -123,15 +123,15 @@ public class FogOfWarTest extends BaseScreen {
 		public void draw (Batch batch, OrthographicCamera gameCamera, Array<LoSObject> loSObjects) {
 			// NOTE easy win, draw and update only whats visible
 //			batch.disableBlending();
-			for (int i = 0; i < tiles.length; i++) {
-				tiles[i].update(batch, loSObjects);
+			for (FoWTile tile : tiles) {
+				tile.update(batch, loSObjects);
 			}
 //			batch.enableBlending();
 			batch.setProjectionMatrix(gameCamera.combined);
 			batch.setColor(1, 1, 1, alpha);
 			batch.begin();
-			for (int i = 0; i < tiles.length; i++) {
-				tiles[i].draw(batch);
+			for (FoWTile tile : tiles) {
+				tile.draw(batch);
 			}
 			batch.end();
 		}
