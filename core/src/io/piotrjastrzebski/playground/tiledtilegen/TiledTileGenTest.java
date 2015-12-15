@@ -1,6 +1,7 @@
 package io.piotrjastrzebski.playground.tiledtilegen;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.PolygonRegion;
@@ -81,6 +82,20 @@ public class TiledTileGenTest extends BaseScreen {
 		Gdx.gl.glClearColor(L, L, L, 1f);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
+		float scale = (Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT) || Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT))?25:1;
+		scale *= delta * 0.1f;
+		if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
+			gameCamera.position.x -= scale;
+		} else if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
+			gameCamera.position.x += scale;
+		}
+		if (Gdx.input.isKeyPressed(Input.Keys.UP)) {
+			gameCamera.position.y += scale;
+		} else if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
+			gameCamera.position.y -= scale;
+		}
+		gameCamera.update();
+
 		mapRenderer.setView(gameCamera);
 		mapRenderer.render();
 
@@ -112,22 +127,14 @@ public class TiledTileGenTest extends BaseScreen {
 			float[] vertices = getVertices();
 			float[] textureCoords = getTextureCoords();
 			for (int i = 0, n = vertices.length; i < n; i++) {
-//				textureCoords[i] = u + uvWidth * vertices[i]/region.getRegionWidth();
 				textureCoords[i] = u + uvWidth * vertices[i];
 				i++;
-//				textureCoords[i] = v + uvHeight * (1 - vertices[i]/region.getRegionHeight());
 				textureCoords[i] = v + uvHeight * (1 - vertices[i]);
 			}
 
 			// expand packed vertices to they match region size
 			// region must be square and the base region is 2 tiles high
 			System.arraycopy(type.packedVertices, 0, vertices, 0, vertices.length);
-//			float[] packed = type.packedVertices;
-//			for (int i = 0, n = vertices.length; i < n; i++) {
-//				vertices[i] = packed[i];
-//				i++;
-//				vertices[i] = packed[i];
-//			}
 			// region dimensions will always be square, half of the original height
 			// its the way the tiled region works
 			int size = region.getRegionHeight()/2;
