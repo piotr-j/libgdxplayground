@@ -58,6 +58,7 @@ import io.piotrjastrzebski.playground.simplelights.SimpleLightTest;
 import io.piotrjastrzebski.playground.splitscreen.SplitTest;
 import io.piotrjastrzebski.playground.tiledgentest.*;
 import io.piotrjastrzebski.playground.tiledmapwidget.TMWTest;
+import io.piotrjastrzebski.playground.tiledtilegen.TiledTileGenTest;
 import io.piotrjastrzebski.playground.uitesting.*;
 import light2dtest.ShadowTest;
 
@@ -86,7 +87,7 @@ public class PlaygroundGame extends Game implements GameReset {
 		ShadowTest.class, GpuShadows.class, CircleTest.class, ShapeRendererTest.class, BTreeTest.class, FitVPTest.class, VPTest.class,
 		SimpleLightTest.class, UIImageButtonTest.class, IsoTest.class, UISelectRowTest.class, TMWTest.class, Box2dRayTest.class,
 		ECSFancyWallsTest.class, PuncherTest.class, UIRotateTestTest.class, SimpleTouchTest.class, UITAPaneTest.class, BTEditTest.class,
-		UIBlendTest.class, SplitTest.class, FontGenTest.class, UIImgBtnTest.class, UISelectBoxTest.class,
+		UIBlendTest.class, SplitTest.class, FontGenTest.class, UIImgBtnTest.class, UISelectBoxTest.class, TiledTileGenTest.class,
 	};
 
 	PlatformBridge bridge;
