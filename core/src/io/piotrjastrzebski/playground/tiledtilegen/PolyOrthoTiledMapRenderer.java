@@ -1,37 +1,43 @@
 package io.piotrjastrzebski.playground.tiledtilegen;
 
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.g2d.Batch;
-import com.badlogic.gdx.graphics.g2d.PolygonRegion;
-import com.badlogic.gdx.graphics.g2d.PolygonSpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapTile;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.renderers.BatchTiledMapRenderer;
+import com.badlogic.gdx.maps.tiled.tiles.StaticTiledMapTile;
 
 import static com.badlogic.gdx.graphics.g2d.Batch.*;
 import static com.badlogic.gdx.graphics.g2d.Batch.U2;
 import static com.badlogic.gdx.graphics.g2d.Batch.U3;
 
 /**
+ * OrthoCachedTiledMapRenderer that uses PolygonSpriteBatch
+ *
+ * Renders PolygonTiledMapTile with PolygonSpriteBatch
+ *
+ * flip and rotation not supported in PolygonTiledMapTile
+ *
  * Created by EvilEntity on 15/12/2015.
  */
-public class MapRenderer extends BatchTiledMapRenderer {
+public class PolyOrthoTiledMapRenderer extends BatchTiledMapRenderer {
 
-	public MapRenderer (TiledMap map) {
-		super(map);
+	public PolyOrthoTiledMapRenderer (TiledMap map) {
+		this(map, new PolygonSpriteBatch());
+		this.ownsBatch = true;
 	}
 
-	public MapRenderer (TiledMap map, PolygonSpriteBatch batch) {
+	public PolyOrthoTiledMapRenderer (TiledMap map, PolygonSpriteBatch batch) {
 		super(map, batch);
 	}
 
-	public MapRenderer (TiledMap map, float unitScale) {
-		super(map, unitScale);
+	public PolyOrthoTiledMapRenderer (TiledMap map, float unitScale) {
+		this(map, unitScale, new PolygonSpriteBatch());
+		this.ownsBatch = true;
 	}
 
-	public MapRenderer (TiledMap map, float unitScale, Batch batch) {
+	public PolyOrthoTiledMapRenderer (TiledMap map, float unitScale, PolygonSpriteBatch batch) {
 		super(map, unitScale, batch);
 	}
 
@@ -65,14 +71,13 @@ public class MapRenderer extends BatchTiledMapRenderer {
 					continue;
 				}
 				final TiledMapTile tile = cell.getTile();
-				if (tile instanceof TiledTileGenTest.MagicTiledMapTile) {
-					TiledTileGenTest.TiledRegion region = ((TiledTileGenTest.MagicTiledMapTile)tile).getTiledRegion();
+
+				if (tile instanceof PolygonTiledMapTile) {
+					PolygonRegion region = ((PolygonTiledMapTile)tile).getPolygonRegion();
 					float x1 = x + tile.getOffsetX() * unitScale;
 					float y1 = y + tile.getOffsetY() * unitScale;
 					float w = region.getRegion().getRegionWidth() * unitScale;
 					float h = region.getRegion().getRegionHeight() * unitScale;
-
-//					batch.draw(region.getTexture(), vertices, 0, NUM_VERTICES);
 					((PolygonSpriteBatch)batch).draw(region, x1, y1, w, h);
 
 				} else if (tile != null) {
@@ -183,6 +188,19 @@ public class MapRenderer extends BatchTiledMapRenderer {
 				x += layerTileWidth;
 			}
 			y -= layerTileHeight;
+		}
+	}
+
+	public static class PolygonTiledMapTile extends StaticTiledMapTile {
+		protected PolygonRegion polygonRegion;
+
+		public PolygonTiledMapTile (PolygonRegion polygonRegion) {
+			super(polygonRegion.getRegion());
+			this.polygonRegion = polygonRegion;
+		}
+
+		public PolygonRegion getPolygonRegion () {
+			return polygonRegion;
 		}
 	}
 }

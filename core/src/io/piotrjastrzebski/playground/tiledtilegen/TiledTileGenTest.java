@@ -6,13 +6,10 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.PolygonRegion;
 import com.badlogic.gdx.graphics.g2d.PolygonSpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.maps.MapLayer;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapTile;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
-import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
-import com.badlogic.gdx.maps.tiled.tiles.StaticTiledMapTile;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
@@ -32,7 +29,7 @@ public class TiledTileGenTest extends BaseScreen {
 	TextureRegion base;
 	PolygonSpriteBatch polyBatch;
 	Array<TiledRegion> tiledRegions;
-	MapRenderer mapRenderer;
+	PolyOrthoTiledMapRenderer mapRenderer;
 	public TiledTileGenTest (GameReset game) {
 		super(game);
 		VisTextButton reload = new VisTextButton("Reload");
@@ -52,9 +49,8 @@ public class TiledTileGenTest extends BaseScreen {
 
 
 		TiledMap map = new TmxMapLoader().load("tiled/simple.tmx");
-		mapRenderer = new MapRenderer(map, INV_SCALE, polyBatch);
+		mapRenderer = new PolyOrthoTiledMapRenderer(map, INV_SCALE, polyBatch);
 
-		// TODO replace some tiles with tiled tiles, implement renderer
 		TiledMapTileLayer layer = (TiledMapTileLayer)map.getLayers().get(0);
 		int width = layer.getWidth();
 		int height = layer.getHeight();
@@ -65,22 +61,10 @@ public class TiledTileGenTest extends BaseScreen {
 				TiledMapTile tile = cell.getTile();
 				if (tile == null) continue;
 				if (tile.getId() != 1) continue;
-				MagicTiledMapTile mapTile = new MagicTiledMapTile(tiledRegions.first());
+				PolyOrthoTiledMapRenderer.PolygonTiledMapTile mapTile = new PolyOrthoTiledMapRenderer.PolygonTiledMapTile(tiledRegions.first());
 				mapTile.setId(tile.getId());
 				cell.setTile(mapTile);
 			}
-		}
-	}
-
-	public static class MagicTiledMapTile extends StaticTiledMapTile {
-		TiledRegion tiledRegion;
-		public MagicTiledMapTile (TiledRegion tiledRegion) {
-			super((TextureRegion)null);
-			this.tiledRegion = tiledRegion;
-		}
-
-		public TiledRegion getTiledRegion () {
-			return tiledRegion;
 		}
 	}
 
