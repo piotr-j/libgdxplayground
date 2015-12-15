@@ -42,6 +42,8 @@ public class TiledTileGenTest extends BaseScreen {
 		});
 
 		raw = new Texture(Gdx.files.internal("tiled/templatev2.png"));
+		raw.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
+
 		polyBatch = new PolygonSpriteBatch();
 		base = new TextureRegion(raw);
 
@@ -61,10 +63,21 @@ public class TiledTileGenTest extends BaseScreen {
 				if (cell == null) continue;
 				TiledMapTile tile = cell.getTile();
 				if (tile == null) continue;
-				if (tile.getId() != 1) continue;
-				PolyOrthoTiledMapRenderer.PolygonTiledMapTile mapTile = new PolyOrthoTiledMapRenderer.PolygonTiledMapTile(tiledRegions.first());
-				mapTile.setId(tile.getId());
-				cell.setTile(mapTile);
+				PolyOrthoTiledMapRenderer.PolygonTiledMapTile mapTile;
+				switch (tile.getId()) {
+				case 1:
+					mapTile = new PolyOrthoTiledMapRenderer.PolygonTiledMapTile(tiledRegions.first());
+					mapTile.setId(tile.getId());
+					cell.setTile(mapTile);
+					break;
+				case 2:
+					mapTile = new PolyOrthoTiledMapRenderer.PolygonTiledMapTile(tiledRegions.get(15));
+					mapTile.setId(tile.getId());
+					cell.setTile(mapTile);
+					break;
+				default:
+//				mapTile = new PolyOrthoTiledMapRenderer.PolygonTiledMapTile(tiledRegions.get(tiledRegions.size-1));
+				}
 			}
 		}
 	}
@@ -72,7 +85,7 @@ public class TiledTileGenTest extends BaseScreen {
 	private void generateTiles () {
 		tiledRegions.clear();
 		for (TiledType tiledType : TiledType.values()) {
-			tiledRegions.add(new TiledRegion(base, tiledType));
+			tiledRegions.add(new TiledRegion(new TextureRegion(base), tiledType));
 		}
 	}
 
@@ -117,7 +130,7 @@ public class TiledTileGenTest extends BaseScreen {
 	public static class TiledRegion extends PolygonRegion {
 		public TiledRegion (TextureRegion region, TiledType type) {
 			// we need copy, as we will modify it later
-			super(new TextureRegion(region), type.getVerticesCopy(), type.triangles);
+			super(region, type.getVerticesCopy(), type.triangles);
 
 			float u = region.getU(), v = region.getV();
 			float uvWidth = region.getU2()- u;
@@ -161,7 +174,7 @@ public class TiledTileGenTest extends BaseScreen {
 		private short[] triangles;
 		private int numTriangles;
 		private short quads;
-		private short[] indices = new short[]{0, 3, 1, 1, 3, 2};
+		private short[] indices = new short[]{0,1,2,0,3,2};
 		private TiledData data = new TiledData();
 
 		public TiledDataBuilder () {
@@ -170,6 +183,8 @@ public class TiledTileGenTest extends BaseScreen {
 			triangles = new short[6 * MAX_QUADS];
 		}
 
+		// fix for bleeding issues
+		private float fix = 0.01f;
 		public TiledDataBuilder quad (
 			int sx, int sy, int sw, int sh,
 			int tx, int ty, int tw, int th) {
@@ -178,17 +193,17 @@ public class TiledTileGenTest extends BaseScreen {
 			int vo = numVertices;
 			float nsx = sx/width;
 			float nsy = sy/height;
-			vertices[vo++] = nsx;
-			vertices[vo++] = nsy;
+			vertices[vo++] = nsx + fix;
+			vertices[vo++] = nsy + fix;
 
-			vertices[vo++] = nsx + sw/width;
-			vertices[vo++] = nsy;
+			vertices[vo++] = nsx + sw/width - fix;
+			vertices[vo++] = nsy + fix;
 
-			vertices[vo++] = nsx + sw/width;
-			vertices[vo++] = nsy + sh/height;
+			vertices[vo++] = nsx + sw/width - fix;
+			vertices[vo++] = nsy + sh/height - fix;
 
-			vertices[vo++] = nsx;
-			vertices[vo++] = nsy + sh/height;
+			vertices[vo++] = nsx + fix;
+			vertices[vo++] = nsy + sh/height - fix;
 
 			vo = numVertices;
 			packedVertices[vo++] = tx;
