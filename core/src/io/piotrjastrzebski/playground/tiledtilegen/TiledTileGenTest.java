@@ -2,11 +2,13 @@ package io.piotrjastrzebski.playground.tiledtilegen;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.PolygonRegion;
-import com.badlogic.gdx.graphics.g2d.PolygonSpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.TextureData;
+import com.badlogic.gdx.graphics.g2d.*;
+import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapTile;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
@@ -16,10 +18,15 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.BufferUtils;
+import com.badlogic.gdx.utils.ScreenUtils;
 import com.kotcrab.vis.ui.widget.VisTextButton;
 import io.piotrjastrzebski.playground.BaseScreen;
 import io.piotrjastrzebski.playground.GameReset;
 
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.IntBuffer;
 import java.util.Arrays;
 
 /**
@@ -42,13 +49,15 @@ public class TiledTileGenTest extends BaseScreen {
 		});
 
 		raw = new Texture(Gdx.files.internal("tiled/templatev2.png"));
-		raw.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
+		// cant have this for packing/save
+//		raw.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
 
 		polyBatch = new PolygonSpriteBatch();
 		base = new TextureRegion(raw);
 
 		tiledRegions = new Array<>();
 		generateTiles();
+		packTiles("template/", 32, Gdx.files.external(".atlas/atlas"));
 
 
 		TiledMap map = new TmxMapLoader().load("tiled/simple.tmx");
@@ -80,6 +89,58 @@ public class TiledTileGenTest extends BaseScreen {
 				}
 			}
 		}
+	}
+
+	private void packTiles (String name, int pixelSize, FileHandle saveFile) {
+		IntBuffer intBuffer = BufferUtils.newIntBuffer(16);
+		Gdx.gl20.glGetIntegerv(GL20.GL_MAX_TEXTURE_SIZE, intBuffer);
+		// we probably dont need full size map, would be nice to pick semi optimal size
+		int size = Math.min(intBuffer.get(), 2048);
+		FrameBuffer tileFBO = new FrameBuffer(Pixmap.Format.RGBA8888, Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), false);
+		PixmapPacker packer = new PixmapPacker(size, size, Pixmap.Format.RGBA8888, 2, true);
+
+		// blending multiple times will break stuff
+		polyBatch.disableBlending();
+		Gdx.gl.glClearColor(0, 0, 0, 0);
+		for (TiledRegion region : tiledRegions) {
+			TiledType type = region.type;
+			tileFBO.begin();
+			Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+			polyBatch.begin();
+			polyBatch.draw(region, 0, 0, pixelSize, pixelSize);
+			polyBatch.end();
+			Pixmap pm = ScreenUtils.getFrameBufferPixmap(0, 0, pixelSize, pixelSize);
+			tileFBO.end();
+			flipPM(pm);
+			packer.pack(name + type.name(), pm);
+		}
+
+		PixmapPackerIO packerIO = new PixmapPackerIO();
+		PixmapPackerIO.SaveParameters params = new PixmapPackerIO.SaveParameters();
+		try {
+			packerIO.save(saveFile, packer, params);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		packer.dispose();
+		tileFBO.dispose();
+		polyBatch.enableBlending();
+	}
+
+	private void flipPM(Pixmap pm) {
+		int w = pm.getWidth();
+		int h = pm.getHeight();
+		final ByteBuffer pixels = pm.getPixels();
+		final int numBytes = w * h * 4;
+		byte[] lines = new byte[numBytes];
+		final int numBytesPerLine = w * 4;
+		for (int i = 0; i < h; i++) {
+			pixels.position((h - i - 1) * numBytesPerLine);
+			pixels.get(lines, i * numBytesPerLine, numBytesPerLine);
+		}
+		pixels.clear();
+		pixels.put(lines);
 	}
 
 	private void generateTiles () {
@@ -128,9 +189,11 @@ public class TiledTileGenTest extends BaseScreen {
 	}
 
 	public static class TiledRegion extends PolygonRegion {
+		public TiledType type;
 		public TiledRegion (TextureRegion region, TiledType type) {
 			// we need copy, as we will modify it later
 			super(region, type.getVerticesCopy(), type.triangles);
+			this.type = type;
 
 			float u = region.getU(), v = region.getV();
 			float uvWidth = region.getU2()- u;
@@ -184,7 +247,7 @@ public class TiledTileGenTest extends BaseScreen {
 		}
 
 		// fix for bleeding issues
-		private float fix = 0.01f;
+		private float fix = 0.0f;
 		public TiledDataBuilder quad (
 			int sx, int sy, int sw, int sh,
 			int tx, int ty, int tw, int th) {
