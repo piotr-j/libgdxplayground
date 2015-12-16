@@ -3,6 +3,8 @@ package io.piotrjastrzebski.playground;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
+import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
@@ -58,6 +60,7 @@ import io.piotrjastrzebski.playground.simplelights.SimpleLightTest;
 import io.piotrjastrzebski.playground.splitscreen.SplitTest;
 import io.piotrjastrzebski.playground.tiledgentest.*;
 import io.piotrjastrzebski.playground.tiledmapwidget.TMWTest;
+import io.piotrjastrzebski.playground.tiledtilegen.TerrainTileGenTest;
 import io.piotrjastrzebski.playground.tiledtilegen.TiledTileGenTest;
 import io.piotrjastrzebski.playground.uitesting.*;
 import light2dtest.ShadowTest;
@@ -88,11 +91,18 @@ public class PlaygroundGame extends Game implements GameReset {
 		SimpleLightTest.class, UIImageButtonTest.class, IsoTest.class, UISelectRowTest.class, TMWTest.class, Box2dRayTest.class,
 		ECSFancyWallsTest.class, PuncherTest.class, UIRotateTestTest.class, SimpleTouchTest.class, UITAPaneTest.class, BTEditTest.class,
 		UIBlendTest.class, SplitTest.class, FontGenTest.class, UIImgBtnTest.class, UISelectBoxTest.class, TiledTileGenTest.class,
+		TerrainTileGenTest.class,
 	};
 
 	PlatformBridge bridge;
+	Class<? extends BaseScreen> target;
 	public PlaygroundGame (PlatformBridge bridge) {
 		this.bridge = bridge;
+	}
+
+	public PlaygroundGame (PlatformBridge bridge, Class<? extends BaseScreen> target) {
+		this.bridge = bridge;
+		this.target = target;
 	}
 
 	@Override
@@ -109,7 +119,17 @@ public class PlaygroundGame extends Game implements GameReset {
 	}
 
 	public void reset () {
-		setScreen(new TestSelectScreen(this));
+		if (target != null) {
+			try {
+				Constructor constructor = target.getConstructor(GameReset.class);
+				setScreen((BaseScreen)constructor.newInstance(PlaygroundGame.this));
+			} catch (InvocationTargetException | InstantiationException | IllegalAccessException | NoSuchMethodException e) {
+				e.printStackTrace();
+			}
+			target = null;
+		} else {
+			setScreen(new TestSelectScreen(this));
+		}
 	}
 
 	private class TestSelectScreen extends BaseScreen {
@@ -194,5 +214,13 @@ public class PlaygroundGame extends Game implements GameReset {
 	@Override public void dispose () {
 		super.dispose();
 		VisUI.dispose();
+	}
+
+	public static void start (String[] args, Class<? extends BaseScreen> target) {
+		LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
+		config.width = 1280;
+		config.height = 720;
+		config.useHDPI = true;
+		new LwjglApplication(new PlaygroundGame(new DesktopBridge(), target), config);
 	}
 }
