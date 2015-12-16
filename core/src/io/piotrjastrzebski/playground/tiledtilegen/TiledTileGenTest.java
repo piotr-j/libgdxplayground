@@ -22,6 +22,7 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import com.kotcrab.vis.ui.widget.VisTextButton;
 import io.piotrjastrzebski.playground.BaseScreen;
 import io.piotrjastrzebski.playground.GameReset;
+import io.piotrjastrzebski.playground.PlaygroundGame;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -587,5 +588,9 @@ public class TiledTileGenTest extends BaseScreen {
 		gameCamera.zoom = MathUtils.clamp(gameCamera.zoom + gameCamera.zoom * amount * 0.1f, 0.1f, 3f);
 		gameCamera.update();
 		return true;
+	}
+
+	public static void main (String[] args) {
+		PlaygroundGame.start(args, TiledTileGenTest.class);
 	}
 }
