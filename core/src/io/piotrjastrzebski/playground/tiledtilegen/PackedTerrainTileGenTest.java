@@ -359,7 +359,7 @@ public class PackedTerrainTileGenTest extends BaseScreen {
 		}
 
 		public TiledDataBuilder sideAB () {
-			return toCD(48, 48, 32, 16);
+			return toAB(48, 0, 32, 16);
 		}
 		public TiledDataBuilder sideAB_A () {
 			return toC(48, 48, 16, 16);
@@ -368,7 +368,7 @@ public class PackedTerrainTileGenTest extends BaseScreen {
 			return toD(64, 48, 16, 16);
 		}
 		public TiledDataBuilder sideCD () {
-			return toAB(48, 0, 32, 16);
+			return toCD(48, 48, 32, 16);
 		}
 		public TiledDataBuilder sideCD_C () {
 			return toA(48, 0, 16, 16);
@@ -377,7 +377,7 @@ public class PackedTerrainTileGenTest extends BaseScreen {
 			return toB(64, 0, 16, 16);
 		}
 		public TiledDataBuilder sideAC () {
-			return toBD(32, 16, 16, 32);
+			return toAC(80, 16, 16, 32);
 		}
 		public TiledDataBuilder sideAC_A () {
 			return toB(32, 32, 16, 16);
@@ -386,7 +386,7 @@ public class PackedTerrainTileGenTest extends BaseScreen {
 			return toD(32, 16, 16, 16);
 		}
 		public TiledDataBuilder sideBD () {
-			return toAC(80, 16, 16, 32);
+			return toBD(32, 16, 16, 32);
 		}
 		public TiledDataBuilder sideBD_B () {
 			return toA(80, 32, 16, 16);
@@ -476,25 +476,25 @@ public class PackedTerrainTileGenTest extends BaseScreen {
 		SIDE_AC_BD(builder.sideAC().sideBD().build()),
 		SIDE_AB_CD(builder.sideAB().sideCD().build()),
 
-		SIDE_BD_A(builder.sideBD().cornerB().build()),
-		SIDE_CD_B(builder.sideCD().cornerD().build()),
-		SIDE_AC_D(builder.sideAC().cornerC().build()),
-		SIDE_AB_C(builder.sideAB().cornerA().build()),
+		SIDE_AC_B(builder.sideAC().cornerB().build()),
+		SIDE_AB_D(builder.sideAB().cornerD().build()),
+		SIDE_BD_C(builder.sideBD().cornerC().build()),
+		SIDE_CD_A(builder.sideCD().cornerA().build()),
 
-		SIDE_BD_C(builder.sideBD().cornerD().build()),
-		SIDE_CD_A(builder.sideCD().cornerC().build()),
-		SIDE_AC_B(builder.sideAC().cornerA().build()),
-		SIDE_AB_D(builder.sideAB().cornerB().build()),
+		SIDE_AC_D(builder.sideAC().cornerD().build()),
+		SIDE_AB_C(builder.sideAB().cornerC().build()),
+		SIDE_BD_A(builder.sideBD().cornerA().build()),
+		SIDE_CD_B(builder.sideCD().cornerB().build()),
 
-		SIDE_BD_A_C(builder.sideBD().cornerB().cornerD().build()),
-		SIDE_CD_A_B(builder.sideCD().cornerC().cornerD().build()),
-		SIDE_AC_B_D(builder.sideAC().cornerA().cornerC().build()),
-		SIDE_AB_C_D(builder.sideAB().cornerA().cornerB().build()),
+		SIDE_AC_B_D(builder.sideAC().cornerB().cornerD().build()),
+		SIDE_AB_C_D(builder.sideAB().cornerC().cornerD().build()),
+		SIDE_BD_A_C(builder.sideBD().cornerA().cornerC().build()),
+		SIDE_CD_A_B(builder.sideCD().cornerA().cornerB().build()),
 
-		SIDE_BD(builder.sideBD().build()),
-		SIDE_CD(builder.sideCD().build()),
 		SIDE_AC(builder.sideAC().build()),
 		SIDE_AB(builder.sideAB().build()),
+		SIDE_BD(builder.sideBD().build()),
+		SIDE_CD(builder.sideCD().build()),
 		;
 		// vertices to build uvs from
 		public final float[] vertices;
