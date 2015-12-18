@@ -12,6 +12,7 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.IntArray;
 import com.badlogic.gdx.utils.IntMap;
+import com.badlogic.gdx.utils.ObjectSet;
 import io.piotrjastrzebski.playground.BaseScreen;
 import io.piotrjastrzebski.playground.GameReset;
 import io.piotrjastrzebski.playground.PlaygroundGame;
@@ -37,7 +38,7 @@ public class TiledPartitionTest extends BaseScreen {
 		1, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 1,
 		1, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 1,
 		1, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 1,
-		1, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 1,
+		1, 0, 0, 0, 1, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 1,
 
 		1, 0, 0, 0, 0, 0, 0, 0,  1, 1, 1, 1, 1, 1, 1, 1,  1, 1, 1, 1, 2, 1, 1, 1,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 1,
 		1, 0, 0, 0, 0, 0, 0, 0,  1, 0, 0, 0, 0, 0, 0, 2,  2, 0, 1, 0, 0, 0, 0, 1,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 1,
@@ -78,7 +79,7 @@ public class TiledPartitionTest extends BaseScreen {
 		gameCamera.position.set(VP_WIDTH / 2, VP_HEIGHT / 2, 0);
 
 		rebuildRegions();
-//		regions.get(0).rebuild();
+//		regions.getTile(0).rebuild();
 	}
 
 	private void rebuildRegions () {
@@ -136,7 +137,7 @@ public class TiledPartitionTest extends BaseScreen {
 	Region ffRegion;
 	Array<Tile> found = new Array<>();
 	private void floodFill (int x, int y, Region region, Array<Tile> found) {
-		Tile start = get(x, y, region);
+		Tile start = getTile(x, y, region);
 		if (start == null) return;
 		ffRegion = region;
 		targetType = start.type;
@@ -157,13 +158,13 @@ public class TiledPartitionTest extends BaseScreen {
 				Tile east = getEdge(tile, 1, region);
 
 				for (int i = west.x; i <= east.x; i++) {
-					Tile n = get(i, west.y, region);
+					Tile n = getTile(i, west.y, region);
 					visitTile(n, found);
-					Tile north = get(i, west.y + 1, region);
+					Tile north = getTile(i, west.y + 1, region);
 					if (north != null && north.type == targetType) {
 						addToQueue(north);
 					}
-					Tile south = get(i, west.y - 1, region);
+					Tile south = getTile(i, west.y - 1, region);
 					if (south != null && south.type == targetType) {
 						addToQueue(south);
 					}
@@ -179,7 +180,7 @@ public class TiledPartitionTest extends BaseScreen {
 
 	private Tile getEdge (Tile tile, int offset, Region region) {
 		while (true) {
-			Tile next = get(tile.x + offset, tile.y, region);
+			Tile next = getTile(tile.x + offset, tile.y, region);
 			if (next != null && next.type == targetType) {
 				tile = next;
 			} else {
@@ -235,10 +236,10 @@ public class TiledPartitionTest extends BaseScreen {
 	}
 
 	private void addToQueue(int x, int y, Region region) {
-		addToQueue(get(x, y, region));
+		addToQueue(getTile(x, y, region));
 	}
 
-	private Tile get(int x, int y, Region region) {
+	private Tile getTile (int x, int y, Region region) {
 		if (region == null) {
 			if (x < 0 || x >= MAP_WIDTH) return null;
 			if (y < 0 || y >= MAP_HEIGHT) return null;
@@ -273,7 +274,8 @@ public class TiledPartitionTest extends BaseScreen {
 			switch (type) {
 			case 0: // grass
 				// some variation so we know wtf is going on
-				color.set(.1f, MathUtils.random(0.7f, .9f), MathUtils.random(.1f, .2f), 1);
+//				color.set(.1f, MathUtils.random(0.7f, .9f), MathUtils.random(.1f, .2f), 1);
+				color.set(0, 1, 0, 1);
 				break;
 			case 1: // wall
 				color.set(Color.FIREBRICK);
@@ -297,7 +299,7 @@ public class TiledPartitionTest extends BaseScreen {
 		}
 
 		@Override public String toString () {
-			return "Tile{" +x + ", " + y + "}";
+			return "Tile{" +x + ", " + y + ", id="+id+"}";
 		}
 
 		@Override public boolean equals (Object o) {
@@ -307,7 +309,7 @@ public class TiledPartitionTest extends BaseScreen {
 				return false;
 
 			Tile tile = (Tile)o;
-			return id != tile.id;
+			return id == tile.id;
 		}
 
 		@Override public int hashCode () {
@@ -330,50 +332,47 @@ public class TiledPartitionTest extends BaseScreen {
 			bounds.set(x, y, REGION_SIZE, REGION_SIZE);
 			for (int sx = 0; sx < REGION_SIZE; sx++) {
 				for (int sy = 0; sy < REGION_SIZE; sy++) {
-					subs[sx + sy * REGION_SIZE] = new SubRegion(sx, sy);
+					subs[sx + sy * REGION_SIZE] = new SubRegion();
 				}
 			}
 		}
 
-		private Rectangle tmp = new Rectangle();
 		public void update(Vector2 cs) {
 			selected = bounds.contains(cs);
-			SubRegion selected = null;
-			for (SubRegion sub : subs) {
-				tmp.set(x + sub.sx, y + sub.sy, 1, 1);
-				sub.selected = false;
-				if (tmp.contains(cs)) {
-					selected = sub;
-				}
-			}
-			if (selected != null) {
+			if (selected) {
 				for (SubRegion sub : subs) {
-					if (sub.id == selected.id) {
-						sub.selected = true;
-					}
+					sub.select(cs);
+				}
+			} else {
+				for (SubRegion sub : subs) {
+					sub.selected = false;
 				}
 			}
 			// TODO select neighbours
 		}
 
 		int ids;
+		ObjectSet<Tile> added = new ObjectSet<>();
 		public void rebuild () {
-			ids = 0;
-			for (SubRegion sub : subs) {
-				sub.id = -1;
+			for (int i = 0; i < ids; i++) {
+				subs[i].id = -1;
+				subs[i].tiles.clear();
 			}
-			for (int i = 0; i < subs.length; i++) {
-				SubRegion sub = subs[i];
-				if (sub.id >= 0) continue;
-				found.clear();
-				floodFill(x + sub.sx, y + sub.sy, this, found);
-				resumeFloodFill(this, found);
-//				filling = false;
+			ids = 0;
+			added.clear();
+			for (int sx = 0; sx < REGION_SIZE; sx++) {
+				for (int sy = 0; sy < REGION_SIZE; sy++) {
+					found.clear();
+					SubRegion sub = subs[ids];
+					Tile tile = getTile(x + sx, y + sy, this);
+					if (tile == null || added.contains(tile)) continue;
 
-				for (Tile tile : found) {
-					getWorld(tile.x, tile.y).id = ids;
+					floodFill(x + sx, y + sy, this, found);
+					resumeFloodFill(this, found);
+					added.addAll(found);
+					sub.tiles.addAll(found);
+					ids++;
 				}
-				ids++;
 			}
 		}
 
@@ -388,16 +387,8 @@ public class TiledPartitionTest extends BaseScreen {
 		}
 
 		public void renderSubs (ShapeRenderer renderer) {
-			for (SubRegion sub : subs) {
-				if (sub.selected) {
-					renderer.setColor(1, 1, 1, .5f);
-					renderer.rect(x + sub.sx + 0.05f, y + sub.sy + 0.05f, 1 - 0.1f, 1 - 0.1f);
-				} else {
-					float c = .5f + sub.id /(float)ids/2;
-					renderer.setColor(c, c, c, .5f);
-					renderer.rect(x + sub.sx + 0.1f, y + sub.sy + 0.1f, 1 - 0.2f, 1 - 0.2f);
-				}
-				sub.selected = false;
+			for (int i = 0; i < ids; i++) {
+				subs[i].render(renderer);
 			}
 		}
 
@@ -412,15 +403,36 @@ public class TiledPartitionTest extends BaseScreen {
 		}
 
 		public class SubRegion {
-			public final int sx;
-			public final int sy;
+			private Rectangle tmp = new Rectangle();
 			public int id = -1;
 			public boolean selected;
+			public ObjectSet<Tile> tiles = new ObjectSet<>();
+//			public Array<Tile> tiles = new Array<>();
 
-			public SubRegion (int sx, int sy) {
+			public SubRegion () {
 
-				this.sx = sx;
-				this.sy = sy;
+			}
+
+			public void select (Vector2 cs) {
+				for (Tile tile : tiles) {
+					if (tmp.set(tile.x, tile.y, 1, 1).contains(cs)) {
+						selected = true;
+						return;
+					}
+				}
+				selected = false;
+			}
+
+			public void render (ShapeRenderer renderer) {
+				if (selected) {
+					renderer.setColor(1, 1, 1, .5f);
+				} else {
+					float c = .5f + id /(float)ids/2;
+					renderer.setColor(c, c, c, .5f);
+				}
+				for (Tile tile : tiles) {
+					renderer.rect(tile.x + 0.1f, tile.y + 0.1f, 1 - 0.2f, 1 - 0.2f);
+				}
 			}
 		}
 	}
