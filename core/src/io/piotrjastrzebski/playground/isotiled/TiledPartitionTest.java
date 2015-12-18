@@ -105,12 +105,12 @@ public class TiledPartitionTest extends BaseScreen {
 			}
 		}
 		Gdx.gl.glEnable(GL20.GL_BLEND);
+		Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
 		renderer.setProjectionMatrix(gameCamera.combined);
 		renderer.begin(ShapeRenderer.ShapeType.Filled);
 		for (Tile tile : tiles) {
 			tile.render(renderer, delta);
 		}
-		renderer.end();
 
 //		Gdx.gl.glEnable(GL20.GL_BLEND);
 //		renderer.setColor(1, 0, 1, 0.1f);
@@ -120,12 +120,17 @@ public class TiledPartitionTest extends BaseScreen {
 //		}
 //		renderer.end();
 
-		renderer.begin(ShapeRenderer.ShapeType.Line);
 		for (Region region : regions) {
 			region.update(cs);
-			region.render(renderer);
+			region.renderSubs(renderer);
 		}
 
+		renderer.end();
+
+		renderer.begin(ShapeRenderer.ShapeType.Line);
+		for (Region region : regions) {
+			region.render(renderer);
+		}
 		renderer.end();
 	}
 	Region ffRegion;
@@ -375,18 +380,21 @@ public class TiledPartitionTest extends BaseScreen {
 		private float margin = 0.015f;
 		public void render (ShapeRenderer renderer) {
 			if (selected) {
-				renderer.setColor(Color.CYAN);
+				renderer.setColor(0, 1, 1, 1);
 			} else {
-				renderer.setColor(Color.GOLD);
+				renderer.setColor(1, .7f, 0, 1);
 			}
 			renderer.rect(x + margin, y + margin, REGION_SIZE-2*margin, REGION_SIZE-2*margin);
+		}
+
+		public void renderSubs (ShapeRenderer renderer) {
 			for (SubRegion sub : subs) {
 				float c = .5f + sub.id /(float)ids/2;
 				renderer.setColor(c, c, c, .25f);
 				if (sub.selected) {
-					renderer.setColor(Color.CYAN);
+					renderer.setColor(1, 1, 1, .5f);
 				}
-				renderer.rect(x + sub.sx + .1f, y + sub.sy + .1f, .8f, .8f);
+				renderer.rect(x + sub.sx + 0.025f, y + sub.sy + 0.025f, 1 - 0.05f, 1 - 0.05f);
 				sub.selected = false;
 			}
 		}
