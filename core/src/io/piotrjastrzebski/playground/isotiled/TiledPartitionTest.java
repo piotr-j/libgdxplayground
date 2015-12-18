@@ -29,15 +29,14 @@ public class TiledPartitionTest extends BaseScreen {
 	private final static int REGION_SIZE = 8;
 	private final static int MAP_WIDTH = REGION_SIZE * 5;
 	private final static int MAP_HEIGHT = REGION_SIZE * 3;
-	//																	48, 24
 	private final static int[] map = new int[] {
 		1, 1, 1, 1, 1, 1, 1, 1,  1, 1, 1, 1, 1, 1, 1, 1,  1, 1, 1, 1, 1, 1, 1, 1,  1, 1, 1, 1, 1, 1, 1, 1,  1, 1, 1, 1, 1, 1, 1, 1,
-		1, 1, 1, 1, 1, 1, 1, 1,  1, 1, 1, 1, 1, 1, 1, 1,  1, 1, 1, 1, 1, 1, 1, 1,  1, 1, 1, 1, 1, 1, 1, 1,  1, 1, 1, 1, 1, 1, 1, 1,
 		1, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 1,
-		1, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 1,
-		1, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 1,
-		1, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 1,
-		1, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 1,
+		1, 0, 0, 0, 0, 0, 0, 0,  0, 0, 1, 1, 1, 1, 1, 0,  0, 1, 1, 2, 1, 1, 0, 0,  1, 1, 1, 1, 1, 1, 1, 1,  0, 0, 0, 0, 0, 0, 0, 1,
+		1, 0, 0, 0, 0, 0, 0, 0,  0, 0, 1, 0, 0, 0, 1, 0,  0, 1, 0, 0, 0, 1, 0, 0,  1, 0, 0, 0, 0, 0, 0, 1,  0, 0, 0, 0, 0, 0, 0, 1,
+		1, 0, 0, 0, 0, 0, 0, 0,  0, 1, 1, 0, 0, 0, 1, 0,  1, 1, 0, 0, 0, 1, 0, 0,  1, 0, 0, 0, 0, 0, 0, 1,  0, 0, 0, 0, 0, 0, 0, 1,
+		1, 0, 0, 0, 0, 0, 0, 0,  0, 1, 0, 0, 1, 1, 1, 0,  2, 0, 0, 1, 1, 1, 0, 0,  1, 0, 1, 1, 1, 0, 0, 1,  0, 0, 0, 0, 0, 0, 0, 1,
+		1, 0, 0, 0, 0, 0, 0, 0,  0, 1, 1, 1, 1, 0, 0, 0,  1, 1, 2, 1, 0, 0, 0, 0,  1, 1, 1, 0, 1, 1, 1, 1,  0, 0, 0, 0, 0, 0, 0, 1,
 		1, 0, 0, 0, 1, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 1,
 
 		1, 0, 0, 0, 0, 0, 0, 0,  1, 1, 1, 1, 1, 1, 1, 1,  1, 1, 1, 1, 2, 1, 1, 1,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 1,
@@ -357,6 +356,7 @@ public class TiledPartitionTest extends BaseScreen {
 			for (int i = 0; i < ids; i++) {
 				subs[i].id = -1;
 				subs[i].tiles.clear();
+				subs[i].edges.clear();
 			}
 			ids = 0;
 			added.clear();
@@ -371,6 +371,47 @@ public class TiledPartitionTest extends BaseScreen {
 					resumeFloodFill(this, found);
 					added.addAll(found);
 					sub.tiles.addAll(found);
+					// TODO find edges of the region
+					// if tile is at the edge -> edge
+					// if tile is adjacent to tile not in this region -> edge
+					// we start at bottom left, like always
+					// we want all tiles at left and bottoms edges
+					// we want tile +1 at top and right, so they are == to tiles in the next region
+					// we dont really need to save the tiles, just hash of edge pos, len and direction
+					// x + y + dir + len
+					// simple, find all boundaries, but we dont really have enough data from it
+					// need some kind of fill probably
+					// go up/right from each edge tile? mark used etc
+					// probably need to go in both dirs to be safe
+					// 2 passes, left/right, up/down?
+//					for (Tile t : sub.tiles) {
+//						Tile w = getTile(t.x - 1, t.y, null);
+//						if (w == null || !sub.tiles.contains(w)) {
+//							sub.edges.add(t);
+//							continue;
+//						}
+//						Tile e = getTile(t.x + 1, t.y, null);
+//						if (e == null || !sub.tiles.contains(e)) {
+//							sub.edges.add(t);
+//							continue;
+//						}
+//						Tile n = getTile(t.x, t.y + 1, null);
+//						if (n == null || !sub.tiles.contains(n)) {
+//							sub.edges.add(t);
+//							continue;
+//						}
+//						Tile s = getTile(t.x, t.y - 1, null);
+//						if (s == null || !sub.tiles.contains(s)) {
+//							sub.edges.add(t);
+//						}
+//					}
+
+//					for (Tile t : sub.tiles) {
+//						if (t.x == x || t.x == x + REGION_SIZE -1
+//							|| t.y == y || t.y == y + REGION_SIZE -1) {
+//							sub.edges.add(t);
+//						}
+//					}
 					ids++;
 				}
 			}
@@ -407,6 +448,7 @@ public class TiledPartitionTest extends BaseScreen {
 			public int id = -1;
 			public boolean selected;
 			public ObjectSet<Tile> tiles = new ObjectSet<>();
+			public ObjectSet<Tile> edges = new ObjectSet<>();
 //			public Array<Tile> tiles = new Array<>();
 
 			public SubRegion () {
@@ -424,13 +466,17 @@ public class TiledPartitionTest extends BaseScreen {
 			}
 
 			public void render (ShapeRenderer renderer) {
-				if (selected) {
-					renderer.setColor(1, 1, 1, .5f);
-				} else {
-					float c = .5f + id /(float)ids/2;
-					renderer.setColor(c, c, c, .5f);
-				}
 				for (Tile tile : tiles) {
+					if (selected) {
+						if (edges.contains(tile)) {
+							renderer.setColor(Color.MAGENTA);
+						} else {
+							renderer.setColor(1, 1, 1, .5f);
+						}
+					} else {
+						float c = .5f + id /(float)ids/2;
+						renderer.setColor(c, c, c, .5f);
+					}
 					renderer.rect(tile.x + 0.1f, tile.y + 0.1f, 1 - 0.2f, 1 - 0.2f);
 				}
 			}
