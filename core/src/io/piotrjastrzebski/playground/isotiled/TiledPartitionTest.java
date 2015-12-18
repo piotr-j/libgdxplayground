@@ -76,6 +76,14 @@ public class TiledPartitionTest extends BaseScreen {
 			}
 		}
 		gameCamera.position.set(VP_WIDTH / 2, VP_HEIGHT / 2, 0);
+
+		rebuildRegions();
+	}
+
+	private void rebuildRegions () {
+		for (Region region : regions) {
+			region.rebuild(tiles);
+		}
 	}
 
 	private Vector2 cs = new Vector2();
@@ -86,21 +94,26 @@ public class TiledPartitionTest extends BaseScreen {
 			fillTimer += delta;
 			if (fillTimer > .25f) {
 				fillTimer-=.25f;
-				resumeFloodFill(ffRegion);
+				resumeFloodFill(ffRegion, found);
 			}
 		}
 		Gdx.gl.glDisable(GL20.GL_BLEND);
 		renderer.setProjectionMatrix(gameCamera.combined);
 		renderer.begin(ShapeRenderer.ShapeType.Filled);
-		// todo draw tiles
 		for (Tile tile : tiles) {
 			tile.render(renderer, delta);
 		}
-
 		renderer.end();
+
 		Gdx.gl.glEnable(GL20.GL_BLEND);
+		renderer.setColor(1, 0, 1, 0.1f);
+		renderer.begin(ShapeRenderer.ShapeType.Filled);
+		for (Tile tile : found) {
+			renderer.rect(tile.x + .4f, tile.y + .4f, .2f, .2f);
+		}
+		renderer.end();
+
 		renderer.begin(ShapeRenderer.ShapeType.Line);
-		// todo draw partitions
 		for (Region region : regions) {
 			region.update(cs);
 			region.render(renderer);
@@ -109,7 +122,8 @@ public class TiledPartitionTest extends BaseScreen {
 		renderer.end();
 	}
 	Region ffRegion;
-	private void floodFill (int x, int y, Region region) {
+	Array<Tile> found = new Array<>();
+	private void floodFill (int x, int y, Region region, Array<Tile> found) {
 		Tile start = get(x, y, region);
 		if (start == null) return;
 		ffRegion = region;
@@ -117,22 +131,22 @@ public class TiledPartitionTest extends BaseScreen {
 		processed.clear();
 		queue.clear();
 		queue.add(start);
-		resumeFloodFill(region);
+		resumeFloodFill(region, found);
 	}
 
-	private void resumeFloodFill (Region region) {
+	private void resumeFloodFill (Region region, Array<Tile> found) {
 		int iters = 0;
 		while (queue.size > 0) {
 			Tile tile = queue.removeIndex(0);
 			if (tile.type == targetType) {
 				if (processed.containsKey(tile.id)) continue;
-				visitTile(tile);
+				visitTile(tile, found);
 				Tile west = getEdge(tile, -1, region);
 				Tile east = getEdge(tile, 1, region);
 
 				for (int i = west.x; i <= east.x; i++) {
 					Tile n = get(i, west.y, region);
-					visitTile(n);
+					visitTile(n, found);
 					Tile north = get(i, west.y + 1, region);
 					if (north != null && north.type == targetType) {
 						addToQueue(north);
@@ -170,8 +184,8 @@ public class TiledPartitionTest extends BaseScreen {
 	int targetType;
 	Array<Tile> queue = new Array<>();
 	IntMap<Tile> processed = new IntMap<>();
-	private void floodFill (int x, int y) {
-		floodFill(x, y, null);
+	private void floodFill (int x, int y, Array<Tile> found) {
+		floodFill(x, y, null, found);
 	}
 
 	private void addToQueue (Tile tile) {
@@ -179,10 +193,11 @@ public class TiledPartitionTest extends BaseScreen {
 		queue.add(tile);
 	}
 
-	private void visitTile(Tile tile) {
+	private void visitTile (Tile tile, Array<Tile> found) {
 		processed.put(tile.id, tile);
 		tile.tint.set(1, .5f, .5f, 1);
 		tile.a = 1;
+		found.add(tile);
 	}
 
 	private void resumeFloodFillSlow (Region region) {
@@ -206,7 +221,7 @@ public class TiledPartitionTest extends BaseScreen {
 			}
 		}
 	}
-//
+
 	private void addToQueue(int x, int y, Region region) {
 		addToQueue(get(x, y, region));
 	}
@@ -306,7 +321,7 @@ public class TiledPartitionTest extends BaseScreen {
 			selected = bounds.contains(cs);
 		}
 
-		public void rebuild() {
+		public void rebuild (Array<Tile> tiles) {
 
 		}
 
@@ -337,11 +352,13 @@ public class TiledPartitionTest extends BaseScreen {
 				}
 			}
 		} else if (button == Input.Buttons.RIGHT) {
-			floodFill((int)cs.x, (int)cs.y);
+			found.clear();
+			floodFill((int)cs.x, (int)cs.y, found);
 		} else if (button == Input.Buttons.MIDDLE) {
 			for (Region region : regions) {
 				if (region.bounds.contains(cs)) {
-					floodFill((int)cs.x, (int)cs.y, region);
+					found.clear();
+					floodFill((int)cs.x, (int)cs.y, region, found);
 					break;
 				}
 
