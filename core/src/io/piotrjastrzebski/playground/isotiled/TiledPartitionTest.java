@@ -28,20 +28,46 @@ public class TiledPartitionTest extends BaseScreen {
 	private final static int REGION_SIZE = 8;
 	private final static int MAP_WIDTH = REGION_SIZE * 5;
 	private final static int MAP_HEIGHT = REGION_SIZE * 3;
+	//																	48, 24
+	private final static int[] map = new int[] {
+		1, 1, 1, 1, 1, 1, 1, 1,  1, 1, 1, 1, 1, 1, 1, 1,  1, 1, 1, 1, 1, 1, 1, 1,  1, 1, 1, 1, 1, 1, 1, 1,  1, 1, 1, 1, 1, 1, 1, 1,
+		1, 1, 1, 1, 1, 1, 1, 1,  1, 1, 1, 1, 1, 1, 1, 1,  1, 1, 1, 1, 1, 1, 1, 1,  1, 1, 1, 1, 1, 1, 1, 1,  1, 1, 1, 1, 1, 1, 1, 1,
+		1, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 1,
+		1, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 1,
+		1, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 1,
+		1, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 1,
+		1, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 1,
+		1, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 1,
+
+		1, 0, 0, 0, 0, 0, 0, 0,  1, 1, 1, 1, 1, 1, 1, 1,  1, 1, 1, 1, 2, 1, 1, 1,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 1,
+		1, 0, 0, 0, 0, 0, 0, 0,  1, 0, 0, 0, 0, 0, 0, 2,  2, 0, 1, 0, 0, 0, 0, 1,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 1,
+		1, 0, 0, 0, 0, 0, 0, 0,  1, 0, 0, 0, 0, 0, 0, 1,  1, 0, 1, 0, 0, 1, 0, 1,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 1,
+		1, 0, 0, 0, 0, 0, 0, 0,  1, 0, 0, 0, 0, 0, 0, 1,  0, 0, 1, 0, 0, 1, 0, 1,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 1,
+		1, 0, 0, 0, 0, 0, 0, 0,  1, 0, 0, 0, 0, 0, 0, 1,  0, 0, 1, 0, 0, 1, 0, 1,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 1,
+		1, 0, 0, 0, 0, 0, 0, 0,  1, 0, 0, 0, 0, 0, 0, 1,  0, 0, 1, 0, 0, 1, 0, 1,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 1,
+		1, 0, 0, 0, 0, 0, 0, 0,  1, 0, 0, 0, 0, 0, 0, 1,  0, 0, 1, 0, 0, 0, 0, 1,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 1,
+		1, 0, 0, 0, 0, 0, 0, 0,  1, 1, 1, 1, 1, 1, 1, 1,  1, 1, 1, 1, 1, 1, 1, 1,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 1,
+
+		1, 1, 1, 1, 1, 1, 1, 1,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 1,
+		1, 0, 0, 0, 0, 0, 0, 1,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 1,
+		1, 0, 0, 0, 0, 0, 0, 1,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 1,
+		1, 0, 0, 0, 0, 0, 0, 1,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 1,
+		1, 0, 0, 0, 0, 0, 0, 1,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 1,
+		1, 0, 0, 0, 0, 0, 0, 1,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 1,
+		1, 0, 0, 0, 0, 0, 0, 1,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 1,
+		1, 1, 1, 1, 1, 1, 1, 1,  1, 1, 1, 1, 1, 1, 1, 1,  1, 1, 1, 1, 1, 1, 1, 1,  1, 1, 1, 1, 1, 1, 1, 1,  1, 1, 1, 1, 1, 1, 1, 1,
+	};
 
 	Array<Tile> tiles = new Array<>();
 	Array<Region> regions = new Array<>();
+
 	public TiledPartitionTest (GameReset game) {
 		super(game);
-		Tile tile;
-		for (int x = 0; x < MAP_WIDTH; x++) {
-			for (int y = 0; y < MAP_HEIGHT; y++) {
-				tiles.add(tile = new Tile(x * MAP_HEIGHT + y, x, y));
-				if (x%2 == 0 && y%2==0) {
-					tile.color.set(0, .8f, 0, 1);
-				} else {
-					tile.color.set(.1f, 0.6f, .1f, 1);
-				}
+		for (int y = 0; y < MAP_HEIGHT; y++) {
+			for (int x = 0; x < MAP_WIDTH; x++) {
+				Tile tile = new Tile(x + y * MAP_WIDTH, x, y);
+				tile.setType(map[x + (MAP_HEIGHT - 1 - y) * MAP_WIDTH]);
+				tiles.add(tile);
 			}
 		}
 		for (int x = 0; x < MAP_WIDTH; x += REGION_SIZE) {
@@ -49,7 +75,7 @@ public class TiledPartitionTest extends BaseScreen {
 				regions.add(new Region(x, y));
 			}
 		}
-		gameCamera.position.set(VP_WIDTH/2, VP_HEIGHT/2, 0);
+		gameCamera.position.set(VP_WIDTH / 2, VP_HEIGHT / 2, 0);
 	}
 
 	private Vector2 cs = new Vector2();
@@ -60,7 +86,7 @@ public class TiledPartitionTest extends BaseScreen {
 			fillTimer += delta;
 			if (fillTimer > .25f) {
 				fillTimer-=.25f;
-				resumeFloodFill();
+				resumeFloodFill(ffRegion);
 			}
 		}
 		Gdx.gl.glDisable(GL20.GL_BLEND);
@@ -82,11 +108,12 @@ public class TiledPartitionTest extends BaseScreen {
 
 		renderer.end();
 	}
-
+	Region ffRegion;
 	private void floodFill (int x, int y, Region region) {
 		Tile start = get(x, y, region);
 		if (start == null) return;
-		targetColor = start.color.toIntBits();
+		ffRegion = region;
+		targetType = start.type;
 		processed.clear();
 		queue.clear();
 		queue.add(start);
@@ -97,7 +124,7 @@ public class TiledPartitionTest extends BaseScreen {
 		int iters = 0;
 		while (queue.size > 0) {
 			Tile tile = queue.removeIndex(0);
-			if (tile.color.toIntBits() == targetColor) {
+			if (tile.type == targetType) {
 				if (processed.containsKey(tile.id)) continue;
 				visitTile(tile);
 				Tile west = getEdge(tile, -1, region);
@@ -107,11 +134,11 @@ public class TiledPartitionTest extends BaseScreen {
 					Tile n = get(i, west.y, region);
 					visitTile(n);
 					Tile north = get(i, west.y + 1, region);
-					if (north != null && north.color.toIntBits() == targetColor) {
+					if (north != null && north.type == targetType) {
 						addToQueue(north);
 					}
 					Tile south = get(i, west.y - 1, region);
-					if (south != null && south.color.toIntBits() == targetColor) {
+					if (south != null && south.type == targetType) {
 						addToQueue(south);
 					}
 				}
@@ -127,7 +154,7 @@ public class TiledPartitionTest extends BaseScreen {
 	private Tile getEdge (Tile tile, int offset, Region region) {
 		while (true) {
 			Tile next = get(tile.x + offset, tile.y, region);
-			if (next != null && next.color.toIntBits() == targetColor) {
+			if (next != null && next.type == targetType) {
 				tile = next;
 			} else {
 				break;
@@ -138,62 +165,13 @@ public class TiledPartitionTest extends BaseScreen {
 
 	boolean filling;
 	float fillTimer;
-	int maxIters = 25;
+	int maxIters = 4;
 
-	int targetColor;
+	int targetType;
 	Array<Tile> queue = new Array<>();
 	IntMap<Tile> processed = new IntMap<>();
 	private void floodFill (int x, int y) {
-		Tile start = get(x, y);
-		if (start == null) return;
-		targetColor = start.color.toIntBits();
-		processed.clear();
-		queue.clear();
-		queue.add(start);
-		resumeFloodFill();
-	}
-
-	private void resumeFloodFill () {
-		int iters = 0;
-		while (queue.size > 0) {
-			Tile tile = queue.removeIndex(0);
-			if (tile.color.toIntBits() == targetColor) {
-				if (processed.containsKey(tile.id)) continue;
-				visitTile(tile);
-				Tile west = getEdge(tile, -1);
-				Tile east = getEdge(tile, 1);
-
-				for (int i = west.x; i <= east.x; i++) {
-					Tile n = get(i, west.y);
-					visitTile(n);
-					Tile north = get(i, west.y + 1);
-					if (north != null && north.color.toIntBits() == targetColor) {
-						addToQueue(north);
-					}
-					Tile south = get(i, west.y - 1);
-					if (south != null && south.color.toIntBits() == targetColor) {
-						addToQueue(south);
-					}
-				}
-			}
-			iters++;
-			if (iters >= maxIters) {
-				filling = true;
-				break;
-			}
-		}
-	}
-
-	private Tile getEdge (Tile tile, int offset) {
-		while (true) {
-			Tile next = get(tile.x + offset, tile.y);
-			if (next != null && next.color.toIntBits() == targetColor) {
-				tile = next;
-			} else {
-				break;
-			}
-		}
-		return tile;
+		floodFill(x, y, null);
 	}
 
 	private void addToQueue (Tile tile) {
@@ -207,19 +185,19 @@ public class TiledPartitionTest extends BaseScreen {
 		tile.a = 1;
 	}
 
-	private void resumeFloodFill2 () {
+	private void resumeFloodFillSlow (Region region) {
 		int iters = 0;
 		while (queue.size > 0) {
 			Tile tile = queue.removeIndex(0);
-			if (tile.color.toIntBits() == targetColor) {
+			if (tile.type == targetType) {
 				if (processed.containsKey(tile.id)) continue;
 				processed.put(tile.id, tile);
 				tile.tint.set(1, .5f, .5f, 1);
 				tile.a = 1;
-				addToQueue(tile.x - 1, tile.y);
-				addToQueue(tile.x + 1, tile.y);
-				addToQueue(tile.x, tile.y + 1);
-				addToQueue(tile.x, tile.y - 1);
+				addToQueue(tile.x - 1, tile.y, region);
+				addToQueue(tile.x + 1, tile.y, region);
+				addToQueue(tile.x, tile.y + 1, region);
+				addToQueue(tile.x, tile.y - 1, region);
 			}
 			iters++;
 			if (iters >= maxIters) {
@@ -228,23 +206,20 @@ public class TiledPartitionTest extends BaseScreen {
 			}
 		}
 	}
-
-	private void addToQueue(int x, int y) {
-		addToQueue(get(x, y));
-	}
-
-	private Tile get(int x, int y) {
-		if (x < 0 || x >= MAP_WIDTH) return null;
-		if (y < 0 || y >= MAP_HEIGHT) return null;
-		int index = y + x * MAP_HEIGHT;
-		if (index < 0 || index >= tiles.size) return null;
-		return tiles.get(index);
+//
+	private void addToQueue(int x, int y, Region region) {
+		addToQueue(get(x, y, region));
 	}
 
 	private Tile get(int x, int y, Region region) {
-		if (x < region.x || x >= region.x + REGION_SIZE) return null;
-		if (y < region.y || y >= region.y + REGION_SIZE) return null;
-		int index = y + x * MAP_HEIGHT;
+		if (region == null) {
+			if (x < 0 || x >= MAP_WIDTH) return null;
+			if (y < 0 || y >= MAP_HEIGHT) return null;
+		} else {
+			if (x < region.x || x >= region.x + REGION_SIZE) return null;
+			if (y < region.y || y >= region.y + REGION_SIZE) return null;
+		}
+		int index = x + y * MAP_WIDTH;
 		if (index < 0 || index >= tiles.size) return null;
 		return tiles.get(index);
 	}
@@ -253,16 +228,33 @@ public class TiledPartitionTest extends BaseScreen {
 		public int id;
 		public int x;
 		public int y;
-		public boolean isWall;
 		public Rectangle bounds = new Rectangle();
-		public Color color = new Color(Color.BROWN);
-		public Color tint = new Color(Color.WHITE);
+		public Color color = new Color();
+		public Color tint = new Color();
+		public int type;
 
 		public Tile (int id, int x, int y) {
 			this.id = id;
 			this.x = x;
 			this.y = y;
 			bounds.set(x, y, 1, 1);
+			setType(0);
+		}
+
+		public void setType (int type) {
+			this.type = type;
+			switch (type) {
+			case 0: // grass
+				// some variation so we know wtf is going on
+				color.set(.1f, MathUtils.random(0.7f, .9f), MathUtils.random(.1f, .2f), 1);
+				break;
+			case 1: // wall
+				color.set(Color.FIREBRICK);
+				break;
+			case 2: // door
+				color.set(1f, .8f, .6f, 1);
+				break;
+			}
 		}
 
 		Color tmp = new Color();
@@ -338,16 +330,9 @@ public class TiledPartitionTest extends BaseScreen {
 			// todo create a wall at position
 			for (Tile tile : tiles) {
 				if (tile.bounds.contains(cs)) {
-					tile.isWall = !tile.isWall;
-					if (tile.isWall) {
-						tile.color.set(Color.BROWN);
-					} else {
-						if (tile.x % 2 == 0 && tile.y % 2 == 0) {
-							tile.color.set(0, .8f, 0, 1);
-						} else {
-							tile.color.set(.1f, 0.6f, .1f, 1);
-						}
-					}
+					int next = tile.type + 1;
+					if (next > 2) next = 0;
+					tile.setType(next);
 					break;
 				}
 			}
