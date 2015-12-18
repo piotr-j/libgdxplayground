@@ -78,11 +78,18 @@ public class TiledPartitionTest extends BaseScreen {
 		gameCamera.position.set(VP_WIDTH / 2, VP_HEIGHT / 2, 0);
 
 		rebuildRegions();
+//		regions.get(0).rebuild();
 	}
 
 	private void rebuildRegions () {
 		for (Region region : regions) {
-			region.rebuild(tiles);
+			region.rebuild();
+		}
+	}
+
+	private void rebuildRegion (Vector2 cs) {
+		for (Region region : regions) {
+			if (region.bounds.contains(cs)) region.rebuild();
 		}
 	}
 
@@ -97,7 +104,7 @@ public class TiledPartitionTest extends BaseScreen {
 				resumeFloodFill(ffRegion, found);
 			}
 		}
-		Gdx.gl.glDisable(GL20.GL_BLEND);
+		Gdx.gl.glEnable(GL20.GL_BLEND);
 		renderer.setProjectionMatrix(gameCamera.combined);
 		renderer.begin(ShapeRenderer.ShapeType.Filled);
 		for (Tile tile : tiles) {
@@ -105,13 +112,13 @@ public class TiledPartitionTest extends BaseScreen {
 		}
 		renderer.end();
 
-		Gdx.gl.glEnable(GL20.GL_BLEND);
-		renderer.setColor(1, 0, 1, 0.1f);
-		renderer.begin(ShapeRenderer.ShapeType.Filled);
-		for (Tile tile : found) {
-			renderer.rect(tile.x + .4f, tile.y + .4f, .2f, .2f);
-		}
-		renderer.end();
+//		Gdx.gl.glEnable(GL20.GL_BLEND);
+//		renderer.setColor(1, 0, 1, 0.1f);
+//		renderer.begin(ShapeRenderer.ShapeType.Filled);
+//		for (Tile tile : found) {
+//			renderer.rect(tile.x + .4f, tile.y + .4f, .2f, .2f);
+//		}
+//		renderer.end();
 
 		renderer.begin(ShapeRenderer.ShapeType.Line);
 		for (Region region : regions) {
@@ -135,7 +142,7 @@ public class TiledPartitionTest extends BaseScreen {
 	}
 
 	private void resumeFloodFill (Region region, Array<Tile> found) {
-		int iters = 0;
+//		int iters = 0;
 		while (queue.size > 0) {
 			Tile tile = queue.removeIndex(0);
 			if (tile.type == targetType) {
@@ -157,11 +164,11 @@ public class TiledPartitionTest extends BaseScreen {
 					}
 				}
 			}
-			iters++;
-			if (iters >= maxIters) {
-				filling = true;
-				break;
-			}
+//			iters++;
+//			if (iters >= maxIters) {
+//				filling = true;
+//				break;
+//			}
 		}
 	}
 
@@ -201,7 +208,7 @@ public class TiledPartitionTest extends BaseScreen {
 	}
 
 	private void resumeFloodFillSlow (Region region) {
-		int iters = 0;
+//		int iters = 0;
 		while (queue.size > 0) {
 			Tile tile = queue.removeIndex(0);
 			if (tile.type == targetType) {
@@ -214,11 +221,11 @@ public class TiledPartitionTest extends BaseScreen {
 				addToQueue(tile.x, tile.y + 1, region);
 				addToQueue(tile.x, tile.y - 1, region);
 			}
-			iters++;
-			if (iters >= maxIters) {
-				filling = true;
-				break;
-			}
+//			iters++;
+//			if (iters >= maxIters) {
+//				filling = true;
+//				break;
+//			}
 		}
 	}
 
@@ -239,7 +246,7 @@ public class TiledPartitionTest extends BaseScreen {
 		return tiles.get(index);
 	}
 
-	private static class Tile {
+	private class Tile {
 		public int id;
 		public int x;
 		public int y;
@@ -275,7 +282,7 @@ public class TiledPartitionTest extends BaseScreen {
 		Color tmp = new Color();
 		float a;
 		public void render(ShapeRenderer renderer, float delta) {
-			a = MathUtils.clamp(a -= .25f*delta, 0, 1);
+			a = MathUtils.clamp(a -= 2f*delta, 0, 1);
 			renderer.setColor(tmp.set(color).lerp(tint, a));
 			renderer.rect(x, y, 1, 1);
 		}
@@ -303,26 +310,66 @@ public class TiledPartitionTest extends BaseScreen {
 		}
 	}
 
-	private static class Region {
+	private class Region {
 		public int x;
 		public int y;
 		public IntArray sides = new IntArray();
 		public Rectangle bounds = new Rectangle();
 		public Array<Tile> tiles = new Array<>();
+		public SubRegion[] subs = new SubRegion[REGION_SIZE * REGION_SIZE];
 		public boolean selected;
 
 		public Region (int x, int y) {
 			this.x = x;
 			this.y = y;
 			bounds.set(x, y, REGION_SIZE, REGION_SIZE);
+			for (int sx = 0; sx < REGION_SIZE; sx++) {
+				for (int sy = 0; sy < REGION_SIZE; sy++) {
+					subs[sx + sy * REGION_SIZE] = new SubRegion(sx, sy);
+				}
+			}
 		}
 
+		private Rectangle tmp = new Rectangle();
 		public void update(Vector2 cs) {
 			selected = bounds.contains(cs);
+			SubRegion selected = null;
+			for (SubRegion sub : subs) {
+				tmp.set(x + sub.sx, y + sub.sy, 1, 1);
+				sub.selected = false;
+				if (tmp.contains(cs)) {
+					selected = sub;
+				}
+			}
+			if (selected != null) {
+				for (SubRegion sub : subs) {
+					if (sub.id == selected.id) {
+						sub.selected = true;
+					}
+				}
+			}
+			// TODO select neighbours
 		}
 
-		public void rebuild (Array<Tile> tiles) {
+		int ids;
+		public void rebuild () {
+			ids = 0;
+			for (SubRegion sub : subs) {
+				sub.id = -1;
+			}
+			for (int i = 0; i < subs.length; i++) {
+				SubRegion sub = subs[i];
+				if (sub.id >= 0) continue;
+				found.clear();
+				floodFill(x + sub.sx, y + sub.sy, this, found);
+				resumeFloodFill(this, found);
+//				filling = false;
 
+				for (Tile tile : found) {
+					getWorld(tile.x, tile.y).id = ids;
+				}
+				ids++;
+			}
 		}
 
 		private float margin = 0.015f;
@@ -330,9 +377,41 @@ public class TiledPartitionTest extends BaseScreen {
 			if (selected) {
 				renderer.setColor(Color.CYAN);
 			} else {
-				renderer.setColor(Color.RED);
+				renderer.setColor(Color.GOLD);
 			}
 			renderer.rect(x + margin, y + margin, REGION_SIZE-2*margin, REGION_SIZE-2*margin);
+			for (SubRegion sub : subs) {
+				float c = .5f + sub.id /(float)ids/2;
+				renderer.setColor(c, c, c, .25f);
+				if (sub.selected) {
+					renderer.setColor(Color.CYAN);
+				}
+				renderer.rect(x + sub.sx + .1f, y + sub.sy + .1f, .8f, .8f);
+				sub.selected = false;
+			}
+		}
+
+		private SubRegion getWorld(int x, int y) {
+			x -= this.x;
+			y -= this.y;
+			return subs[x + y * REGION_SIZE];
+		}
+
+		private SubRegion get(int x, int y) {
+			return subs[x + y * REGION_SIZE];
+		}
+
+		public class SubRegion {
+			public final int sx;
+			public final int sy;
+			public int id = -1;
+			public boolean selected;
+
+			public SubRegion (int sx, int sy) {
+
+				this.sx = sx;
+				this.sy = sy;
+			}
 		}
 	}
 
@@ -351,9 +430,17 @@ public class TiledPartitionTest extends BaseScreen {
 					break;
 				}
 			}
+			rebuildRegion(cs);
 		} else if (button == Input.Buttons.RIGHT) {
-			found.clear();
-			floodFill((int)cs.x, (int)cs.y, found);
+			for (Tile tile : tiles) {
+				if (tile.bounds.contains(cs)) {
+					int next = tile.type - 1;
+					if (next < 0) next = 2;
+					tile.setType(next);
+					break;
+				}
+			}
+			rebuildRegion(cs);
 		} else if (button == Input.Buttons.MIDDLE) {
 			for (Region region : regions) {
 				if (region.bounds.contains(cs)) {
