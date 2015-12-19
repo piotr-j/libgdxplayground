@@ -27,20 +27,10 @@ public class TiledWrapTest extends BaseScreen {
 	Array<MapEntity> entities = new Array<>();
  	public TiledWrapTest (GameReset game) {
 		super(game);
-		// this is simple, max 4 visible maps, no bs translations and stuff
-		// top maps
-		maps.add(new MapWrapper(-MAP_WIDTH/2 - MAP_WIDTH, -MAP_HEIGHT/2 + MAP_HEIGHT));
-		maps.add(new MapWrapper(-MAP_WIDTH/2, -MAP_HEIGHT/2 + MAP_HEIGHT));
-		maps.add(new MapWrapper(-MAP_WIDTH/2 + MAP_WIDTH, -MAP_HEIGHT/2 + MAP_HEIGHT));
-		// centre maps
-		maps.add(new MapWrapper(-MAP_WIDTH/2 - MAP_WIDTH, -MAP_HEIGHT/2));
-		maps.add(new MapWrapper(-MAP_WIDTH/2, -MAP_HEIGHT/2));
-		maps.add(new MapWrapper(-MAP_WIDTH/2 + MAP_WIDTH, -MAP_HEIGHT/2));
-		// bottom maps
-		maps.add(new MapWrapper(-MAP_WIDTH/2 - MAP_WIDTH, -MAP_HEIGHT/2 - MAP_HEIGHT));
-		maps.add(new MapWrapper(-MAP_WIDTH/2, -MAP_HEIGHT/2 - MAP_HEIGHT));
-		maps.add(new MapWrapper(-MAP_WIDTH/2 + MAP_WIDTH, -MAP_HEIGHT/2 - MAP_HEIGHT));
-
+		maps.add(new MapWrapper(-MAP_WIDTH, -MAP_HEIGHT));
+		maps.add(new MapWrapper(0, -MAP_HEIGHT));
+		maps.add(new MapWrapper(-MAP_WIDTH, 0));
+		maps.add(new MapWrapper(0, 0));
 		for (int i = 0; i < 100; i++) {
 			// position relative to maps lower left corner
 			entities.add(new MapEntity(
@@ -155,10 +145,10 @@ public class TiledWrapTest extends BaseScreen {
 		}
 		// if we move outside of desire range, we correct
 		// this way we are always near origin andwe dont have to move the maps
-		if (gameCamera.position.x < -MAP_WIDTH) gameCamera.position.x += MAP_WIDTH;
-		if (gameCamera.position.x >  MAP_WIDTH) gameCamera.position.x -= MAP_WIDTH;
-		if (gameCamera.position.y < -MAP_HEIGHT) gameCamera.position.y += MAP_HEIGHT;
-		if (gameCamera.position.y >  MAP_HEIGHT) gameCamera.position.y -= MAP_HEIGHT;
+		if (gameCamera.position.x < -MAP_WIDTH/2) gameCamera.position.x += MAP_WIDTH;
+		if (gameCamera.position.x >  MAP_WIDTH/2) gameCamera.position.x -= MAP_WIDTH;
+		if (gameCamera.position.y < -MAP_HEIGHT/2) gameCamera.position.y += MAP_HEIGHT;
+		if (gameCamera.position.y >  MAP_HEIGHT/2) gameCamera.position.y -= MAP_HEIGHT;
 		gameCamera.update();
 		updateMousePosition(Gdx.input.getX(), Gdx.input.getY());
 	}
