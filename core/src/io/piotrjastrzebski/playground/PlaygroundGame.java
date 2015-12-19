@@ -91,7 +91,7 @@ public class PlaygroundGame extends Game implements GameReset {
 		SimpleLightTest.class, UIImageButtonTest.class, IsoTest.class, UISelectRowTest.class, TMWTest.class, Box2dRayTest.class,
 		ECSFancyWallsTest.class, PuncherTest.class, UIRotateTestTest.class, SimpleTouchTest.class, UITAPaneTest.class, BTEditTest.class,
 		UIBlendTest.class, SplitTest.class, FontGenTest.class, UIImgBtnTest.class, UISelectBoxTest.class, TiledTileGenTest.class,
-		TerrainTileGenTest.class,
+		TerrainTileGenTest.class, TiledWrapTest.class,
 	};
 
 	PlatformBridge bridge;
