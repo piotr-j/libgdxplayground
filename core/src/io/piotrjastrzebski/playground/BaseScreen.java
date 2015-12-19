@@ -5,6 +5,8 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
@@ -127,8 +129,16 @@ public abstract class BaseScreen implements Screen, InputProcessor {
 		return false;
 	}
 
+	protected Vector2 cs = new Vector2();
+	protected Vector3 temp = new Vector3();
 	@Override public boolean mouseMoved (int screenX, int screenY) {
-		return false;
+		updateMousePosition(screenX, screenY);
+		return true;
+	}
+
+	protected void updateMousePosition (int screenX, int screenY) {
+		gameCamera.unproject(temp.set(screenX, screenY, 0));
+		cs.set(temp.x, temp.y);
 	}
 
 	@Override public boolean scrolled (int amount) {
