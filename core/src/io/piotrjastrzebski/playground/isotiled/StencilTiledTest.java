@@ -243,25 +243,25 @@ public class StencilTiledTest extends BaseScreen {
 //		batch.setShader(null);
 
 
-//		if (renderStencil) {
-//			fbo.begin();
-//			Gdx.gl20.glClearColor(1, 0, 0, 1);
-//			Gdx.gl20.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_STENCIL_BUFFER_BIT);
-//
-//			Gdx.gl20.glEnable(GL20.GL_STENCIL_TEST);
-//			Gdx.gl20.glStencilFunc(GL20.GL_ALWAYS, 0x1, 0xFF);
-//			Gdx.gl20.glStencilOp(GL20.GL_REPLACE, GL20.GL_REPLACE, GL20.GL_REPLACE);
-//
-//			batch.setShader(discardShader);
-//			mapRenderer.render(fgLayer);
-//			batch.setShader(null);
-//			fbo.end();
-//			Gdx.gl20.glDisable(GL20.GL_STENCIL_TEST);
-//
-//			batch.begin();
-//			batch.draw(fboRegion, gameCamera.position.x - VP_WIDTH / 2, gameCamera.position.y - VP_HEIGHT / 2, VP_WIDTH, VP_HEIGHT);
-//			batch.end();
-//		}
+		if (renderStencil) {
+			fbo.begin();
+			Gdx.gl20.glClearColor(0, 0, 0, 1);
+			Gdx.gl20.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_STENCIL_BUFFER_BIT);
+
+			Gdx.gl20.glEnable(GL20.GL_STENCIL_TEST);
+			Gdx.gl20.glStencilFunc(GL20.GL_ALWAYS, 0x1, 0xFF);
+			Gdx.gl20.glStencilOp(GL20.GL_REPLACE, GL20.GL_REPLACE, GL20.GL_REPLACE);
+
+			batch.setShader(discardShader);
+			mapRenderer.render(fgLayer);
+			batch.setShader(null);
+			fbo.end();
+			Gdx.gl20.glDisable(GL20.GL_STENCIL_TEST);
+
+			batch.begin();
+			batch.draw(fboRegion, gameCamera.position.x - VP_WIDTH / 2, gameCamera.position.y - VP_HEIGHT / 2, VP_WIDTH, VP_HEIGHT);
+			batch.end();
+		}
 	}
 
 	private void updateInput (float delta) {
