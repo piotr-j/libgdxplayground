@@ -22,6 +22,7 @@ public class DesktopLauncher {
 		config.width = 1280;
 		config.height = 720;
 		config.useHDPI = true;
+		config.stencil = 8;
 		new LwjglApplication(new PlaygroundGame(new DesktopBridge()), config);
 	}
 
