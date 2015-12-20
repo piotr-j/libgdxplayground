@@ -40,14 +40,28 @@ public class TiledWrapTest extends BaseScreen {
 		maps.add(new MapWrapper(0, -MAP_HEIGHT));
 		maps.add(new MapWrapper(-MAP_WIDTH, 0));
 		maps.add(new MapWrapper(0, 0));
-		for (int i = 0; i < 100; i++) {
-			// position relative to maps lower left corner
-			entities.add(new MapEntity(
-				MathUtils.random(0, MAP_WIDTH),
-				MathUtils.random(0, MAP_HEIGHT),
-				vb
-			));
+		int id = 0;
+		for (int x = 0; x < MAP_WIDTH; x++) {
+			for (int y = 0; y < MAP_HEIGHT; y++) {
+				MapEntity e;
+				entities.add(e = new MapEntity(x, y, vb));
+				if ((id%2)==0) {
+					e.color.set(.8f,.8f,.8f,1);
+				} else {
+					e.color.set(.4f,.4f,.4f,1);
+				}
+				id++;
+			}
+			id++;
 		}
+//		for (int i = 0; i < 100; i++) {
+			// position relative to maps lower left corner
+//			entities.add(new MapEntity(
+//				MathUtils.random(0, MAP_WIDTH),
+//				MathUtils.random(0, MAP_HEIGHT),
+//				vb
+//			));
+//		}
 		ShaderProgram.pedantic = false;
 		radialShader = new ShaderProgram(Gdx.files.internal("tiled/shaders/radial.vert"), Gdx.files.internal("tiled/shaders/radial3.frag"));
 		if (!radialShader.isCompiled()) {
@@ -56,6 +70,7 @@ public class TiledWrapTest extends BaseScreen {
 			radialShader.begin();
 			radialShader.setUniformf("distortion", .4f);
 			radialShader.setUniformf("zoom", 3.7f);
+			radialShader.setUniformf("resolution", Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 			radialShader.end();
 		}
 		fboRegion = new TextureRegion();
@@ -68,9 +83,9 @@ public class TiledWrapTest extends BaseScreen {
 		fbo = new FrameBuffer(Pixmap.Format.RGBA8888, width, height, false);
 		fboRegion.setRegion(fbo.getColorBufferTexture());
 		fboRegion.flip(false, true);
-//		radialShader.begin();
-//		radialShader.setUniformf("resolution", width, height);
-//		radialShader.end();
+		radialShader.begin();
+		radialShader.setUniformf("resolution", width, height);
+		radialShader.end();
 	}
 
 	@Override public boolean keyDown (int keycode) {
@@ -82,6 +97,11 @@ public class TiledWrapTest extends BaseScreen {
 			} else {
 				radialShader.dispose();
 				radialShader = shader;
+				radialShader.begin();
+				radialShader.setUniformf("distortion", .4f);
+				radialShader.setUniformf("zoom", 3.7f);
+				radialShader.setUniformf("resolution", Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+				radialShader.end();
 			}
 			break;
 		case Input.Keys.F3:
@@ -181,7 +201,8 @@ public class TiledWrapTest extends BaseScreen {
 			if (!vb.overlaps(eb)) return;
 			renderer.setColor(color);
 			// we use gradient so the boundaries are clearly visible
-			renderer.circle(eb.x + 0.5f, eb.y + 0.5f, .5f, 16);
+			renderer.rect(eb.x, eb.y, 1, 1);
+//			renderer.circle(eb.x + 0.5f, eb.y + 0.5f, .5f, 16);
 		}
 	}
 

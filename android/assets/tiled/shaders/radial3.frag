@@ -5,6 +5,7 @@ uniform sampler2D u_texture;
 
 uniform float distortion;// = 0.3
 uniform float zoom;// = 1
+uniform vec2 resolution;// = 1
 const float PI = 3.1415926535;
 
 void main() {
