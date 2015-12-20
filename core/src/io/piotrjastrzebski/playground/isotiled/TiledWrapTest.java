@@ -4,6 +4,10 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Pixmap;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.glutils.FrameBuffer;
+import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
@@ -16,8 +20,8 @@ import io.piotrjastrzebski.playground.PlaygroundGame;
  * Created by EvilEntity on 07/06/2015.
  */
 public class TiledWrapTest extends BaseScreen {
-	public final static float MAP_WIDTH = 30;
-	public final static float MAP_HEIGHT = 15;
+	public final static float MAP_WIDTH = 30*2;
+	public final static float MAP_HEIGHT = 15*2;
 	private final static Color v1 = new Color(Color.WHITE);
 	private final static Color v2 = new Color(Color.BLUE);
 	private final static Color v3 = new Color(Color.GREEN);
@@ -25,7 +29,12 @@ public class TiledWrapTest extends BaseScreen {
 
 	Array<MapWrapper> maps = new Array<>();
 	Array<MapEntity> entities = new Array<>();
- 	public TiledWrapTest (GameReset game) {
+	FrameBuffer fbo;
+	TextureRegion fboRegion;
+	ShaderProgram radialShader;
+	private boolean useShader;
+
+	public TiledWrapTest (GameReset game) {
 		super(game);
 		maps.add(new MapWrapper(-MAP_WIDTH, -MAP_HEIGHT));
 		maps.add(new MapWrapper(0, -MAP_HEIGHT));
@@ -39,6 +48,53 @@ public class TiledWrapTest extends BaseScreen {
 				vb
 			));
 		}
+		ShaderProgram.pedantic = false;
+		radialShader = new ShaderProgram(Gdx.files.internal("tiled/shaders/radial.vert"), Gdx.files.internal("tiled/shaders/radial3.frag"));
+		if (!radialShader.isCompiled()) {
+			Gdx.app.log("", "Failed to load shader " + radialShader.getLog());
+		} else {
+			radialShader.begin();
+			radialShader.setUniformf("distortion", .4f);
+			radialShader.setUniformf("zoom", 3.7f);
+			radialShader.end();
+		}
+		fboRegion = new TextureRegion();
+		useShader = true;
+	}
+
+	@Override public void resize (int width, int height) {
+		super.resize(width, height);
+		if (fbo != null) fbo.dispose();
+		fbo = new FrameBuffer(Pixmap.Format.RGBA8888, width, height, false);
+		fboRegion.setRegion(fbo.getColorBufferTexture());
+		fboRegion.flip(false, true);
+//		radialShader.begin();
+//		radialShader.setUniformf("resolution", width, height);
+//		radialShader.end();
+	}
+
+	@Override public boolean keyDown (int keycode) {
+		switch (keycode) {
+		case Input.Keys.F2:
+			ShaderProgram shader = new ShaderProgram(Gdx.files.internal("tiled/shaders/radial.vert"), Gdx.files.internal("tiled/shaders/radial3.frag"));
+			if (!shader.isCompiled()) {
+				Gdx.app.log("", "Failed to load shader " + shader.getLog());
+			} else {
+				radialShader.dispose();
+				radialShader = shader;
+			}
+			break;
+		case Input.Keys.F3:
+			useShader = !useShader;
+			break;
+		}
+		return super.keyDown(keycode);
+	}
+
+	@Override public void dispose () {
+		super.dispose();
+		fbo.dispose();
+		radialShader.dispose();
 	}
 
 	Rectangle vb = new Rectangle();
@@ -46,6 +102,9 @@ public class TiledWrapTest extends BaseScreen {
 	@Override public void render (float delta) {
 		updateInput(delta);
 		updateVB();
+		Gdx.gl.glClearColor(.6f, .6f, .6f, 1);
+		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+		fbo.begin();
 		Gdx.gl.glClearColor(.6f, .6f, .6f, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
@@ -66,8 +125,16 @@ public class TiledWrapTest extends BaseScreen {
 		renderer.setColor(0, 1, 1, .5f);
 //		renderer.circle(cs.x-.25f, cs.y, 0.5f, 16);
 //		renderer.circle(cs.x+.25f, cs.y, 0.5f, 16);
-
 		renderer.end();
+		fbo.end();
+		batch.disableBlending();
+		batch.setProjectionMatrix(gameCamera.combined);
+		if (useShader) batch.setShader(radialShader);
+		batch.begin();
+		batch.draw(fboRegion, gameCamera.position.x -VP_WIDTH/2, gameCamera.position.y -VP_HEIGHT/2, VP_WIDTH, VP_HEIGHT);
+		batch.end();
+		batch.setShader(null);
+		batch.enableBlending();
 	}
 
 	public static class MapWrapper {
@@ -120,8 +187,10 @@ public class TiledWrapTest extends BaseScreen {
 
 	private void updateVB () {
 		// we want the vb to be smaller than the map
-		final float marginX = 6f;
-		final float marginY = 5f;
+//		final float marginX = 6f;
+		final float marginX = 0f;
+//		final float marginY = 5f;
+		final float marginY = 0;
 		vb.set(
 			gameCamera.position.x - VP_WIDTH / 2 + marginX,
 			gameCamera.position.y - VP_HEIGHT / 2 + marginY,
