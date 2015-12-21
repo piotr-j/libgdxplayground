@@ -13,6 +13,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.IntArray;
 import com.badlogic.gdx.utils.IntMap;
 import com.badlogic.gdx.utils.ObjectSet;
+import com.sun.org.apache.regexp.internal.RE;
 import io.piotrjastrzebski.playground.BaseScreen;
 import io.piotrjastrzebski.playground.GameReset;
 import io.piotrjastrzebski.playground.PlaygroundGame;
@@ -39,7 +40,7 @@ public class TiledPartitionTest extends BaseScreen {
 		0, 0, 0, 0, 0, 0, 0, 0,  0, 1, 1, 0, 0, 0, 1, 0,  1, 1, 0, 0, 0, 1, 0, 0,  1, 0, 0, 0, 0, 0, 0, 1,  0, 0, 0, 0, 0, 0, 0, 1,
 		0, 0, 0, 0, 0, 0, 0, 0,  0, 1, 0, 0, 1, 1, 1, 0,  2, 0, 0, 1, 1, 1, 0, 0,  1, 0, 1, 1, 1, 0, 0, 1,  0, 0, 0, 0, 0, 0, 0, 1,
 		0, 0, 0, 0, 0, 0, 0, 0,  0, 1, 1, 1, 1, 0, 0, 0,  1, 1, 2, 1, 0, 0, 0, 0,  1, 1, 1, 0, 1, 1, 1, 1,  0, 0, 0, 0, 0, 0, 0, 1,
-		1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 1,
+		1, 1, 1, 1, 1, 1, 1, 1,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 1,
 
 		1, 0, 0, 0, 0, 0, 0, 0,  1, 1, 1, 1, 1, 1, 1, 1,  1, 1, 1, 1, 2, 1, 1, 1,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 1,
 		1, 0, 0, 0, 0, 0, 0, 0,  1, 0, 0, 0, 0, 0, 0, 2,  2, 0, 1, 0, 0, 0, 0, 1,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 1,
@@ -57,7 +58,7 @@ public class TiledPartitionTest extends BaseScreen {
 		0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 1,  1, 1, 1, 1, 1, 1, 1, 1,  1, 1, 1, 2, 1, 1, 1, 1,
 		0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 1,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 1,
 		0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 1,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 1,
-		0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 1,  1, 1, 1, 1, 1, 1, 1, 1,  1, 1, 1, 1, 1, 1, 1, 1,
+		1, 1, 1, 1, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 1,  1, 1, 1, 1, 1, 1, 1, 1,  1, 1, 1, 1, 1, 1, 1, 1,
 	};
 
 	Array<Tile> tiles = new Array<>();
@@ -84,15 +85,43 @@ public class TiledPartitionTest extends BaseScreen {
 	}
 
 	private void rebuildRegions () {
-		for (Region region : regions) {
-			region.rebuild();
+		for (int i = 0; i < regions.size; i++) {
+			regions.get(i).rebuild();
+		}
+		for (int i = 0; i < regions.size; i++) {
+			regions.get(i).rebuildSubs();
 		}
 	}
 
 	private void rebuildRegion (Vector2 cs) {
-		for (Region region : regions) {
+		for (int i = 0; i < regions.size; i++) {
+			Region region = regions.get(i);
 			if (region.bounds.contains(cs)) region.rebuild();
 		}
+	}
+
+	private void rebuildRegions (Vector2 cs) {
+		for (int i = 0; i < regions.size; i++) {
+			Region region = regions.get(i);
+			if (region.bounds.contains(cs)){
+				region.rebuild();
+				int x = (int)region.bounds.x/REGION_SIZE;
+				int y = (int)region.bounds.y/REGION_SIZE;
+				rebuildRegion(x -1, y);
+				rebuildRegion(x +1, y);
+				rebuildRegion(x, y +1);
+				rebuildRegion(x, y -1);
+				break;
+			}
+		}
+	}
+
+	private void rebuildRegion (int x, int y) {
+		if (x < 0) return;
+		if (x >= 5) return;
+		if (y < 0) return;
+		if (y >= 3) return;
+		regions.get(x * 3 + y).rebuild();
 	}
 
 	private Vector2 cs = new Vector2();
@@ -125,6 +154,7 @@ public class TiledPartitionTest extends BaseScreen {
 		for (Region region : regions) {
 			region.update(cs);
 			region.renderSubs(renderer);
+			region.renderEdges(renderer);
 		}
 
 		renderer.end();
@@ -405,15 +435,17 @@ public class TiledPartitionTest extends BaseScreen {
 				for (int sy = 0; sy < REGION_SIZE; sy++) {
 					found.clear();
 					SubRegion sub = subs[ids];
+					sub.id = ids;
 					Tile tile = getTile(x + sx, y + sy, this);
 					if (tile == null || added.contains(tile)) continue;
 
 					floodFillFull(x + sx, y + sy, this, found);
 					added.addAll(found);
+					sub.tiles.clear();
 					for (Tile f : found) {
 						sub.tiles.add(f);
 					}
-
+					ids++;
 					// TODO find edges of the region
 					// if tile is at the edge -> edge
 					// if tile is adjacent to tile not in this region -> edge
@@ -476,10 +508,11 @@ public class TiledPartitionTest extends BaseScreen {
 //							sub.edges.add(t);
 //						}
 //					}
-					ids++;
 				}
 			}
+		}
 
+		public void rebuildSubs() {
 			for (int i = 0; i < ids; i++) {
 				subs[i].rebuild();
 			}
@@ -498,6 +531,12 @@ public class TiledPartitionTest extends BaseScreen {
 		public void renderSubs (ShapeRenderer renderer) {
 			for (int i = 0; i < ids; i++) {
 				subs[i].render(renderer);
+			}
+		}
+
+		public void renderEdges (ShapeRenderer renderer) {
+			for (int i = 0; i < ids; i++) {
+				subs[i].renderEdges(renderer);
 			}
 		}
 
@@ -538,23 +577,30 @@ public class TiledPartitionTest extends BaseScreen {
 //				Tile first = tiles.first();
 //				edges2.add(new Edge(first.x, first.y, 4, true));
 //				edges2.add(new Edge(first.x, first.y, 7, false));
-				int row = 0;
+//				int row = 0;
 				int last = 0;
-				int y = tiles.first().y;
+				///*
+//				int y = tiles.first().y;
 				while (last < tiles.size) {
 					Tile first = tiles.get(last);
+					if (first.y == 0) {
+						last++;
+						continue;
+					}
 					Tile south = getTile(first.x, first.y - 1, null);
 					if (south != null && tiles.contains(south, true)) {
 						last++;
 						continue;
 					}
+					int otherSubRegionId = getSubRegionId(south);
 					Tile prev = first;
 					for (int i = last + 1; i < tiles.size ; i++) {
 						Tile tile = tiles.get(i);
 						if (prev.y != tile.y) break;
 						if (prev.x + 1 != tile.x) break;
-						south = getTile(first.x, first.y - 1, null);
-						if (south != null && !tiles.contains(south, true)) break;
+						south = getTile(tile.x, tile.y - 1, null);
+						if (south != null && tiles.contains(south, true)) break;
+						if (otherSubRegionId != getSubRegionId(south)) break;
 						prev = tile;
 						last = i;
 					}
@@ -563,6 +609,34 @@ public class TiledPartitionTest extends BaseScreen {
 					last++;
 //					break;
 				}
+				//*/
+				///*
+				last = 0;
+				while (last < tiles.size) {
+					Tile first = tiles.get(last);
+					Tile north = getTile(first.x, first.y + 1, null);
+					if (north == null || tiles.contains(north, true)) {
+						last++;
+						continue;
+					}
+					int otherSubRegionId = getSubRegionId(north);
+					Tile prev = first;
+					for (int i = last + 1; i < tiles.size ; i++) {
+						Tile tile = tiles.get(i);
+						if (prev.y != tile.y) break;
+						if (prev.x + 1 != tile.x) break;
+						north = getTile(tile.x, tile.y + 1, null);
+						if (north == null || tiles.contains(north, true)) break;
+						if (otherSubRegionId != getSubRegionId(north)) break;
+						prev = tile;
+						last = i;
+					}
+					Edge edge = new Edge(first.x, first.y + 1, prev.x - first.x + 1, true);
+					edges2.add(edge);
+					last++;
+//					break;
+				}
+				//*/
 			}
 
 			public void select (Vector2 cs) {
@@ -575,31 +649,42 @@ public class TiledPartitionTest extends BaseScreen {
 				selected = false;
 			}
 
-			public void render (ShapeRenderer renderer) {
+			public void renderEdges (ShapeRenderer renderer) {
 				if (!selected) return;
-				for (Tile tile : tiles) {
-					if (selected) {
-						if (edges.contains(tile)) {
-							renderer.setColor(Color.MAGENTA);
-						} else {
-							renderer.setColor(1, 1, 1, .5f);
-						}
-					} else {
-						float c = .5f + id /(float)ids/2;
-						renderer.setColor(c, c, c, .5f);
-					}
-					renderer.rect(tile.x + 0.1f, tile.y + 0.1f, 1 - 0.2f, 1 - 0.2f);
-				}
 				renderer.setColor(1, 1, 0, selected?.75f:.5f);
 				for (Edge edge : edges2) {
 					edge.render(renderer);
 				}
+			}
 
+			public void render (ShapeRenderer renderer) {
+				for (int i = 0; i < tiles.size; i++) {
+					Tile tile = tiles.get(i);
+					float c = i/(float)tiles.size;
+					if (selected) {
+//						renderer.setColor(c, c, c, .5f);
+						renderer.setColor(1, 1, 1, .5f);
+					} else {
+						c = .5f + id /(float)ids/2;
+						renderer.setColor(c, c, c, .5f);
+					}
+					renderer.rect(tile.x + 0.1f, tile.y + 0.1f, 1 - 0.2f, 1 - 0.2f);
+				}
+//				for (Tile tile : tiles) {
+//					if (selected) {
+//						renderer.setColor(1, 1, 1, .5f);
+//					} else {
+//						float c = .5f + id /(float)ids/2;
+//						renderer.setColor(c, c, c, .5f);
+//					}
+//					renderer.rect(tile.x + 0.1f, tile.y + 0.1f, 1 - 0.2f, 1 - 0.2f);
+//				}
 			}
 
 			public class Edge {
 				public int x, y, len;
 				public boolean horizontal;
+				private Color color = new Color(MathUtils.random(),MathUtils.random(),MathUtils.random(),1);
 
 				public Edge (int x, int y, int len, boolean horizontal) {
 					this.x = x;
@@ -609,10 +694,24 @@ public class TiledPartitionTest extends BaseScreen {
 				}
 
 				public void render (ShapeRenderer renderer) {
-					renderer.rect(x, y, horizontal?len:1, horizontal?1:len);
+					renderer.setColor(color);
+					renderer.rect(x+0.1f, y+0.1f, (horizontal?len:1)-.2f, (horizontal?1:len)-.2f);
 				}
 			}
 		}
+	}
+
+	private int getSubRegionId (Tile tile) {
+		// TODO this is obviously dumb
+		// do we want region and sub region id hash?
+		for (Region region : regions) {
+			for (int i = 0; i < region.ids; i++) {
+				if (region.subs[i].tiles.contains(tile, true)) {
+					return i;
+				}
+			}
+		}
+		return -1;
 	}
 
 	private Vector3 temp = new Vector3();
@@ -630,7 +729,7 @@ public class TiledPartitionTest extends BaseScreen {
 					break;
 				}
 			}
-			rebuildRegion(cs);
+			rebuildRegions(cs);
 		} else if (button == Input.Buttons.RIGHT) {
 			for (Tile tile : tiles) {
 				if (tile.bounds.contains(cs)) {
@@ -640,7 +739,7 @@ public class TiledPartitionTest extends BaseScreen {
 					break;
 				}
 			}
-			rebuildRegion(cs);
+			rebuildRegions(cs);
 		} else if (button == Input.Buttons.MIDDLE) {
 			for (Region region : regions) {
 				if (region.bounds.contains(cs)) {
