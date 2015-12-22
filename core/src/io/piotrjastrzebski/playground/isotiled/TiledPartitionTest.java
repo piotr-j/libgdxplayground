@@ -645,10 +645,15 @@ public class TiledPartitionTest extends BaseScreen {
 					Edge edge = edges2.get(i);
 					for (int j = 0; j < edge.connected.size; j++) {
 						SubRegion subRegion = edge.connected.get(j);
-						if (subRegion != this && !renderedExtras.contains(subRegion)
-							&& subRegion.tiles.first().type == type) {
-							subRegion.renderExtra(renderer);
-							renderedExtras.add(subRegion);
+						if (subRegion != this && !renderedExtras.contains(subRegion)) {
+							int other = subRegion.tiles.first().type;
+							if (type == 1 && type == other) {
+								subRegion.renderExtra(renderer);
+								renderedExtras.add(subRegion);
+							} else if (type != 1 && other != 1) {
+								subRegion.renderExtra(renderer);
+								renderedExtras.add(subRegion);
+							}
 						}
 					}
 				}
