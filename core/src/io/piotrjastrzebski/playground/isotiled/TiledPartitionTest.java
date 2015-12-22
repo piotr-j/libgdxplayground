@@ -634,7 +634,7 @@ public class TiledPartitionTest extends BaseScreen {
 					} else {
 //						c = .5f + id /(float)ids/2;
 //						renderer.setColor(c, c, c, .5f);
-						renderer.setColor(tile.color);
+						renderer.setColor(1, 1, 1, .2f);
 					}
 					renderer.rect(tile.x, tile.y, 1, 1);
 				}
