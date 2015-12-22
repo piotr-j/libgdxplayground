@@ -617,11 +617,11 @@ public class TiledPartitionTest extends BaseScreen {
 			}
 
 			public void renderEdges (ShapeRenderer renderer) {
-				if (!selected) return;
-				renderer.setColor(1, 1, 0, selected?.75f:.5f);
-				for (Edge edge : edges2) {
-					edge.render(renderer);
-				}
+//				if (!selected) return;
+//				renderer.setColor(1, 1, 0, selected?.75f:.5f);
+//				for (Edge edge : edges2) {
+//					edge.render(renderer);
+//				}
 			}
 
 			public void render (ShapeRenderer renderer) {
@@ -629,11 +629,33 @@ public class TiledPartitionTest extends BaseScreen {
 					Tile tile = tiles.get(i);
 					float c = i/(float)tiles.size;
 					if (selected) {
-						renderer.setColor(c, c, c, .5f);
+						renderer.setColor(0, 0, 1, .5f);
+//						renderer.setColor(c, c, c, .5f);
 					} else {
 						c = .5f + id /(float)ids/2;
 						renderer.setColor(c, c, c, .5f);
 					}
+					renderer.rect(tile.x, tile.y, 1, 1);
+				}
+				if (!selected) return;
+				renderedExtras.clear();
+				for (int i = 0; i < edges2.size; i++) {
+					Edge edge = edges2.get(i);
+					for (int j = 0; j < edge.connected.size; j++) {
+						SubRegion subRegion = edge.connected.get(j);
+						if (subRegion != this && !renderedExtras.contains(subRegion)) {
+							subRegion.renderExtra(renderer);
+							renderedExtras.add(subRegion);
+						}
+					}
+				}
+			}
+			ObjectSet<SubRegion> renderedExtras = new ObjectSet<>();
+
+			private void renderExtra (ShapeRenderer renderer) {
+				renderer.setColor(0, 0, 1, .33f);
+				for (int i = 0; i < tiles.size; i++) {
+					Tile tile = tiles.get(i);
 					renderer.rect(tile.x, tile.y, 1, 1);
 				}
 			}
@@ -659,7 +681,7 @@ public class TiledPartitionTest extends BaseScreen {
 	}
 
 	public class Edge {
-		public Array<Region.SubRegion> conencted = new Array<>();
+		public Array<Region.SubRegion> connected = new Array<>();
 		public int x;
 		public int y;
 		public int len;
@@ -686,7 +708,7 @@ public class TiledPartitionTest extends BaseScreen {
 		}
 
 		public void add(Region.SubRegion region) {
-
+			connected.add(region);
 		}
 
 		@Override public boolean equals (Object o) {
