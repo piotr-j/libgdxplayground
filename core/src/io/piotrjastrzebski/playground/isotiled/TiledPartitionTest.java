@@ -640,19 +640,40 @@ public class TiledPartitionTest extends BaseScreen {
 		}
 	}
 
+	private Edge tempEdge = new Edge(0, 0, 0, true);
+	private Array<Edge> dumb = new Array<>();
 	public Edge getEdge (int x, int y, int len, boolean horizontal) {
-		// TODO find edge that fits or create new one
+		tempEdge.set(x, y, len, horizontal);
+		int id = dumb.indexOf(tempEdge, false);
+		if (id > 0) {
+			return dumb.get(id);
+		}
+		Edge edge = new Edge(x, y, len, horizontal);
+		dumb.add(edge);
+		return edge;
+	}
 
-		return new Edge(x, y, len, horizontal);
+	public void removeEdges(Region region) {
+		// we want to clear all edges from that and surrounding regions
+
 	}
 
 	public class Edge {
 		public Array<Region.SubRegion> conencted = new Array<>();
-		public int x, y, len;
+		public int x;
+		public int y;
+		public int len;
 		public boolean horizontal;
 		private Color color = new Color(MathUtils.random(),MathUtils.random(),MathUtils.random(), .75f);
 
 		public Edge (int x, int y, int len, boolean horizontal) {
+			this.x = x;
+			this.y = y;
+			this.len = len;
+			this.horizontal = horizontal;
+		}
+
+		public void set (int x, int y, int len, boolean horizontal) {
 			this.x = x;
 			this.y = y;
 			this.len = len;
