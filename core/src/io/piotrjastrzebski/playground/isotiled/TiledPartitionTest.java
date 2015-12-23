@@ -25,10 +25,10 @@ public class TiledPartitionTest extends BaseScreen {
 	public final static float VP_WIDTH = 1280/SCALE;
 	public final static float VP_HEIGHT = 720/SCALE;
 
-	private final static int REGION_SIZE = 8;
-	private final static int MAP_WIDTH = REGION_SIZE * 5;
-	private final static int MAP_HEIGHT = REGION_SIZE * 3;
-	private final static int[] map = new int[] {
+	public final static int REGION_SIZE = 8;
+	public final static int MAP_WIDTH = REGION_SIZE * 5;
+	public final static int MAP_HEIGHT = REGION_SIZE * 3;
+	public final static int[] map = new int[] {
 		0, 0, 0, 0, 0, 0, 0, 0,  1, 1, 1, 1, 1, 1, 1, 1,  1, 1, 1, 1, 1, 1, 1, 1,  1, 1, 1, 1, 1, 1, 1, 1,  1, 1, 1, 1, 1, 1, 1, 1,
 		0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 1,
 		0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 1, 1, 1, 1, 1, 0,  0, 1, 1, 2, 1, 1, 0, 0,  1, 1, 1, 1, 1, 1, 1, 1,  0, 0, 0, 0, 0, 0, 0, 1,
@@ -154,7 +154,7 @@ public class TiledPartitionTest extends BaseScreen {
 	}
 	Region ffRegion;
 	ObjectSet<Tile> found = new ObjectSet<>();
-	private void floodFill (int x, int y, Region region, ObjectSet<Tile> found) {
+	protected void floodFill (int x, int y, Region region, ObjectSet<Tile> found) {
 		Tile start = getTile(x, y, region);
 		if (start == null) return;
 		ffRegion = region;
@@ -165,7 +165,7 @@ public class TiledPartitionTest extends BaseScreen {
 		resumeFloodFill(region, found);
 	}
 
-	private void resumeFloodFill (Region region, ObjectSet<Tile> found) {
+	protected void resumeFloodFill (Region region, ObjectSet<Tile> found) {
 		int iters = 0;
 		while (queue.size > 0) {
 			ff(region, found);
@@ -177,7 +177,7 @@ public class TiledPartitionTest extends BaseScreen {
 		}
 	}
 
-	private void ff(Region region, ObjectSet<Tile> found) {
+	protected void ff(Region region, ObjectSet<Tile> found) {
 		Tile tile = queue.removeIndex(0);
 		if (tile.type == targetType) {
 			if (processed.containsKey(tile.id)) return;
@@ -200,7 +200,7 @@ public class TiledPartitionTest extends BaseScreen {
 		}
 	}
 
-	private void floodFillFull (int x, int y, Region region, ObjectSet<Tile> found) {
+	protected void floodFillFull (int x, int y, Region region, ObjectSet<Tile> found) {
 		Tile start = getTile(x, y, region);
 		if (start == null) return;
 		ffRegion = region;
@@ -213,7 +213,7 @@ public class TiledPartitionTest extends BaseScreen {
 		}
 	}
 
-	private Tile getEdge (Tile tile, int offset, Region region) {
+	protected Tile getEdge (Tile tile, int offset, Region region) {
 		while (true) {
 			Tile next = getTile(tile.x + offset, tile.y, region);
 			if (next != null && next.type == targetType) {
@@ -249,7 +249,7 @@ public class TiledPartitionTest extends BaseScreen {
 		addToQueue(getTile(x, y, region));
 	}
 
-	private Tile getTile (int x, int y, Region region) {
+	protected Tile getTile (int x, int y, Region region) {
 		if (region == null) {
 			if (x < 0 || x >= MAP_WIDTH) return null;
 			if (y < 0 || y >= MAP_HEIGHT) return null;
@@ -437,6 +437,20 @@ public class TiledPartitionTest extends BaseScreen {
 			}
 		}
 
+		protected Comparator<Tile> sortX = new Comparator<Tile>() {
+			@Override public int compare (Tile o1, Tile o2) {
+				if (o1.y == o2.y) return o1.x - o2.x;
+				return o1.y - o2.y;
+			}
+		};
+
+		protected Comparator<Tile> sortY = new Comparator<Tile>() {
+			@Override public int compare (Tile o1, Tile o2) {
+				if (o1.x == o2.x) return o1.y - o2.y;
+				return o1.x - o2.x;
+			}
+		};
+
 		public class SubRegion {
 			private Rectangle tmp = new Rectangle();
 			public int id = -1;
@@ -462,12 +476,7 @@ public class TiledPartitionTest extends BaseScreen {
 
 
 			private void findHorizontalEdges () {
-				tiles.sort(new Comparator<Tile>() {
-					@Override public int compare (Tile o1, Tile o2) {
-						if (o1.y == o2.y) return o1.x - o2.x;
-						return o1.y - o2.y;
-					}
-				});
+				tiles.sort(sortX);
 				int last = 0;
 				///*
 				// bottom edges
@@ -535,12 +544,7 @@ public class TiledPartitionTest extends BaseScreen {
 
 			private void findVerticalEdges() {
 				// note maybe work on entire tile grid +1? less sorting
-				tiles.sort(new Comparator<Tile>() {
-					@Override public int compare (Tile o1, Tile o2) {
-						if (o1.x == o2.x) return o1.y - o2.y;
-						return o1.x - o2.x;
-					}
-				});
+				tiles.sort(sortY);
 				int last = 0;
 //				/*
 				// left edges
@@ -745,7 +749,7 @@ public class TiledPartitionTest extends BaseScreen {
 			return result;
 		}
 	}
-	private int getSubRegionId (Tile tile) {
+	protected int getSubRegionId (Tile tile) {
 		// TODO this is obviously dumb
 		// do we want region and sub region id hash?
 		for (Region region : regions) {
