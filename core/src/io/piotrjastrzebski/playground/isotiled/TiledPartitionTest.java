@@ -400,7 +400,6 @@ public class TiledPartitionTest extends BaseScreen {
 
 					floodFillFull(x + sx, y + sy, this, found);
 					added.addAll(found);
-					sub.tiles.clear();
 					for (Tile f : found) {
 						sub.tiles.add(f);
 					}
@@ -456,158 +455,96 @@ public class TiledPartitionTest extends BaseScreen {
 			public int id = -1;
 			public boolean selected;
 			public Array<Tile> tiles = new Array<>();
-			public ObjectSet<Tile> tiles2 = new ObjectSet<>();
-			public ObjectSet<Tile> edges = new ObjectSet<>();
-			public Array<Edge> edges2 = new Array<>();
+			public Array<Edge> edges = new Array<>();
 
 			public SubRegion () {
 
 			}
 
 			public void rebuild() {
-				// TODO remove from current edges
-				edges2.clear();
-				tiles2.clear();
-				tiles2.addAll(tiles);
-				if (tiles2.size != tiles.size) throw new AssertionError("fuck " + tiles2.size + " != " + tiles.size);
-				findHorizontalEdges();
-				findVerticalEdges();
-			}
-
-
-			private void findHorizontalEdges () {
+				// find vertical edges
 				tiles.sort(sortX);
-				int last = 0;
-				///*
-				// bottom edges
-				while (last < tiles.size) {
-					Tile start = tiles.get(last);
-					if (start.y == 0) {
-						last++;
-						continue;
-					}
-					Tile south = getTile(start.x, start.y - 1, null);
-					if (south != null && tiles.contains(south, true)) {
-						last++;
-						continue;
-					}
-					int otherSubRegionId = getSubRegionId(south);
-					Tile end = start;
-					for (int i = last + 1; i < tiles.size ; i++) {
-						Tile tile = tiles.get(i);
-						if (end.y != tile.y) break;
-						if (end.x + 1 != tile.x) break;
-						south = getTile(tile.x, tile.y - 1, null);
-						if (south != null && tiles.contains(south, true)) break;
-						if (otherSubRegionId != getSubRegionId(south)) break;
-						end = tile;
-						last = i;
-					}
-					Edge edge = TiledPartitionTest.this.getEdge(start.x, start.y, end.x - start.x + 1, true);
-					edge.add(this);
-					edges2.add(edge);
-					last++;
-				}
-				//*/
-//				/*
-				// top edges
-				last = 0;
-				while (last < tiles.size) {
-					Tile start = tiles.get(last);
-					if (start.y == MAP_HEIGHT -1) {
-						break;
-					}
-					Tile north = getTile(start.x, start.y + 1, null);
-					if (north == null || tiles.contains(north, true)) {
-						last++;
-						continue;
-					}
-					int otherSubRegionId = getSubRegionId(north);
-					Tile end = start;
-					for (int i = last + 1; i < tiles.size ; i++) {
-						Tile tile = tiles.get(i);
-						if (end.y != tile.y) break;
-						if (end.x + 1 != tile.x) break;
-						north = getTile(tile.x, tile.y + 1, null);
-						if (north == null || tiles.contains(north, true)) break;
-						if (otherSubRegionId != getSubRegionId(north)) break;
-						end = tile;
-						last = i;
-					}
-					Edge edge = TiledPartitionTest.this.getEdge(start.x, start.y + 1, end.x - start.x + 1, true);
-					edge.add(this);
-					edges2.add(edge);
-					last++;
-				}
-				//*/
+				findHorEdges(0, -1, 0);
+				findHorEdges(MAP_HEIGHT -1, 1, 1);
+				// find horizontal edges
+				tiles.sort(sortY);
+				findVertEdges(0, -1, 0);
+				findVertEdges(MAP_WIDTH -1, 1, 1);
 			}
 
-			private void findVerticalEdges() {
-				// note maybe work on entire tile grid +1? less sorting
-				tiles.sort(sortY);
+			private void findHorEdges(int skipY, int offsetY, int endOffsetY) {
 				int last = 0;
-//				/*
-				// left edges
 				while (last < tiles.size) {
 					Tile start = tiles.get(last);
-					if (start.x == 0) {
+					// not strictly needed, skip edges of the map
+					if (start.y == skipY) {
 						last++;
 						continue;
 					}
-					Tile west = getTile(start.x - 1, start.y, null);
-					if (west != null && tiles.contains(west, true)) {
+					Tile test = getTile(start.x, start.y + offsetY, null);
+					// check if next tile is part of this sub region
+					if (test != null && tiles.contains(test, true)) {
 						last++;
 						continue;
 					}
-					int otherSubRegionId = getSubRegionId(west);
+					// test is from other region
+					int otherSubRegionId = getSubRegionId(test);
+					Tile end = start;
+					// go in a given direction until we encounter a tile that doesnt match
+					for (int i = last + 1; i < tiles.size ; i++) {
+						Tile tile = tiles.get(i);
+						// next row, we are done
+						if (end.y != tile.y) break;
+						// next tile is not adjacent to last one
+						if (end.x + 1 != tile.x) break;
+						test = getTile(tile.x, tile.y + offsetY, null);
+						// we dont want edges inside the regions
+						if (test != null && tiles.contains(test, true)) break;
+						// if type of the other tile changes, we want an edge
+						if (otherSubRegionId != getSubRegionId(test)) break;
+						end = tile;
+						last = i;
+					}
+					// set up edge
+					Edge edge = TiledPartitionTest.this.getEdge(start.x, start.y + endOffsetY, end.x - start.x + 1, true);
+					edge.add(this);
+					edges.add(edge);
+					// start again from next tile
+					last++;
+				}
+			}
+
+			private void findVertEdges(int skipX, int offsetX, int endOffsetX) {
+				int last = 0;
+				while (last < tiles.size) {
+					Tile start = tiles.get(last);
+					// not strictly needed, skip edges of the map
+					if (start.x == skipX) {
+						last++;
+						continue;
+					}
+					Tile test = getTile(start.x + offsetX, start.y, null);
+					if (test != null && tiles.contains(test, true)) {
+						last++;
+						continue;
+					}
+					int otherSubRegionId = getSubRegionId(test);
 					Tile end = start;
 					for (int i = last + 1; i < tiles.size ; i++) {
 						Tile tile = tiles.get(i);
 						if (end.x != tile.x) break;
 						if (end.y + 1 != tile.y) break;
-						west = getTile(tile.x - 1, tile.y, null);
-						if (west != null && tiles.contains(west, true)) break;
-						if (otherSubRegionId != getSubRegionId(west)) break;
+						test = getTile(tile.x + offsetX, tile.y, null);
+						if (test != null && tiles.contains(test, true)) break;
+						if (otherSubRegionId != getSubRegionId(test)) break;
 						end = tile;
 						last = i;
 					}
-					Edge edge = TiledPartitionTest.this.getEdge(start.x, start.y, end.y - start.y + 1, false);
+					Edge edge = TiledPartitionTest.this.getEdge(start.x + endOffsetX, start.y, end.y - start.y + 1, false);
 					edge.add(this);
-					edges2.add(edge);
+					edges.add(edge);
 					last++;
 				}
-				//*/
-//				/*
-				// right edges
-				last = 0;
-				while (last < tiles.size) {
-					Tile start = tiles.get(last);
-					if (start.x == MAP_WIDTH -1) {
-						break;
-					}
-					Tile east = getTile(start.x + 1, start.y, null);
-					if (east == null || tiles.contains(east, true)) {
-						last++;
-						continue;
-					}
-					int otherSubRegionId = getSubRegionId(east);
-					Tile end = start;
-					for (int i = last + 1; i < tiles.size ; i++) {
-						Tile tile = tiles.get(i);
-						if (end.x != tile.x) break;
-						if (end.y + 1 != tile.y) break;
-						east = getTile(tile.x + 1, tile.y, null);
-						if (east == null || tiles.contains(east, true)) break;
-						if (otherSubRegionId != getSubRegionId(east)) break;
-						end = tile;
-						last = i;
-					}
-					Edge edge = TiledPartitionTest.this.getEdge(start.x + 1, start.y, end.y - start.y + 1, false);
-					edge.add(this);
-					edges2.add(edge);
-					last++;
-				}
-				//*/
 			}
 
 			public void select (Vector2 cs) {
@@ -621,11 +558,10 @@ public class TiledPartitionTest extends BaseScreen {
 			}
 
 			public void renderEdges (ShapeRenderer renderer) {
-//				if (!selected) return;
-//				renderer.setColor(1, 1, 0, selected?.75f:.5f);
-//				for (Edge edge : edges2) {
-//					edge.render(renderer);
-//				}
+				if (!selected) return;
+				for (Edge edge : edges) {
+					edge.render(renderer);
+				}
 			}
 
 			public void render (ShapeRenderer renderer) {
@@ -645,8 +581,8 @@ public class TiledPartitionTest extends BaseScreen {
 				if (!selected) return;
 				renderedExtras.clear();
 				int type = tiles.first().type;
-				for (int i = 0; i < edges2.size; i++) {
-					Edge edge = edges2.get(i);
+				for (int i = 0; i < edges.size; i++) {
+					Edge edge = edges.get(i);
 					for (int j = 0; j < edge.connected.size; j++) {
 						SubRegion subRegion = edge.connected.get(j);
 						if (subRegion != this && !renderedExtras.contains(subRegion)) {
@@ -698,7 +634,7 @@ public class TiledPartitionTest extends BaseScreen {
 		public int y;
 		public int len;
 		public boolean horizontal;
-		private Color color = new Color(MathUtils.random(),MathUtils.random(),MathUtils.random(), .75f);
+		private Color color = new Color(MathUtils.random(),MathUtils.random(),MathUtils.random(), 1);
 
 		public Edge (int x, int y, int len, boolean horizontal) {
 			this.x = x;
