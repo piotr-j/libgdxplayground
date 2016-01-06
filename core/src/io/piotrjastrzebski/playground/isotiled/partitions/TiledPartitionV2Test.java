@@ -1,22 +1,15 @@
-package io.piotrjastrzebski.playground.isotiled;
+package io.piotrjastrzebski.playground.isotiled.partitions;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.IntMap;
-import com.badlogic.gdx.utils.ObjectSet;
 import io.piotrjastrzebski.playground.BaseScreen;
 import io.piotrjastrzebski.playground.GameReset;
 import io.piotrjastrzebski.playground.PlaygroundGame;
-
-import java.util.Comparator;
 
 /**
  * Created by EvilEntity on 07/06/2015.
@@ -63,15 +56,18 @@ public class TiledPartitionV2Test extends BaseScreen {
 
 	public TiledPartitionV2Test (GameReset game) {
 		super(game);
-		for (int y = 0; y < MAP_HEIGHT; y++) {
-			for (int x = 0; x < MAP_WIDTH; x++) {
+		tiles.ensureCapacity(MAP_HEIGHT * MAP_WIDTH);
+		// set size to max so it wont complain when we use #set(int, T)
+		tiles.size = MAP_HEIGHT * MAP_WIDTH;
+		for (int x = 0; x < MAP_WIDTH; x++) {
+			for (int y = 0; y < MAP_HEIGHT; y++) {
 				Tile tile = new Tile(x + y * MAP_WIDTH, x, y);
+				// magic incantation to get correct id from the map above
 				tile.setType(map[x + (MAP_HEIGHT - 1 - y) * MAP_WIDTH]);
-				tiles.add(tile);
+				tiles.set(tile.id, tile);
 			}
 		}
 		gameCamera.position.set(VP_WIDTH / 2, VP_HEIGHT / 2, 0);
-
 	}
 
 	private Vector2 cs = new Vector2();
@@ -80,6 +76,7 @@ public class TiledPartitionV2Test extends BaseScreen {
 
 		Gdx.gl.glEnable(GL20.GL_BLEND);
 		Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+
 		renderer.setProjectionMatrix(gameCamera.combined);
 		renderer.begin(ShapeRenderer.ShapeType.Filled);
 		for (Tile tile : tiles) {
@@ -87,73 +84,6 @@ public class TiledPartitionV2Test extends BaseScreen {
 		}
 
 		renderer.end();
-
-	}
-
-
-	private class Tile {
-		public int id;
-		public int x;
-		public int y;
-		public Rectangle bounds = new Rectangle();
-		public Color color = new Color();
-		public Color tint = new Color();
-		public int type;
-
-		public Tile (int id, int x, int y) {
-			this.id = id;
-			this.x = x;
-			this.y = y;
-			bounds.set(x, y, 1, 1);
-			setType(0);
-		}
-
-		public void setType (int type) {
-			this.type = type;
-			switch (type) {
-			case 0: // grass
-				// some variation so we know wtf is going on
-//				color.set(.1f, MathUtils.random(0.7f, .9f), MathUtils.random(.1f, .2f), 1);
-				color.set(0, 1, 0, 1);
-				break;
-			case 1: // wall
-				color.set(Color.FIREBRICK);
-				break;
-			case 2: // door
-				color.set(1f, .8f, .6f, 1);
-				break;
-			}
-		}
-
-		Color tmp = new Color();
-		float a;
-		public void render(ShapeRenderer renderer, float delta) {
-			a = MathUtils.clamp(a -= 2f*delta, 0, 1);
-			renderer.setColor(tmp.set(color).lerp(tint, a));
-			renderer.rect(x, y, 1, 1);
-		}
-
-		public void setColor(Color color){
-			this.color.set(color);
-		}
-
-		@Override public String toString () {
-			return "Tile{" +x + ", " + y + ", id="+id+"}";
-		}
-
-		@Override public boolean equals (Object o) {
-			if (this == o)
-				return true;
-			if (o == null || getClass() != o.getClass())
-				return false;
-
-			Tile tile = (Tile)o;
-			return id == tile.id;
-		}
-
-		@Override public int hashCode () {
-			return id;
-		}
 	}
 
 	private Vector3 temp = new Vector3();
@@ -161,6 +91,7 @@ public class TiledPartitionV2Test extends BaseScreen {
 		// fairly dumb
 		gameCamera.unproject(temp.set(screenX, screenY, 0));
 		cs.set(temp.x, temp.y);
+		// need to change type or something
 		if (button == Input.Buttons.LEFT) {
 
 		} else if (button == Input.Buttons.RIGHT) {
