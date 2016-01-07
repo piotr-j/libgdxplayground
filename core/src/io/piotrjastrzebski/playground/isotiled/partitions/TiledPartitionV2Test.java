@@ -8,6 +8,8 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.IntMap;
+import com.badlogic.gdx.utils.ObjectSet;
 import io.piotrjastrzebski.playground.BaseScreen;
 import io.piotrjastrzebski.playground.GameReset;
 import io.piotrjastrzebski.playground.PlaygroundGame;
@@ -91,16 +93,19 @@ public class TiledPartitionV2Test extends BaseScreen {
 
 	private void addTileToRegion (Tile tile) {
 		MapRegion region = getRegionAt(tile.x, tile.y);
+		if (region == null) throw new AssertionError("Region cant be null here!");
 		region.addTile(tile);
 	}
 
 	private MapRegion getRegionAt (int x, int y) {
 		int rx = x / REGION_SIZE;
 		int ry = y / REGION_SIZE;
+		if (rx < 0 || ry < 0 || rx >= MAP_WIDTH / REGION_SIZE || ry >= MAP_HEIGHT / REGION_SIZE) return null;
 		return regions.get(rx + ry * (MAP_WIDTH / REGION_SIZE));
 	}
 
 	private Tile getTileAt (int x, int y) {
+		if (x < 0 || y < 0 || x >= MAP_WIDTH || y >= MAP_HEIGHT) return null;
 		return tiles.get(x + y * MAP_WIDTH);
 	}
 
@@ -118,6 +123,11 @@ public class TiledPartitionV2Test extends BaseScreen {
 			tile.render(renderer, delta);
 		}
 		drawDebugPointer();
+		renderer.setColor(Color.GOLD);
+		renderer.getColor().a = .75f;
+		for (Tile tile : found) {
+			renderer.rect(tile.x, tile.y, 1, 1);
+		}
 		renderer.end();
 
 		renderer.begin(ShapeRenderer.ShapeType.Line);
@@ -128,13 +138,88 @@ public class TiledPartitionV2Test extends BaseScreen {
 		renderer.end();
 	}
 
+	private void floodFill(int x, int y, ObjectSet<Tile> out) {
+		floodFill(x, y, 0, 0, MAP_WIDTH -1, MAP_HEIGHT -1, out);
+	}
+
+	private void floodFill(int x, int y, MapRegion region, ObjectSet<Tile> out) {
+		floodFill(x, y, region.x, region.y, region.x + region.width -1, region.y + region.height -1, out);
+	}
+
+	private ObjectSet<Tile> found = new ObjectSet<>();
+	private Array<Tile> queue = new Array<>(false, 16);
+	private IntMap<Tile> processed = new IntMap<>();
+	/**
+	 * Find all connected tiles starting from tile at x, y within given bounds
+	 */
+	private void floodFill(int x, int y, int sx, int sy, int ex, int ey, ObjectSet<Tile> out) {
+		out.clear();
+		processed.clear();
+		queue.clear();
+		Tile start = getTileAt(x, y);
+		if (start == null) throw new AssertionError("Tile cant be null here!");
+		queue.add(start);
+		while (queue.size > 0) {
+			Tile tile = queue.removeIndex(0);
+			if (tile.type != start.type) continue;
+			if (processed.containsKey(tile.id)) continue;
+			processed.put(tile.id, tile);
+			out.add(tile);
+			Tile west = getWestEdge(tile, sx, sy, ex, ey);
+			Tile east = getEastEdge(tile, sx, sy, ex, ey);
+
+			for (int nx = west.x; nx <= east.x; nx++) {
+				Tile next = getTileAt(nx, west.y);
+				if (next == null) throw new AssertionError("Tile cant be null here!");
+				processed.put(next.id, next);
+				out.add(next);
+				Tile north = getTileAt(nx, west.y + 1);
+				if (north != null
+					&& north.x >= sx && north.x <= ex && north.y >= sy && north.y <= ey
+					&& north.type == start.type
+					&& !processed.containsKey(north.id)) {
+					queue.add(north);
+				}
+				Tile south = getTileAt(nx, west.y - 1);
+				if (south != null
+					&& south.x >= sx && south.x <= ex && south.y >= sy && south.y <= ey
+					&& south.type == start.type
+					&& !processed.containsKey(south.id)) {
+					queue.add(south);
+				}
+			}
+		}
+	}
+
+	private Tile getWestEdge (Tile tile, int sx, int sy, int ex, int ey) {
+		return getEdge(tile, -1, sx, sy, ex, ey);
+	}
+
+	private Tile getEastEdge (Tile tile, int sx, int sy, int ex, int ey) {
+		return getEdge(tile, 1, sx, sy, ex, ey);
+	}
+
+	private Tile getEdge (Tile tile, int offset, int sx, int sy, int ex, int ey) {
+		while (true) {
+			Tile next = getTileAt(tile.x + offset, tile.y);
+			if (next != null
+				&& next.x >= sx && next.x <= ex && next.y >= sy && next.y <= ey
+				&& next.type == tile.type) {
+				tile = next;
+			} else {
+				break;
+			}
+		}
+		return tile;
+	}
+
 	private void drawDebugPointer () {
 		if (drawDebugPointer) {
 			int x = (int)cs.x;
 			int y = (int)cs.y;
 
-
 			MapRegion region = getRegionAt(x, y);
+			if (region == null) throw new AssertionError("Region cant be null here!");
 			renderer.setColor(Color.MAGENTA);
 			renderer.getColor().a = .5f;
 			for (Tile tile : region.tiles) {
@@ -148,6 +233,7 @@ public class TiledPartitionV2Test extends BaseScreen {
 			renderer.rect(region.x, region.y + region.height - 0.25f, region.width, 0.25f);
 
 			Tile tile = getTileAt(x, y);
+			if (tile == null) throw new AssertionError("Tile cant be null here!");
 			renderer.setColor(Color.PINK);
 			renderer.rect(tile.x, tile.y, 1, 1);
 			renderer.setColor(Color.RED);
@@ -169,13 +255,16 @@ public class TiledPartitionV2Test extends BaseScreen {
 		// fairly dumb
 		gameCamera.unproject(temp.set(screenX, screenY, 0));
 		cs.set(temp.x, temp.y);
+		int x = (int)cs.x;
+		int y = (int)cs.y;
 		// need to change type or something
 		if (button == Input.Buttons.LEFT) {
-
+			floodFill(x, y, found);
 		} else if (button == Input.Buttons.RIGHT) {
-
+			MapRegion region = getRegionAt(x, y);
+			floodFill(x, y, region, found);
 		} else if (button == Input.Buttons.MIDDLE) {
-
+			found.clear();
 		}
 		return true;
 	}
