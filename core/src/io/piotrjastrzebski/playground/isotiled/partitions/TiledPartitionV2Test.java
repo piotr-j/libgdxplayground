@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.utils.IntArray;
 import com.badlogic.gdx.utils.ObjectSet;
 import io.piotrjastrzebski.playground.BaseScreen;
 import io.piotrjastrzebski.playground.GameReset;
@@ -59,17 +60,24 @@ public class TiledPartitionV2Test extends BaseScreen {
 		super(game);
 
 		tileMap = new TileMap(map, MAP_WIDTH, MAP_HEIGHT, REGION_SIZE);
+		tileMap.rebuild();
 
 		gameCamera.position.set(VP_WIDTH / 2, VP_HEIGHT / 2, 0);
 
 		Gdx.app.log("", "F2 - toggle draw debug pointer");
 		Gdx.app.log("", "F3 - toggle draw debug flood fill, l click - ff all, r click - ff region");
 		Gdx.app.log("", "F4 - toggle debug tile type setter");
+		Gdx.app.log("", "F5 - toggle draw debug tile over mouse");
+		Gdx.app.log("", "F6 - toggle draw sub regions");
+		Gdx.app.log("", "F7 - toggle draw all edges");
 	}
 
 	private boolean debugTileType = true;
+	private boolean drawDebugOverTile = true;
 	private boolean drawDebugPointer = false;
 	private boolean drawDebugFloodFill = false;
+	private boolean drawDebugSubRegions = false;
+	private boolean drawAllEdges = false;
 	private Vector2 cs = new Vector2();
 	@Override public void render (float delta) {
 		super.render(delta);
@@ -82,52 +90,116 @@ public class TiledPartitionV2Test extends BaseScreen {
 		for (Tile tile : tileMap.tiles) {
 			tile.render(renderer, delta);
 		}
-		drawDebugPointer();
+		if (drawDebugPointer) {
+			drawDebugPointer();
+		}
+		if (drawDebugSubRegions) {
+			drawSubRegions();
+		}
 		if (drawDebugFloodFill) {
-			renderer.setColor(Color.GOLD);
-			renderer.getColor().a = .75f;
-			for (Tile tile : found) {
-				renderer.rect(tile.x + .025f, tile.y + .025f, .95f, .95f);
+			drawFloodFill();
+		}
+		if (drawAllEdges) {
+			for (TileMap.Edge edge : tileMap.edges) {
+				renderer.setColor(edge.color);
+				renderer.rect(edge.x + .1f, edge.y + .1f, edge.horizontal ? edge.length - .2f : .8f,
+					edge.horizontal ? .8f : edge.length - .2f);
 			}
+		}
+
+		int x = (int)cs.x;
+		int y = (int)cs.y;
+		MapRegion.SubRegion sub = tileMap.getSubRegionAt(x, y);
+		if (sub != null) {
+			renderer.setColor(sub.color);
+			for (Tile tile : sub.tiles) {
+				renderer.rect(tile.x+.05f, tile.y+.05f, .9f, .9f);
+			}
+			IntArray ids = sub.edgeIds;
+			for (int i = 0; i < ids.size; i++) {
+				TileMap.Edge edge = tileMap.getEdge(ids.get(i));
+				for (MapRegion.SubRegion region : edge.subRegions) {
+					if (region == sub) continue;
+					if (region.tileType != sub.tileType) continue;
+					renderer.setColor(sub.color);
+					renderer.getColor().a = .5f;
+					for (Tile tile : region.tiles) {
+						renderer.rect(tile.x+.05f, tile.y+.05f, .9f, .9f);
+					}
+				}
+//				renderer.setColor(edge.color);
+//				renderer.rect(edge.x + .1f, edge.y + .1f, edge.horizontal ? edge.length - .2f : .8f,
+//					edge.horizontal ? .8f : edge.length - .2f);
+			}
+
 		}
 		renderer.end();
 
 		renderer.begin(ShapeRenderer.ShapeType.Line);
-		renderer.setColor(Color.CYAN);
+		renderer.setColor(Color.WHITE);
 		for (MapRegion region : tileMap.regions) {
-			region.render(renderer, delta);
+			renderer.rect(region.x, region.y, region.size, region.size);
+		}
+		if (drawDebugOverTile) {
+			drawTileOver();
 		}
 		renderer.end();
+	}
+
+	private void drawTileOver () {
+		renderer.setColor(Color.BLACK);
+		Tile tile = tileMap.getTileAt((int)cs.x, (int)cs.y);
+		if (tile != null) {
+			renderer.rect(tile.x, tile.y, 1, 1);
+		}
+	}
+
+	private void drawFloodFill () {
+		renderer.setColor(Color.GOLD);
+		renderer.getColor().a = .75f;
+		for (Tile tile : found) {
+			renderer.rect(tile.x + .025f, tile.y + .025f, .95f, .95f);
+		}
+	}
+
+	private void drawSubRegions () {
+		for (MapRegion region : tileMap.regions) {
+			for (MapRegion.SubRegion sub : region.subs) {
+				renderer.setColor(sub.color);
+				for (Tile tile : sub.tiles) {
+					renderer.rect(tile.x+.05f, tile.y+.05f, .9f, .9f);
+				}
+			}
+		}
 	}
 
 	private ObjectSet<Tile> found = new ObjectSet<>();
 
 	private void drawDebugPointer () {
-		if (drawDebugPointer) {
-			int x = (int)cs.x;
-			int y = (int)cs.y;
+		int x = (int)cs.x;
+		int y = (int)cs.y;
 
-			MapRegion region = tileMap.getRegionAt(x, y);
-			if (region == null) throw new AssertionError("Region cant be null here!");
-			renderer.setColor(Color.MAGENTA);
-			renderer.getColor().a = .5f;
-			for (Tile tile : region.tiles) {
-				renderer.rect(tile.x+.05f, tile.y+.05f, .9f, .9f);
-			}
-			renderer.getColor().a = 1f;
-			renderer.setColor(Color.MAGENTA);
-			renderer.rect(region.x, region.y, region.width, 0.25f);
-			renderer.rect(region.x, region.y, 0.25f, region.height);
-			renderer.rect(region.x + region.width - 0.25f, region.y, 0.25f, region.height);
-			renderer.rect(region.x, region.y + region.height - 0.25f, region.width, 0.25f);
-
-			Tile tile = tileMap.getTileAt(x, y);
-			if (tile == null) throw new AssertionError("Tile cant be null here!");
-			renderer.setColor(Color.PINK);
-			renderer.rect(tile.x, tile.y, 1, 1);
-			renderer.setColor(Color.RED);
-			renderer.circle(cs.x, cs.y, .1f, 16);
+		MapRegion region = tileMap.getRegionAt(x, y);
+		if (region == null) throw new AssertionError("Region cant be null here!");
+		renderer.setColor(Color.MAGENTA);
+		renderer.getColor().a = .5f;
+		for (int id = 0; id < region.tiles.size; id++) {
+			Tile tile = tileMap.getTile(region.tiles.get(id));
+			renderer.rect(tile.x+.05f, tile.y+.05f, .9f, .9f);
 		}
+		renderer.getColor().a = 1f;
+		renderer.setColor(Color.MAGENTA);
+		renderer.rect(region.x, region.y, region.size, 0.25f);
+		renderer.rect(region.x, region.y, 0.25f, region.size);
+		renderer.rect(region.x + region.size - 0.25f, region.y, 0.25f, region.size);
+		renderer.rect(region.x, region.y + region.size - 0.25f, region.size, 0.25f);
+
+		Tile tile = tileMap.getTileAt(x, y);
+		if (tile == null) throw new AssertionError("Tile cant be null here!");
+		renderer.setColor(Color.PINK);
+		renderer.rect(tile.x, tile.y, 1, 1);
+		renderer.setColor(Color.RED);
+		renderer.circle(cs.x, cs.y, .1f, 16);
 	}
 
 	@Override public boolean keyDown (int keycode) {
@@ -140,6 +212,15 @@ public class TiledPartitionV2Test extends BaseScreen {
 			break;
 		case Input.Keys.F4:
 			debugTileType = !debugTileType;
+			break;
+		case Input.Keys.F5:
+			drawDebugOverTile = !drawDebugOverTile;
+			break;
+		case Input.Keys.F6:
+			drawDebugSubRegions = !drawDebugSubRegions;
+			break;
+		case Input.Keys.F7:
+			drawAllEdges = !drawAllEdges;
 			break;
 		}
 		return super.keyDown(keycode);
@@ -168,9 +249,11 @@ public class TiledPartitionV2Test extends BaseScreen {
 				if (button == Input.Buttons.LEFT) {
 					tile.type++;
 					if (tile.type > 2) tile.type = 0;
+					tileMap.rebuild(tile.x, tile.y);;
 				} else if (button == Input.Buttons.RIGHT) {
 					tile.type--;
 					if (tile.type < 0) tile.type = 2;
+					tileMap.rebuild(tile.x, tile.y);;
 				}
 			}
 		}

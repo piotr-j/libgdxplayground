@@ -13,6 +13,8 @@ class Tile {
 	public Color color = new Color();
 	public Color tint = new Color();
 	public int type;
+	public MapRegion region;
+	public MapRegion.SubRegion subRegion;
 
 	public Tile (int id, int x, int y) {
 		this.id = id;

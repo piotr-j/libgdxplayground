@@ -16,7 +16,7 @@ class FloodFiller {
 	}
 
 	public static void floodFill (int x, int y, MapRegion region, TileMap tileMap, ObjectSet<Tile> out) {
-		floodFill(x, y, region.x, region.y, region.x + region.width - 1, region.y + region.height - 1, tileMap, out);
+		floodFill(x, y, region.x, region.y, region.x + region.size - 1, region.y + region.size - 1, tileMap, out);
 	}
 
 	private static Array<Tile> queue = new Array<>(false, 16);
