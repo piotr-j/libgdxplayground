@@ -5,6 +5,7 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.ObjectSet;
@@ -59,6 +60,7 @@ public class TiledPartitionV2Test extends BaseScreen {
 		super(game);
 
 		tileMap = new TileMap(map, MAP_WIDTH, MAP_HEIGHT, REGION_SIZE);
+		tileMap.rebuild();
 
 		gameCamera.position.set(VP_WIDTH / 2, VP_HEIGHT / 2, 0);
 
@@ -66,12 +68,14 @@ public class TiledPartitionV2Test extends BaseScreen {
 		Gdx.app.log("", "F3 - toggle draw debug flood fill, l click - ff all, r click - ff region");
 		Gdx.app.log("", "F4 - toggle debug tile type setter");
 		Gdx.app.log("", "F5 - toggle draw debug tile over mouse");
+		Gdx.app.log("", "F6 - toggle draw sub regions");
 	}
 
 	private boolean debugTileType = true;
 	private boolean drawDebugOverTile = true;
 	private boolean drawDebugPointer = false;
 	private boolean drawDebugFloodFill = false;
+	private boolean drawDebugSubRegions = false;
 	private Vector2 cs = new Vector2();
 	@Override public void render (float delta) {
 		super.render(delta);
@@ -85,6 +89,17 @@ public class TiledPartitionV2Test extends BaseScreen {
 			tile.render(renderer, delta);
 		}
 		drawDebugPointer();
+		if (drawDebugSubRegions) {
+			for (MapRegion region : tileMap.regions) {
+				for (MapRegion.SubRegion sub : region.subs) {
+					renderer.setColor(sub.color);
+					for (int id = 0; id < sub.tiles.size; id++) {
+						Tile tile = tileMap.getTile(sub.tiles.get(id));
+						renderer.rect(tile.x+.05f, tile.y+.05f, .9f, .9f);
+					}
+				}
+			}
+		}
 		if (drawDebugFloodFill) {
 			renderer.setColor(Color.GOLD);
 			renderer.getColor().a = .75f;
@@ -97,7 +112,7 @@ public class TiledPartitionV2Test extends BaseScreen {
 		renderer.begin(ShapeRenderer.ShapeType.Line);
 		renderer.setColor(Color.WHITE);
 		for (MapRegion region : tileMap.regions) {
-			renderer.rect(region.x, region.y, region.width, region.height);
+			renderer.rect(region.x, region.y, region.size, region.size);
 		}
 		if (drawDebugOverTile) {
 			renderer.setColor(Color.BLACK);
@@ -126,10 +141,10 @@ public class TiledPartitionV2Test extends BaseScreen {
 			}
 			renderer.getColor().a = 1f;
 			renderer.setColor(Color.MAGENTA);
-			renderer.rect(region.x, region.y, region.width, 0.25f);
-			renderer.rect(region.x, region.y, 0.25f, region.height);
-			renderer.rect(region.x + region.width - 0.25f, region.y, 0.25f, region.height);
-			renderer.rect(region.x, region.y + region.height - 0.25f, region.width, 0.25f);
+			renderer.rect(region.x, region.y, region.size, 0.25f);
+			renderer.rect(region.x, region.y, 0.25f, region.size);
+			renderer.rect(region.x + region.size - 0.25f, region.y, 0.25f, region.size);
+			renderer.rect(region.x, region.y + region.size - 0.25f, region.size, 0.25f);
 
 			Tile tile = tileMap.getTileAt(x, y);
 			if (tile == null) throw new AssertionError("Tile cant be null here!");
@@ -153,6 +168,9 @@ public class TiledPartitionV2Test extends BaseScreen {
 			break;
 		case Input.Keys.F5:
 			drawDebugOverTile = !drawDebugOverTile;
+			break;
+		case Input.Keys.F6:
+			drawDebugSubRegions = !drawDebugSubRegions;
 			break;
 		}
 		return super.keyDown(keycode);
@@ -181,9 +199,11 @@ public class TiledPartitionV2Test extends BaseScreen {
 				if (button == Input.Buttons.LEFT) {
 					tile.type++;
 					if (tile.type > 2) tile.type = 0;
+					tileMap.rebuild(tile.x, tile.y);;
 				} else if (button == Input.Buttons.RIGHT) {
 					tile.type--;
 					if (tile.type < 0) tile.type = 2;
+					tileMap.rebuild(tile.x, tile.y);;
 				}
 			}
 		}

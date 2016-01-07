@@ -23,7 +23,7 @@ class TileMap {
 		regions = new MapRegion[regionsX * regionsY];
 		for (int x = 0; x < regionsX; x++) {
 			for (int y = 0; y < regionsY; y++) {
-				MapRegion region = new MapRegion(x + y * regionsX, x * regionSize, y * regionSize, regionSize, regionSize);
+				MapRegion region = new MapRegion(x + y * regionsX, x * regionSize, y * regionSize, regionSize);
 				regions[region.id] = region;
 			}
 		}
@@ -63,5 +63,30 @@ class TileMap {
 
 	public Tile getTile (int id) {
 		return tiles[id];
+	}
+
+	/**
+	 * Rebuild all regions
+	 */
+	public void rebuild () {
+		for (MapRegion region : regions) {
+			region.rebuild(this);
+		}
+	}
+
+	/**
+	 * Rebuild region at x, y and surrounding
+	 */
+	public void rebuild (int x, int y) {
+		rebuildRegionAt(x, y);
+		rebuildRegionAt(x -regionSize, y);
+		rebuildRegionAt(x +regionSize, y);
+		rebuildRegionAt(x, y -regionSize);
+		rebuildRegionAt(x, y +regionSize);
+	}
+
+	private void rebuildRegionAt (int x, int y) {
+		MapRegion region = getRegionAt(x, y);
+		if (region!= null) region.rebuild(this);
 	}
 }
