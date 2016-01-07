@@ -23,6 +23,9 @@ class Tile {
 
 	public void setType (int type) {
 		this.type = type;
+	}
+
+	private void updateColor(int type) {
 		switch (type) {
 		case 0: // grass
 			color.set(0, 1, 0, 1);
@@ -37,6 +40,7 @@ class Tile {
 	}
 
 	public void render (ShapeRenderer renderer, float delta) {
+		updateColor(type);
 		renderer.setColor(color);
 		renderer.rect(x, y, 1, 1);
 	}

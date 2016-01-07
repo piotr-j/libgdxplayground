@@ -90,6 +90,7 @@ public class TiledPartitionV2Test extends BaseScreen {
 
 		Gdx.app.log("", "F2 - toggle draw debug pointer");
 		Gdx.app.log("", "F3 - toggle draw debug flood fill, l click - ff all, r click - ff region");
+		Gdx.app.log("", "F4 - toggle debug tile type setter");
 	}
 
 	private void addTileToRegion (Tile tile) {
@@ -110,6 +111,7 @@ public class TiledPartitionV2Test extends BaseScreen {
 		return tiles.get(x + y * MAP_WIDTH);
 	}
 
+	private boolean debugTileType = true;
 	private boolean drawDebugPointer = false;
 	private boolean drawDebugFloodFill = false;
 	private Vector2 cs = new Vector2();
@@ -253,6 +255,9 @@ public class TiledPartitionV2Test extends BaseScreen {
 		case Input.Keys.F3:
 			drawDebugFloodFill = !drawDebugFloodFill;
 			break;
+		case Input.Keys.F4:
+			debugTileType = !debugTileType;
+			break;
 		}
 		return super.keyDown(keycode);
 	}
@@ -273,6 +278,17 @@ public class TiledPartitionV2Test extends BaseScreen {
 				floodFill(x, y, region, found);
 			} else if (button == Input.Buttons.MIDDLE) {
 				found.clear();
+			}
+		} else if (debugTileType) {
+			Tile tile = getTileAt(x, y);
+			if (tile != null) {
+				if (button == Input.Buttons.LEFT) {
+					tile.type++;
+					if (tile.type > 2) tile.type = 0;
+				} else if (button == Input.Buttons.RIGHT) {
+					tile.type--;
+					if (tile.type < 0) tile.type = 2;
+				}
 			}
 		}
 		return true;
