@@ -5,11 +5,17 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.IntArray;
 import com.badlogic.gdx.utils.ObjectSet;
+import com.badlogic.gdx.utils.Pool;
 
 /**
  * Created by EvilEntity on 07/01/2016.
  */
 class MapRegion {
+	private static Pool<SubRegion> subRegionPool = new Pool<SubRegion>() {
+		@Override protected SubRegion newObject () {
+			return new SubRegion();
+		}
+	};
 	public int id;
 	public final int x;
 	public final int y;
@@ -39,13 +45,14 @@ class MapRegion {
 	private static ObjectSet<Tile> added = new ObjectSet<>();
 	public void rebuild (TileMap tileMap) {
 		added.clear();
+		subRegionPool.freeAll(subs);
 		subs.clear();
 		for (int tx = x; tx < x + size; tx++) {
 			for (int ty = y; ty < y + size; ty++) {
 				found.clear();
 				Tile tile = tileMap.getTileAt(tx, ty);
 				if (tile == null || added.contains(tile)) continue;
-				SubRegion sub = new SubRegion(subs.size);
+				SubRegion sub = subRegionPool.obtain().init(subs.size, this);
 				subs.add(sub);
 				FloodFiller.floodFill(tx, ty, this, tileMap, found);
 				added.addAll(found);
@@ -62,15 +69,19 @@ class MapRegion {
 		}
 	}
 
-	public class SubRegion {
+	public static class SubRegion implements Pool.Poolable{
 		public MapRegion parent;
 		public int id;
 		public IntArray tiles = new IntArray();
 		// used for debug rendering, kinda bad...
 		public final Color color = new Color(MathUtils.random(), MathUtils.random(), MathUtils.random(), .75f);
 
-		public SubRegion (int id) {
+		public SubRegion () {}
+
+		public SubRegion init(int id, MapRegion parent) {
 			this.id = id;
+			this.parent = parent;
+			return this;
 		}
 
 		public void rebuild(TileMap map) {
@@ -79,6 +90,12 @@ class MapRegion {
 
 		public void add (Tile t) {
 			tiles.add(t.id);
+		}
+
+		@Override public void reset () {
+			id = -1;
+			tiles.clear();
+			parent = null;
 		}
 	}
 }
