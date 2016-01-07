@@ -7,6 +7,8 @@ import com.badlogic.gdx.utils.IntArray;
 import com.badlogic.gdx.utils.ObjectSet;
 import com.badlogic.gdx.utils.Pool;
 
+import java.util.Comparator;
+
 /**
  * Created by EvilEntity on 07/01/2016.
  */
@@ -35,6 +37,7 @@ class MapRegion {
 			throw new AssertionError("Tile outside of region!");
 		// proper ids?
 		tiles.add(tile.id);
+		tile.region = this;
 	}
 
 	public boolean contains (float x, float y) {
@@ -69,10 +72,33 @@ class MapRegion {
 		}
 	}
 
-	public static class SubRegion implements Pool.Poolable{
+	public SubRegion getSubRegionAt (int x, int y) {
+		for (SubRegion sub : subs) {
+			if (sub.contains(x, y)) return sub;
+		}
+		return null;
+	}
+
+	public static class SubRegion implements Pool.Poolable {
+		private static Comparator<Tile> tileXComp = new Comparator<Tile>() {
+			@Override public int compare (Tile o1, Tile o2) {
+				if (o1.y == o2.y) return o1.x - o2.x;
+				return o1.y - o2.y;
+			}
+		};
+
+		private static Comparator<Tile> tileYComp = new Comparator<Tile>() {
+			@Override public int compare (Tile o1, Tile o2) {
+				if (o1.x == o2.x) return o1.y - o2.y;
+				return o1.x - o2.x;
+			}
+		};
+
 		public MapRegion parent;
 		public int id;
-		public IntArray tiles = new IntArray();
+		public int tileType;
+		public Array<Tile> tiles = new Array<>();
+		public IntArray edgeIds = new IntArray();
 		// used for debug rendering, kinda bad...
 		public final Color color = new Color(MathUtils.random(), MathUtils.random(), MathUtils.random(), .75f);
 
@@ -85,17 +111,122 @@ class MapRegion {
 		}
 
 		public void rebuild(TileMap map) {
+			map.clearEdges(this);
+			edgeIds.clear();
+			// tiles are sorted so it is easier to find next tile in order
+			tiles.sort(tileXComp);
+			findHorizontalEdges(map, -1, 0);
+			findHorizontalEdges(map, 1, 1);
+			tiles.sort(tileYComp);
+			findVerticalEdges(map, -1, 0);
+			findVerticalEdges(map, 1, 1);
+		}
 
+		private void findHorizontalEdges (TileMap map, int offsetY, int endOffsetY) {
+			// we need to find 2 types of edges, edges in this sub region, and edges in regions to the side
+			int id = 0;
+			// go over all tiles in this region
+			while (id < tiles.size) {
+				// first tile of this edge
+				Tile start = tiles.get(id);
+				// check if tile below this one belongs to this sub, if so go to next one
+				Tile next = map.getTileAt(start.x, start.y + offsetY);
+				// we are at the edge
+				if (next == null) {
+					id++;
+					continue;
+				}
+				// this should never be null, as we skip the bottom edge of the map
+				if (next.subRegion == this) {
+					id++;
+					continue;
+				}
+				int otherType = next.type;
+				Tile end = start;
+				// go in a given direction until we encounter a tile that doesnt match
+				for (int i = id + 1; i < tiles.size ; i++) {
+					Tile tile = tiles.get(i);
+					// next row, we are done
+					if (end.y != tile.y) break;
+					// next tile is not adjacent to last one
+					if (end.x + 1 != tile.x) break;
+					next = map.getTileAt(tile.x, tile.y + offsetY);
+					// we dont want edges inside the regions
+					if (next == null) break;
+					if (next.subRegion == this) break;
+					// if type of the other tile changes, we want an edge
+					if (otherType != next.type) break;
+					end = tile;
+					id = i;
+				}
+				int edge = map.setHorizontalEdge(this, start.x, start.y + endOffsetY, end.x - start.x + 1);
+				edgeIds.add(edge);
+				id++;
+			}
+		}
+
+		private void findVerticalEdges (TileMap map, int offsetX, int endOffsetX) {
+			// we need to find 2 types of edges, edges in this sub region, and edges in regions to the side
+			int id = 0;
+			// go over all tiles in this region
+			while (id < tiles.size) {
+				// first tile of this edge
+				Tile start = tiles.get(id);
+				// check if tile below this one belongs to this sub, if so go to next one
+				Tile next = map.getTileAt(start.x + offsetX, start.y);
+				// we are at the edge
+				if (next == null) {
+					id++;
+					continue;
+				}
+				// this should never be null, as we skip the bottom edge of the map
+				if (next.subRegion == this) {
+					id++;
+					continue;
+				}
+				int otherType = next.type;
+				Tile end = start;
+				// go in a given direction until we encounter a tile that doesnt match
+				for (int i = id + 1; i < tiles.size ; i++) {
+					Tile tile = tiles.get(i);
+					// next row, we are done
+					if (end.x != tile.x) break;
+					// next tile is not adjacent to last one
+					if (end.y + 1 != tile.y) break;
+					next = map.getTileAt(tile.x + offsetX, tile.y);
+					// we dont want edges inside the regions
+					if (next == null) break;
+					if (next.subRegion == this) break;
+					// if type of the other tile changes, we want an edge
+					if (otherType != next.type) break;
+					end = tile;
+					id = i;
+				}
+				int edge = map.setVerticalEdge(this, start.x + endOffsetX, start.y, end.y - start.y + 1);
+				edgeIds.add(edge);
+				id++;
+			}
 		}
 
 		public void add (Tile t) {
-			tiles.add(t.id);
+			tiles.add(t);
+			t.subRegion = this;
+			// we assume that all tiles in this sub region are of the same type
+			tileType = t.type;
 		}
 
 		@Override public void reset () {
 			id = -1;
+			tileType = -1;
 			tiles.clear();
 			parent = null;
+		}
+
+		public boolean contains (int x, int y) {
+			for (Tile tile : tiles) {
+				if (tile.x == x && tile.y == y) return true;
+			}
+			return false;
 		}
 	}
 }

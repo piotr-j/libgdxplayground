@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.utils.IntArray;
 import com.badlogic.gdx.utils.ObjectSet;
 import io.piotrjastrzebski.playground.BaseScreen;
 import io.piotrjastrzebski.playground.GameReset;
@@ -68,6 +69,7 @@ public class TiledPartitionV2Test extends BaseScreen {
 		Gdx.app.log("", "F4 - toggle debug tile type setter");
 		Gdx.app.log("", "F5 - toggle draw debug tile over mouse");
 		Gdx.app.log("", "F6 - toggle draw sub regions");
+		Gdx.app.log("", "F7 - toggle draw all edges");
 	}
 
 	private boolean debugTileType = true;
@@ -75,6 +77,7 @@ public class TiledPartitionV2Test extends BaseScreen {
 	private boolean drawDebugPointer = false;
 	private boolean drawDebugFloodFill = false;
 	private boolean drawDebugSubRegions = false;
+	private boolean drawAllEdges = false;
 	private Vector2 cs = new Vector2();
 	@Override public void render (float delta) {
 		super.render(delta);
@@ -95,6 +98,40 @@ public class TiledPartitionV2Test extends BaseScreen {
 		}
 		if (drawDebugFloodFill) {
 			drawFloodFill();
+		}
+		if (drawAllEdges) {
+			for (TileMap.Edge edge : tileMap.edges) {
+				renderer.setColor(edge.color);
+				renderer.rect(edge.x + .1f, edge.y + .1f, edge.horizontal ? edge.length - .2f : .8f,
+					edge.horizontal ? .8f : edge.length - .2f);
+			}
+		}
+
+		int x = (int)cs.x;
+		int y = (int)cs.y;
+		MapRegion.SubRegion sub = tileMap.getSubRegionAt(x, y);
+		if (sub != null) {
+			renderer.setColor(sub.color);
+			for (Tile tile : sub.tiles) {
+				renderer.rect(tile.x+.05f, tile.y+.05f, .9f, .9f);
+			}
+			IntArray ids = sub.edgeIds;
+			for (int i = 0; i < ids.size; i++) {
+				TileMap.Edge edge = tileMap.getEdge(ids.get(i));
+				for (MapRegion.SubRegion region : edge.subRegions) {
+					if (region == sub) continue;
+					if (region.tileType != sub.tileType) continue;
+					renderer.setColor(sub.color);
+					renderer.getColor().a = .5f;
+					for (Tile tile : region.tiles) {
+						renderer.rect(tile.x+.05f, tile.y+.05f, .9f, .9f);
+					}
+				}
+//				renderer.setColor(edge.color);
+//				renderer.rect(edge.x + .1f, edge.y + .1f, edge.horizontal ? edge.length - .2f : .8f,
+//					edge.horizontal ? .8f : edge.length - .2f);
+			}
+
 		}
 		renderer.end();
 
@@ -129,8 +166,7 @@ public class TiledPartitionV2Test extends BaseScreen {
 		for (MapRegion region : tileMap.regions) {
 			for (MapRegion.SubRegion sub : region.subs) {
 				renderer.setColor(sub.color);
-				for (int id = 0; id < sub.tiles.size; id++) {
-					Tile tile = tileMap.getTile(sub.tiles.get(id));
+				for (Tile tile : sub.tiles) {
 					renderer.rect(tile.x+.05f, tile.y+.05f, .9f, .9f);
 				}
 			}
@@ -182,6 +218,9 @@ public class TiledPartitionV2Test extends BaseScreen {
 			break;
 		case Input.Keys.F6:
 			drawDebugSubRegions = !drawDebugSubRegions;
+			break;
+		case Input.Keys.F7:
+			drawAllEdges = !drawAllEdges;
 			break;
 		}
 		return super.keyDown(keycode);
