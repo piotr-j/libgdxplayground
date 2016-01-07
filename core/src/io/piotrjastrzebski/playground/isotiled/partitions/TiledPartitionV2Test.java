@@ -5,7 +5,6 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.ObjectSet;
@@ -88,24 +87,14 @@ public class TiledPartitionV2Test extends BaseScreen {
 		for (Tile tile : tileMap.tiles) {
 			tile.render(renderer, delta);
 		}
-		drawDebugPointer();
+		if (drawDebugPointer) {
+			drawDebugPointer();
+		}
 		if (drawDebugSubRegions) {
-			for (MapRegion region : tileMap.regions) {
-				for (MapRegion.SubRegion sub : region.subs) {
-					renderer.setColor(sub.color);
-					for (int id = 0; id < sub.tiles.size; id++) {
-						Tile tile = tileMap.getTile(sub.tiles.get(id));
-						renderer.rect(tile.x+.05f, tile.y+.05f, .9f, .9f);
-					}
-				}
-			}
+			drawSubRegions();
 		}
 		if (drawDebugFloodFill) {
-			renderer.setColor(Color.GOLD);
-			renderer.getColor().a = .75f;
-			for (Tile tile : found) {
-				renderer.rect(tile.x + .025f, tile.y + .025f, .95f, .95f);
-			}
+			drawFloodFill();
 		}
 		renderer.end();
 
@@ -115,44 +104,66 @@ public class TiledPartitionV2Test extends BaseScreen {
 			renderer.rect(region.x, region.y, region.size, region.size);
 		}
 		if (drawDebugOverTile) {
-			renderer.setColor(Color.BLACK);
-			Tile tile = tileMap.getTileAt((int)cs.x, (int)cs.y);
-			if (tile != null) {
-				renderer.rect(tile.x, tile.y, 1, 1);
-			}
+			drawTileOver();
 		}
 		renderer.end();
+	}
+
+	private void drawTileOver () {
+		renderer.setColor(Color.BLACK);
+		Tile tile = tileMap.getTileAt((int)cs.x, (int)cs.y);
+		if (tile != null) {
+			renderer.rect(tile.x, tile.y, 1, 1);
+		}
+	}
+
+	private void drawFloodFill () {
+		renderer.setColor(Color.GOLD);
+		renderer.getColor().a = .75f;
+		for (Tile tile : found) {
+			renderer.rect(tile.x + .025f, tile.y + .025f, .95f, .95f);
+		}
+	}
+
+	private void drawSubRegions () {
+		for (MapRegion region : tileMap.regions) {
+			for (MapRegion.SubRegion sub : region.subs) {
+				renderer.setColor(sub.color);
+				for (int id = 0; id < sub.tiles.size; id++) {
+					Tile tile = tileMap.getTile(sub.tiles.get(id));
+					renderer.rect(tile.x+.05f, tile.y+.05f, .9f, .9f);
+				}
+			}
+		}
 	}
 
 	private ObjectSet<Tile> found = new ObjectSet<>();
 
 	private void drawDebugPointer () {
-		if (drawDebugPointer) {
-			int x = (int)cs.x;
-			int y = (int)cs.y;
+		int x = (int)cs.x;
+		int y = (int)cs.y;
 
-			MapRegion region = tileMap.getRegionAt(x, y);
-			if (region == null) throw new AssertionError("Region cant be null here!");
-			renderer.setColor(Color.MAGENTA);
-			renderer.getColor().a = .5f;
-			for (int id = 0; id < region.tiles.size; id++) {
-				Tile tile = tileMap.getTile(region.tiles.get(id));
-				renderer.rect(tile.x+.05f, tile.y+.05f, .9f, .9f);
-			}
-			renderer.getColor().a = 1f;
-			renderer.setColor(Color.MAGENTA);
-			renderer.rect(region.x, region.y, region.size, 0.25f);
-			renderer.rect(region.x, region.y, 0.25f, region.size);
-			renderer.rect(region.x + region.size - 0.25f, region.y, 0.25f, region.size);
-			renderer.rect(region.x, region.y + region.size - 0.25f, region.size, 0.25f);
-
-			Tile tile = tileMap.getTileAt(x, y);
-			if (tile == null) throw new AssertionError("Tile cant be null here!");
-			renderer.setColor(Color.PINK);
-			renderer.rect(tile.x, tile.y, 1, 1);
-			renderer.setColor(Color.RED);
-			renderer.circle(cs.x, cs.y, .1f, 16);
+		MapRegion region = tileMap.getRegionAt(x, y);
+		if (region == null) throw new AssertionError("Region cant be null here!");
+		renderer.setColor(Color.MAGENTA);
+		renderer.getColor().a = .5f;
+		for (int id = 0; id < region.tiles.size; id++) {
+			Tile tile = tileMap.getTile(region.tiles.get(id));
+			renderer.rect(tile.x+.05f, tile.y+.05f, .9f, .9f);
 		}
+		renderer.getColor().a = 1f;
+		renderer.setColor(Color.MAGENTA);
+		renderer.rect(region.x, region.y, region.size, 0.25f);
+		renderer.rect(region.x, region.y, 0.25f, region.size);
+		renderer.rect(region.x + region.size - 0.25f, region.y, 0.25f, region.size);
+		renderer.rect(region.x, region.y + region.size - 0.25f, region.size, 0.25f);
+
+		Tile tile = tileMap.getTileAt(x, y);
+		if (tile == null) throw new AssertionError("Tile cant be null here!");
+		renderer.setColor(Color.PINK);
+		renderer.rect(tile.x, tile.y, 1, 1);
+		renderer.setColor(Color.RED);
+		renderer.circle(cs.x, cs.y, .1f, 16);
 	}
 
 	@Override public boolean keyDown (int keycode) {
