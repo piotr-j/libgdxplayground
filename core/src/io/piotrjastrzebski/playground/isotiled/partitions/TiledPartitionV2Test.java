@@ -65,9 +65,11 @@ public class TiledPartitionV2Test extends BaseScreen {
 		Gdx.app.log("", "F2 - toggle draw debug pointer");
 		Gdx.app.log("", "F3 - toggle draw debug flood fill, l click - ff all, r click - ff region");
 		Gdx.app.log("", "F4 - toggle debug tile type setter");
+		Gdx.app.log("", "F5 - toggle draw debug tile over mouse");
 	}
 
 	private boolean debugTileType = true;
+	private boolean drawDebugOverTile = true;
 	private boolean drawDebugPointer = false;
 	private boolean drawDebugFloodFill = false;
 	private Vector2 cs = new Vector2();
@@ -93,9 +95,16 @@ public class TiledPartitionV2Test extends BaseScreen {
 		renderer.end();
 
 		renderer.begin(ShapeRenderer.ShapeType.Line);
-		renderer.setColor(Color.CYAN);
+		renderer.setColor(Color.WHITE);
 		for (MapRegion region : tileMap.regions) {
 			region.render(renderer, delta);
+		}
+		if (drawDebugOverTile) {
+			renderer.setColor(Color.BLACK);
+			Tile tile = tileMap.getTileAt((int)cs.x, (int)cs.y);
+			if (tile != null) {
+				renderer.rect(tile.x, tile.y, 1, 1);
+			}
 		}
 		renderer.end();
 	}
@@ -140,6 +149,9 @@ public class TiledPartitionV2Test extends BaseScreen {
 			break;
 		case Input.Keys.F4:
 			debugTileType = !debugTileType;
+			break;
+		case Input.Keys.F5:
+			drawDebugOverTile = !drawDebugOverTile;
 			break;
 		}
 		return super.keyDown(keycode);
