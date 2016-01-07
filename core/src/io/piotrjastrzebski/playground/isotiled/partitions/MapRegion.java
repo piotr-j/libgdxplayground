@@ -56,6 +56,12 @@ class MapRegion {
 		}
 	}
 
+	public void rebuildSubRegions(TileMap tileMap) {
+		for (SubRegion sub : subs) {
+			sub.rebuild(tileMap);
+		}
+	}
+
 	public class SubRegion {
 		public MapRegion parent;
 		public int id;
@@ -65,6 +71,10 @@ class MapRegion {
 
 		public SubRegion (int id) {
 			this.id = id;
+		}
+
+		public void rebuild(TileMap map) {
+
 		}
 
 		public void add (Tile t) {

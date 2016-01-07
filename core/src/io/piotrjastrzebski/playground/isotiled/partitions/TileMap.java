@@ -1,5 +1,7 @@
 package io.piotrjastrzebski.playground.isotiled.partitions;
 
+import com.badlogic.gdx.utils.Array;
+
 /**
  * Created by EvilEntity on 07/01/2016.
  */
@@ -64,13 +66,25 @@ class TileMap {
 	public Tile getTile (int id) {
 		return tiles[id];
 	}
-
+	private Array<MapRegion> rebuildQueue = new Array<>();
 	/**
 	 * Rebuild all regions
 	 */
 	public void rebuild () {
+		rebuildQueue.clear();
 		for (MapRegion region : regions) {
+			rebuildQueue.add(region);
+		}
+		execRebuild();
+	}
+
+	private void execRebuild() {
+		for (MapRegion region : rebuildQueue) {
 			region.rebuild(this);
+		}
+		// note this is separate as it depends on surrounding regions being updated
+		for (MapRegion region : rebuildQueue) {
+			region.rebuildSubRegions(this);
 		}
 	}
 
@@ -78,15 +92,17 @@ class TileMap {
 	 * Rebuild region at x, y and surrounding
 	 */
 	public void rebuild (int x, int y) {
+		rebuildQueue.clear();
 		rebuildRegionAt(x, y);
 		rebuildRegionAt(x -regionSize, y);
 		rebuildRegionAt(x +regionSize, y);
 		rebuildRegionAt(x, y -regionSize);
 		rebuildRegionAt(x, y +regionSize);
+		execRebuild();
 	}
 
 	private void rebuildRegionAt (int x, int y) {
 		MapRegion region = getRegionAt(x, y);
-		if (region!= null) region.rebuild(this);
+		if (region != null) rebuildQueue.add(region);
 	}
 }
