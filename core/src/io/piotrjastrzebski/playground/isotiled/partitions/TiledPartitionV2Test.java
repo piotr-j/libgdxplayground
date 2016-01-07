@@ -1,22 +1,16 @@
-package io.piotrjastrzebski.playground.isotiled;
+package io.piotrjastrzebski.playground.isotiled.partitions;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.IntMap;
 import com.badlogic.gdx.utils.ObjectSet;
 import io.piotrjastrzebski.playground.BaseScreen;
 import io.piotrjastrzebski.playground.GameReset;
 import io.piotrjastrzebski.playground.PlaygroundGame;
-
-import java.util.Comparator;
 
 /**
  * Created by EvilEntity on 07/06/2015.
@@ -59,101 +53,96 @@ public class TiledPartitionV2Test extends BaseScreen {
 		0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 1,  1, 1, 1, 1, 1, 1, 1, 1,  1, 1, 1, 1, 1, 1, 1, 1,
 	};
 
-	Array<Tile> tiles = new Array<>();
+	TileMap tileMap;
 
 	public TiledPartitionV2Test (GameReset game) {
 		super(game);
-		for (int y = 0; y < MAP_HEIGHT; y++) {
-			for (int x = 0; x < MAP_WIDTH; x++) {
-				Tile tile = new Tile(x + y * MAP_WIDTH, x, y);
-				tile.setType(map[x + (MAP_HEIGHT - 1 - y) * MAP_WIDTH]);
-				tiles.add(tile);
-			}
-		}
+
+		tileMap = new TileMap(map, MAP_WIDTH, MAP_HEIGHT, REGION_SIZE);
+
 		gameCamera.position.set(VP_WIDTH / 2, VP_HEIGHT / 2, 0);
 
+		Gdx.app.log("", "F2 - toggle draw debug pointer");
+		Gdx.app.log("", "F3 - toggle draw debug flood fill, l click - ff all, r click - ff region");
+		Gdx.app.log("", "F4 - toggle debug tile type setter");
 	}
 
+	private boolean debugTileType = true;
+	private boolean drawDebugPointer = false;
+	private boolean drawDebugFloodFill = false;
 	private Vector2 cs = new Vector2();
 	@Override public void render (float delta) {
 		super.render(delta);
 
 		Gdx.gl.glEnable(GL20.GL_BLEND);
 		Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+
 		renderer.setProjectionMatrix(gameCamera.combined);
 		renderer.begin(ShapeRenderer.ShapeType.Filled);
-		for (Tile tile : tiles) {
+		for (Tile tile : tileMap.tiles) {
 			tile.render(renderer, delta);
 		}
-
-		renderer.end();
-
-	}
-
-
-	private class Tile {
-		public int id;
-		public int x;
-		public int y;
-		public Rectangle bounds = new Rectangle();
-		public Color color = new Color();
-		public Color tint = new Color();
-		public int type;
-
-		public Tile (int id, int x, int y) {
-			this.id = id;
-			this.x = x;
-			this.y = y;
-			bounds.set(x, y, 1, 1);
-			setType(0);
-		}
-
-		public void setType (int type) {
-			this.type = type;
-			switch (type) {
-			case 0: // grass
-				// some variation so we know wtf is going on
-//				color.set(.1f, MathUtils.random(0.7f, .9f), MathUtils.random(.1f, .2f), 1);
-				color.set(0, 1, 0, 1);
-				break;
-			case 1: // wall
-				color.set(Color.FIREBRICK);
-				break;
-			case 2: // door
-				color.set(1f, .8f, .6f, 1);
-				break;
+		drawDebugPointer();
+		if (drawDebugFloodFill) {
+			renderer.setColor(Color.GOLD);
+			renderer.getColor().a = .75f;
+			for (Tile tile : found) {
+				renderer.rect(tile.x + .025f, tile.y + .025f, .95f, .95f);
 			}
 		}
+		renderer.end();
 
-		Color tmp = new Color();
-		float a;
-		public void render(ShapeRenderer renderer, float delta) {
-			a = MathUtils.clamp(a -= 2f*delta, 0, 1);
-			renderer.setColor(tmp.set(color).lerp(tint, a));
-			renderer.rect(x, y, 1, 1);
+		renderer.begin(ShapeRenderer.ShapeType.Line);
+		renderer.setColor(Color.CYAN);
+		for (MapRegion region : tileMap.regions) {
+			region.render(renderer, delta);
 		}
+		renderer.end();
+	}
 
-		public void setColor(Color color){
-			this.color.set(color);
+	private ObjectSet<Tile> found = new ObjectSet<>();
+
+	private void drawDebugPointer () {
+		if (drawDebugPointer) {
+			int x = (int)cs.x;
+			int y = (int)cs.y;
+
+			MapRegion region = tileMap.getRegionAt(x, y);
+			if (region == null) throw new AssertionError("Region cant be null here!");
+			renderer.setColor(Color.MAGENTA);
+			renderer.getColor().a = .5f;
+			for (Tile tile : region.tiles) {
+				renderer.rect(tile.x+.05f, tile.y+.05f, .9f, .9f);
+			}
+			renderer.getColor().a = 1f;
+			renderer.setColor(Color.MAGENTA);
+			renderer.rect(region.x, region.y, region.width, 0.25f);
+			renderer.rect(region.x, region.y, 0.25f, region.height);
+			renderer.rect(region.x + region.width - 0.25f, region.y, 0.25f, region.height);
+			renderer.rect(region.x, region.y + region.height - 0.25f, region.width, 0.25f);
+
+			Tile tile = tileMap.getTileAt(x, y);
+			if (tile == null) throw new AssertionError("Tile cant be null here!");
+			renderer.setColor(Color.PINK);
+			renderer.rect(tile.x, tile.y, 1, 1);
+			renderer.setColor(Color.RED);
+			renderer.circle(cs.x, cs.y, .1f, 16);
 		}
+	}
 
-		@Override public String toString () {
-			return "Tile{" +x + ", " + y + ", id="+id+"}";
+	@Override public boolean keyDown (int keycode) {
+		switch (keycode) {
+		case Input.Keys.F2:
+			drawDebugPointer = !drawDebugPointer;
+			break;
+		case Input.Keys.F3:
+			drawDebugFloodFill = !drawDebugFloodFill;
+			break;
+		case Input.Keys.F4:
+			debugTileType = !debugTileType;
+			break;
 		}
-
-		@Override public boolean equals (Object o) {
-			if (this == o)
-				return true;
-			if (o == null || getClass() != o.getClass())
-				return false;
-
-			Tile tile = (Tile)o;
-			return id == tile.id;
-		}
-
-		@Override public int hashCode () {
-			return id;
-		}
+		return super.keyDown(keycode);
 	}
 
 	private Vector3 temp = new Vector3();
@@ -161,12 +150,29 @@ public class TiledPartitionV2Test extends BaseScreen {
 		// fairly dumb
 		gameCamera.unproject(temp.set(screenX, screenY, 0));
 		cs.set(temp.x, temp.y);
-		if (button == Input.Buttons.LEFT) {
-
-		} else if (button == Input.Buttons.RIGHT) {
-
-		} else if (button == Input.Buttons.MIDDLE) {
-
+		int x = (int)cs.x;
+		int y = (int)cs.y;
+		// need to change type or something
+		if (drawDebugFloodFill) {
+			if (button == Input.Buttons.LEFT) {
+				FloodFiller.floodFill(x, y, tileMap, found);
+			} else if (button == Input.Buttons.RIGHT) {
+				MapRegion region = tileMap.getRegionAt(x, y);
+				FloodFiller.floodFill(x, y, region, tileMap, found);
+			} else if (button == Input.Buttons.MIDDLE) {
+				found.clear();
+			}
+		} else if (debugTileType) {
+			Tile tile = tileMap.getTileAt(x, y);
+			if (tile != null) {
+				if (button == Input.Buttons.LEFT) {
+					tile.type++;
+					if (tile.type > 2) tile.type = 0;
+				} else if (button == Input.Buttons.RIGHT) {
+					tile.type--;
+					if (tile.type < 0) tile.type = 2;
+				}
+			}
 		}
 		return true;
 	}
