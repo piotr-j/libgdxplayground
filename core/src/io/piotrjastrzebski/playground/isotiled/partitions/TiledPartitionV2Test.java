@@ -88,7 +88,8 @@ public class TiledPartitionV2Test extends BaseScreen {
 
 		gameCamera.position.set(VP_WIDTH / 2, VP_HEIGHT / 2, 0);
 
-		Gdx.app.log("", "F1 - toggle draw debug pounter");
+		Gdx.app.log("", "F2 - toggle draw debug pointer");
+		Gdx.app.log("", "F3 - toggle draw debug flood fill, l click - ff all, r click - ff region");
 	}
 
 	private void addTileToRegion (Tile tile) {
@@ -110,6 +111,7 @@ public class TiledPartitionV2Test extends BaseScreen {
 	}
 
 	private boolean drawDebugPointer = false;
+	private boolean drawDebugFloodFill = false;
 	private Vector2 cs = new Vector2();
 	@Override public void render (float delta) {
 		super.render(delta);
@@ -123,10 +125,12 @@ public class TiledPartitionV2Test extends BaseScreen {
 			tile.render(renderer, delta);
 		}
 		drawDebugPointer();
-		renderer.setColor(Color.GOLD);
-		renderer.getColor().a = .75f;
-		for (Tile tile : found) {
-			renderer.rect(tile.x + .025f, tile.y + .025f, .95f, .95f);
+		if (drawDebugFloodFill) {
+			renderer.setColor(Color.GOLD);
+			renderer.getColor().a = .75f;
+			for (Tile tile : found) {
+				renderer.rect(tile.x + .025f, tile.y + .025f, .95f, .95f);
+			}
 		}
 		renderer.end();
 
@@ -243,8 +247,11 @@ public class TiledPartitionV2Test extends BaseScreen {
 
 	@Override public boolean keyDown (int keycode) {
 		switch (keycode) {
-		case Input.Keys.F1:
+		case Input.Keys.F2:
 			drawDebugPointer = !drawDebugPointer;
+			break;
+		case Input.Keys.F3:
+			drawDebugFloodFill = !drawDebugFloodFill;
 			break;
 		}
 		return super.keyDown(keycode);
@@ -258,13 +265,15 @@ public class TiledPartitionV2Test extends BaseScreen {
 		int x = (int)cs.x;
 		int y = (int)cs.y;
 		// need to change type or something
-		if (button == Input.Buttons.LEFT) {
-			floodFill(x, y, found);
-		} else if (button == Input.Buttons.RIGHT) {
-			MapRegion region = getRegionAt(x, y);
-			floodFill(x, y, region, found);
-		} else if (button == Input.Buttons.MIDDLE) {
-			found.clear();
+		if (drawDebugFloodFill) {
+			if (button == Input.Buttons.LEFT) {
+				floodFill(x, y, found);
+			} else if (button == Input.Buttons.RIGHT) {
+				MapRegion region = getRegionAt(x, y);
+				floodFill(x, y, region, found);
+			} else if (button == Input.Buttons.MIDDLE) {
+				found.clear();
+			}
 		}
 		return true;
 	}
