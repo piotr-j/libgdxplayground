@@ -60,4 +60,8 @@ class TileMap {
 			throw new AssertionError("Region cant be null here!");
 		region.addTile(tile);
 	}
+
+	public Tile getTile (int id) {
+		return tiles[id];
+	}
 }

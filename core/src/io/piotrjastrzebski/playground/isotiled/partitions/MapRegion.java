@@ -1,7 +1,7 @@
 package io.piotrjastrzebski.playground.isotiled.partitions;
 
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.IntArray;
 
 /**
  * Created by EvilEntity on 07/01/2016.
@@ -12,7 +12,8 @@ class MapRegion {
 	public final int y;
 	public final int width;
 	public final int height;
-	public Array<Tile> tiles = new Array<>();
+	public IntArray tiles = new IntArray();
+	public Array<SubRegion> subRegions = new Array<>();
 
 	public MapRegion (int id, int x, int y, int width, int height) {
 		this.id = id;
@@ -26,14 +27,14 @@ class MapRegion {
 		if (!contains(tile.x, tile.y))
 			throw new AssertionError("Tile outside of region!");
 		// proper ids?
-		tiles.add(tile);
+		tiles.add(tile.id);
 	}
 
 	public boolean contains (float x, float y) {
 		return this.x <= x && this.x + width >= x && this.y <= y && this.y + height >= y;
 	}
 
-	public void render (ShapeRenderer renderer, float delta) {
-		renderer.rect(x, y, width, height);
+	public class SubRegion {
+		public MapRegion parent;
 	}
 }

@@ -97,7 +97,7 @@ public class TiledPartitionV2Test extends BaseScreen {
 		renderer.begin(ShapeRenderer.ShapeType.Line);
 		renderer.setColor(Color.WHITE);
 		for (MapRegion region : tileMap.regions) {
-			region.render(renderer, delta);
+			renderer.rect(region.x, region.y, region.width, region.height);
 		}
 		if (drawDebugOverTile) {
 			renderer.setColor(Color.BLACK);
@@ -120,7 +120,8 @@ public class TiledPartitionV2Test extends BaseScreen {
 			if (region == null) throw new AssertionError("Region cant be null here!");
 			renderer.setColor(Color.MAGENTA);
 			renderer.getColor().a = .5f;
-			for (Tile tile : region.tiles) {
+			for (int id = 0; id < region.tiles.size; id++) {
+				Tile tile = tileMap.getTile(region.tiles.get(id));
 				renderer.rect(tile.x+.05f, tile.y+.05f, .9f, .9f);
 			}
 			renderer.getColor().a = 1f;
