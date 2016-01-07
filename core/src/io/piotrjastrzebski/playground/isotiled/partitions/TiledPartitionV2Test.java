@@ -126,7 +126,7 @@ public class TiledPartitionV2Test extends BaseScreen {
 		renderer.setColor(Color.GOLD);
 		renderer.getColor().a = .75f;
 		for (Tile tile : found) {
-			renderer.rect(tile.x, tile.y, 1, 1);
+			renderer.rect(tile.x + .025f, tile.y + .025f, .95f, .95f);
 		}
 		renderer.end();
 
