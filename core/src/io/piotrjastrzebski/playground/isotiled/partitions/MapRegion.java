@@ -2,10 +2,7 @@ package io.piotrjastrzebski.playground.isotiled.partitions;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.IntArray;
-import com.badlogic.gdx.utils.ObjectSet;
-import com.badlogic.gdx.utils.Pool;
+import com.badlogic.gdx.utils.*;
 
 import java.util.Comparator;
 
@@ -33,14 +30,14 @@ class MapRegion {
 	}
 
 	public void addTile (Tile tile) {
-		if (!contains(tile.x, tile.y))
+		if (!isInBounds(tile.x, tile.y))
 			throw new AssertionError("Tile outside of region!");
 		// proper ids?
 		tiles.add(tile.id);
 		tile.region = this;
 	}
 
-	public boolean contains (float x, float y) {
+	public boolean isInBounds (int x, int y) {
 		return this.x <= x && this.x + size >= x && this.y <= y && this.y + size >= y;
 	}
 
@@ -98,6 +95,8 @@ class MapRegion {
 		public int id;
 		public int tileType;
 		public Array<Tile> tiles = new Array<>();
+		/** contains localized ids for tiles in this sub region */
+		private IntSet tilePositions = new IntSet();
 		public IntArray edgeIds = new IntArray();
 		// used for debug rendering, kinda bad...
 		public final Color color = new Color(MathUtils.random(), MathUtils.random(), MathUtils.random(), .75f);
@@ -112,7 +111,6 @@ class MapRegion {
 
 		public void rebuild(TileMap map) {
 			map.clearEdges(this);
-			edgeIds.clear();
 			// tiles are sorted so it is easier to find next tile in order
 			tiles.sort(tileXComp);
 			findHorizontalEdges(map, -1, 0);
@@ -124,109 +122,118 @@ class MapRegion {
 
 		private void findHorizontalEdges (TileMap map, int offsetY, int endOffsetY) {
 			// we need to find 2 types of edges, edges in this sub region, and edges in regions to the side
-			int id = 0;
+			int currentId = 0;
 			// go over all tiles in this region
-			while (id < tiles.size) {
+			while (currentId < tiles.size) {
 				// first tile of this edge
-				Tile start = tiles.get(id);
+				Tile start = tiles.get(currentId);
 				// check if tile below this one belongs to this sub, if so go to next one
 				Tile next = map.getTileAt(start.x, start.y + offsetY);
 				// we are at the edge
 				if (next == null) {
-					id++;
+					currentId++;
 					continue;
 				}
 				// this should never be null, as we skip the bottom edge of the map
 				if (next.subRegion == this) {
-					id++;
+					currentId++;
 					continue;
 				}
 				int otherType = next.type;
 				Tile end = start;
 				// go in a given direction until we encounter a tile that doesnt match
-				for (int i = id + 1; i < tiles.size ; i++) {
+				for (int i = currentId + 1; i < tiles.size ; i++) {
 					Tile tile = tiles.get(i);
 					// next row, we are done
 					if (end.y != tile.y) break;
 					// next tile is not adjacent to last one
 					if (end.x + 1 != tile.x) break;
 					next = map.getTileAt(tile.x, tile.y + offsetY);
-					// we dont want edges inside the regions
+					// no tile, its at the map bounds
 					if (next == null) break;
+					// we dont want edges inside the regions
 					if (next.subRegion == this) break;
 					// if type of the other tile changes, we want an edge
 					if (otherType != next.type) break;
 					end = tile;
-					id = i;
+					currentId = i;
 				}
 				int edge = map.setHorizontalEdge(this, start.x, start.y + endOffsetY, end.x - start.x + 1);
 				edgeIds.add(edge);
-				id++;
+				currentId++;
 			}
 		}
 
 		private void findVerticalEdges (TileMap map, int offsetX, int endOffsetX) {
 			// we need to find 2 types of edges, edges in this sub region, and edges in regions to the side
-			int id = 0;
+			int currentId = 0;
 			// go over all tiles in this region
-			while (id < tiles.size) {
+			while (currentId < tiles.size) {
 				// first tile of this edge
-				Tile start = tiles.get(id);
+				Tile start = tiles.get(currentId);
 				// check if tile below this one belongs to this sub, if so go to next one
 				Tile next = map.getTileAt(start.x + offsetX, start.y);
 				// we are at the edge
 				if (next == null) {
-					id++;
+					currentId++;
 					continue;
 				}
 				// this should never be null, as we skip the bottom edge of the map
 				if (next.subRegion == this) {
-					id++;
+					currentId++;
 					continue;
 				}
 				int otherType = next.type;
 				Tile end = start;
 				// go in a given direction until we encounter a tile that doesnt match
-				for (int i = id + 1; i < tiles.size ; i++) {
+				for (int i = currentId + 1; i < tiles.size ; i++) {
 					Tile tile = tiles.get(i);
 					// next row, we are done
 					if (end.x != tile.x) break;
 					// next tile is not adjacent to last one
 					if (end.y + 1 != tile.y) break;
 					next = map.getTileAt(tile.x + offsetX, tile.y);
-					// we dont want edges inside the regions
+					// no tile, its at the map bounds
 					if (next == null) break;
+					// we dont want edges inside the regions
 					if (next.subRegion == this) break;
 					// if type of the other tile changes, we want an edge
 					if (otherType != next.type) break;
 					end = tile;
-					id = i;
+					currentId = i;
 				}
 				int edge = map.setVerticalEdge(this, start.x + endOffsetX, start.y, end.y - start.y + 1);
 				edgeIds.add(edge);
-				id++;
+				currentId++;
 			}
 		}
 
-		public void add (Tile t) {
-			tiles.add(t);
-			t.subRegion = this;
+		public void add (Tile tile) {
+			if (tiles.contains(tile, true)) throw new AssertionError("Tile already added!");
+			tiles.add(tile);
+			tile.subRegion = this;
 			// we assume that all tiles in this sub region are of the same type
-			tileType = t.type;
+			tileType = tile.type;
+			tilePositions.add(toLocalId(tile.x, tile.y));
 		}
 
 		@Override public void reset () {
 			id = -1;
 			tileType = -1;
 			tiles.clear();
+			tilePositions.clear();
 			parent = null;
 		}
 
+		/**
+		 * Translate global coordinates to local id
+		 */
+		private int toLocalId(int x, int y) {
+			return (x - parent.x) + (y - parent.y) * parent.size;
+		}
+
 		public boolean contains (int x, int y) {
-			for (Tile tile : tiles) {
-				if (tile.x == x && tile.y == y) return true;
-			}
-			return false;
+			return parent.isInBounds(x, y) && tilePositions.contains(toLocalId(x, y));
 		}
 	}
 }

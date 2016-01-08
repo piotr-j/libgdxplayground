@@ -122,6 +122,7 @@ class TileMap {
 				Edge.free(edge);
 			}
 		}
+		region.edgeIds.clear();
 	}
 
 	private Edge getEdge(int x, int y, int length, boolean horizontal) {
