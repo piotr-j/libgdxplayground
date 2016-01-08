@@ -157,10 +157,13 @@ class TileMap {
 		return region.getSubRegionAt(x, y);
 	}
 
+	private final static int MAX_LENGTH = (int)Math.pow(2, 4);
+	private final static int MAX_X = (int)Math.pow(2, 13);
+	private final static int MAX_Y = (int)Math.pow(2, 13);
 	private int packEdgeId(int x, int y, int length, boolean horizontal) {
-		if (length >= 16) throw new AssertionError("Length >= 16");
-		if (x >= 8192) throw new AssertionError("x > 8192");
-		if (y >= 8192) throw new AssertionError("y > 8192");
+		if (length >= MAX_LENGTH) throw new AssertionError("Length >= " + MAX_LENGTH);
+		if (x >= MAX_X) throw new AssertionError("x >= " + MAX_X);
+		if (y >= MAX_Y) throw new AssertionError("y >= " + MAX_Y);
 		// pack data into unique id
 		// 1 bit - hor/vert, << 30
 		// 4 bits - len, max 16 lets say << 26
