@@ -3,6 +3,7 @@ package io.piotrjastrzebski.playground.isotiled.partitions;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.IntArray;
 import com.badlogic.gdx.utils.IntMap;
 import com.badlogic.gdx.utils.Pool;
 
@@ -175,6 +176,36 @@ class TileMap {
 
 	public Edge getEdge (int id) {
 		return idToEdge.get(id, null);
+	}
+
+	/**
+	 * find all regions connected to the one at x, y, with specified degree of separation
+	 */
+	public Array<MapRegion.SubRegion> getConnectedSubsAt (int x, int y, int dos, Array<MapRegion.SubRegion> out) {
+		if (dos <= 0) return out;
+		MapRegion.SubRegion region = getSubRegionAt(x, y);
+		if (region == null) return out;
+		return getConnectedSubsTo(region, dos, out);
+	}
+
+	public Array<MapRegion.SubRegion> getConnectedSubsTo (MapRegion.SubRegion region, int dos, Array<MapRegion.SubRegion> out) {
+		if (dos <= 0) return out;
+		if (!out.contains(region, true))
+			out.add(region);
+		IntArray ids = region.edgeIds;
+		for (int i = 0; i < ids.size; i++) {
+			Edge edge = getEdge(ids.get(i));
+			for (MapRegion.SubRegion other : edge.subRegions) {
+				// this == should be definable
+				if (!out.contains(other, true) && other.tileType == region.tileType) out.add(other);
+			}
+		}
+		// store current size as it may change while looping
+		int size = out.size;
+		for (int i = 0; i < size; i++) {
+			getConnectedSubsTo(out.get(i), dos -1, out);
+		}
+		return out;
 	}
 
 	public static class Edge {

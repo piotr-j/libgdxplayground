@@ -7,7 +7,7 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.utils.IntArray;
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ObjectSet;
 import io.piotrjastrzebski.playground.BaseScreen;
 import io.piotrjastrzebski.playground.GameReset;
@@ -79,6 +79,7 @@ public class TiledPartitionV2Test extends BaseScreen {
 	private boolean drawDebugSubRegions = false;
 	private boolean drawAllEdges = false;
 	private Vector2 cs = new Vector2();
+	private Array<MapRegion.SubRegion> subRegions = new Array<>();
 	@Override public void render (float delta) {
 		super.render(delta);
 
@@ -109,6 +110,16 @@ public class TiledPartitionV2Test extends BaseScreen {
 
 		int x = (int)cs.x;
 		int y = (int)cs.y;
+		subRegions.clear();
+		tileMap.getConnectedSubsAt(x, y, 2, subRegions);
+		for (MapRegion.SubRegion sub : subRegions) {
+			renderer.setColor(sub.color);
+			for (Tile tile : sub.tiles) {
+				renderer.rect(tile.x+.05f, tile.y+.05f, .9f, .9f);
+			}
+		}
+
+		/*
 		MapRegion.SubRegion sub = tileMap.getSubRegionAt(x, y);
 		if (sub != null) {
 			renderer.setColor(sub.color);
@@ -133,6 +144,7 @@ public class TiledPartitionV2Test extends BaseScreen {
 			}
 
 		}
+		*/
 		renderer.end();
 
 		renderer.begin(ShapeRenderer.ShapeType.Line);
