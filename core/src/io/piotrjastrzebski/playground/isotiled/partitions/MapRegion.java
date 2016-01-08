@@ -41,12 +41,19 @@ class MapRegion {
 		return this.x <= x && this.x + size >= x && this.y <= y && this.y + size >= y;
 	}
 
-	private static ObjectSet<Tile> found = new ObjectSet<>();
-	private static ObjectSet<Tile> added = new ObjectSet<>();
-	public void rebuild (TileMap tileMap) {
+	public void clear (TileMap tileMap) {
+		for (SubRegion sub : subs) {
+			sub.clear(tileMap);
+		}
+
 		added.clear();
 		subRegionPool.freeAll(subs);
 		subs.clear();
+	}
+
+	private static ObjectSet<Tile> found = new ObjectSet<>();
+	private static ObjectSet<Tile> added = new ObjectSet<>();
+	public void rebuild (TileMap tileMap) {
 		for (int tx = x; tx < x + size; tx++) {
 			for (int ty = y; ty < y + size; ty++) {
 				found.clear();
@@ -74,6 +81,22 @@ class MapRegion {
 			if (sub.contains(x, y)) return sub;
 		}
 		return null;
+	}
+
+	@Override public boolean equals (Object o) {
+		if (this == o)
+			return true;
+		if (o == null || getClass() != o.getClass())
+			return false;
+
+		MapRegion mapRegion = (MapRegion)o;
+
+		return id == mapRegion.id;
+
+	}
+
+	@Override public int hashCode () {
+		return id;
 	}
 
 	public static class SubRegion implements Pool.Poolable {
@@ -206,6 +229,8 @@ class MapRegion {
 				edgeIds.add(edge);
 				currentId++;
 			}
+
+
 		}
 
 		public void add (Tile tile) {
@@ -234,6 +259,33 @@ class MapRegion {
 
 		public boolean contains (int x, int y) {
 			return parent.isInBounds(x, y) && tilePositions.contains(toLocalId(x, y));
+		}
+
+		public void clear (TileMap tileMap) {
+			tileMap.clearEdges(this);
+		}
+
+		@Override public boolean equals (Object o) {
+			if (this == o)
+				return true;
+			if (o == null || getClass() != o.getClass())
+				return false;
+
+			SubRegion subRegion = (SubRegion)o;
+
+			if (id != subRegion.id)
+				return false;
+			if (tileType != subRegion.tileType)
+				return false;
+			return parent != null ? parent.equals(subRegion.parent) : subRegion.parent == null;
+
+		}
+
+		@Override public int hashCode () {
+			int result = parent != null ? parent.hashCode() : 0;
+			result = 31 * result + id;
+			result = 31 * result + tileType;
+			return result;
 		}
 	}
 }

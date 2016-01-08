@@ -1,11 +1,9 @@
 package io.piotrjastrzebski.playground.isotiled.partitions;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.IntArray;
-import com.badlogic.gdx.utils.IntMap;
-import com.badlogic.gdx.utils.Pool;
+import com.badlogic.gdx.utils.*;
 
 /**
  * Created by EvilEntity on 07/01/2016.
@@ -71,6 +69,7 @@ class TileMap {
 	public Tile getTile (int id) {
 		return tiles[id];
 	}
+
 	private Array<MapRegion> rebuildQueue = new Array<>();
 	/**
 	 * Rebuild all regions
@@ -84,6 +83,9 @@ class TileMap {
 	}
 
 	private void execRebuild() {
+		for (MapRegion region : rebuildQueue) {
+			region.clear(this);
+		}
 		for (MapRegion region : rebuildQueue) {
 			region.rebuild(this);
 		}
@@ -112,13 +114,15 @@ class TileMap {
 	}
 
 	public void clearEdges (MapRegion.SubRegion region) {
+		// TODO need to make sure that his crap works
 		// find all edges with this region and clear them
 		for (int i = 0; i < region.edgeIds.size; i++) {
 			int id = region.edgeIds.get(i);
 			Edge edge = idToEdge.get(id, null);
 			if (edge == null) continue;
-			edge.subRegions.removeValue(region, true);
-			if (edge.subRegions.size == 0) {
+			if (edge.subA == region) edge.subA = null;
+			if (edge.subB == region) edge.subB = null;
+			if (edge.subA == null && edge.subB == null) {
 				idToEdge.remove(id);
 				Edge.free(edge);
 			}
@@ -181,34 +185,86 @@ class TileMap {
 	/**
 	 * find all regions connected to the one at x, y, with specified degree of separation
 	 */
-	public Array<MapRegion.SubRegion> getConnectedSubsAt (int x, int y, int dos, Array<MapRegion.SubRegion> out) {
-		if (dos <= 0) return out;
+	public ObjectSet<MapRegion.SubRegion> getConnectedSubsAt (int x, int y, int dos, ObjectSet<MapRegion.SubRegion> out) {
+		if (dos < 0) return out;
 		MapRegion.SubRegion region = getSubRegionAt(x, y);
 		if (region == null) return out;
 		return getConnectedSubsTo(region, dos, out);
 	}
 
-	public Array<MapRegion.SubRegion> getConnectedSubsTo (MapRegion.SubRegion region, int dos, Array<MapRegion.SubRegion> out) {
-		if (dos <= 0) return out;
-		if (!out.contains(region, true))
-			out.add(region);
-		IntArray ids = region.edgeIds;
+	public ObjectSet<MapRegion.SubRegion> getConnectedSubsTo (MapRegion.SubRegion region, int dos, ObjectSet<MapRegion.SubRegion> out) {
+		test.clear();
+		getConnectedSubs(region, dos, out);
+//		Gdx.app.log("Tested: ", String.valueOf(test.size));
+//		Gdx.app.log("Edges: ", test.toString());
+//		for (IntIntMap.Entry entry : test.entries()) {
+//			if (entry.value > 1) {
+//				Gdx.app.log("Dupe edge : ", entry.value + "x " +getEdge(entry.key).toString());
+//			}
+//		}
+
+		return out;
+	}
+
+	IntIntMap test = new IntIntMap();
+	private ObjectSet<MapRegion.SubRegion> getConnectedSubs (final MapRegion.SubRegion region, final int dos, final ObjectSet<MapRegion.SubRegion> out) {
+
+		// region was already processed
+		if (out.contains(region)) return out;
+		out.add(region);
+		if (dos == 0) return out;
+
+		final IntArray ids = region.edgeIds;
 		for (int i = 0; i < ids.size; i++) {
-			Edge edge = getEdge(ids.get(i));
-			for (MapRegion.SubRegion other : edge.subRegions) {
-				// this == should be definable
-				if (!out.contains(other, true) && other.tileType == region.tileType) out.add(other);
+			final Edge edge = getEdge(ids.get(i));
+//			test.put(edge.id, test.get(edge.id, 0) + 1);
+//			if (test.get(edge.id, 0) > 1) continue;
+			// todo pass in the action
+			if (edge.subA != region
+				&& defaultFilter.accept(region, edge.subA)
+				&& !out.contains(edge.subA)) {
+				getConnectedSubs(edge.subA, dos -1, out);
 			}
-		}
-		// store current size as it may change while looping
-		int size = out.size;
-		for (int i = 0; i < size; i++) {
-			getConnectedSubsTo(out.get(i), dos -1, out);
+			if (edge.subB != region
+				&& defaultFilter.accept(region, edge.subB)
+				&& !out.contains(edge.subB)) {
+				getConnectedSubs(edge.subB, dos -1, out);
+			}
 		}
 		return out;
 	}
 
-	public static class Edge {
+	private SubRegionFilter defaultFilter = new SubRegionFilter() {
+		@Override public boolean accept (MapRegion.SubRegion that, MapRegion.SubRegion other) {
+//			if (that.tileType == 0) {
+//				return that.tileType == other.tileType;
+//			} else {
+//				return other.tileType == 1 || other.tileType == 2;
+//			}
+//			return that.tileType == other.tileType;
+			return true;
+		}
+	};
+
+	public void expandSubRegions (ObjectSet<MapRegion.SubRegion> subRegions) {
+		// works, but super inefficient...
+		Array<MapRegion.SubRegion> tmpRegions = new Array<>();
+		for (MapRegion.SubRegion subRegion : subRegions) {
+			tmpRegions.add(subRegion);
+		}
+		ObjectSet<MapRegion.SubRegion> tmpSet = new ObjectSet<>();
+		for (MapRegion.SubRegion welp : tmpRegions) {
+			tmpSet.clear();
+			getConnectedSubs(welp, 1, tmpSet);
+			subRegions.addAll(tmpSet);
+		}
+	}
+
+	public interface SubRegionFilter {
+		boolean accept(MapRegion.SubRegion that, MapRegion.SubRegion other);
+	}
+
+	public static class Edge implements Pool.Poolable{
 		private static Pool<Edge> pool = new Pool<Edge>() {
 			@Override protected Edge newObject () {
 				return new Edge();
@@ -228,7 +284,8 @@ class TileMap {
 		public int y;
 		public int length;
 		public boolean horizontal;
-		public Array<MapRegion.SubRegion> subRegions = new Array<>();
+		public MapRegion.SubRegion subA;
+		public MapRegion.SubRegion subB;
 		// color for debug, buuuu
 		public final Color color = new Color(MathUtils.random(), MathUtils.random(), MathUtils.random(), .5f);
 		protected Edge() {}
@@ -243,8 +300,33 @@ class TileMap {
 		}
 
 		public void add (MapRegion.SubRegion region) {
-			if (!subRegions.contains(region, true))
-				subRegions.add(region);
+			if (subA == null) {
+				subA = region;
+			} else if (subB == null) {
+				subB = region;
+			} else {
+				throw new AssertionError("There can only be 2 sub regions per edge!");
+			}
+		}
+
+		@Override public void reset () {
+			subA = null;
+			subB = null;
+			id = -1;
+			x = -1;
+			y = -1;
+			length = -1;
+			horizontal = false;
+		}
+
+		@Override public String toString () {
+			return "Edge{" +
+				"id=" + id +
+				", x=" + x +
+				", y=" + y +
+				", length=" + length +
+				", horizontal=" + horizontal +
+				'}';
 		}
 	}
 }

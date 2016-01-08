@@ -5,10 +5,8 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ObjectSet;
 import io.piotrjastrzebski.playground.BaseScreen;
 import io.piotrjastrzebski.playground.GameReset;
@@ -33,10 +31,10 @@ public class TiledPartitionV2Test extends BaseScreen {
 		0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 1, 0, 0, 0, 1, 0,  0, 1, 0, 0, 0, 1, 0, 0,  1, 0, 0, 0, 0, 0, 0, 1,  0, 0, 0, 0, 0, 0, 0, 1,
 		0, 0, 0, 0, 0, 0, 0, 0,  0, 1, 1, 0, 0, 0, 0, 0,  1, 1, 0, 0, 0, 0, 0, 0,  1, 0, 0, 0, 0, 0, 0, 1,  0, 0, 0, 0, 0, 0, 0, 1,
 		0, 0, 0, 0, 0, 0, 0, 0,  0, 1, 0, 0, 1, 1, 1, 1,  2, 0, 0, 1, 1, 1, 1, 1,  1, 0, 1, 0, 1, 0, 0, 1,  0, 0, 0, 0, 0, 0, 0, 1,
-		0, 0, 0, 0, 0, 0, 0, 0,  0, 1, 1, 1, 1, 0, 0, 0,  1, 1, 2, 1, 0, 0, 0, 0,  1, 1, 1, 0, 1, 1, 1, 1,  0, 0, 0, 0, 0, 0, 0, 1,
+		0, 0, 0, 0, 0, 0, 0, 0,  0, 1, 1, 1, 1, 0, 0, 1,  1, 1, 2, 1, 0, 0, 0, 0,  1, 1, 1, 0, 1, 1, 1, 1,  0, 0, 0, 0, 0, 0, 0, 1,
 		1, 1, 1, 1, 1, 1, 1, 1,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 1,
 
-		1, 0, 0, 0, 0, 0, 0, 0,  1, 1, 1, 1, 1, 1, 1, 1,  1, 1, 1, 1, 2, 1, 1, 1,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 1,
+		1, 0, 0, 0, 0, 0, 0, 1,  1, 1, 1, 1, 1, 1, 1, 1,  1, 1, 1, 1, 2, 1, 1, 1,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 1,
 		1, 0, 0, 0, 0, 0, 0, 0,  1, 0, 0, 0, 0, 0, 0, 2,  2, 0, 1, 0, 0, 0, 0, 1,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 1,
 		1, 0, 0, 0, 0, 0, 0, 0,  1, 0, 0, 0, 0, 0, 0, 1,  1, 0, 1, 0, 0, 1, 0, 1,  0, 0, 0, 0, 1, 1, 1, 1,  1, 1, 1, 1, 0, 0, 0, 1,
 		1, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 1,  0, 0, 1, 0, 0, 1, 0, 1,  0, 0, 0, 0, 1, 0, 0, 0,  0, 0, 0, 2, 0, 0, 0, 1,
@@ -83,7 +81,7 @@ public class TiledPartitionV2Test extends BaseScreen {
 	private boolean drawAllEdges = false;
 	private int degreeOfSeparation = 1;
 	private Vector2 cs = new Vector2();
-	private Array<MapRegion.SubRegion> subRegions = new Array<>();
+	private ObjectSet<MapRegion.SubRegion> subRegions = new ObjectSet<>();
 	@Override public void render (float delta) {
 		super.render(delta);
 
@@ -117,12 +115,20 @@ public class TiledPartitionV2Test extends BaseScreen {
 		subRegions.clear();
 		// TODO this is broken for degreeOfSeparation > 3
 		tileMap.getConnectedSubsAt(x, y, degreeOfSeparation, subRegions);
+
+//		tileMap.expandSubRegions(x, y, 0, subRegions);
+//		for (int i = 0; i < degreeOfSeparation; i++) {
+//			tileMap.expandSubRegions(subRegions);
+//		}
+
+		renderer.setColor(Color.BLACK);
 		for (MapRegion.SubRegion sub : subRegions) {
-			renderer.setColor(sub.color);
+//			renderer.setColor(sub.color);
 			for (Tile tile : sub.tiles) {
-				renderer.rect(tile.x+.05f, tile.y+.05f, .9f, .9f);
+				renderer.rect(tile.x+.1f, tile.y+.1f, .8f, .8f);
 			}
 		}
+
 
 		/*
 		MapRegion.SubRegion sub = tileMap.getSubRegionAt(x, y);
@@ -244,7 +250,7 @@ public class TiledPartitionV2Test extends BaseScreen {
 			Gdx.app.log("", "degreeOfSeparation = " + degreeOfSeparation);
 			break;
 		case Input.Keys.RIGHT_BRACKET:
-			degreeOfSeparation = Math.min(degreeOfSeparation +1, 10);
+			degreeOfSeparation = Math.min(degreeOfSeparation +1, 15);
 			Gdx.app.log("", "degreeOfSeparation = " + degreeOfSeparation);
 			break;
 		}
