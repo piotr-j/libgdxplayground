@@ -95,6 +95,14 @@ class MapRegion {
 
 	}
 
+	@Override public String toString () {
+		return "MapRegion{" +
+			"id=" + id +
+			", x=" + x +
+			", y=" + y +
+			'}';
+	}
+
 	@Override public int hashCode () {
 		return id;
 	}
@@ -286,6 +294,14 @@ class MapRegion {
 			result = 31 * result + id;
 			result = 31 * result + tileType;
 			return result;
+		}
+
+		@Override public String toString () {
+			return "SubRegion{" +
+				"parent.id=" + parent.id +
+				", id=" + id +
+				", tileType=" + tileType +
+				'}';
 		}
 	}
 }

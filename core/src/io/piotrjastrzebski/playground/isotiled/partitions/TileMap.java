@@ -82,6 +82,47 @@ class TileMap {
 		execRebuild();
 	}
 
+	private void validateHashes () {
+		IntIntMap edgeHashes = new IntIntMap();
+		for (Edge edge : edges) {
+			int hc = edge.hashCode();
+			edgeHashes.put(hc, edgeHashes.get(hc, 0) + 1);
+		}
+		Gdx.app.log("", "Duped edge hashes: ");
+		for (IntIntMap.Entry entry : edgeHashes) {
+			if (entry.value > 1) {
+				Gdx.app.log("", "" + entry.key);
+				throw new AssertionError("Duped edge hash!");
+			}
+		}
+
+		IntIntMap regionHashes = new IntIntMap();
+		IntIntMap subRegionHashes = new IntIntMap();
+		for (MapRegion region : regions) {
+			int hc = region.hashCode();
+			regionHashes.put(hc, regionHashes.get(hc, 0) + 1);
+			for (MapRegion.SubRegion sub : region.subs) {
+				hc = sub.hashCode();
+				subRegionHashes.put(hc, subRegionHashes.get(hc, 0) + 1);
+			}
+		}
+
+		Gdx.app.log("", "Duped region hashes:");
+		for (IntIntMap.Entry entry : regionHashes) {
+			if (entry.value > 1) {
+				Gdx.app.log("", ""+ entry.key);
+				throw new AssertionError("Duped region hash!");
+			}
+		}
+		Gdx.app.log("", "Duped sub region hashes:");
+		for (IntIntMap.Entry entry : subRegionHashes) {
+			if (entry.value > 1) {
+				Gdx.app.log("", "" + entry.key);
+				throw new AssertionError("Duped sub region hash!");
+			}
+		}
+	}
+
 	private void execRebuild() {
 		for (MapRegion region : rebuildQueue) {
 			region.clear(this);
@@ -93,6 +134,8 @@ class TileMap {
 		for (MapRegion region : rebuildQueue) {
 			region.rebuildSubRegions(this);
 		}
+		// FIXME fails when tile is changed!!!
+		validateHashes();
 	}
 
 	/**
@@ -189,12 +232,26 @@ class TileMap {
 		if (dos < 0) return out;
 		MapRegion.SubRegion region = getSubRegionAt(x, y);
 		if (region == null) return out;
-		return getConnectedSubsTo(region, dos, out);
+		tmpInts.clear();
+		getConnectedSubsTo(region, dos, out);
+
+		int dupes = 0;
+		int max = 0;
+		for (IntIntMap.Entry entry : tmpInts.entries()) {
+			if (entry.value > 1) {
+				if (entry.value > max) max = entry.value;
+				dupes++;
+			}
+		}
+		Gdx.app.log("", "Total regions " + tmpInts.size);
+		Gdx.app.log("", "Duped regions " + dupes);
+		Gdx.app.log("", "Max dupes " + max);
+		return out;
 	}
 
 	public ObjectSet<MapRegion.SubRegion> getConnectedSubsTo (MapRegion.SubRegion region, int dos, ObjectSet<MapRegion.SubRegion> out) {
 		test.clear();
-		getConnectedSubs(region, dos, out);
+		getConnectedSubs(region, dos, filterAll, out);
 //		Gdx.app.log("Tested: ", String.valueOf(test.size));
 //		Gdx.app.log("Edges: ", test.toString());
 //		for (IntIntMap.Entry entry : test.entries()) {
@@ -207,9 +264,17 @@ class TileMap {
 	}
 
 	IntIntMap test = new IntIntMap();
-	private ObjectSet<MapRegion.SubRegion> getConnectedSubs (final MapRegion.SubRegion region, final int dos, final ObjectSet<MapRegion.SubRegion> out) {
+	private ObjectSet<MapRegion.SubRegion> getConnectedSubs (final MapRegion.SubRegion region, final int dos, SubRegionFilter filter,
+		final ObjectSet<MapRegion.SubRegion> out) {
 
 		// region was already processed
+//		if (tmpInts.contains(region.id)) return out;
+//		tmpInts.add(region.id);
+		// sub region ids are not globally unique, got to pack them with parents id which is
+		// sub id max is 63, so << 7 should be fine
+		int id = region.parent.id << 7 + region.id;
+		tmpInts.put(id, tmpInts.get(id, 0) + 1);
+
 		if (out.contains(region)) return out;
 		out.add(region);
 		if (dos == 0) return out;
@@ -219,45 +284,81 @@ class TileMap {
 			final Edge edge = getEdge(ids.get(i));
 //			test.put(edge.id, test.get(edge.id, 0) + 1);
 //			if (test.get(edge.id, 0) > 1) continue;
-			// todo pass in the action
 			if (edge.subA != region
-				&& defaultFilter.accept(region, edge.subA)
+				&& filter.accept(region, edge.subA)
 				&& !out.contains(edge.subA)) {
-				getConnectedSubs(edge.subA, dos -1, out);
+				getConnectedSubs(edge.subA, dos -1, filter, out);
 			}
 			if (edge.subB != region
-				&& defaultFilter.accept(region, edge.subB)
+				&& filter.accept(region, edge.subB)
 				&& !out.contains(edge.subB)) {
-				getConnectedSubs(edge.subB, dos -1, out);
+				getConnectedSubs(edge.subB, dos -1, filter, out);
 			}
 		}
 		return out;
 	}
 
-	private SubRegionFilter defaultFilter = new SubRegionFilter() {
+	private SubRegionFilter filterSimilar = new SubRegionFilter() {
 		@Override public boolean accept (MapRegion.SubRegion that, MapRegion.SubRegion other) {
-//			if (that.tileType == 0) {
-//				return that.tileType == other.tileType;
-//			} else {
-//				return other.tileType == 1 || other.tileType == 2;
-//			}
-//			return that.tileType == other.tileType;
+			if (that.tileType == 0) {
+				return that.tileType == other.tileType;
+			} else {
+				return other.tileType == 1 || other.tileType == 2;
+			}
+		}
+	};
+	private SubRegionFilter filterExact = new SubRegionFilter() {
+		@Override public boolean accept (MapRegion.SubRegion that, MapRegion.SubRegion other) {
+			return that.tileType == other.tileType;
+		}
+	};
+	private SubRegionFilter filterAll = new SubRegionFilter() {
+		@Override public boolean accept (MapRegion.SubRegion that, MapRegion.SubRegion other) {
 			return true;
 		}
 	};
 
-	public void expandSubRegions (ObjectSet<MapRegion.SubRegion> subRegions) {
-		// works, but super inefficient...
-		Array<MapRegion.SubRegion> tmpRegions = new Array<>();
-		for (MapRegion.SubRegion subRegion : subRegions) {
-			tmpRegions.add(subRegion);
+	private Array<MapRegion.SubRegion> tmpRegions = new Array<>();
+	private ObjectSet<MapRegion.SubRegion> tmpSet = new ObjectSet<>();
+	private IntIntMap tmpInts = new IntIntMap();
+	public ObjectSet<MapRegion.SubRegion> expandSubRegions (ObjectSet<MapRegion.SubRegion> subRegions, int times) {
+		tmpInts.clear();
+		int totalFound = 0;
+		for (int i = 0; i < times; i++) {
+			tmpRegions.clear();
+			// no add all, buu
+			for (MapRegion.SubRegion subRegion : subRegions) {
+				tmpRegions.add(subRegion);
+			}
+			for (MapRegion.SubRegion subRegion : tmpRegions) {
+				tmpSet.clear();
+				// since we go over same subs many times, we waste a ton of work, gotta fix that....
+				getConnectedSubs(subRegion, 1, filterAll, tmpSet);
+				int found = tmpSet.size;
+				totalFound += found;
+				int current = subRegions.size;
+				subRegions.addAll(tmpSet);
+				Gdx.app.log("", "found " + found +", added " + (subRegions.size - current));
+			}
 		}
-		ObjectSet<MapRegion.SubRegion> tmpSet = new ObjectSet<>();
-		for (MapRegion.SubRegion welp : tmpRegions) {
-			tmpSet.clear();
-			getConnectedSubs(welp, 1, tmpSet);
-			subRegions.addAll(tmpSet);
+		// with large times, we find orders of magnitude more then we add
+		Gdx.app.log("", "found total " + totalFound +", added " + subRegions.size);
+
+//		subRegions.addAll(tmpSet);
+		int dupes = 0;
+		int max = 0;
+		for (IntIntMap.Entry entry : tmpInts.entries()) {
+			if (entry.value > 1) {
+				if (entry.value > max) max = entry.value;
+//				Gdx.app.log("", "Dupe : " + entry.key);
+				dupes++;
+			}
 		}
+		Gdx.app.log("", "Total regions " + tmpInts.size);
+		Gdx.app.log("", "Duped regions " + dupes);
+		Gdx.app.log("", "Max dupes " + max);
+
+		return subRegions;
 	}
 
 	public interface SubRegionFilter {
@@ -319,13 +420,29 @@ class TileMap {
 			horizontal = false;
 		}
 
+		@Override public boolean equals (Object o) {
+			if (this == o)
+				return true;
+			if (o == null || getClass() != o.getClass())
+				return false;
+
+			Edge edge = (Edge)o;
+			return id == edge.id;
+
+		}
+
+		@Override public int hashCode () {
+			// if must be unique
+			return id;
+		}
+
 		@Override public String toString () {
 			return "Edge{" +
 				"id=" + id +
 				", x=" + x +
 				", y=" + y +
 				", length=" + length +
-				", horizontal=" + horizontal +
+				 (horizontal?", horizontal":", vertical") +
 				'}';
 		}
 	}

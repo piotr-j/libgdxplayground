@@ -5,12 +5,14 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.ObjectSet;
 import io.piotrjastrzebski.playground.BaseScreen;
 import io.piotrjastrzebski.playground.GameReset;
 import io.piotrjastrzebski.playground.PlaygroundGame;
+import net.mostlyoriginal.api.plugin.extendedcomponentmapper.M;
 
 /**
  * Created by EvilEntity on 07/06/2015.
@@ -113,13 +115,12 @@ public class TiledPartitionV2Test extends BaseScreen {
 		int x = (int)cs.x;
 		int y = (int)cs.y;
 		subRegions.clear();
-		// TODO this is broken for degreeOfSeparation > 3
+		// TODO this is broken for high degreeOfSeparation
 		tileMap.getConnectedSubsAt(x, y, degreeOfSeparation, subRegions);
 
-//		tileMap.expandSubRegions(x, y, 0, subRegions);
-//		for (int i = 0; i < degreeOfSeparation; i++) {
-//			tileMap.expandSubRegions(subRegions);
-//		}
+//		tileMap.getConnectedSubsAt(x, y, 0, subRegions);
+//		tileMap.expandSubRegions(subRegions, degreeOfSeparation);
+
 
 		renderer.setColor(Color.BLACK);
 		for (MapRegion.SubRegion sub : subRegions) {
@@ -250,11 +251,18 @@ public class TiledPartitionV2Test extends BaseScreen {
 			Gdx.app.log("", "degreeOfSeparation = " + degreeOfSeparation);
 			break;
 		case Input.Keys.RIGHT_BRACKET:
-			degreeOfSeparation = Math.min(degreeOfSeparation +1, 15);
+			degreeOfSeparation = Math.min(degreeOfSeparation +1, 32);
 			Gdx.app.log("", "degreeOfSeparation = " + degreeOfSeparation);
 			break;
 		}
 		return super.keyDown(keycode);
+	}
+
+	@Override public boolean scrolled (int amount) {
+		degreeOfSeparation = Math.max(Math.min(degreeOfSeparation + amount, 32), 0);
+		Gdx.app.log("", "degreeOfSeparation = " + degreeOfSeparation);
+
+		return super.scrolled(amount);
 	}
 
 	private Vector3 temp = new Vector3();
