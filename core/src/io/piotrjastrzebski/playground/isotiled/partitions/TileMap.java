@@ -228,7 +228,7 @@ class TileMap {
 	/**
 	 * find all regions connected to the one at x, y, with specified degree of separation
 	 */
-	public ObjectSet<MapRegion.SubRegion> getConnectedSubsAt (int x, int y, int dos, ObjectSet<MapRegion.SubRegion> out) {
+	public NeighbourData getConnectedSubsAt (int x, int y, int dos, NeighbourData out) {
 		if (dos < 0) return out;
 		MapRegion.SubRegion region = getSubRegionAt(x, y);
 		if (region == null) return out;
@@ -249,7 +249,7 @@ class TileMap {
 		return out;
 	}
 
-	public ObjectSet<MapRegion.SubRegion> getConnectedSubsTo (MapRegion.SubRegion region, int dos, ObjectSet<MapRegion.SubRegion> out) {
+	public NeighbourData getConnectedSubsTo (MapRegion.SubRegion region, int dos, NeighbourData out) {
 		getConnectedSubs(region, dos, filterSimilar, out);
 		return out;
 	}
@@ -257,24 +257,28 @@ class TileMap {
 	public Array<Edge> touched = new Array<>();
 	public Array<MapRegion.SubRegion> touchedRegions = new Array<>();
 	public Array<MapRegion.SubRegion> regionsEdges = new Array<>();
-	private ObjectSet<MapRegion.SubRegion> getConnectedSubs (final MapRegion.SubRegion region, final int dos, SubRegionFilter filter,
-		final ObjectSet<MapRegion.SubRegion> out) {
+	private NeighbourData getConnectedSubs (final MapRegion.SubRegion region, final int dos, SubRegionFilter filter,
+		final NeighbourData out) {
 
+		tmpRegions.clear();
 		// sub id max is 63, so << 7 should be fine
 		int id = region.parent.id << 7 + region.id;
 		tmpInts.put(id, tmpInts.get(id, 0) + 1);
 		touchedRegions.add(region);
-		out.add(region);
 
-		Array<MapRegion.SubRegion> tmp = new Array<>();
-		tmp.add(region);
+		out.degreeOfSeparation = dos;
+		out.subRegions.add(region);
+
+		tmpRegions.add(region);
 
 		int offset = 0;
+		// for simple iteration
+		out.offsets.add(0);
 		for (int i = 0; i < dos; i++) {
 			// cache as it will grow
-			int length = tmp.size;
+			int length = tmpRegions.size;
 			for (int j = offset; j < length; j++) {
-				MapRegion.SubRegion sub = tmp.get(j);
+				MapRegion.SubRegion sub = tmpRegions.get(j);
 				touchedRegions.add(sub);
 				final IntArray ids = sub.edgeIds;
 				for (int k = 0; k < ids.size; k++) {
@@ -282,20 +286,23 @@ class TileMap {
 					touched.add(edge);
 					if (edge.subA != sub
 						&& filter.accept(sub, edge.subA)
-						&& !tmp.contains(edge.subA, true)) {
-						tmp.add(edge.subA);
+						&& !tmpRegions.contains(edge.subA, true)) {
+						tmpRegions.add(edge.subA);
 					}
 					if (edge.subB != sub
 						&& filter.accept(sub, edge.subB)
-						&& !tmp.contains(edge.subB, true)) {
-						tmp.add(edge.subB);
+						&& !tmpRegions.contains(edge.subB, true)) {
+						tmpRegions.add(edge.subB);
 					}
 				}
 			}
 			offset = length;
-			Gdx.app.log("", "step "+ i + " Added " + (tmp.size - length));
+			out.offsets.add(offset);
+			Gdx.app.log("", "step "+ i + " Added " + (tmpRegions.size - length));
 		}
-		out.addAll(tmp);
+		// for simple iteration
+		out.offsets.add(tmpRegions.size);
+		out.add(tmpRegions);
 		return out;
 	}
 
@@ -334,7 +341,7 @@ class TileMap {
 			for (MapRegion.SubRegion subRegion : tmpRegions) {
 				tmpSet.clear();
 				// since we go over same subs many times, we waste a ton of work, gotta fix that....
-				getConnectedSubs(subRegion, 1, filterAll, tmpSet);
+//				getConnectedSubs(subRegion, 1, filterAll, tmpSet);
 				int found = tmpSet.size;
 				totalFound += found;
 				int current = subRegions.size;
@@ -360,6 +367,40 @@ class TileMap {
 		Gdx.app.log("", "Max dupes " + max);
 
 		return subRegions;
+	}
+
+	/**
+	 * Result of neighbour search
+	 */
+	public static class NeighbourData implements Pool.Poolable {
+		public Array<MapRegion.SubRegion> subRegions = new Array<>();
+		public IntArray offsets = new IntArray();
+		public int degreeOfSeparation;
+
+		@Override public void reset () {
+			subRegions.clear();
+			offsets.clear();
+			degreeOfSeparation = 0;
+		}
+
+		/**
+		 * get sub regions for given degreeOfSeparation
+		 */
+		public Array<MapRegion.SubRegion> get(int degreeOfSeparation, Array<MapRegion.SubRegion> out) {
+			if (degreeOfSeparation > this.degreeOfSeparation) return out;
+			int offset = offsets.items[degreeOfSeparation];
+			int count = offsets.items[degreeOfSeparation+1];
+			for (int j = offset; j < count; j++) {
+				out.add(subRegions.get(j));
+			}
+			return out;
+		}
+
+		public void add (Array<MapRegion.SubRegion> toAdd) {
+			for (MapRegion.SubRegion subRegion : toAdd) {
+				if (!subRegions.contains(subRegion, true)) subRegions.add(subRegion);
+			}
+		}
 	}
 
 	public interface SubRegionFilter {

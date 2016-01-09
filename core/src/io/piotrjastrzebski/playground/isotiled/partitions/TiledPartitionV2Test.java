@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ObjectSet;
 import io.piotrjastrzebski.playground.BaseScreen;
 import io.piotrjastrzebski.playground.GameReset;
@@ -83,7 +84,9 @@ public class TiledPartitionV2Test extends BaseScreen {
 	private boolean drawAllEdges = false;
 	private int degreeOfSeparation = 1;
 	private Vector2 cs = new Vector2();
-	private ObjectSet<MapRegion.SubRegion> subRegions = new ObjectSet<>();
+//	private ObjectSet<MapRegion.SubRegion> subRegions = new ObjectSet<>();
+	private Array<MapRegion.SubRegion> tmpRegions = new Array<>();
+	private TileMap.NeighbourData data = new TileMap.NeighbourData();
 	int lastX = -1;
 	int lastY = -1;
 	int lastDoS = -1;
@@ -122,13 +125,12 @@ public class TiledPartitionV2Test extends BaseScreen {
 			lastX = x;
 			lastY = y;
 			lastDoS = degreeOfSeparation;
-
-			subRegions.clear();
+			data.reset();
 			tileMap.touched.clear();
 			tileMap.touchedRegions.clear();
 			tileMap.regionsEdges.clear();
 			// TODO this is broken for high degreeOfSeparation
-			tileMap.getConnectedSubsAt(x, y, degreeOfSeparation, subRegions);
+			tileMap.getConnectedSubsAt(x, y, degreeOfSeparation, data);
 
 //		tileMap.getConnectedSubsAt(x, y, 0, subRegions);
 //		tileMap.expandSubRegions(subRegions, degreeOfSeparation);
@@ -137,25 +139,38 @@ public class TiledPartitionV2Test extends BaseScreen {
 		renderer.end();
 		renderer.begin(ShapeRenderer.ShapeType.Line);
 		renderer.setColor(Color.BLACK);
-		for (MapRegion.SubRegion sub : subRegions) {
+		for (MapRegion.SubRegion sub : data.subRegions) {
 			for (Tile tile : sub.tiles) {
 				renderer.rect(tile.x+.05f, tile.y+.05f, .9f, .9f);
 			}
 		}
-
-
 		renderer.end();
+
 		renderer.begin(ShapeRenderer.ShapeType.Filled);
+		renderer.setColor(Color.BLACK);
+		renderer.getColor().a = .1f;
+		tmpRegions.clear();
+		for (int i = 0; i < data.degreeOfSeparation; i++) {
+			// NOTE tmpRegions should be cleared in general usage, we dont so we can show progression with blending
+			data.get(i, tmpRegions);
+			for (MapRegion.SubRegion sub : tmpRegions) {
+				for (Tile tile : sub.tiles) {
+					renderer.rect(tile.x+.1f, tile.y+.1f, .8f, .8f);
+				}
+			}
+		}
+
+		/*
 		renderer.setColor(Color.FOREST);
 		renderer.getColor().a = .5f;
-		for (MapRegion.SubRegion sub : subRegions) {
+		for (MapRegion.SubRegion sub : data.subRegions) {
 			for (Tile tile : sub.tiles) {
 				renderer.rect(tile.x+.1f, tile.y+.1f, .8f, .8f);
 			}
 		}
 		renderer.setColor(Color.VIOLET);
 		renderer.getColor().a = .5f;
-		for (MapRegion.SubRegion sub : subRegions) {
+		for (MapRegion.SubRegion sub : data.subRegions) {
 			for (Tile tile : sub.tiles) {
 				renderer.rect(tile.x+.3f, tile.y+.3f, .4f, .4f);
 			}
@@ -167,7 +182,7 @@ public class TiledPartitionV2Test extends BaseScreen {
 			renderer.rect(edge.x + .1f, edge.y + .1f, edge.horizontal ? edge.length - .2f : .8f,
 				edge.horizontal ? .8f : edge.length - .2f);
 		}
-
+		*/
 		/*
 		MapRegion.SubRegion sub = tileMap.getSubRegionAt(x, y);
 		if (sub != null) {
