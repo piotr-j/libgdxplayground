@@ -250,51 +250,52 @@ class TileMap {
 	}
 
 	public ObjectSet<MapRegion.SubRegion> getConnectedSubsTo (MapRegion.SubRegion region, int dos, ObjectSet<MapRegion.SubRegion> out) {
-		test.clear();
-		getConnectedSubs(region, dos, filterAll, out);
-//		Gdx.app.log("Tested: ", String.valueOf(test.size));
-//		Gdx.app.log("Edges: ", test.toString());
-//		for (IntIntMap.Entry entry : test.entries()) {
-//			if (entry.value > 1) {
-//				Gdx.app.log("Dupe edge : ", entry.value + "x " +getEdge(entry.key).toString());
-//			}
-//		}
-
+		getConnectedSubs(region, dos, filterSimilar, out);
 		return out;
 	}
 
-	IntIntMap test = new IntIntMap();
+	public Array<Edge> touched = new Array<>();
+	public Array<MapRegion.SubRegion> touchedRegions = new Array<>();
+	public Array<MapRegion.SubRegion> regionsEdges = new Array<>();
 	private ObjectSet<MapRegion.SubRegion> getConnectedSubs (final MapRegion.SubRegion region, final int dos, SubRegionFilter filter,
 		final ObjectSet<MapRegion.SubRegion> out) {
 
-		// region was already processed
-//		if (tmpInts.contains(region.id)) return out;
-//		tmpInts.add(region.id);
-		// sub region ids are not globally unique, got to pack them with parents id which is
 		// sub id max is 63, so << 7 should be fine
 		int id = region.parent.id << 7 + region.id;
 		tmpInts.put(id, tmpInts.get(id, 0) + 1);
-
-		if (out.contains(region)) return out;
+		touchedRegions.add(region);
 		out.add(region);
-		if (dos == 0) return out;
 
-		final IntArray ids = region.edgeIds;
-		for (int i = 0; i < ids.size; i++) {
-			final Edge edge = getEdge(ids.get(i));
-//			test.put(edge.id, test.get(edge.id, 0) + 1);
-//			if (test.get(edge.id, 0) > 1) continue;
-			if (edge.subA != region
-				&& filter.accept(region, edge.subA)
-				&& !out.contains(edge.subA)) {
-				getConnectedSubs(edge.subA, dos -1, filter, out);
+		Array<MapRegion.SubRegion> tmp = new Array<>();
+		tmp.add(region);
+
+		int offset = 0;
+		for (int i = 0; i < dos; i++) {
+			// cache as it will grow
+			int length = tmp.size;
+			for (int j = offset; j < length; j++) {
+				MapRegion.SubRegion sub = tmp.get(j);
+				touchedRegions.add(sub);
+				final IntArray ids = sub.edgeIds;
+				for (int k = 0; k < ids.size; k++) {
+					final Edge edge = getEdge(ids.get(k));
+					touched.add(edge);
+					if (edge.subA != sub
+						&& filter.accept(sub, edge.subA)
+						&& !tmp.contains(edge.subA, true)) {
+						tmp.add(edge.subA);
+					}
+					if (edge.subB != sub
+						&& filter.accept(sub, edge.subB)
+						&& !tmp.contains(edge.subB, true)) {
+						tmp.add(edge.subB);
+					}
+				}
 			}
-			if (edge.subB != region
-				&& filter.accept(region, edge.subB)
-				&& !out.contains(edge.subB)) {
-				getConnectedSubs(edge.subB, dos -1, filter, out);
-			}
+			offset = length;
+			Gdx.app.log("", "step "+ i + " Added " + (tmp.size - length));
 		}
+		out.addAll(tmp);
 		return out;
 	}
 

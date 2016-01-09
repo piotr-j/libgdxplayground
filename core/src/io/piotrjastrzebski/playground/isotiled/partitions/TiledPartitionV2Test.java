@@ -27,7 +27,7 @@ public class TiledPartitionV2Test extends BaseScreen {
 	public final static int MAP_WIDTH = REGION_SIZE * 5;
 	public final static int MAP_HEIGHT = REGION_SIZE * 3;
 	public final static int[] map = new int[] {
-		0, 0, 0, 0, 0, 0, 0, 0,  1, 1, 1, 1, 1, 1, 1, 1,  1, 1, 1, 1, 1, 1, 1, 1,  1, 1, 1, 1, 1, 1, 1, 1,  1, 1, 1, 1, 1, 1, 1, 1,
+		0, 0, 0, 0, 0, 0, 0, 0,  0, 1, 1, 1, 1, 1, 1, 1,  1, 1, 1, 1, 1, 1, 1, 1,  1, 1, 1, 1, 1, 1, 1, 1,  1, 1, 1, 1, 1, 1, 1, 1,
 		0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 1, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 1,
 		0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 1, 1, 1, 1, 1, 0,  0, 1, 1, 2, 1, 1, 0, 0,  1, 1, 1, 1, 1, 1, 1, 1,  0, 0, 0, 0, 0, 0, 0, 1,
 		0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 1, 0, 0, 0, 1, 0,  0, 1, 0, 0, 0, 1, 0, 0,  1, 0, 0, 0, 0, 0, 0, 1,  0, 0, 0, 0, 0, 0, 0, 1,
@@ -84,6 +84,9 @@ public class TiledPartitionV2Test extends BaseScreen {
 	private int degreeOfSeparation = 1;
 	private Vector2 cs = new Vector2();
 	private ObjectSet<MapRegion.SubRegion> subRegions = new ObjectSet<>();
+	int lastX = -1;
+	int lastY = -1;
+	int lastDoS = -1;
 	@Override public void render (float delta) {
 		super.render(delta);
 
@@ -114,22 +117,56 @@ public class TiledPartitionV2Test extends BaseScreen {
 
 		int x = (int)cs.x;
 		int y = (int)cs.y;
-		subRegions.clear();
-		// TODO this is broken for high degreeOfSeparation
-		tileMap.getConnectedSubsAt(x, y, degreeOfSeparation, subRegions);
+		// cache to save the battery :d
+		if (lastX != x || lastY != y || lastDoS != degreeOfSeparation) {
+			lastX = x;
+			lastY = y;
+			lastDoS = degreeOfSeparation;
+
+			subRegions.clear();
+			tileMap.touched.clear();
+			tileMap.touchedRegions.clear();
+			tileMap.regionsEdges.clear();
+			// TODO this is broken for high degreeOfSeparation
+			tileMap.getConnectedSubsAt(x, y, degreeOfSeparation, subRegions);
 
 //		tileMap.getConnectedSubsAt(x, y, 0, subRegions);
 //		tileMap.expandSubRegions(subRegions, degreeOfSeparation);
+		}
 
-
+		renderer.end();
+		renderer.begin(ShapeRenderer.ShapeType.Line);
 		renderer.setColor(Color.BLACK);
 		for (MapRegion.SubRegion sub : subRegions) {
-//			renderer.setColor(sub.color);
+			for (Tile tile : sub.tiles) {
+				renderer.rect(tile.x+.05f, tile.y+.05f, .9f, .9f);
+			}
+		}
+
+
+		renderer.end();
+		renderer.begin(ShapeRenderer.ShapeType.Filled);
+		renderer.setColor(Color.FOREST);
+		renderer.getColor().a = .5f;
+		for (MapRegion.SubRegion sub : subRegions) {
 			for (Tile tile : sub.tiles) {
 				renderer.rect(tile.x+.1f, tile.y+.1f, .8f, .8f);
 			}
 		}
+		renderer.setColor(Color.VIOLET);
+		renderer.getColor().a = .5f;
+		for (MapRegion.SubRegion sub : subRegions) {
+			for (Tile tile : sub.tiles) {
+				renderer.rect(tile.x+.3f, tile.y+.3f, .4f, .4f);
+			}
+		}
 
+		renderer.setColor(Color.CYAN);
+		renderer.getColor().a = .5f;
+		for (TileMap.Edge edge : tileMap.touched) {
+			renderer.rect(edge.x + .1f, edge.y + .1f, edge.horizontal ? edge.length - .2f : .8f,
+				edge.horizontal ? .8f : edge.length - .2f);
+		}
 
 		/*
 		MapRegion.SubRegion sub = tileMap.getSubRegionAt(x, y);
