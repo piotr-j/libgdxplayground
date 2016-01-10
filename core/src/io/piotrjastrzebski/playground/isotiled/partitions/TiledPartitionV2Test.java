@@ -121,19 +121,22 @@ public class TiledPartitionV2Test extends BaseScreen {
 		int x = (int)cs.x;
 		int y = (int)cs.y;
 		// cache to save the battery :d
-		if (lastX != x || lastY != y || lastDoS != degreeOfSeparation) {
-			lastX = x;
-			lastY = y;
-			lastDoS = degreeOfSeparation;
-			data.reset();
-			tileMap.touched.clear();
-			tileMap.touchedRegions.clear();
-			tileMap.regionsEdges.clear();
-			// TODO this is broken for high degreeOfSeparation
-			tileMap.getConnectedSubsAt(x, y, degreeOfSeparation, data);
 
-//		tileMap.getConnectedSubsAt(x, y, 0, subRegions);
-//		tileMap.expandSubRegions(subRegions, degreeOfSeparation);
+		if (lastX != x || lastY != y || lastDoS != degreeOfSeparation) {
+			// we moved source
+			if (lastX != x || lastY != y || lastDoS > degreeOfSeparation) {
+				lastX = x;
+				lastY = y;
+				data.reset();
+				tileMap.touched.clear();
+				tileMap.touchedRegions.clear();
+				tileMap.regionsEdges.clear();
+				tileMap.getConnectedSubsAt(x, y, degreeOfSeparation, data);
+			} else {
+				// dos is higher, we can expand
+				tileMap.expandSubRegions(data, degreeOfSeparation-lastDoS);
+			}
+			lastDoS = degreeOfSeparation;
 		}
 
 		renderer.end();
@@ -150,8 +153,9 @@ public class TiledPartitionV2Test extends BaseScreen {
 		renderer.setColor(Color.BLACK);
 		renderer.getColor().a = .1f;
 		tmpRegions.clear();
-		for (int i = 0; i < data.degreeOfSeparation; i++) {
+		for (int i = 0; i <= data.degreeOfSeparation; i++) {
 			// NOTE tmpRegions should be cleared in general usage, we dont so we can show progression with blending
+//			tmpRegions.clear();
 			data.get(i, tmpRegions);
 			for (MapRegion.SubRegion sub : tmpRegions) {
 				for (Tile tile : sub.tiles) {
@@ -279,6 +283,7 @@ public class TiledPartitionV2Test extends BaseScreen {
 	}
 
 	@Override public boolean keyDown (int keycode) {
+		int scale = (Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT) || Gdx.input.isKeyPressed(Input.Keys.SHIFT_RIGHT))?2:1;
 		switch (keycode) {
 		case Input.Keys.F2:
 			drawDebugPointer = !drawDebugPointer;
@@ -299,11 +304,11 @@ public class TiledPartitionV2Test extends BaseScreen {
 			drawAllEdges = !drawAllEdges;
 			break;
 		case Input.Keys.LEFT_BRACKET:
-			degreeOfSeparation = Math.max(degreeOfSeparation -1, 0);
+			degreeOfSeparation = Math.max(degreeOfSeparation -scale, 0);
 			Gdx.app.log("", "degreeOfSeparation = " + degreeOfSeparation);
 			break;
 		case Input.Keys.RIGHT_BRACKET:
-			degreeOfSeparation = Math.min(degreeOfSeparation +1, 32);
+			degreeOfSeparation = Math.min(degreeOfSeparation +scale, 32);
 			Gdx.app.log("", "degreeOfSeparation = " + degreeOfSeparation);
 			break;
 		}

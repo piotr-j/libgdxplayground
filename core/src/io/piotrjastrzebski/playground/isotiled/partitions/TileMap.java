@@ -243,9 +243,9 @@ class TileMap {
 				dupes++;
 			}
 		}
-		Gdx.app.log("", "Total regions " + tmpInts.size);
-		Gdx.app.log("", "Duped regions " + dupes);
-		Gdx.app.log("", "Max dupes " + max);
+//		Gdx.app.log("", "Total regions " + tmpInts.size);
+//		Gdx.app.log("", "Duped regions " + dupes);
+//		Gdx.app.log("", "Max dupes " + max);
 		return out;
 	}
 
@@ -254,27 +254,28 @@ class TileMap {
 		return out;
 	}
 
+	private IntIntMap tmpInts = new IntIntMap();
 	public Array<Edge> touched = new Array<>();
 	public Array<MapRegion.SubRegion> touchedRegions = new Array<>();
 	public Array<MapRegion.SubRegion> regionsEdges = new Array<>();
 	private NeighbourData getConnectedSubs (final MapRegion.SubRegion region, final int dos, SubRegionFilter filter,
 		final NeighbourData out) {
-
-		tmpRegions.clear();
-		// sub id max is 63, so << 7 should be fine
-		int id = region.parent.id << 7 + region.id;
-		tmpInts.put(id, tmpInts.get(id, 0) + 1);
-		touchedRegions.add(region);
-
-		out.degreeOfSeparation = dos;
+		out.reset();
+		// add first region
 		out.subRegions.add(region);
-
-		tmpRegions.add(region);
-
-		int offset = 0;
-		// for simple iteration
 		out.offsets.add(0);
-		for (int i = 0; i < dos; i++) {
+		out.offsets.add(1);
+		// expand to desired degree
+		expandSubRegions(out, dos);
+		return out;
+	}
+
+	public NeighbourData expandSubRegions (NeighbourData out, int times) {
+		out.degreeOfSeparation += times;
+		Array<MapRegion.SubRegion> tmpRegions = out.subRegions;
+		int size = out.subRegions.size;
+		int offset = tmpRegions.size - out.offsets.get(out.offsets.size -1);
+		for (int i = 0; i < times; i++) {
 			// cache as it will grow
 			int length = tmpRegions.size;
 			for (int j = offset; j < length; j++) {
@@ -285,25 +286,66 @@ class TileMap {
 					final Edge edge = getEdge(ids.get(k));
 					touched.add(edge);
 					if (edge.subA != sub
-						&& filter.accept(sub, edge.subA)
+						&& filterSimilar.accept(sub, edge.subA)
 						&& !tmpRegions.contains(edge.subA, true)) {
 						tmpRegions.add(edge.subA);
 					}
 					if (edge.subB != sub
-						&& filter.accept(sub, edge.subB)
+						&& filterSimilar.accept(sub, edge.subB)
 						&& !tmpRegions.contains(edge.subB, true)) {
 						tmpRegions.add(edge.subB);
 					}
 				}
 			}
 			offset = length;
-			out.offsets.add(offset);
+			out.offsets.add(tmpRegions.size);
 			Gdx.app.log("", "step "+ i + " Added " + (tmpRegions.size - length));
 		}
-		// for simple iteration
-		out.offsets.add(tmpRegions.size);
-		out.add(tmpRegions);
+		Gdx.app.log("", "Expanded from " + size+ " to " + tmpRegions.size);
 		return out;
+	}
+
+	/**
+	 * Result of neighbour search
+	 */
+	public static class NeighbourData implements Pool.Poolable {
+		// we could try ObjectSet for faster(?) contains()
+		public Array<MapRegion.SubRegion> subRegions = new Array<>();
+		public IntArray offsets = new IntArray();
+		public int degreeOfSeparation;
+
+		@Override public void reset () {
+			subRegions.clear();
+			offsets.clear();
+			degreeOfSeparation = 0;
+		}
+
+		/**
+		 * get view for given degreeOfSeparation
+		 */
+		public Array<MapRegion.SubRegion> get(int degreeOfSeparation, Array<MapRegion.SubRegion> out) {
+			if (degreeOfSeparation > this.degreeOfSeparation) return out;
+			int offset = offsets.items[degreeOfSeparation];
+			int size = offsets.items[degreeOfSeparation + 1];
+			if (size > subRegions.size) {
+				Gdx.app.log("", "welp!");
+			}
+			for (int ii = offset; ii < size; ii++) {
+				out.add(subRegions.get(ii));
+			}
+			return out;
+		}
+
+		protected void add (Array<MapRegion.SubRegion> toAdd) {
+			for (MapRegion.SubRegion subRegion : toAdd) {
+				if (!subRegions.contains(subRegion, true))
+					subRegions.add(subRegion);
+			}
+		}
+	}
+
+	public interface SubRegionFilter {
+		boolean accept(MapRegion.SubRegion that, MapRegion.SubRegion other);
 	}
 
 	private SubRegionFilter filterSimilar = new SubRegionFilter() {
@@ -325,87 +367,6 @@ class TileMap {
 			return true;
 		}
 	};
-
-	private Array<MapRegion.SubRegion> tmpRegions = new Array<>();
-	private ObjectSet<MapRegion.SubRegion> tmpSet = new ObjectSet<>();
-	private IntIntMap tmpInts = new IntIntMap();
-	public ObjectSet<MapRegion.SubRegion> expandSubRegions (ObjectSet<MapRegion.SubRegion> subRegions, int times) {
-		tmpInts.clear();
-		int totalFound = 0;
-		for (int i = 0; i < times; i++) {
-			tmpRegions.clear();
-			// no add all, buu
-			for (MapRegion.SubRegion subRegion : subRegions) {
-				tmpRegions.add(subRegion);
-			}
-			for (MapRegion.SubRegion subRegion : tmpRegions) {
-				tmpSet.clear();
-				// since we go over same subs many times, we waste a ton of work, gotta fix that....
-//				getConnectedSubs(subRegion, 1, filterAll, tmpSet);
-				int found = tmpSet.size;
-				totalFound += found;
-				int current = subRegions.size;
-				subRegions.addAll(tmpSet);
-				Gdx.app.log("", "found " + found +", added " + (subRegions.size - current));
-			}
-		}
-		// with large times, we find orders of magnitude more then we add
-		Gdx.app.log("", "found total " + totalFound +", added " + subRegions.size);
-
-//		subRegions.addAll(tmpSet);
-		int dupes = 0;
-		int max = 0;
-		for (IntIntMap.Entry entry : tmpInts.entries()) {
-			if (entry.value > 1) {
-				if (entry.value > max) max = entry.value;
-//				Gdx.app.log("", "Dupe : " + entry.key);
-				dupes++;
-			}
-		}
-		Gdx.app.log("", "Total regions " + tmpInts.size);
-		Gdx.app.log("", "Duped regions " + dupes);
-		Gdx.app.log("", "Max dupes " + max);
-
-		return subRegions;
-	}
-
-	/**
-	 * Result of neighbour search
-	 */
-	public static class NeighbourData implements Pool.Poolable {
-		public Array<MapRegion.SubRegion> subRegions = new Array<>();
-		public IntArray offsets = new IntArray();
-		public int degreeOfSeparation;
-
-		@Override public void reset () {
-			subRegions.clear();
-			offsets.clear();
-			degreeOfSeparation = 0;
-		}
-
-		/**
-		 * get sub regions for given degreeOfSeparation
-		 */
-		public Array<MapRegion.SubRegion> get(int degreeOfSeparation, Array<MapRegion.SubRegion> out) {
-			if (degreeOfSeparation > this.degreeOfSeparation) return out;
-			int offset = offsets.items[degreeOfSeparation];
-			int count = offsets.items[degreeOfSeparation+1];
-			for (int j = offset; j < count; j++) {
-				out.add(subRegions.get(j));
-			}
-			return out;
-		}
-
-		public void add (Array<MapRegion.SubRegion> toAdd) {
-			for (MapRegion.SubRegion subRegion : toAdd) {
-				if (!subRegions.contains(subRegion, true)) subRegions.add(subRegion);
-			}
-		}
-	}
-
-	public interface SubRegionFilter {
-		boolean accept(MapRegion.SubRegion that, MapRegion.SubRegion other);
-	}
 
 	public static class Edge implements Pool.Poolable{
 		private static Pool<Edge> pool = new Pool<Edge>() {
