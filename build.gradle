@@ -17,7 +17,7 @@ allprojects {
     version = '1.0'
     ext {
         appName = 'playground'
-        gdxVersion = '1.7.3-SNAPSHOT'
+        gdxVersion = '1.8.0'
         roboVMVersion = '1.2.0'
         box2DLightsVersion = '1.4'
         ashleyVersion = '1.4.0'
