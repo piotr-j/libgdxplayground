@@ -5,7 +5,6 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
@@ -13,7 +12,6 @@ import com.badlogic.gdx.utils.ObjectSet;
 import io.piotrjastrzebski.playground.BaseScreen;
 import io.piotrjastrzebski.playground.GameReset;
 import io.piotrjastrzebski.playground.PlaygroundGame;
-import net.mostlyoriginal.api.plugin.extendedcomponentmapper.M;
 
 /**
  * Created by EvilEntity on 07/06/2015.
@@ -112,7 +110,7 @@ public class TiledPartitionV2Test extends BaseScreen {
 			drawFloodFill();
 		}
 		if (drawAllEdges) {
-			for (TileMap.Edge edge : tileMap.idToEdge.values()) {
+			for (Edge edge : tileMap.idToEdge.values()) {
 				renderer.setColor(edge.color);
 				renderer.rect(edge.x + .1f, edge.y + .1f, edge.horizontal ? edge.length - .2f : .8f,
 					edge.horizontal ? .8f : edge.length - .2f);
