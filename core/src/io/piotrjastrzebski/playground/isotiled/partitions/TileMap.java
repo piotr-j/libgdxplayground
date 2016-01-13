@@ -77,14 +77,14 @@ class TileMap {
 	public void rebuild () {
 		rebuildQueue.clear();
 		for (MapRegion region : regions) {
-			rebuildQueue.add(region);
+			scheduleRegionRebuild(region);
 		}
 		execRebuild();
 	}
 
 	private void validateHashes () {
 		IntIntMap edgeHashes = new IntIntMap();
-		for (Edge edge : edges) {
+		for (Edge edge : idToEdge.values()) {
 			int hc = edge.hashCode();
 			edgeHashes.put(hc, edgeHashes.get(hc, 0) + 1);
 		}
@@ -143,16 +143,19 @@ class TileMap {
 	 */
 	public void rebuild (int x, int y) {
 		rebuildQueue.clear();
-		rebuildRegionAt(x, y);
-		rebuildRegionAt(x -regionSize, y);
-		rebuildRegionAt(x +regionSize, y);
-		rebuildRegionAt(x, y -regionSize);
-		rebuildRegionAt(x, y +regionSize);
+		scheduleRegionRebuildAt(x, y);
+		scheduleRegionRebuildAt(x -regionSize, y);
+		scheduleRegionRebuildAt(x +regionSize, y);
+		scheduleRegionRebuildAt(x, y -regionSize);
+		scheduleRegionRebuildAt(x, y +regionSize);
 		execRebuild();
 	}
 
-	private void rebuildRegionAt (int x, int y) {
-		MapRegion region = getRegionAt(x, y);
+	private void scheduleRegionRebuildAt (int x, int y) {
+		scheduleRegionRebuild(getRegionAt(x, y));
+	}
+
+	private void scheduleRegionRebuild (MapRegion region) {
 		if (region != null) rebuildQueue.add(region);
 	}
 
@@ -168,6 +171,7 @@ class TileMap {
 			if (edge.subA == null && edge.subB == null) {
 				idToEdge.remove(id);
 				Edge.free(edge);
+//				edges.removeValue(edge, true);
 			}
 		}
 		region.edgeIds.clear();
@@ -180,7 +184,7 @@ class TileMap {
 		}
 		// need proper way of getting those
 		Edge edge = Edge.obtain().init(id, x, y, length, horizontal);
-		edges.add(edge);
+//		edges.add(edge);
 		idToEdge.put(id, edge);
 		return edge;
 	}
@@ -191,7 +195,7 @@ class TileMap {
 		return edge.id;
 	}
 
-	public Array<Edge> edges = new Array<>();
+//	public Array<Edge> edges = new Array<>();
 	public IntMap<Edge> idToEdge = new IntMap<>();
 	public int setVerticalEdge (MapRegion.SubRegion region, int x, int y, int length) {
 		Edge edge = getEdge(x, y, length, false);

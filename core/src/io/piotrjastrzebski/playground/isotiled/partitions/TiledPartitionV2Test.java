@@ -90,6 +90,7 @@ public class TiledPartitionV2Test extends BaseScreen {
 	int lastX = -1;
 	int lastY = -1;
 	int lastDoS = -1;
+	boolean dirty = false;
 	@Override public void render (float delta) {
 		super.render(delta);
 
@@ -111,7 +112,7 @@ public class TiledPartitionV2Test extends BaseScreen {
 			drawFloodFill();
 		}
 		if (drawAllEdges) {
-			for (TileMap.Edge edge : tileMap.edges) {
+			for (TileMap.Edge edge : tileMap.idToEdge.values()) {
 				renderer.setColor(edge.color);
 				renderer.rect(edge.x + .1f, edge.y + .1f, edge.horizontal ? edge.length - .2f : .8f,
 					edge.horizontal ? .8f : edge.length - .2f);
@@ -122,9 +123,9 @@ public class TiledPartitionV2Test extends BaseScreen {
 		int y = (int)cs.y;
 		// cache to save the battery :d
 
-		if (lastX != x || lastY != y || lastDoS != degreeOfSeparation) {
+		if (lastX != x || lastY != y || lastDoS != degreeOfSeparation || dirty) {
 			// we moved source
-			if (lastX != x || lastY != y || lastDoS > degreeOfSeparation) {
+			if (lastX != x || lastY != y || lastDoS > degreeOfSeparation || dirty) {
 				lastX = x;
 				lastY = y;
 				data.reset();
@@ -137,6 +138,7 @@ public class TiledPartitionV2Test extends BaseScreen {
 				tileMap.expandSubRegions(data, degreeOfSeparation-lastDoS);
 			}
 			lastDoS = degreeOfSeparation;
+			dirty = false;
 		}
 
 		renderer.end();
@@ -351,6 +353,7 @@ public class TiledPartitionV2Test extends BaseScreen {
 					if (tile.type < 0) tile.type = 2;
 					tileMap.rebuild(tile.x, tile.y);;
 				}
+				dirty = true;
 			}
 		}
 		return true;
