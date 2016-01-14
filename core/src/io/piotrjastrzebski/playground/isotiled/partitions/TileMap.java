@@ -2,6 +2,7 @@ package io.piotrjastrzebski.playground.isotiled.partitions;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.utils.*;
+import io.piotrjastrzebski.playground.isotiled.partitions.MapRegion.SubRegion;
 
 /**
  * Created by EvilEntity on 07/01/2016.
@@ -14,11 +15,16 @@ class TileMap {
 	public final int regionsY;
 	public final MapRegion[] regions;
 	public final Tile[] tiles;
+	public final Array<Room> rooms;
+	private final ObjectSet<Room> roomsTouched;
 
 	public TileMap (int[] map, int mapWidth, int mapHeight, int regionSize) {
 		this.mapWidth = mapWidth;
 		this.mapHeight = mapHeight;
 		this.regionSize = regionSize;
+
+		rooms = new Array<>();
+		roomsTouched = new ObjectSet<>();
 
 		regionsX = mapWidth / regionSize;
 		regionsY = mapHeight / regionSize;
@@ -99,7 +105,7 @@ class TileMap {
 		for (MapRegion region : regions) {
 			int hc = region.hashCode();
 			regionHashes.put(hc, regionHashes.get(hc, 0) + 1);
-			for (MapRegion.SubRegion sub : region.subs) {
+			for (SubRegion sub : region.subs) {
 				hc = sub.hashCode();
 				subRegionHashes.put(hc, subRegionHashes.get(hc, 0) + 1);
 			}
@@ -132,10 +138,57 @@ class TileMap {
 		for (MapRegion region : rebuildQueue) {
 			region.rebuildSubRegions(this);
 		}
-		// FIXME fails when tile is changed!!!
+		rebuildRooms(rebuildQueue);
 		validateHashes();
 	}
 
+	private NeighbourData tmpData = new NeighbourData();
+	private ObjectSet<SubRegion> tmpSubs = new ObjectSet<>();
+	public ObjectMap<SubRegion, Room> subToRoom = new ObjectMap<>();
+	private void rebuildRooms (Array<MapRegion> rebuildQueue) {
+		tmpSubs.clear();
+		for (Room room : roomsTouched) {
+			for (SubRegion subRegion : room.subRegions) {
+				subToRoom.remove(subRegion);
+			}
+			rooms.removeValue(room, true);
+			Room.free(room);
+		}
+		roomsTouched.clear();
+
+		for (MapRegion region : rebuildQueue) {
+			Array<SubRegion> subs = region.subs;
+			// in our queue all subs should be out of rooms
+			for (SubRegion startSub : subs) {
+				if (tmpSubs.contains(startSub))
+					continue;
+				tmpData.reset();
+				// FIXME this doesnt handle room splitting
+				// we probably wont have more then 999...
+				// need to do something with the rooms
+				getConnectedSubs(startSub, 999, filterSimilar, tmpData);
+				// find room to add to
+				Room room = null;
+				// since all subs are connected, they belong to same room
+				for (SubRegion subRegion : tmpData.subRegions) {
+					if (subToRoom.containsKey(subRegion)) {
+						room = subToRoom.get(subRegion);
+						break;
+					}
+				}
+				if (room == null) {
+					room = Room.obtain();
+					rooms.add(room);
+				}
+				// startSub should be in the data as well
+				for (SubRegion subRegion : tmpData.subRegions) {
+					room.add(subRegion);
+					subToRoom.put(subRegion, room);
+					tmpSubs.add(subRegion);
+				}
+			}
+		}
+	}
 	/**
 	 * Rebuild region at x, y and surrounding
 	 */
@@ -157,7 +210,7 @@ class TileMap {
 		if (region != null) rebuildQueue.add(region);
 	}
 
-	public void clearEdges (MapRegion.SubRegion region) {
+	public void clear (SubRegion region) {
 		// TODO need to make sure that his crap works
 		// find all edges with this region and clear them
 		for (int i = 0; i < region.edgeIds.size; i++) {
@@ -169,7 +222,17 @@ class TileMap {
 			if (edge.subA == null && edge.subB == null) {
 				idToEdge.remove(id);
 				Edge.free(edge);
-//				edges.removeValue(edge, true);
+			}
+			Room room = subToRoom.remove(region);
+			if (room != null) {
+				room.remove(region);
+				if (room.subRegions.size == 0) {
+					rooms.removeValue(room, true);
+					Room.free(room);
+					roomsTouched.remove(room);
+				} else {
+					roomsTouched.add(room);
+				}
 			}
 		}
 		region.edgeIds.clear();
@@ -182,26 +245,24 @@ class TileMap {
 		}
 		// need proper way of getting those
 		Edge edge = Edge.obtain().init(id, x, y, length, horizontal);
-//		edges.add(edge);
 		idToEdge.put(id, edge);
 		return edge;
 	}
 
-	public int setHorizontalEdge (MapRegion.SubRegion region, int x, int y, int length) {
+	public int setHorizontalEdge (SubRegion region, int x, int y, int length) {
 		Edge edge = getEdge(x, y, length, true);
 		edge.add(region);
 		return edge.id;
 	}
 
-//	public Array<Edge> edges = new Array<>();
 	public IntMap<Edge> idToEdge = new IntMap<>();
-	public int setVerticalEdge (MapRegion.SubRegion region, int x, int y, int length) {
+	public int setVerticalEdge (SubRegion region, int x, int y, int length) {
 		Edge edge = getEdge(x, y, length, false);
 		edge.add(region);
 		return edge.id;
 	}
 
-	public MapRegion.SubRegion getSubRegionAt (int x, int y) {
+	public SubRegion getSubRegionAt (int x, int y) {
 		MapRegion region = getRegionAt(x, y);
 		if (region == null) return null;
 		return region.getSubRegionAt(x, y);
@@ -232,7 +293,7 @@ class TileMap {
 	 */
 	public NeighbourData getConnectedSubsAt (int x, int y, int dos, NeighbourData out) {
 		if (dos < 0) return out;
-		MapRegion.SubRegion region = getSubRegionAt(x, y);
+		SubRegion region = getSubRegionAt(x, y);
 		if (region == null) return out;
 		tmpInts.clear();
 		getConnectedSubsTo(region, dos, out);
@@ -251,16 +312,16 @@ class TileMap {
 		return out;
 	}
 
-	public NeighbourData getConnectedSubsTo (MapRegion.SubRegion region, int dos, NeighbourData out) {
+	public NeighbourData getConnectedSubsTo (SubRegion region, int dos, NeighbourData out) {
 		getConnectedSubs(region, dos, filterSimilar, out);
 		return out;
 	}
 
 	private IntIntMap tmpInts = new IntIntMap();
 	public Array<Edge> touched = new Array<>();
-	public Array<MapRegion.SubRegion> touchedRegions = new Array<>();
-	public Array<MapRegion.SubRegion> regionsEdges = new Array<>();
-	private NeighbourData getConnectedSubs (final MapRegion.SubRegion region, final int dos, SubRegionFilter filter,
+	public Array<SubRegion> touchedRegions = new Array<>();
+	public Array<SubRegion> regionsEdges = new Array<>();
+	private NeighbourData getConnectedSubs (final SubRegion region, final int dos, SubRegionFilter filter,
 		final NeighbourData out) {
 		out.reset();
 		// add first region
@@ -268,32 +329,33 @@ class TileMap {
 		out.offsets.add(0);
 		out.offsets.add(1);
 		// expand to desired degree
-		expandSubRegions(out, dos);
+		expandSubRegions(out, dos, filter);
 		return out;
 	}
 
-	public NeighbourData expandSubRegions (NeighbourData out, int times) {
-		out.degreeOfSeparation += times;
-		Array<MapRegion.SubRegion> tmpRegions = out.subRegions;
+	public NeighbourData expandSubRegions (NeighbourData out, int times, SubRegionFilter filter) {
+		if (out.subRegions.size == 0) return out;
+		Array<SubRegion> tmpRegions = out.subRegions;
 		int size = out.subRegions.size;
 		int offset = tmpRegions.size - out.offsets.get(out.offsets.size -1);
-		for (int i = 0; i < times; i++) {
+		int i = 0;
+		for (; i < times; i++) {
 			// cache as it will grow
 			int length = tmpRegions.size;
 			for (int j = offset; j < length; j++) {
-				MapRegion.SubRegion sub = tmpRegions.get(j);
+				SubRegion sub = tmpRegions.get(j);
 				touchedRegions.add(sub);
 				final IntArray ids = sub.edgeIds;
 				for (int k = 0; k < ids.size; k++) {
 					final Edge edge = getEdge(ids.get(k));
 					touched.add(edge);
 					if (edge.subA != sub
-						&& filterSimilar.accept(sub, edge.subA)
+						&& filter.accept(sub, edge.subA)
 						&& !tmpRegions.contains(edge.subA, true)) {
 						tmpRegions.add(edge.subA);
 					}
 					if (edge.subB != sub
-						&& filterSimilar.accept(sub, edge.subB)
+						&& filter.accept(sub, edge.subB)
 						&& !tmpRegions.contains(edge.subB, true)) {
 						tmpRegions.add(edge.subB);
 					}
@@ -302,9 +364,18 @@ class TileMap {
 			offset = length;
 			out.offsets.add(tmpRegions.size);
 			Gdx.app.log("", "step "+ i + " Added " + (tmpRegions.size - length));
+			if (tmpRegions.size - length == 0) {
+				Gdx.app.log("", "Reached max added");
+				break;
+			}
 		}
+		out.degreeOfSeparation += i;
 		Gdx.app.log("", "Expanded from " + size+ " to " + tmpRegions.size);
 		return out;
+	}
+
+	public void expandSubRegions (NeighbourData out, int times) {
+		expandSubRegions(out, times, filterSimilar);
 	}
 
 	/**
@@ -312,7 +383,7 @@ class TileMap {
 	 */
 	public static class NeighbourData implements Pool.Poolable {
 		// we could try ObjectSet for faster(?) contains()
-		public Array<MapRegion.SubRegion> subRegions = new Array<>();
+		public Array<SubRegion> subRegions = new Array<>();
 		public IntArray offsets = new IntArray();
 		public int degreeOfSeparation;
 
@@ -325,7 +396,8 @@ class TileMap {
 		/**
 		 * get view for given degreeOfSeparation
 		 */
-		public Array<MapRegion.SubRegion> get(int degreeOfSeparation, Array<MapRegion.SubRegion> out) {
+		public Array<SubRegion> get(int degreeOfSeparation, Array<SubRegion> out) {
+			if (subRegions.size == 0) return out;
 			if (degreeOfSeparation > this.degreeOfSeparation) return out;
 			int offset = offsets.items[degreeOfSeparation];
 			int size = offsets.items[degreeOfSeparation + 1];
@@ -338,8 +410,8 @@ class TileMap {
 			return out;
 		}
 
-		protected void add (Array<MapRegion.SubRegion> toAdd) {
-			for (MapRegion.SubRegion subRegion : toAdd) {
+		protected void add (Array<SubRegion> toAdd) {
+			for (SubRegion subRegion : toAdd) {
 				if (!subRegions.contains(subRegion, true))
 					subRegions.add(subRegion);
 			}
@@ -347,11 +419,11 @@ class TileMap {
 	}
 
 	public interface SubRegionFilter {
-		boolean accept(MapRegion.SubRegion that, MapRegion.SubRegion other);
+		boolean accept(SubRegion that, SubRegion other);
 	}
 
 	private SubRegionFilter filterSimilar = new SubRegionFilter() {
-		@Override public boolean accept (MapRegion.SubRegion that, MapRegion.SubRegion other) {
+		@Override public boolean accept (SubRegion that, SubRegion other) {
 			if (that.tileType == 0) {
 				return that.tileType == other.tileType;
 			} else {
@@ -360,12 +432,12 @@ class TileMap {
 		}
 	};
 	private SubRegionFilter filterExact = new SubRegionFilter() {
-		@Override public boolean accept (MapRegion.SubRegion that, MapRegion.SubRegion other) {
+		@Override public boolean accept (SubRegion that, SubRegion other) {
 			return that.tileType == other.tileType;
 		}
 	};
 	private SubRegionFilter filterAll = new SubRegionFilter() {
-		@Override public boolean accept (MapRegion.SubRegion that, MapRegion.SubRegion other) {
+		@Override public boolean accept (SubRegion that, SubRegion other) {
 			return true;
 		}
 	};

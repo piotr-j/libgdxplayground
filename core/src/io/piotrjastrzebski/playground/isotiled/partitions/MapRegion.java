@@ -141,7 +141,7 @@ class MapRegion {
 		}
 
 		public void rebuild(TileMap map) {
-			map.clearEdges(this);
+			map.clear(this);
 			// tiles are sorted so it is easier to find next tile in order
 			tiles.sort(tileXComp);
 			findHorizontalEdges(map, -1, 0);
@@ -270,7 +270,7 @@ class MapRegion {
 		}
 
 		public void clear (TileMap tileMap) {
-			tileMap.clearEdges(this);
+			tileMap.clear(this);
 		}
 
 		@Override public boolean equals (Object o) {

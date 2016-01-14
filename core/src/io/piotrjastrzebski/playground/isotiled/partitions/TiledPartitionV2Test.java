@@ -22,9 +22,9 @@ public class TiledPartitionV2Test extends BaseScreen {
 	public final static float VP_WIDTH = 1280/SCALE;
 	public final static float VP_HEIGHT = 720/SCALE;
 
-	public final static int REGION_SIZE = 8;
-	public final static int MAP_WIDTH = REGION_SIZE * 5;
-	public final static int MAP_HEIGHT = REGION_SIZE * 3;
+	public final static int REGION_SIZE = 4;
+	public final static int MAP_WIDTH = REGION_SIZE * 4;
+	public final static int MAP_HEIGHT = REGION_SIZE * 4;
 	public final static int[] map = new int[] {
 		0, 0, 0, 0, 0, 0, 0, 0,  0, 1, 1, 1, 1, 1, 1, 1,  1, 1, 1, 1, 1, 1, 1, 1,  1, 1, 1, 1, 1, 1, 1, 1,  1, 1, 1, 1, 1, 1, 1, 1,
 		0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 1, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 1,
@@ -54,12 +54,34 @@ public class TiledPartitionV2Test extends BaseScreen {
 		0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 1,  1, 1, 1, 1, 1, 1, 1, 1,  1, 1, 1, 1, 1, 1, 1, 1,
 	};
 
+	public final static int[] map2 = new int[] {
+		0, 0, 0, 0, 	0, 0, 0, 0,		0, 0, 0, 0, 	0, 0, 0, 0,
+		0, 0, 0, 0, 	0, 0, 0, 0,		0, 0, 0, 0, 	0, 0, 0, 0,
+		0, 0, 0, 0, 	0, 0, 0, 0,		0, 0, 0, 0, 	0, 0, 0, 0,
+		0, 0, 0, 0, 	0, 0, 0, 0,		0, 0, 0, 0, 	0, 0, 0, 0,
+
+		0, 0, 0, 0, 	1, 1, 1, 1,		1, 1, 1, 1, 	0, 0, 0, 0,
+		0, 0, 0, 0, 	1, 0, 0, 0,		0, 0, 0, 1, 	0, 0, 0, 0,
+		1, 1, 0, 1, 	1, 0, 0, 0,		0, 0, 0, 1, 	0, 0, 0, 0,
+		0, 0, 0, 0, 	0, 0, 0, 0,		0, 0, 0, 1, 	0, 0, 0, 0,
+
+		0, 0, 0, 0, 	1, 0, 0, 0,  	0, 0, 0, 1, 	0, 0, 0, 0,
+		0, 0, 0, 0, 	1, 0, 0, 0,  	0, 0, 0, 1, 	0, 0, 0, 0,
+		0, 0, 0, 0, 	1, 0, 0, 0,  	0, 0, 0, 1, 	1, 1, 1, 1,
+		0, 0, 0, 0, 	1, 1, 1, 1,  	1, 1, 1, 1, 	0, 0, 0, 0,
+
+		0, 0, 0, 0, 	0, 0, 0, 1,  	1, 0, 0, 0, 	0, 0, 0, 0,
+		0, 0, 0, 0, 	0, 0, 0, 1,  	1, 0, 0, 0, 	0, 0, 0, 0,
+		0, 0, 0, 0, 	0, 0, 0, 1,  	1, 0, 0, 0, 	0, 0, 0, 0,
+		0, 0, 0, 0, 	0, 0, 0, 1,  	1, 0, 0, 0, 	0, 0, 0, 0,
+	};
+
 	TileMap tileMap;
 
 	public TiledPartitionV2Test (GameReset game) {
 		super(game);
 
-		tileMap = new TileMap(map, MAP_WIDTH, MAP_HEIGHT, REGION_SIZE);
+		tileMap = new TileMap(map2, MAP_WIDTH, MAP_HEIGHT, REGION_SIZE);
 		tileMap.rebuild();
 
 		gameCamera.position.set(VP_WIDTH / 2, VP_HEIGHT / 2, 0);
@@ -70,6 +92,7 @@ public class TiledPartitionV2Test extends BaseScreen {
 		Gdx.app.log("", "F5 - toggle draw debug tile over mouse");
 		Gdx.app.log("", "F6 - toggle draw sub regions");
 		Gdx.app.log("", "F7 - toggle draw all edges");
+		Gdx.app.log("", "F8 - toggle draw degree of separation search");
 		Gdx.app.log("", "[ - degreeOfSeparation--");
 		Gdx.app.log("", "] - degreeOfSeparation++");
 	}
@@ -80,6 +103,8 @@ public class TiledPartitionV2Test extends BaseScreen {
 	private boolean drawDebugFloodFill = false;
 	private boolean drawDebugSubRegions = false;
 	private boolean drawAllEdges = false;
+	private boolean drawDoS = false;
+
 	private int degreeOfSeparation = 1;
 	private Vector2 cs = new Vector2();
 //	private ObjectSet<MapRegion.SubRegion> subRegions = new ObjectSet<>();
@@ -141,10 +166,24 @@ public class TiledPartitionV2Test extends BaseScreen {
 
 		renderer.end();
 		renderer.begin(ShapeRenderer.ShapeType.Line);
+		if (drawDoS) {
+			renderer.setColor(Color.BLACK);
+			for (MapRegion.SubRegion sub : data.subRegions) {
+				for (Tile tile : sub.tiles) {
+					renderer.rect(tile.x + .05f, tile.y + .05f, .9f, .9f);
+				}
+			}
+		}
 		renderer.setColor(Color.BLACK);
-		for (MapRegion.SubRegion sub : data.subRegions) {
-			for (Tile tile : sub.tiles) {
-				renderer.rect(tile.x+.05f, tile.y+.05f, .9f, .9f);
+		MapRegion.SubRegion at = tileMap.getSubRegionAt(x, y);
+		if (at != null) {
+			Room r = tileMap.subToRoom.get(at);
+			if (r != null) {
+				for (MapRegion.SubRegion sub : r.subRegions) {
+					for (Tile tile : sub.tiles) {
+						renderer.rect(tile.x + .05f, tile.y + .05f, .9f, .9f);
+					}
+				}
 			}
 		}
 		renderer.end();
@@ -152,14 +191,26 @@ public class TiledPartitionV2Test extends BaseScreen {
 		renderer.begin(ShapeRenderer.ShapeType.Filled);
 		renderer.setColor(Color.BLACK);
 		renderer.getColor().a = .1f;
-		tmpRegions.clear();
-		for (int i = 0; i <= data.degreeOfSeparation; i++) {
-			// NOTE tmpRegions should be cleared in general usage, we dont so we can show progression with blending
+		if (drawDoS) {
+			tmpRegions.clear();
+			for (int i = 0; i <= data.degreeOfSeparation; i++) {
+				// NOTE tmpRegions should be cleared in general usage, we dont so we can show progression with blending
 //			tmpRegions.clear();
-			data.get(i, tmpRegions);
-			for (MapRegion.SubRegion sub : tmpRegions) {
+				data.get(i, tmpRegions);
+				for (MapRegion.SubRegion sub : tmpRegions) {
+					for (Tile tile : sub.tiles) {
+						renderer.rect(tile.x + .1f, tile.y + .1f, .8f, .8f);
+					}
+				}
+			}
+		}
+
+		for (Room room : tileMap.rooms) {
+			renderer.setColor(room.color);
+			for (MapRegion.SubRegion sub : room.subRegions) {
 				for (Tile tile : sub.tiles) {
-					renderer.rect(tile.x+.1f, tile.y+.1f, .8f, .8f);
+//					renderer.rect(tile.x+.2f, tile.y+.2f, .6f, .6f);
+					renderer.triangle(tile.x+.2f, tile.y+.2f, tile.x+.8f, tile.y+.2f, tile.x+.2f, tile.y+.8f);
 				}
 			}
 		}
@@ -247,7 +298,8 @@ public class TiledPartitionV2Test extends BaseScreen {
 			for (MapRegion.SubRegion sub : region.subs) {
 				renderer.setColor(sub.color);
 				for (Tile tile : sub.tiles) {
-					renderer.rect(tile.x+.05f, tile.y+.05f, .9f, .9f);
+					renderer.triangle(tile.x+.8f, tile.y+.8f, tile.x+.8f, tile.y+.2f, tile.x+.2f, tile.y+.8f);
+//					renderer.rect(tile.x+.05f, tile.y+.05f, .9f, .9f);
 				}
 			}
 		}
@@ -302,6 +354,9 @@ public class TiledPartitionV2Test extends BaseScreen {
 			break;
 		case Input.Keys.F7:
 			drawAllEdges = !drawAllEdges;
+			break;
+		case Input.Keys.F8:
+			drawDoS = !drawDoS;
 			break;
 		case Input.Keys.LEFT_BRACKET:
 			degreeOfSeparation = Math.max(degreeOfSeparation -scale, 0);
