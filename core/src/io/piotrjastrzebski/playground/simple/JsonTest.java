@@ -21,17 +21,25 @@ public class JsonTest extends BaseScreen {
 	public JsonTest (GameReset game) {
 		super(game);
 
+		ObjectMap<String, Item> items = new ObjectMap<>();
 		Item item1 = new Item("Item 1", "textures/tex1.png", 10, 12);
-		Gdx.app.log(TAG, item1.toString());
+		Item item2 = new Item("Item 2", "textures/tex1.png", 10, 12);
+		Item item3 = new Item("Item 3", "textures/tex1.png", 10, 12);
+		Item item4 = new Item("Item 4", "textures/tex1.png", 10, 12);
+		items.put(item1.getName(), item1);
+		items.put(item2.getName(), item2);
+		items.put(item3.getName(), item3);
+		items.put(item4.getName(), item4);
+		Gdx.app.log(TAG, items.get("Item 1").toString());
 
-		Json json = new Json(JsonWriter.OutputType.javascript);
-		String item1Json = json.toJson(item1);
-		Item item2 = json.fromJson(Item.class, item1Json);
-		Gdx.app.log(TAG, item2.toString());
+		Json json = new Json();
+		String itemsJson = json.toJson(items);
+		ObjectMap<String, Item> itemsFromJson = json.fromJson(ObjectMap.class, Item.class, itemsJson);
+		Gdx.app.log(TAG, itemsFromJson.get("Item 1").toString());
 
 		JsonReader reader = new JsonReader();
-		JsonValue value = reader.parse(item1Json);
-		Gdx.app.log(TAG, value.getString("name"));
+		JsonValue value = reader.parse(itemsJson);
+		Gdx.app.log(TAG, value.get("Item 1").getString("name"));
 	}
 
 	public static class Item {
