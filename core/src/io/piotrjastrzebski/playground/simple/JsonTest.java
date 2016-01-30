@@ -5,9 +5,7 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.utils.Json;
-import com.badlogic.gdx.utils.JsonWriter;
-import com.badlogic.gdx.utils.ScreenUtils;
+import com.badlogic.gdx.utils.*;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import io.piotrjastrzebski.playground.BaseScreen;
 import io.piotrjastrzebski.playground.GameReset;
@@ -30,6 +28,10 @@ public class JsonTest extends BaseScreen {
 		String item1Json = json.toJson(item1);
 		Item item2 = json.fromJson(Item.class, item1Json);
 		Gdx.app.log(TAG, item2.toString());
+
+		JsonReader reader = new JsonReader();
+		JsonValue value = reader.parse(item1Json);
+		Gdx.app.log(TAG, value.getString("name"));
 	}
 
 	public static class Item {
