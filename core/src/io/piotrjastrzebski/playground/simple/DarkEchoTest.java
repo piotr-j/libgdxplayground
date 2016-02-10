@@ -16,7 +16,6 @@ import com.badlogic.gdx.utils.reflect.ArrayReflection;
 import io.piotrjastrzebski.playground.BaseScreen;
 import io.piotrjastrzebski.playground.GameReset;
 import io.piotrjastrzebski.playground.PlaygroundGame;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.util.Iterator;
 import java.util.Spliterator;
@@ -510,11 +509,11 @@ public class DarkEchoTest extends BaseScreen {
 		}
 
 		@Override public void forEach (Consumer<? super T> action) {
-			throw new NotImplementedException();
+			throw new IllegalStateException("NotImplemented");
 		}
 
 		@Override public Spliterator<T> spliterator () {
-			throw new NotImplementedException();
+			throw new IllegalStateException("NotImplemented");
 		}
 
 		static public class CircularBufferIterator<T> implements Iterator<T>, Iterable<T> {
