@@ -7,9 +7,11 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.utils.Array;
 import io.piotrjastrzebski.playground.BaseScreen;
 import io.piotrjastrzebski.playground.GameReset;
 import io.piotrjastrzebski.playground.PlaygroundGame;
@@ -17,24 +19,71 @@ import io.piotrjastrzebski.playground.PlaygroundGame;
 /**
  * Created by EvilEntity on 25/01/2016.
  */
-public class SimplexNoiseShakeTest extends BaseScreen {
-	private static final String TAG = SimplexNoiseShakeTest.class.getSimpleName();
+public class CameraShakeTest extends BaseScreen {
+	private static final String TAG = CameraShakeTest.class.getSimpleName();
 	private final int numPoints = 128;
 	private CircularBuffer<Vector2> points = new CircularBuffer<>(numPoints, false);
-	private CameraShake shake;
-	public SimplexNoiseShakeTest (GameReset game) {
+	private CameraShaker shaker;
+	private int shakerId;
+	private Array<CameraShaker> shakers = new Array<>();
+	private Array<String> shakerNames = new Array<>();
+
+	public CameraShakeTest (GameReset game) {
 		super(game);
 		for (int i = 0; i < numPoints; i++) {
 			points.store(new Vector2());
 		}
-		shake = new CameraShake(gameCamera);
-//		shake.shake(10, 1);
+
+		createShaker("DefaultShaker (random)", null);
+		createShaker("NoiseShaker", new CameraShaker.ShakeStrategy() {
+			private float timer = 0;
+			@Override public Vector3 calculateOffset (float delta, float magnitude, Vector3 out) {
+				timer += delta;
+				out.x = SimplexNoise.noise(timer * 10) * magnitude;
+				out.y = SimplexNoise.noise(timer * 5) * magnitude;
+				return out;
+			}
+		});
+		createShaker("RandomShaker", new CameraShaker.ShakeStrategy() {
+			@Override public Vector3 calculateOffset (float delta, float magnitude, Vector3 out) {
+				out.x = MathUtils.random(-magnitude, magnitude);
+				out.y = MathUtils.random(-magnitude, magnitude);
+				return out;
+			}
+		});
+		createShaker("InterpolatedShaker", new CameraShaker.ShakeStrategy() {
+			private float timer = 0;
+			private float freq = 16;
+			private Vector2 start = new Vector2();
+			private Vector2 target = new Vector2();
+			@Override public Vector3 calculateOffset (float delta, float magnitude, Vector3 out) {
+				// note this isnt so great if magnitude changes
+				if (timer <= 0) {
+					start.set(target);
+					target.set(MathUtils.random(-magnitude, magnitude), MathUtils.random(-magnitude, magnitude));
+				}
+				timer += delta;
+				out.x = Interpolation.linear.apply(start.x, target.x, timer * freq);
+				out.y = Interpolation.linear.apply(start.y, target.y, timer * freq);
+				// pick target 4 times a second
+				if (timer >= 1f/freq) {
+					timer = 0;
+				}
+				return out;
+			}
+		});
+		shaker = shakers.get(shakerId);
+
+		Gdx.app.log(TAG, "Space - shake!");
+		Gdx.app.log(TAG, "Q - prev shaker!");
+		Gdx.app.log(TAG, "E - next shaker!");
 	}
 
-	private Vector2 pos = new Vector2();
-	private Vector2 shakePos = new Vector2();
-	private float lastX = 0;
-	private float lastY = 0;
+	private void createShaker (String name, CameraShaker.ShakeStrategy strategy) {
+		shakerNames.add(name);
+		shakers.add(new CameraShaker(strategy));
+	}
+
 	private float timer;
 
 	@Override public void render (float delta) {
@@ -49,7 +98,7 @@ public class SimplexNoiseShakeTest extends BaseScreen {
 		gameCamera.position.set(newX, newY, 0);
 		gameCamera.update();
 
-		shake.begin(delta);
+		shaker.begin(delta, gameCamera);
 
 		renderer.setProjectionMatrix(gameCamera.combined);
 		renderer.setColor(Color.GREEN);
@@ -97,28 +146,72 @@ public class SimplexNoiseShakeTest extends BaseScreen {
 		float h = magnitude;
 		renderer.rect(-w, -h, w * 2, h * 2);
 		renderer.end();
-		shake.end();
+		shaker.end();
 		if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
-			shake.shake(.5f, .25f);
+			shaker.shake(.5f, .25f);
+		}
+		if (Gdx.input.isKeyJustPressed(Input.Keys.Q)) {
+			shakerId--;
+			if (shakerId < 0) {
+				shakerId = shakers.size -1;
+			}
+			shaker = shakers.get(shakerId);
+			Gdx.app.log(TAG, "Shaker " + shakerNames.get(shakerId));
+		}
+		if (Gdx.input.isKeyJustPressed(Input.Keys.E)) {
+			shakerId++;
+			if (shakerId >= shakers.size) {
+				shakerId = 0;
+			}
+			shaker = shakers.get(shakerId);
+			Gdx.app.log(TAG, "Shaker " + shakerNames.get(shakerId));
 		}
 	}
 
 	/**
 	 * Shapes the wrapped camera
 	 */
-	public static class CameraShake {
+	public static class CameraShaker {
+		public interface ShakeStrategy {
+			Vector3 calculateOffset (float delta, float magnitude, Vector3 out);
+		}
+		private static ShakeStrategy simpleStrategy;
 		private Vector3 camPos;
+		private Vector3 out;
 		private OrthographicCamera camera;
-		private float timer;
 		private float duration;
 		private float magnitude;
 		private float maxMagnitude = 2;
 		private float magnitudeTaperScale = 3f;
+		private ShakeStrategy strategy;
 
-		public CameraShake (OrthographicCamera camera) {
-			if (camera == null) throw new IllegalArgumentException("Camera cannot be null!");
-			this.camera = camera;
+		/**
+		 * Create CameraShaker with simple ShakeStrategy
+		 */
+		public CameraShaker () {
+			this(null);
+		}
+
+		/**
+		 * Create CameraShaker with given strategy
+		 * @param strategy ShakeStrategy to use, if null default one will be created
+		 */
+		public CameraShaker (ShakeStrategy strategy) {
+			this.strategy = strategy;
+			if (strategy == null) {
+				if (simpleStrategy == null) {
+					simpleStrategy = new ShakeStrategy() {
+						@Override public Vector3 calculateOffset (float delta, float magnitude, Vector3 out) {
+							out.x = MathUtils.random(-magnitude, magnitude);
+							out.y = MathUtils.random(-magnitude, magnitude);
+							return out;
+						}
+					};
+				}
+				this.strategy = simpleStrategy;
+			}
 			camPos = new Vector3();
+			out = new Vector3();
 		}
 
 		/**
@@ -141,26 +234,23 @@ public class SimplexNoiseShakeTest extends BaseScreen {
 		/**
 		 * Must be called before rendering that uses wrapped camera begins
 		 */
-		public void begin(float delta) {
+		public void begin(float delta, OrthographicCamera camera) {
+			if (this.camera != null) throw new AssertionError("Call #end first!");
+			this.camera = camera;
 			camPos.set(camera.position);
-			timer += delta;
-			if (duration >= 0) {
+			if (duration > 0) {
 				duration -= delta;
-				float xScale = 2;
-				float amplitude = 5;
-				float x = camPos.x + SimplexNoise.noise(timer * amplitude * xScale) * magnitude;
-				float y = camPos.y + SimplexNoise.noise(timer * amplitude) * magnitude;
-				camera.position.set(x, y, camera.position.z);
+				out.setZero();
+				strategy.calculateOffset(delta, magnitude, out);
+				camera.position.add(out);
 				camera.update();
 			} else if (magnitude > 0){
 				// taper of magnitude quickly until we end up close enough to original camera position
 				magnitude -= magnitudeTaperScale * delta;
-				float xScale = 2;
-				float amplitude = 5;
-				float x = camPos.x + SimplexNoise.noise(timer * amplitude * xScale) * magnitude;
-				float y = camPos.y + SimplexNoise.noise(timer * amplitude) * magnitude;
-				if (!camPos.epsilonEquals(x, y, camPos.z, .001f)) {
-					camera.position.set(x, y, camera.position.z);
+				out.setZero();
+				strategy.calculateOffset(delta, magnitude, out);
+				if (!out.isZero(0.001f)) {
+					camera.position.add(out);
 					camera.update();
 					duration -= delta;
 				} else {
@@ -175,8 +265,10 @@ public class SimplexNoiseShakeTest extends BaseScreen {
 		 * Must be called after rendering that uses wrapped camera happened
 		 */
 		public void end() {
+			if (camera == null) throw new AssertionError("Call #begin first!");
 			camera.position.set(camPos);
 			camera.update();
+			camera = null;
 		}
 
 		/**
@@ -210,7 +302,7 @@ public class SimplexNoiseShakeTest extends BaseScreen {
 			return maxMagnitude;
 		}
 
-		public CameraShake setMaxMagnitude (float maxMagnitude) {
+		public CameraShaker setMaxMagnitude (float maxMagnitude) {
 			this.maxMagnitude = maxMagnitude;
 			return this;
 		}
@@ -219,7 +311,7 @@ public class SimplexNoiseShakeTest extends BaseScreen {
 			return magnitudeTaperScale;
 		}
 
-		public CameraShake setMagnitudeTaperScale (float magnitudeTaperScale) {
+		public CameraShaker setMagnitudeTaperScale (float magnitudeTaperScale) {
 			this.magnitudeTaperScale = magnitudeTaperScale;
 			return this;
 		}
@@ -293,6 +385,6 @@ public class SimplexNoiseShakeTest extends BaseScreen {
 
 	// allow us to start this test directly
 	public static void main (String[] args) {
-		PlaygroundGame.start(args, SimplexNoiseShakeTest.class);
+		PlaygroundGame.start(args, CameraShakeTest.class);
 	}
 }
