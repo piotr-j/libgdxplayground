@@ -15,6 +15,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import io.piotrjastrzebski.playground.BaseScreen;
 import io.piotrjastrzebski.playground.GameReset;
+import io.piotrjastrzebski.playground.PlaygroundGame;
 
 /**
  * Created by PiotrJ on 31/07/15.
@@ -131,9 +132,9 @@ public class SimpleBox2dTest extends BaseScreen {
 			this.rot = rotation;
 			this.texture = texture;
 			srcWidth = texture.getWidth();
-			width = srcWidth * INV_SCALE;
+			width = srcWidth * INV_SCALE /2;
 			srcHeight = texture.getHeight();
-			height = srcHeight * INV_SCALE;
+			height = srcHeight * INV_SCALE /2;
 		}
 
 		public void update () {
@@ -229,5 +230,8 @@ public class SimpleBox2dTest extends BaseScreen {
 	@Override public void dispose () {
 		super.dispose();
 		box.dispose();
+	}
+	public static void main (String[] args) {
+		PlaygroundGame.start(args, SimpleBox2dTest.class);
 	}
 }
