@@ -222,6 +222,10 @@ public class PlaygroundGame extends Game implements GameReset {
 		config.height = 720;
 		config.useHDPI = true;
 		config.stencil = 8;
+		start(args, config, target);
+	}
+
+	public static void start (String[] args, LwjglApplicationConfiguration config, Class<? extends BaseScreen> target) {
 		new LwjglApplication(new PlaygroundGame(new DesktopBridge(), target), config);
 	}
 }
