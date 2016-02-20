@@ -255,7 +255,8 @@ public class CameraShakeTest extends BaseScreen {
 					duration -= delta;
 				} else {
 					magnitude = 0;
-					Gdx.app.log("", "Overshoot = " + (-duration) + "ms");
+					int frames = (int)((-duration)/(1f/60f));
+					Gdx.app.log("", "Overshoot = " + frames + "f, " + (-duration) + "ms");
 					duration = 0;
 				}
 			}
