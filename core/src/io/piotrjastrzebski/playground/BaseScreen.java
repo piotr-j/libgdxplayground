@@ -71,6 +71,15 @@ public abstract class BaseScreen implements Screen, InputProcessor {
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 	}
 
+	public void enableBlending () {
+		Gdx.gl.glEnable(GL20.GL_BLEND);
+		Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+	}
+
+	public void disableBlending () {
+		Gdx.gl.glDisable(GL20.GL_BLEND);
+	}
+
 	@Override public void resize (int width, int height) {
 		gameViewport.update(width, height, false);
 		guiViewport.update(width, height, true);
