@@ -9,6 +9,7 @@ import com.badlogic.gdx.utils.async.AsyncResult;
 import com.badlogic.gdx.utils.async.AsyncTask;
 import io.piotrjastrzebski.playground.BaseScreen;
 import io.piotrjastrzebski.playground.GameReset;
+import io.piotrjastrzebski.playground.PlaygroundGame;
 
 /**
  * Created by EvilEntity on 07/06/2015.
@@ -61,5 +62,10 @@ public class AsyncScreenTest extends BaseScreen {
 			Thread.sleep(2000);
 			Gdx.app.log("SlowLoadStuff", "Finished");
 		}
+	}
+
+	// allow us to start this test directly
+	public static void main (String[] args) {
+		PlaygroundGame.start(args, AsyncScreenTest.class);
 	}
 }
