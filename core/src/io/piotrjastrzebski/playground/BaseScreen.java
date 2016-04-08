@@ -125,14 +125,17 @@ public abstract class BaseScreen implements Screen, InputProcessor {
 	}
 
 	@Override public boolean touchDown (int screenX, int screenY, int pointer, int button) {
+		updateMousePosition (screenX, screenY);
 		return false;
 	}
 
 	@Override public boolean touchUp (int screenX, int screenY, int pointer, int button) {
+		updateMousePosition (screenX, screenY);
 		return false;
 	}
 
 	@Override public boolean touchDragged (int screenX, int screenY, int pointer) {
+		updateMousePosition (screenX, screenY);
 		return false;
 	}
 
