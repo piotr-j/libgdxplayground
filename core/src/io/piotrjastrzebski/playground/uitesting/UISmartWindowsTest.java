@@ -3,7 +3,6 @@ package io.piotrjastrzebski.playground.uitesting;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ObjectMap;
 import com.kotcrab.vis.ui.widget.VisWindow;
 import io.piotrjastrzebski.playground.BaseScreen;
@@ -43,35 +42,46 @@ public class UISmartWindowsTest extends BaseScreen {
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 		stage.act(delta);
 		stage.draw();
+
+		SmartWindow.persist(false);
 	}
 
 	public static class SmartWindow extends VisWindow {
 		private final static String TAG = SmartWindow.class.getSimpleName();
 
 		protected static ObjectMap<String, SmartWindow> windows = new ObjectMap<>();
-
-		public static void persist () {
-			// TODO would be nice to persist when position or size changes
-			Preferences prefs = Gdx.app.getPreferences("SmartWindowTest.pref");
+		protected static boolean reqPersist;
+		public static void persist (boolean clear) {
+			if (!reqPersist) return;
+			Preferences prefs = Gdx.app.getPreferences("SmartWindowTest.txt");
+			boolean flush = false;
 			for (SmartWindow w : windows.values()) {
-				prefs.putString(w.key, w.getX()+";"+w.getY()+";"+w.getWidth()+";"+w.getHeight());
+				if (w.isDirty()) {
+					prefs.putString(w.key, w.getX() + ";" + w.getY() + ";" + w.getWidth() + ";" + w.getHeight());
+					flush = true;
+				}
 			}
-			prefs.flush();
-			windows.clear();
+			if (flush) prefs.flush();
+			if (clear) windows.clear();
 		}
 
 		public static void restore (SmartWindow window) {
-			Preferences prefs = Gdx.app.getPreferences("SmartWindowTest.pref");
+			Preferences prefs = Gdx.app.getPreferences("SmartWindowTest.txt");
 			String data = prefs.getString(window.key, null);
 			if (data != null) {
 				String[] split = data.split(";");
 				if (split.length == 4) {
 					try {
-						window.setPosition(Float.parseFloat(split[0]), Float.parseFloat(split[1]));
-						window.setSize(Float.parseFloat(split[2]), Float.parseFloat(split[3]));
+						float x = Float.parseFloat(split[0]);
+						float y = Float.parseFloat(split[1]);
+						float width = Float.parseFloat(split[2]);
+						float height = Float.parseFloat(split[3]);
+						window.restore(x, y, width, height);
 					} catch (NumberFormatException e) {
 						Gdx.app.error(TAG, "Failed to restore window " + window.key + " from data '" + data + "'");
 					}
+				} else {
+					Gdx.app.error(TAG, "Failed to restore window " + window.key + " from data '" + data + "'");
 				}
 			}
 			SmartWindow other = windows.get(window.key, null);
@@ -82,15 +92,39 @@ public class UISmartWindowsTest extends BaseScreen {
 		}
 
 		private final String key;
+		private boolean dirty;
 		public SmartWindow (String title, String key) {
 			super(title);
 			this.key = key;
 			setResizable(true);
 		}
+
+		private void restore (float x, float y, float width, float height) {
+			setPosition(x, y);
+			setSize(width, height);
+			// size/pos changed will be called
+			dirty = false;
+		}
+
+		@Override protected void positionChanged () {
+			super.positionChanged();
+			dirty = true;
+			SmartWindow.reqPersist = true;
+		}
+
+		@Override protected void sizeChanged () {
+			super.sizeChanged();
+			dirty = true;
+			SmartWindow.reqPersist = true;
+		}
+
+		public boolean isDirty () {
+			return dirty;
+		}
 	}
 
 	@Override public void dispose () {
-		SmartWindow.persist();
+		SmartWindow.persist(true);
 		super.dispose();
 	}
 
