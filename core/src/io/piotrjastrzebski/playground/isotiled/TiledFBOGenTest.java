@@ -320,6 +320,11 @@ public class TiledFBOGenTest extends BaseScreen {
 		if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
 			drawNoise = !drawNoise;
 		}
+		if (Gdx.input.isKeyJustPressed(Input.Keys.R)) {
+			for (FBOTile tile : fboTiles) {
+				tile.hide();
+			}
+		}
 
 		bounds.set(
 			gameCamera.position.x - gameCamera.viewportWidth/2 * gameCamera.zoom,
