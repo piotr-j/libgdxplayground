@@ -251,6 +251,16 @@ public class TiledFBOGenTest extends BaseScreen {
 			public void render (ShapeRenderer renderer) {
 				if (cancelled) return;
 				int steps = inTileSteps * inTileSteps;
+				for (int ox = -tile.apron; ox < tile.size + tile.apron; ox++) {
+					for (int oy = -tile.apron; oy < tile.size + tile.apron; oy++) {
+						TiledMapTileLayer.Cell cell = tile.base.getCell(tile.x + ox, tile.y + oy);
+						if (cell == null)
+							continue;
+						TiledMapTile tt = cell.getTile();
+						renderer.setColor(getTileColor(tt.getId()));
+						renderer.rect(ox, oy, 1, 1);
+					}
+				}
 				for (int i = 0; i < tileIds.size; i++) {
 					Color color = getTileColor(tileIds.get(i));
 					for (int j = 0; j < steps; j++) {
