@@ -39,24 +39,35 @@ public class SubpixelTest extends BaseScreen {
 	}
 
 	private Vector2 position = new Vector2();
-	private float moveSpeed = 2f;
+	private float moveSpeed = .1f;
 	@Override public void render (float delta) {
 		Gdx.gl.glClearColor(0, 0, 0, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 		Gdx.gl.glEnable(GL20.GL_BLEND);
 		Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
 		processInput(delta);
+		renderer.setProjectionMatrix(gameCamera.combined);
+		renderer.begin(ShapeRenderer.ShapeType.Line);
+		renderer.setColor(Color.DARK_GRAY);
+		for (int x = 0; x < VP_WIDTH; x++) {
+			renderer.line(x, 0, x, VP_HEIGHT);
+		}
+		for (int y = 0; y < VP_HEIGHT; y++) {
+			renderer.line(0, y, VP_WIDTH, y);
+		}
+		renderer.end();
 
 		// top rect, texture based
-		batch.setProjectionMatrix(guiCamera.combined);
+		batch.setProjectionMatrix(gameCamera.combined);
 		batch.begin();
-		batch.draw(region, position.x, position.y + 48);
+		batch.draw(region, position.x, position.y + .5f, 1, 1);
 		batch.end();
 
 		// bottom rect, shape based
-		renderer.setProjectionMatrix(guiCamera.combined);
+		renderer.setProjectionMatrix(gameCamera.combined);
 		renderer.begin(ShapeRenderer.ShapeType.Filled);
-		renderer.rect(position.x, position.y - 48, 62, 62);
+		renderer.setColor(Color.WHITE);
+		renderer.rect(position.x, position.y - 1.5f, 1, 1);
 		renderer.end();
 	}
 
@@ -77,13 +88,14 @@ public class SubpixelTest extends BaseScreen {
 		}
 		if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
 			Gdx.app.log(TAG, "Reset");
-			position.set(Gdx.graphics.getWidth()/2, Gdx.graphics.getHeight()/2);
+			position.set(VP_WIDTH/2, VP_HEIGHT/2);
 		}
 	}
 
 	@Override public void resize (int width, int height) {
 		super.resize(width, height);
-		position.set(width/2, height/2);
+		gameViewport.update(width, height, true);
+		position.set(VP_WIDTH/2, VP_HEIGHT/2);
 	}
 
 	@Override public void dispose () {
