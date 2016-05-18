@@ -16,6 +16,7 @@ import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.physics.box2d.joints.MouseJoint;
 import com.badlogic.gdx.physics.box2d.joints.MouseJointDef;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.FloatArray;
 import com.badlogic.gdx.utils.TimeUtils;
 import io.piotrjastrzebski.playground.BaseScreen;
 import io.piotrjastrzebski.playground.GameReset;
@@ -129,16 +130,27 @@ public class InterpolationTest extends BaseScreen {
 	boolean simPaused;
 	float accumulator;
 	float manualStepDelay;
+	float rewindDelay;
 	int fpsLimit = 60;
 	@Override public void render (float delta) {
 		long start = TimeUtils.nanoTime();
 		manualStepDelay -= delta;
+		rewindDelay -= delta;
 		if (!simPaused) {
 			step(delta);
-		} else if (Gdx.input.isKeyPressed(Input.Keys.S)){
-			if (manualStepDelay <= 0) {
-				step(Gdx.graphics.getDeltaTime());
-				manualStepDelay = .1f;
+		} else {
+			if (Gdx.input.isKeyPressed(Input.Keys.S)){
+				if (manualStepDelay <= 0) {
+					step(Gdx.graphics.getDeltaTime());
+					manualStepDelay = .1f;
+				}
+			} else if (Gdx.input.isKeyPressed(Input.Keys.R)){
+				if (rewindDelay <= 0) {
+					for (InterpolatedObject interpolatedObject : interpolatedObjects) {
+						interpolatedObject.rewind();
+					}
+					rewindDelay = .1f;
+				}
 			}
 		}
 		Gdx.gl.glClearColor(0.5f, 0.5f, 0.5f, 1);
@@ -240,6 +252,7 @@ public class InterpolationTest extends BaseScreen {
 		private int srcHeight;
 		public boolean isBox;
 		private InterpolatedTransform itm;
+		FloatArray oldState;
 
 		public InterpolatedObject (float x, float y, float rotation, Texture texture) {
 			itm = new InterpolatedTransform();
@@ -250,11 +263,39 @@ public class InterpolationTest extends BaseScreen {
 			width = srcWidth * INV_SCALE;
 			srcHeight = texture.getHeight();
 			height = srcHeight * INV_SCALE;
+
+			oldState = new FloatArray();
 		}
 
 		public void fixedUpdate () {
 			Vector2 position = body.getPosition();
-			itm.update(position.x, position.y, body.getAngle() * MathUtils.radiansToDegrees);
+			float angle = body.getAngle();
+			itm.update(position.x, position.y, angle * MathUtils.radiansToDegrees);
+			Vector2 velocity = body.getLinearVelocity();
+			float angular = body.getAngularVelocity();
+
+			// NOTE this could probably be packed into 1 or 2 ints
+			oldState.add(position.x);
+			oldState.add(position.y);
+			oldState.add(angle);
+			oldState.add(velocity.x);
+			oldState.add(velocity.y);
+			oldState.add(angular);
+		}
+
+		public void rewind () {
+			if (oldState.size > 6) {
+				int id = oldState.size - 6;
+				float x = oldState.get(id);
+				float y = oldState.get(id + 1);
+				float angle = oldState.get(id + 2);
+				body.setTransform(x, y, angle);
+				body.setLinearVelocity(oldState.get(id + 3), oldState.get(id + 4));
+				body.setAngularVelocity(oldState.get(id + 5));
+				oldState.size -= 6;
+				itm.update(x, y, angle * MathUtils.radiansToDegrees);
+				itm.interpolate(1);
+			}
 		}
 
 		public void variableUpdate (float delta, float alpha) {
