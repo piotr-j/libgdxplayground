@@ -2,6 +2,7 @@ package io.piotrjastrzebski.playground.simple;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
@@ -17,10 +18,10 @@ import com.kotcrab.vis.ui.widget.VisSelectBox;
 import com.kotcrab.vis.ui.widget.VisWindow;
 import io.piotrjastrzebski.playground.BaseScreen;
 import io.piotrjastrzebski.playground.GameReset;
+import io.piotrjastrzebski.playground.PlaygroundGame;
 
 /**
- * Simple trail behind touch drag
- * A lot of stuff left for optimizations
+ * Upsample thing based on http://code-disaster.com/2016/02/subpixel-perfect-smooth-scrolling.html
  */
 public class PixelArtUpsampleTest extends BaseScreen {
 	public final static float SCALE = 32f;
@@ -284,5 +285,17 @@ public class PixelArtUpsampleTest extends BaseScreen {
 			texture.dispose();
 		}
 		batch.setShader(null);
+	}
+
+	// allow us to start this test directly
+	public static void main (String[] args) {
+		LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
+		config.width = 1280;
+		config.height = 720;
+		config.useHDPI = true;
+		config.stencil = 8;
+		// for mesh based sub pixel rendering multi sampling is required or post process aa
+		config.samples = 4;
+		PlaygroundGame.start(args, PixelArtUpsampleTest.class);
 	}
 }
