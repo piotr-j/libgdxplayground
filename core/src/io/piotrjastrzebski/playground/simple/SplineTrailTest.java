@@ -17,32 +17,39 @@ import io.piotrjastrzebski.playground.PlaygroundGame;
  * A lot of stuff left for optimizations
  */
 public class SplineTrailTest extends BaseScreen {
+	private static final String TAG = SplineTrailTest.class.getSimpleName();
 	private final static int NUM_POINTS = 16;
 	private Array<Vector2> points = new Array<>();
 	private Array<Vector2> smoothed = new Array<>();
 	private Mesh rect;
 	private ShaderProgram program;
+	private float[] verts = new float[1024];
 	public SplineTrailTest (GameReset game) {
 		super(game);
 		rect = new Mesh(true, 4, 6, new VertexAttribute(VertexAttributes.Usage.Position, 2,
 			ShaderProgram.POSITION_ATTRIBUTE));
 		rect.setVertices(new float[]{-.5f, -.5f, .5f, -.5f, .5f, .5f, -.5f, .5f, });
-		rect.setIndices(new short[]{0, 1, 2, 2, 3, 0});
+//		rect.setIndices(new short[]{0, 1, 2, 2, 3, 0});
+		rect.setIndices(new short[]{0, 1, 2, 2, 0, 3});
 		// we need to use custom shader cus we dont use colors or tex coords
 		program = new ShaderProgram(Gdx.files.internal("shaders/simple.vert"), Gdx.files.internal("shaders/simple.frag"));
 		if (!program.isCompiled()) {
 			Gdx.app.error("", "shader failed");
 		}
+
+		gameCamera.zoom = .25f;
+		gameCamera.update();
 	}
 
 	@Override public void render (float delta) {
-		super.render(delta);
+		Gdx.gl.glClearColor(0.5f, 0.5f, 0.5f, 1);
+		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 		Gdx.gl.glEnable(GL20.GL_BLEND);
 		Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
 		batch.setProjectionMatrix(gameCamera.combined);
 		program.begin();
 		program.setUniformMatrix("u_projTrans", gameCamera.combined);
-		rect.render(program, GL20.GL_TRIANGLES);
+//		rect.render(program, GL20.GL_TRIANGLES);
 		if (mesh != null) {
 //			mesh.setAutoBind(false);
 			mesh.render(program, GL20.GL_TRIANGLE_STRIP);
@@ -56,19 +63,38 @@ public class SplineTrailTest extends BaseScreen {
 		}
 		program.end();
 		renderer.setProjectionMatrix(gameCamera.combined);
-		renderer.begin(ShapeRenderer.ShapeType.Filled);
-		renderer.setColor(Color.RED);
-		for (int i = 0; i < smoothed.size - 1; i++) {
-			Vector2 p1 = smoothed.get(i);
-			Vector2 p2 = smoothed.get(i + 1);
-			renderer.rectLine(p1, p2, 0.1f);
+		renderer.begin(ShapeRenderer.ShapeType.Line);
+//		renderer.setColor(Color.RED);
+//		for (int i = 0; i < smoothed.size - 1; i++) {
+//			Vector2 p1 = smoothed.get(i);
+//			Vector2 p2 = smoothed.get(i + 1);
+//			renderer.line(p1, p2);
+//		}
+//		renderer.setColor(Color.GREEN);
+//		renderer.getColor().a = .75f;
+//		for (int i = 0; i < points.size - 1; i++) {
+//			Vector2 p1 = points.get(i);
+//			Vector2 p2 = points.get(i + 1);
+//			renderer.line(p1, p2);
+//		}
+		renderer.setColor(Color.MAGENTA);
+		mesh.getVertices(verts);
+		int size = mesh.getNumVertices();
+		for (int i = 0; i < size -2; i++) {
+			float a = i/(float)(size-1);
+			renderer.setColor(1-a, 0, a, 1);
+			renderer.triangle(
+				verts[i * 2], verts[i * 2 + 1],
+				verts[i * 2 + 2], verts[i * 2 + 3],
+				verts[i * 2 + 4], verts[i * 2 + 5]);
 		}
-		renderer.setColor(Color.GREEN);
-		renderer.getColor().a = .75f;
-		for (int i = 0; i < points.size - 1; i++) {
-			Vector2 p1 = points.get(i);
-			Vector2 p2 = points.get(i + 1);
-			renderer.rectLine(p1, p2, 0.05f);
+		renderer.end();
+
+		renderer.begin(ShapeRenderer.ShapeType.Filled);
+		for (int i = 0; i < smoothed.size -1; i++) {
+			float a = i/(float)(smoothed.size-1);
+			renderer.setColor(1-a, 0, a, 1);
+			renderer.rectLine(smoothed.get(i), smoothed.get(i + 1), .025f);
 		}
 		renderer.end();
 	}
@@ -172,7 +198,8 @@ public class SplineTrailTest extends BaseScreen {
 		float[] vertices = new float[(smoothed.size -1) * 4];
 		short[] indices = new short[(smoothed.size) * 2 - 2];
 		// this is obviously bad, reusing the mesh is optimal
-		mesh = new Mesh(true, vertices.length, indices.length, new VertexAttribute(VertexAttributes.Usage.Position, 2,
+		int length = vertices.length;
+		mesh = new Mesh(true, length, indices.length, new VertexAttribute(VertexAttributes.Usage.Position, 2,
 			ShaderProgram.POSITION_ATTRIBUTE));
 		Vector2 p1;
 		Vector2 p2;
@@ -195,6 +222,17 @@ public class SplineTrailTest extends BaseScreen {
 		p1 = smoothed.get(smoothed.size -1);
 		vertices[vertices.length -2] = p1.x;
 		vertices[vertices.length -1] = p1.y;
+
+		p1 = smoothed.get(0);
+		p2 = smoothed.get(1);
+		tmp1.set(p1).sub(p2).scl(6f);
+		vertices[0] += tmp1.x;
+		vertices[1] += tmp1.y;
+		p1 = smoothed.get(smoothed.size-1);
+		p2 = smoothed.get(smoothed.size-2);
+		tmp2.set(p1).sub(p2).scl(4f);
+		vertices[vertices.length -2] += tmp2.x;
+		vertices[vertices.length -1] += tmp2.y;
 		// we use strip, so this is simple
 		for (int i = 0; i < indices.length; i++) {
 			indices[i] = (short)i;
