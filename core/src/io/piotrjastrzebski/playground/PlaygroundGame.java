@@ -216,13 +216,17 @@ public class PlaygroundGame extends Game implements GameReset {
 		VisUI.dispose();
 	}
 
-	public static void start (String[] args, Class<? extends BaseScreen> target) {
+	public static LwjglApplicationConfiguration config () {
 		LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
 		config.width = 1280;
 		config.height = 720;
 		config.useHDPI = true;
 		config.stencil = 8;
-		start(args, config, target);
+		return config;
+	}
+
+	public static void start (String[] args, Class<? extends BaseScreen> target) {
+		start(args, config(), target);
 	}
 
 	public static void start (String[] args, LwjglApplicationConfiguration config, Class<? extends BaseScreen> target) {
