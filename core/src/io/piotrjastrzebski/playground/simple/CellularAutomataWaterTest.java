@@ -36,6 +36,7 @@ public class CellularAutomataWaterTest extends BaseScreen {
 	public static int[] types;
 	public static float[] values;
 	public static float[] nextValues;
+	private boolean drawText;
 
 	public CellularAutomataWaterTest (GameReset game) {
 		super(game);
@@ -83,6 +84,9 @@ public class CellularAutomataWaterTest extends BaseScreen {
 				values[index] = 0;
 				nextValues[index] = 0;
 			}
+		}
+		if (Gdx.input.isKeyJustPressed(Input.Keys.T)) {
+			drawText = !drawText;
 		}
 		// simulate
 		tick += delta;
@@ -211,7 +215,8 @@ public class CellularAutomataWaterTest extends BaseScreen {
 					if (value > MIN_DRAW_VALUE) {
 						renderer.setColor(getWaterColor(value, water));
 						// draw full block if there is water about it
-						if (y < HEIGHT -1 && types[x + (y + 1) * WIDTH] == WATER) {
+						int upIndex = x + (y + 1) * WIDTH;
+						if (y < HEIGHT -1 && types[upIndex] == WATER && values[upIndex] > MIN_DRAW_VALUE) {
 							renderer.rect(x, y, 1, 1);
 						} else {
 							renderer.rect(x, y, 1, value);
@@ -231,25 +236,28 @@ public class CellularAutomataWaterTest extends BaseScreen {
 			}
 		}
 		renderer.end();
-		batch.setProjectionMatrix(gameCamera.combined);
-		batch.begin();
-		for (int y = 0; y < HEIGHT; y++) {
-			for (int x = 0; x < WIDTH; x++) {
-				int index = x + y * WIDTH;
-				switch (types[index]) {
-				case WATER: {
-					float value = values[index];
-					if (value > MIN_DRAW_VALUE) {
-						font.setColor(Color.BLACK);
-						glyphs.setText(font, String.format("%.2f", values[index]));
-						font.draw(batch, glyphs, x + .5f - glyphs.width / 2, y + .5f + glyphs.height / 2);
+		if (drawText) {
+			batch.setProjectionMatrix(gameCamera.combined);
+			batch.begin();
+			for (int y = 0; y < HEIGHT; y++) {
+				for (int x = 0; x < WIDTH; x++) {
+					int index = x + y * WIDTH;
+					switch (types[index]) {
+					case WATER: {
+						float value = values[index];
+						if (value > MIN_DRAW_VALUE) {
+							font.setColor(Color.BLACK);
+							glyphs.setText(font, String.format("%.2f", values[index]));
+							font.draw(batch, glyphs, x + .5f - glyphs.width / 2, y + .5f + glyphs.height / 2);
+						}
 					}
-				} break;
-				}
+					break;
+					}
 
+				}
 			}
+			batch.end();
 		}
-		batch.end();
 	}
 
 	private float getStableValue (float value) {
