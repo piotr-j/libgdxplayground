@@ -17,6 +17,7 @@ import com.kotcrab.vis.ui.widget.VisList;
 import com.kotcrab.vis.ui.widget.VisScrollPane;
 import io.piotrjastrzebski.playground.BaseScreen;
 import io.piotrjastrzebski.playground.GameReset;
+import io.piotrjastrzebski.playground.PlaygroundGame;
 
 /**
  * Created by EvilEntity on 10/10/2015.
@@ -151,5 +152,10 @@ public class InterpolationTest extends BaseScreen {
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
+	}
+
+
+	public static void main (String[] args) {
+		PlaygroundGame.start(args, InterpolationTest.class);
 	}
 }
