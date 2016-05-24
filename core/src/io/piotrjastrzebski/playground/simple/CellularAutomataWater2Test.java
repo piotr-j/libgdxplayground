@@ -73,6 +73,7 @@ public class CellularAutomataWater2Test extends BaseScreen {
 			if (Gdx.input.isKeyPressed(Input.Keys.Q)) {
 				types[index] = BLOCK;
 				values[index] = 0;
+				nextValues[index] = 0;
 			} else if (Gdx.input.isKeyPressed(Input.Keys.W)) {
 				types[index] = WATER;
 				values[index] = MAX_VALUE;
@@ -80,6 +81,7 @@ public class CellularAutomataWater2Test extends BaseScreen {
 			} else if (Gdx.input.isKeyPressed(Input.Keys.E)) {
 				types[index] = EMPTY;
 				values[index] = 0;
+				nextValues[index] = 0;
 			}
 		}
 		// simulate
