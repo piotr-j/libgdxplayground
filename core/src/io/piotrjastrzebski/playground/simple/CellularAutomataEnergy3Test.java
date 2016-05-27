@@ -221,15 +221,9 @@ public class CellularAutomataEnergy3Test extends BaseScreen {
 			for (int x = 0; x < WIDTH; x++) {
 				int index = x + y * WIDTH;
 				int type = types[index];
-				if (type == EMPTY)
-					continue;
-
-				float value = values[index];
-				if (value <= 0)
-					continue;
-
-				propagate(x, y, tick);
-
+				if (type == SOURCE || values[index] > 0) {
+					propagate(x, y, tick, 0f);
+				}
 			}
 		}
 
@@ -239,7 +233,7 @@ public class CellularAutomataEnergy3Test extends BaseScreen {
 		}
 	}
 
-	private void propagate (int x, int y, int tick) {
+	private void propagate (int x, int y, int tick, float extra) {
 		int index = x + y * WIDTH;
 		float value = values[index];
 
@@ -255,7 +249,7 @@ public class CellularAutomataEnergy3Test extends BaseScreen {
 				if (x + ox < 0 || x + ox >= WIDTH || y + oy < 0 || y + oy >= HEIGHT)
 					continue;
 				int otherId = (x + ox) + (y + oy) * WIDTH;
-				if (types[otherId] == EMPTY) continue;
+				if (types[otherId] == SOURCE || types[otherId] == EMPTY) continue;
 				if (value > 0) {
 					float flow = (values[index] - values[otherId]) / 4f;
 					if (flow > MIN_FLOW) {
@@ -266,14 +260,14 @@ public class CellularAutomataEnergy3Test extends BaseScreen {
 					nextValues[otherId] += flow;
 					value -= flow;
 				}
-				propagate(x + ox, y + oy, tick);
+				propagate(x + ox, y + oy, tick, 0f);
 			}
 		}
 	}
 
 	private Color getWaterColor(float value, Color out){
 		value = MathUtils.clamp(value, MIN_DRAW_VALUE, MAX_DRAW_VALUE);
-		out.set(value * value, value * value, value/5, 0);
+		out.set(.247f + value * value, .247f + value * value, .247f + value/5, 1);
 		return out;
 	}
 
