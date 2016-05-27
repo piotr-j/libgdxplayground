@@ -80,6 +80,7 @@ public class CellularAutomataEnergy2Test extends BaseScreen {
 	Color water = new Color(Color.WHITE);
 	Color tmpColor1 = new Color(Color.WHITE);
 	Color tmpColor2 = new Color(Color.WHITE);
+	Color tmpColor3 = new Color(Color.WHITE);
 	int tick;
 	float tickTime;
 	float tickDelta = 1/60f;
@@ -105,10 +106,10 @@ public class CellularAutomataEnergy2Test extends BaseScreen {
 		}
 		// simulate
 		tickTime += delta;
-		if (tickTime >= tickDelta) {
+		if (tickTime >= tickDelta && simEnabled) {
 			tickTime -= tickDelta;
 			tick++;
-			update(tick);
+			tick(tick);
 		}
 		// draw stuff
 		renderer.setProjectionMatrix(gameCamera.combined);
@@ -121,18 +122,35 @@ public class CellularAutomataEnergy2Test extends BaseScreen {
 				case DRAIN:
 				case BLOCK: {
 
-					renderer.setColor(Color.BLACK);
-					if (extraValues[index] > 0.25f) {
-						renderer.setColor(Color.GREEN);
-					} else if (extraValues[index] < -0.25f) {
-						renderer.setColor(Color.RED);
+					for (int ox = -1; ox <= 1; ox++) {
+						for (int oy = -1; oy <= 1; oy++) {
+							if (Math.abs(ox) == Math.abs(oy))
+								continue;
+							if (x + ox < 0 || x + ox >= WIDTH || y + oy < 0 || y + oy >= HEIGHT)
+								continue;
+							int otherId = (x + ox) + (y + oy) * WIDTH;
+							if (types[otherId] != EMPTY) {
+								rect(x + .5f, y + .5f, x + .5f + ox / 2f, y + .5f + oy / 2f, .35f, Color.DARK_GRAY,
+									Color.DARK_GRAY);
+							}
+						}
 					}
-					renderer.rect(x, y, 1, 1);
-
+					tmpColor3.set(Color.DARK_GRAY);
+					if (extraValues[index] > 0.25f) {
+						tmpColor3.set(Color.GREEN);
+						renderer.setColor(tmpColor3);
+						renderer.circle(x + .5f, y + .5f, .5f, 8);
+					} else if (extraValues[index] < -0.25f) {
+						tmpColor3.set(Color.RED);
+						renderer.setColor(tmpColor3);
+						renderer.circle(x + .5f, y + .5f, .5f, 8);
+					} else {
+						renderer.setColor(tmpColor3);
+						renderer.circle(x + .5f, y + .5f, .25f, 16);
+					}
 					float value = values[index];
 					if (value > MIN_DRAW_VALUE) {
-						renderer.setColor(getWaterColor(value, water));
-						renderer.rect(x + .35f, y + .35f, .3f, .3f);
+						getWaterColor(value, water);
 						for (int ox = -1; ox <= 1; ox++) {
 							for (int oy = -1; oy <= 1; oy++) {
 								if (Math.abs(ox) == Math.abs(oy))
@@ -141,14 +159,18 @@ public class CellularAutomataEnergy2Test extends BaseScreen {
 									continue;
 								int otherId = (x + ox) + (y + oy) * WIDTH;
 								if (types[otherId] != EMPTY) {
+
 									float otherValue = values[otherId];
 									getWaterColor(otherValue, tmpColor1);
 									tmpColor2.set(water);
 									tmpColor2.lerp(tmpColor1, .5f);
-									rect(x + .5f + ox * .15f, y + .5f + oy * .15f, x + .5f + ox / 2f, y + .5f + oy / 2f, .3f, water, tmpColor2);
+									rect(x + .5f, y + .5f, x + .5f + ox / 2f, y + .5f + oy / 2f, .16f, water, tmpColor2);
 								}
 							}
 						}
+						renderer.setColor(getWaterColor(value, water));
+//						renderer.rect(x + .35f, y + .35f, .3f, .3f);
+						renderer.circle(x + .5f, y + .5f, .15f, 16);
 					}
 				} break;
 				}
@@ -194,8 +216,7 @@ public class CellularAutomataEnergy2Test extends BaseScreen {
 		}
 	}
 
-	private void update (int tick) {
-		if (!simEnabled) return;
+	private void tick (int tick) {
 		for (int y = 0; y < HEIGHT; y++) {
 			for (int x = 0; x < WIDTH; x++) {
 				int index = x + y * WIDTH;
@@ -211,11 +232,11 @@ public class CellularAutomataEnergy2Test extends BaseScreen {
 				if (value <= 0)
 					continue;
 
-				ticks[index] = tick;
 				propagate(x, y, tick);
 
 			}
 		}
+
 		//Copy the new mass values to the mass array
 		for (int i = 0; i < WIDTH * HEIGHT; i++) {
 			values[i] = nextValues[i];
@@ -225,6 +246,8 @@ public class CellularAutomataEnergy2Test extends BaseScreen {
 	private void propagate (int x, int y, int tick) {
 		int index = x + y * WIDTH;
 		float value = values[index];
+		ticks[index] = tick;
+
 		for (int ox = -1; ox <= 1; ox++) {
 			for (int oy = -1; oy <= 1; oy++) {
 				if (Math.abs(ox) == Math.abs(oy))
@@ -232,18 +255,17 @@ public class CellularAutomataEnergy2Test extends BaseScreen {
 				if (x + ox < 0 || x + ox >= WIDTH || y + oy < 0 || y + oy >= HEIGHT)
 					continue;
 				int otherId = (x + ox) + (y + oy) * WIDTH;
-				if (types[otherId] != EMPTY) {
-					float flow = (values[index] - values[otherId]) / 4f;
-					if (flow > MIN_FLOW) {
-						flow *= .5f;
-					}
-					flow = MathUtils.clamp(flow, 0, value);
-					nextValues[index] -= flow;
-					nextValues[otherId] += flow;
-					value -= flow;
-					if (value <= 0)
-						break;
+				if (types[otherId] == EMPTY) continue;
+				float flow = (values[index] - values[otherId]) / 4f;
+				if (flow > MIN_FLOW) {
+					flow *= .5f;
 				}
+				flow = MathUtils.clamp(flow, 0, value);
+				nextValues[index] -= flow;
+				nextValues[otherId] += flow;
+				value -= flow;
+				if (value <= 0)
+					break;
 			}
 		}
 	}
