@@ -35,7 +35,9 @@ public class CellularAutomataEnergy3Test extends BaseScreen {
 	public final static float MIN_DRAW_VALUE = 0.01f;
 	public final static float MAX_DRAW_VALUE = 1.1f;
 	public final static float TYPE_TO_VALUE[] = {0, 0, MAX_VALUE, 0};
-	public final static float TYPE_TO_EXTRA[] = {0, -.01f, MAX_VALUE, -MAX_VALUE/3f};
+//	public final static float TYPE_TO_EXTRA[] = {0, -.01f, MAX_VALUE, -MAX_VALUE/3f};
+	public final static float TYPE_TO_EXTRA[] = {0, 0, MAX_VALUE/3, -MAX_VALUE/3f};
+//	public final static float TYPE_TO_EXTRA[] = {0, 0, MAX_VALUE, -MAX_VALUE/3f};
 
 	public static int[] types;
 	public static int[] ticks;
@@ -67,6 +69,18 @@ public class CellularAutomataEnergy3Test extends BaseScreen {
 			setTile(10 + y * WIDTH, BLOCK);
 			setTile(15 + y * WIDTH, BLOCK);
 			setTile(20 + y * WIDTH, BLOCK);
+		}
+
+		for (int x = 3; x <= 37; x++) {
+			if (x % 2 == 0) {
+				setTile(x + 18 * WIDTH, BLOCK);
+				setTile(x + 20 * WIDTH, BLOCK);
+			}
+			setTile(x + 19 * WIDTH, BLOCK);
+		}
+
+		for (int i = 0; i < WIDTH * HEIGHT / 2; i++) {
+			setTile(MathUtils.random(WIDTH -1) + MathUtils.random(HEIGHT -1) * WIDTH, BLOCK);
 		}
 	}
 
@@ -108,8 +122,7 @@ public class CellularAutomataEnergy3Test extends BaseScreen {
 		tickTime += delta;
 		if (tickTime >= tickDelta && simEnabled) {
 			tickTime -= tickDelta;
-			tick++;
-			tick(tick);
+			tick();
 		}
 		// draw stuff
 		renderer.setProjectionMatrix(gameCamera.combined);
@@ -136,11 +149,11 @@ public class CellularAutomataEnergy3Test extends BaseScreen {
 						}
 					}
 					tmpColor3.set(Color.DARK_GRAY);
-					if (extraValues[index] > 0.25f) {
+					if (types[index] == SOURCE) {
 						tmpColor3.set(Color.GREEN);
 						renderer.setColor(tmpColor3);
 						renderer.circle(x + .5f, y + .5f, .5f, 8);
-					} else if (extraValues[index] < -0.25f) {
+					} else if (types[index] == DRAIN) {
 						tmpColor3.set(Color.RED);
 						renderer.setColor(tmpColor3);
 						renderer.circle(x + .5f, y + .5f, .5f, 8);
@@ -216,12 +229,15 @@ public class CellularAutomataEnergy3Test extends BaseScreen {
 		}
 	}
 
-	private void tick (int tick) {
+	private void tick () {
 		for (int y = 0; y < HEIGHT; y++) {
 			for (int x = 0; x < WIDTH; x++) {
 				int index = x + y * WIDTH;
 				int type = types[index];
-				if (type == SOURCE || values[index] > 0) {
+				// TODO fix non sources with values
+//				if (type == SOURCE || values[index] > 0) {
+				if (type == SOURCE) {
+					tick++;
 					propagate(x, y, tick, 0f);
 				}
 			}
@@ -230,39 +246,47 @@ public class CellularAutomataEnergy3Test extends BaseScreen {
 		//Copy the new mass values to the mass array
 		for (int i = 0; i < WIDTH * HEIGHT; i++) {
 			values[i] = nextValues[i];
+			// TODO this should work when we propagate properly
+			nextValues[i] = MathUtils.clamp(nextValues[i], 0 ,1);
 		}
 	}
 
-	private void propagate (int x, int y, int tick, float extra) {
+	private float propagate (int x, int y, int tick, float extra) {
 		int index = x + y * WIDTH;
 		float value = values[index];
 
 		if (ticks[index] >= tick)
-			return;
-		nextValues[index] += extraValues[index];
-		ticks[index] = tick;
+			return 0;
 
-		for (int ox = -1; ox <= 1; ox++) {
-			for (int oy = -1; oy <= 1; oy++) {
-				if (Math.abs(ox) == Math.abs(oy))
-					continue;
-				if (x + ox < 0 || x + ox >= WIDTH || y + oy < 0 || y + oy >= HEIGHT)
-					continue;
-				int otherId = (x + ox) + (y + oy) * WIDTH;
-				if (types[otherId] == SOURCE || types[otherId] == EMPTY) continue;
-				if (value > 0) {
-					float flow = (values[index] - values[otherId]) / 4f;
-					if (flow > MIN_FLOW) {
-						flow *= .5f;
-					}
-					flow = MathUtils.clamp(flow, 0, value);
-					nextValues[index] -= flow;
-					nextValues[otherId] += flow;
-					value -= flow;
+		ticks[index] = tick;
+		nextValues[index] += extra + extraValues[index];
+		if (nextValues[index] > MAX_VALUE) {
+			// we have extra value, we will pass it along
+			// extra we have is the excess above MAX_VALUE
+			float remaining = (nextValues[index] - MAX_VALUE);
+			nextValues[index] -= remaining;
+			// get per connection excess
+			for (int ox = -1; ox <= 1; ox++) {
+				for (int oy = -1; oy <= 1; oy++) {
+					if (Math.abs(ox) == Math.abs(oy))
+						continue;
+					if (x + ox < 0 || x + ox >= WIDTH || y + oy < 0 || y + oy >= HEIGHT)
+						continue;
+					int otherId = (x + ox) + (y + oy) * WIDTH;
+					if (types[otherId] == SOURCE || types[otherId] == EMPTY)
+						continue;
+					if (ticks[otherId] >= tick)
+						continue;
+					remaining -= propagate(x + ox, y + oy, tick, remaining);
+					if (remaining <= 0) return 0;
 				}
-				propagate(x + ox, y + oy, tick, 0f);
 			}
+//			return -remaining;
+			return 0;
+		} else if (nextValues[index] < 0) {
+			return nextValues[index];
 		}
+		return extra;
 	}
 
 	private Color getWaterColor(float value, Color out){
