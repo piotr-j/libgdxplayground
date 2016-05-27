@@ -47,7 +47,7 @@ public class CellularAutomataEnergy2Test extends BaseScreen {
 
 	public CellularAutomataEnergy2Test (GameReset game) {
 		super(game);
-		BitmapFont visFont = VisUI.getSkin().getFont("default-font");
+		BitmapFont visFont = VisUI.getSkin().getFont("small-font");
 		font = new BitmapFont(new BitmapFont.BitmapFontData(visFont.getData().fontFile, false), visFont.getRegions(), false);
 		font.setUseIntegerPositions(false);
 		font.getData().setScale(INV_SCALE);
@@ -176,12 +176,12 @@ public class CellularAutomataEnergy2Test extends BaseScreen {
 					case BLOCK: {
 						float value = values[index];
 						if (value > MIN_DRAW_VALUE) {
-							getWaterColor(value, water);
-							water.r = 1-water.r;
-							water.g = 1-water.g;
-							water.b = 1-water.b;
-							font.setColor(water);
-							glyphs.setText(font, String.format("%.2f", values[index]));
+							font.setColor(Color.RED);
+							if (value > 1) {
+								glyphs.setText(font, String.format("%.0f", value));
+							} else {
+								glyphs.setText(font, String.format("%.2f", value));
+							}
 							font.draw(batch, glyphs, x + .5f - glyphs.width / 2, y + .5f + glyphs.height / 2);
 						}
 					}
