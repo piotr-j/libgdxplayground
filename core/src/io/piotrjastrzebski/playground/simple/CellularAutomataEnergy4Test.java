@@ -299,7 +299,9 @@ public class CellularAutomataEnergy4Test extends BaseScreen {
 			for (int i = 0; i < drains.size; i++) {
 				values[drains.get(i)] = extra;
 			}
-
+			for (int i = 0; i < blocks.size; i++) {
+				values[blocks.get(i)] = extra;
+			}
 		}
 
 		// tick down not grouped
