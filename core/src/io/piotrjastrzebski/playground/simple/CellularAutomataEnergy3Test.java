@@ -36,7 +36,7 @@ public class CellularAutomataEnergy3Test extends BaseScreen {
 	public final static float MAX_DRAW_VALUE = 1.1f;
 	public final static float TYPE_TO_VALUE[] = {0, 0, MAX_VALUE, 0};
 //	public final static float TYPE_TO_EXTRA[] = {0, -.01f, MAX_VALUE, -MAX_VALUE/3f};
-	public final static float TYPE_TO_EXTRA[] = {0, 0, MAX_VALUE/3, -MAX_VALUE/3f};
+	public final static float TYPE_TO_EXTRA[] = {0, 0, MAX_VALUE, -MAX_VALUE/3};
 //	public final static float TYPE_TO_EXTRA[] = {0, 0, MAX_VALUE, -MAX_VALUE/3f};
 
 	public static int[] types;
@@ -79,9 +79,9 @@ public class CellularAutomataEnergy3Test extends BaseScreen {
 			setTile(x + 19 * WIDTH, BLOCK);
 		}
 
-		for (int i = 0; i < WIDTH * HEIGHT / 2; i++) {
-			setTile(MathUtils.random(WIDTH -1) + MathUtils.random(HEIGHT -1) * WIDTH, BLOCK);
-		}
+//		for (int i = 0; i < WIDTH * HEIGHT / 2; i++) {
+//			setTile(MathUtils.random(WIDTH -1) + MathUtils.random(HEIGHT -1) * WIDTH, BLOCK);
+//		}
 	}
 
 	void setTile (int index, int type) {
@@ -98,6 +98,7 @@ public class CellularAutomataEnergy3Test extends BaseScreen {
 	int tick;
 	float tickTime;
 	float tickDelta = 1/60f;
+//	float tickDelta = 1/10f;
 	@Override public void render (float delta) {
 		super.render(delta);
 		// handle input
@@ -154,7 +155,7 @@ public class CellularAutomataEnergy3Test extends BaseScreen {
 						renderer.setColor(tmpColor3);
 						renderer.circle(x + .5f, y + .5f, .5f, 8);
 					} else if (types[index] == DRAIN) {
-						tmpColor3.set(Color.RED);
+						tmpColor3.set(Color.MAGENTA);
 						renderer.setColor(tmpColor3);
 						renderer.circle(x + .5f, y + .5f, .5f, 8);
 					} else {
@@ -184,6 +185,10 @@ public class CellularAutomataEnergy3Test extends BaseScreen {
 						renderer.setColor(getWaterColor(value, water));
 //						renderer.rect(x + .35f, y + .35f, .3f, .3f);
 						renderer.circle(x + .5f, y + .5f, .15f, 16);
+					}
+					if (types[index] == DRAIN) {
+						renderer.setColor(1-value, value, 0, 1);
+						renderer.rect(x, y, 1, .15f);
 					}
 				} break;
 				}
@@ -228,26 +233,41 @@ public class CellularAutomataEnergy3Test extends BaseScreen {
 			batch.end();
 		}
 	}
-
+	int firstTick;
 	private void tick () {
+		firstTick = tick++;
 		for (int y = 0; y < HEIGHT; y++) {
 			for (int x = 0; x < WIDTH; x++) {
 				int index = x + y * WIDTH;
 				int type = types[index];
 				// TODO fix non sources with values
-//				if (type == SOURCE || values[index] > 0) {
 				if (type == SOURCE) {
-					tick++;
 					propagate(x, y, tick, 0f);
+					tick++;
 				}
 			}
 		}
-
+		// tick down stuff that is not connected to a source
+		for (int y = 0; y < HEIGHT; y++) {
+			for (int x = 0; x < WIDTH; x++) {
+				int index = x + y * WIDTH;
+				int type = types[index];
+				if (type != SOURCE && ticks[index] < firstTick && values[index] > 0) {
+					nextValues[index] += -.01f;
+				}
+			}
+		}
 		//Copy the new mass values to the mass array
-		for (int i = 0; i < WIDTH * HEIGHT; i++) {
-			values[i] = nextValues[i];
-			// TODO this should work when we propagate properly
-			nextValues[i] = MathUtils.clamp(nextValues[i], 0 ,1);
+		for (int y = 0; y < HEIGHT; y++) {
+			for (int x = 0; x < WIDTH; x++) {
+				int index = x + y * WIDTH;
+				values[index] = nextValues[index];
+				if (types[index] == DRAIN) {
+					nextValues[index] = MathUtils.clamp(nextValues[index], -1, 1);
+				} else {
+					nextValues[index] = MathUtils.clamp(nextValues[index], 0, 1);
+				}
+			}
 		}
 	}
 
@@ -258,8 +278,12 @@ public class CellularAutomataEnergy3Test extends BaseScreen {
 		if (ticks[index] >= tick)
 			return 0;
 
+		if (ticks[index] <= firstTick)
+			nextValues[index] += extraValues[index];
+
 		ticks[index] = tick;
-		nextValues[index] += extra + extraValues[index];
+
+		nextValues[index] += extra;
 		if (nextValues[index] > MAX_VALUE) {
 			// we have extra value, we will pass it along
 			// extra we have is the excess above MAX_VALUE
@@ -275,16 +299,18 @@ public class CellularAutomataEnergy3Test extends BaseScreen {
 					int otherId = (x + ox) + (y + oy) * WIDTH;
 					if (types[otherId] == SOURCE || types[otherId] == EMPTY)
 						continue;
-					if (ticks[otherId] >= tick)
+					if (ticks[otherId] > tick)
 						continue;
-					remaining -= propagate(x + ox, y + oy, tick, remaining);
-					if (remaining <= 0) return 0;
+					float propagate = propagate(x + ox, y + oy, tick, remaining);
+					remaining -= propagate;
+					if (remaining <= 0) {
+						return remaining;
+					}
 				}
 			}
-//			return -remaining;
 			return 0;
 		} else if (nextValues[index] < 0) {
-			return nextValues[index];
+			return -nextValues[index];
 		}
 		return extra;
 	}
