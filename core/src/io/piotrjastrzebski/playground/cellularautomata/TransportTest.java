@@ -6,14 +6,24 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Intersector;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.Array;
 import com.kotcrab.vis.ui.VisUI;
+import com.sun.org.apache.bcel.internal.generic.FLOAD;
 import io.piotrjastrzebski.playground.BaseScreen;
 import io.piotrjastrzebski.playground.GameReset;
 import io.piotrjastrzebski.playground.PlaygroundGame;
+import io.piotrjastrzebski.playground.simple.JsonTest;
+
+import java.util.Comparator;
 
 /**
+ * We want to implement transport belts or something
+ * each belt hast 2 lanes items can move on, with at most 2 items per lanes, for 4 total
+ * items should travel along the belts direction
+ * we want different types of belts, straight, elbows,
  * Created by EvilEntity on 25/01/2016.
  */
 @SuppressWarnings("Duplicates")
@@ -27,25 +37,12 @@ public class TransportTest extends BaseScreen {
 	public final static int BLOCK = 1;
 	public final static int SOURCE = 2;
 	public final static int DRAIN = 3;
-	public final static float MIN_VALUE = 0.001f;
-	public final static float MAX_VALUE = 1;
-	public final static float MIN_FLOW = 0.01f;
-	public final static float MAX_SPEED = 1;
-	public final static float MAX_COMPRESS = 0.02f;
-	public final static float MIN_DRAW_VALUE = 0.01f;
-	public final static float MAX_DRAW_VALUE = 1.1f;
-	public final static float TYPE_TO_VALUE[] = {0, 0, MAX_VALUE, 0};
-//	public final static float TYPE_TO_EXTRA[] = {0, -.01f, MAX_VALUE, -MAX_VALUE/3f};
-	public final static float TYPE_TO_EXTRA[] = {0, 0, MAX_VALUE, -MAX_VALUE/3};
-//	public final static float TYPE_TO_EXTRA[] = {0, 0, MAX_VALUE, -MAX_VALUE/3f};
 
-	public static int[] types;
-	public static int[] ticks;
-	public static float[] values;
-	public static float[] nextValues;
-	public static float[] extraValues;
 	private boolean drawText;
 	private boolean simEnabled = true;
+
+	Belt[] belts = new Belt[WIDTH * HEIGHT];
+	Array<Item> items = new Array<>();
 
 	public TransportTest (GameReset game) {
 		super(game);
@@ -55,146 +52,76 @@ public class TransportTest extends BaseScreen {
 		font.getData().setScale(INV_SCALE);
 		glyphs = new GlyphLayout();
 		clear.set(Color.GRAY);
-		types = new int[WIDTH * HEIGHT];
-		ticks = new int[WIDTH * HEIGHT];
-		values = new float[WIDTH * HEIGHT];
-		nextValues = new float[WIDTH * HEIGHT];
-		extraValues = new float[WIDTH * HEIGHT];
-		for (int x = 10; x <= 20; x++) {
-			setTile(x + 5 * WIDTH, BLOCK);
-			setTile(x + 10 * WIDTH, BLOCK);
-			setTile(x + 15 * WIDTH, BLOCK);
-		}
-		for (int y = 5; y <= 15; y++) {
-			setTile(10 + y * WIDTH, BLOCK);
-			setTile(15 + y * WIDTH, BLOCK);
-			setTile(20 + y * WIDTH, BLOCK);
-		}
 
-		for (int x = 3; x <= 37; x++) {
-			if (x % 2 == 0) {
-				setTile(x + 18 * WIDTH, BLOCK);
-				setTile(x + 20 * WIDTH, BLOCK);
-			}
-			setTile(x + 19 * WIDTH, BLOCK);
-		}
-
-//		for (int i = 0; i < WIDTH * HEIGHT / 2; i++) {
-//			setTile(MathUtils.random(WIDTH -1) + MathUtils.random(HEIGHT -1) * WIDTH, BLOCK);
-//		}
 	}
 
-	void setTile (int index, int type) {
-		types[index] = type;
-		values[index] = TYPE_TO_VALUE[type];
-		nextValues[index] = TYPE_TO_VALUE[type];
-		extraValues[index] = TYPE_TO_EXTRA[type];
+	void setBelt(int x, int y, int direction) {
+		int index = x + y * WIDTH;
+		Belt belt = belts[index];
+		if (belt == null) {
+			belt = belts[index] = new Belt();
+			belt.init(x, y);
+		}
+		belt.setDirection(direction);
 	}
 
-	Color water = new Color(Color.WHITE);
-	Color tmpColor1 = new Color(Color.WHITE);
-	Color tmpColor2 = new Color(Color.WHITE);
-	Color tmpColor3 = new Color(Color.WHITE);
+	void removeBelt(int x, int y) {
+		int index = x + y * WIDTH;
+		belts[index] = null;
+	}
+
 	int tick;
 	float tickTime;
-	float tickDelta = 1/60f;
-//	float tickDelta = 1/10f;
+	float tickDelta = 1/10f;
 	@Override public void render (float delta) {
 		super.render(delta);
 		// handle input
 		int mx = (int)cs.x;
 		int my = (int)cs.y;
 		if (mx >= 0 && mx < WIDTH && my >= 0 && my < HEIGHT) {
-			int index = mx + my * WIDTH;
-			if (Gdx.input.isKeyPressed(Input.Keys.Q)) {
-				setTile(index, BLOCK);
-			} else if (Gdx.input.isKeyPressed(Input.Keys.W)) {
-				setTile(index, SOURCE);
-			} else if (Gdx.input.isKeyPressed(Input.Keys.E)) {
-				setTile(index, DRAIN);
+			if (Gdx.input.isKeyPressed(Input.Keys.W)) {
+				setBelt(mx, my, Belt.DIRECTION_NORTH);
+			} else if (Gdx.input.isKeyPressed(Input.Keys.S)) {
+				setBelt(mx, my, Belt.DIRECTION_SOUTH);
+			} else if (Gdx.input.isKeyPressed(Input.Keys.A)) {
+				setBelt(mx, my, Belt.DIRECTION_WEST);
+			} else if (Gdx.input.isKeyPressed(Input.Keys.D)) {
+				setBelt(mx, my, Belt.DIRECTION_EAST);
 			} else if (Gdx.input.isKeyPressed(Input.Keys.R)) {
-				setTile(index, EMPTY);
+				removeBelt(mx, my);
+			} else if (Gdx.input.isKeyJustPressed(Input.Keys.X)) {
+				addItem(cs.x, cs.y);
 			}
 		}
 		if (Gdx.input.isKeyJustPressed(Input.Keys.T)) {
 			drawText = !drawText;
 		}
 		// simulate
-		tickTime += delta;
-		if (tickTime >= tickDelta && simEnabled) {
-			tickTime -= tickDelta;
-			tick();
+		for (Item item : items) {
+			item.update(delta, belts);
 		}
+
+		for (Belt belt : belts) {
+			if (belt == null) continue;
+			belt.update(delta, belts, items);
+		}
+
 		// draw stuff
 		renderer.setProjectionMatrix(gameCamera.combined);
 		renderer.begin(ShapeRenderer.ShapeType.Filled);
+		enableBlending();
 		for (int y = 0; y < HEIGHT; y++) {
 			for (int x = 0; x < WIDTH; x++) {
 				int index = x + y * WIDTH;
-				switch (types[index]) {
-				case SOURCE:
-				case DRAIN:
-				case BLOCK: {
-
-					for (int ox = -1; ox <= 1; ox++) {
-						for (int oy = -1; oy <= 1; oy++) {
-							if (Math.abs(ox) == Math.abs(oy))
-								continue;
-							if (x + ox < 0 || x + ox >= WIDTH || y + oy < 0 || y + oy >= HEIGHT)
-								continue;
-							int otherId = (x + ox) + (y + oy) * WIDTH;
-							if (types[otherId] != EMPTY) {
-								rect(x + .5f, y + .5f, x + .5f + ox / 2f, y + .5f + oy / 2f, .35f, Color.DARK_GRAY,
-									Color.DARK_GRAY);
-							}
-						}
-					}
-					tmpColor3.set(Color.DARK_GRAY);
-					if (types[index] == SOURCE) {
-						tmpColor3.set(Color.GREEN);
-						renderer.setColor(tmpColor3);
-						renderer.circle(x + .5f, y + .5f, .5f, 8);
-					} else if (types[index] == DRAIN) {
-						tmpColor3.set(Color.MAGENTA);
-						renderer.setColor(tmpColor3);
-						renderer.circle(x + .5f, y + .5f, .5f, 8);
-					} else {
-						renderer.setColor(tmpColor3);
-						renderer.circle(x + .5f, y + .5f, .25f, 16);
-					}
-					float value = values[index];
-					if (value > MIN_DRAW_VALUE) {
-						getWaterColor(value, water);
-						for (int ox = -1; ox <= 1; ox++) {
-							for (int oy = -1; oy <= 1; oy++) {
-								if (Math.abs(ox) == Math.abs(oy))
-									continue;
-								if (x + ox < 0 || x + ox >= WIDTH || y + oy < 0 || y + oy >= HEIGHT)
-									continue;
-								int otherId = (x + ox) + (y + oy) * WIDTH;
-								if (types[otherId] != EMPTY) {
-
-									float otherValue = values[otherId];
-									getWaterColor(otherValue, tmpColor1);
-									tmpColor2.set(water);
-									tmpColor2.lerp(tmpColor1, .5f);
-									rect(x + .5f, y + .5f, x + .5f + ox / 2f, y + .5f + oy / 2f, .16f, water, tmpColor2);
-								}
-							}
-						}
-						renderer.setColor(getWaterColor(value, water));
-//						renderer.rect(x + .35f, y + .35f, .3f, .3f);
-						renderer.circle(x + .5f, y + .5f, .15f, 16);
-					}
-					if (types[index] == DRAIN) {
-						renderer.setColor(1-value, value, 0, 1);
-						renderer.rect(x, y, 1, .15f);
-					}
-				} break;
-				}
-
+				Belt belt = belts[index];
+				if (belt == null) continue;
+				belt.draw(renderer);
 			}
 		}
+		for (Item item : items) {
+			item.draw(renderer);
+		}
+
 		renderer.end();
 		renderer.begin(ShapeRenderer.ShapeType.Line);
 		renderer.setColor(Color.BLACK);
@@ -210,115 +137,418 @@ public class TransportTest extends BaseScreen {
 			for (int y = 0; y < HEIGHT; y++) {
 				for (int x = 0; x < WIDTH; x++) {
 					int index = x + y * WIDTH;
-					switch (types[index]) {
-					case SOURCE:
-					case DRAIN:
-					case BLOCK: {
-						float value = values[index];
-						if (value > MIN_DRAW_VALUE) {
-							font.setColor(Color.RED);
-							if (value > 1) {
-								glyphs.setText(font, String.format("%.0f", value));
-							} else {
-								glyphs.setText(font, String.format("%.2f", value));
-							}
-							font.draw(batch, glyphs, x + .5f - glyphs.width / 2, y + .5f + glyphs.height / 2);
-						}
-					}
-					break;
-					}
 
 				}
 			}
 			batch.end();
 		}
 	}
-	int firstTick;
-	private void tick () {
-		firstTick = tick++;
-		for (int y = 0; y < HEIGHT; y++) {
-			for (int x = 0; x < WIDTH; x++) {
-				int index = x + y * WIDTH;
-				int type = types[index];
-				// TODO fix non sources with values
-				if (type == SOURCE) {
-					propagate(x, y, tick, 0f);
-					tick++;
-				}
-			}
-		}
-		// tick down stuff that is not connected to a source
-		for (int y = 0; y < HEIGHT; y++) {
-			for (int x = 0; x < WIDTH; x++) {
-				int index = x + y * WIDTH;
-				int type = types[index];
-				if (type != SOURCE && ticks[index] < firstTick && values[index] > 0) {
-					nextValues[index] += -.01f;
-				}
-			}
-		}
-		//Copy the new mass values to the mass array
-		for (int y = 0; y < HEIGHT; y++) {
-			for (int x = 0; x < WIDTH; x++) {
-				int index = x + y * WIDTH;
-				values[index] = nextValues[index];
-				if (types[index] == DRAIN) {
-					nextValues[index] = MathUtils.clamp(nextValues[index], -1, 1);
-				} else {
-					nextValues[index] = MathUtils.clamp(nextValues[index], 0, 1);
-				}
-			}
-		}
+
+	private void addItem (float x, float y) {
+		Item item = new Item(x, y);
+		items.add(item);
 	}
 
-	private float propagate (int x, int y, int tick, float extra) {
-		int index = x + y * WIDTH;
-		float value = values[index];
+	static class Belt {
+		public static final int SIZE = 8;
+		public static final int DIRECTION_NORTH = 1;
+		public static final int DIRECTION_EAST = 2;
+		public static final int DIRECTION_SOUTH = 3;
+		public static final int DIRECTION_WEST = 4;
+		public int index;
+		public int x;
+		public int y;
+		public int direction;
+		public float speed = 1;
+		// when facing north, lane0 is left, lane1 is right
+		// TODO instead of all this crap, we could do a flow field maybe?
+		Array<Vector2> lane0 = new Array<>();
+		Array<Vector2> lane1 = new Array<>();
+		float[] flow = new float[SIZE * SIZE];
 
-		if (ticks[index] >= tick)
-			return 0;
+		Array<Item> items0 = new Array<>(4);
+		Array<Item> items1 = new Array<>(4);
 
-		if (ticks[index] <= firstTick)
-			nextValues[index] += extraValues[index];
+		public Belt () {
+			// TODO set these based on direction
+			lane0.add(new Vector2());
+			lane0.add(new Vector2());
+			lane1.add(new Vector2());
+			lane1.add(new Vector2());
+		}
 
-		ticks[index] = tick;
+		public Belt setDirection (int direction) {
+			this.direction = direction;
+			// TODO we want to include type as well, ie straight vs elbow
+			switch (direction) {
+			case DIRECTION_NORTH: {
+				lane0.get(0).set(x + .33f, y);
+				lane0.get(1).set(x + .33f, y + 1);
+				lane1.get(0).set(x + .66f, y);
+				lane1.get(1).set(x + .66f, y + 1);
+			} break;
+			case DIRECTION_EAST: {
+				lane0.get(0).set(x, y + .33f);
+				lane0.get(1).set(x + 1, y + .33f);
+				lane1.get(0).set(x, y + .66f);
+				lane1.get(1).set(x + 1, y + .66f);
+			} break;
+			case DIRECTION_SOUTH: {
+				lane0.get(0).set(x + .33f, y + 1);
+				lane0.get(1).set(x + .33f, y);
+				lane1.get(0).set(x + .66f, y + 1);
+				lane1.get(1).set(x + .66f, y);
+			} break;
+			case DIRECTION_WEST: {
+				lane0.get(0).set(x + 1, y + .33f);
+				lane0.get(1).set(x, y + .33f);
+				lane1.get(0).set(x + 1, y + .66f);
+				lane1.get(1).set(x, y + .66f);
+			} break;
+			}
+			return this;
+		}
 
-		nextValues[index] += extra;
-		if (nextValues[index] > MAX_VALUE) {
-			// we have extra value, we will pass it along
-			// extra we have is the excess above MAX_VALUE
-			float remaining = (nextValues[index] - MAX_VALUE);
-			nextValues[index] -= remaining;
-			// get per connection excess
-			for (int ox = -1; ox <= 1; ox++) {
-				for (int oy = -1; oy <= 1; oy++) {
-					if (Math.abs(ox) == Math.abs(oy))
-						continue;
-					if (x + ox < 0 || x + ox >= WIDTH || y + oy < 0 || y + oy >= HEIGHT)
-						continue;
-					int otherId = (x + ox) + (y + oy) * WIDTH;
-					if (types[otherId] == SOURCE || types[otherId] == EMPTY)
-						continue;
-					if (ticks[otherId] > tick)
-						continue;
-					float propagate = propagate(x + ox, y + oy, tick, remaining);
-					remaining -= propagate;
-					if (remaining <= 0) {
-						return remaining;
+		public void draw(ShapeRenderer renderer) {
+			renderer.setColor(Color.LIGHT_GRAY);
+			renderer.rect(x + .15f, y, .7f, 1);
+			renderer.rect(x, y + .15f, 1, .7f);
+			switch (direction) {
+			case DIRECTION_NORTH: {
+				renderer.setColor(.6f, .6f, .6f, 1);
+				renderer.rect(x + .25f, y, .2f, 1);
+				renderer.rect(x + .55f, y, .2f, 1);
+				renderer.setColor(1, 1, 0, .66f);
+				renderer.triangle(x + .2f, y + .2f, x + .5f, y + .8f, x + .8f, y + .2f);
+			} break;
+			case DIRECTION_EAST: {
+				renderer.setColor(.6f, .6f, .6f, 1);
+				renderer.rect(x, y + .25f, 1, .2f);
+				renderer.rect(x, y + .55f, 1, .2f);
+				renderer.setColor(1, 1, 0, .66f);
+				renderer.triangle(x + .2f, y + .2f, x +.8f, y + .5f, x + .2f, y + .8f);
+			} break;
+			case DIRECTION_SOUTH: {
+				renderer.setColor(.6f, .6f, .6f, 1);
+				renderer.rect(x + .25f, y, .2f, 1);
+				renderer.rect(x + .55f, y, .2f, 1);
+				renderer.setColor(1, 1, 0, .66f);
+				renderer.triangle(x + .2f, y + .8f, x + .5f, y + .2f, x + .8f, y + .8f);
+			} break;
+			case DIRECTION_WEST: {
+				renderer.setColor(.6f, .6f, .6f, 1);
+				renderer.rect(x, y + .25f, 1, .2f);
+				renderer.rect(x, y + .55f, 1, .2f);
+				renderer.setColor(1, 1, 0, .66f);
+				renderer.triangle(x + .8f, y + .2f, x +.2f, y + .5f, x + .8f, y + .8f);
+			} break;
+			}
+			renderer.setColor(Color.VIOLET);
+			for (int i = 0; i < lane0.size - 1; i++) {
+				Vector2 p1 = lane0.get(i);
+				Vector2 p2 = lane0.get(i + 1);
+				renderer.rectLine(p1, p2, .1f);
+			}
+			for (int i = 0; i < lane1.size - 1; i++) {
+				Vector2 p1 = lane1.get(i);
+				Vector2 p2 = lane1.get(i + 1);
+				renderer.rectLine(p1, p2, .1f);
+			}
+		}
+
+		public void drawDebug (ShapeRenderer renderer) {
+
+		}
+
+		public void init (int x, int y) {
+			this.x = x;
+			this.y = y;
+			index = x + y * WIDTH;
+			direction = DIRECTION_NORTH;
+		}
+
+		Vector2 nearest0 = new Vector2();
+		Vector2 nearest1 = new Vector2();
+		Vector2 nearestTmp = new Vector2();
+		public boolean accept (Item item) {
+			if (item.x < x || item.x > x + 1 || item.y < y || item.y > y + 1) return false;
+			item.onBelt = this;
+			Gdx.app.log("Belt", "Accepted " + item);
+			// TODO snap to closest rail
+
+			float dst0 = Float.MAX_VALUE;
+			for (int i = 0; i < lane0.size - 1; i++) {
+				Vector2 p1 = lane0.get(i);
+				Vector2 p2 = lane0.get(i + 1);
+				Intersector.nearestSegmentPoint(p1.x, p1.y, p2.x, p2.y, item.x, item.y, nearestTmp);
+				float dst2 = nearestTmp.dst2(item.x, item.y);
+				if (dst2 < dst0) {
+					dst0 = dst2;
+					nearest0.set(nearestTmp);
+				}
+			}
+			float dst1 = Float.MAX_VALUE;
+			for (int i = 0; i < lane1.size - 1; i++) {
+				Vector2 p1 = lane1.get(i);
+				Vector2 p2 = lane1.get(i + 1);
+				Intersector.nearestSegmentPoint(p1.x, p1.y, p2.x, p2.y, item.x, item.y, nearestTmp);
+				float dst2 = nearestTmp.dst2(item.x, item.y);
+				if (dst2 < dst1) {
+					dst1 = dst2;
+					nearest1.set(nearestTmp);
+				}
+			}
+			if (dst0 < dst1) {
+				items0.add(item);
+				final Vector2 first = lane0.get(0);
+				// NOTE this wont work for curves, need to sort per segment or something
+				items0.sort(new Comparator<Item>() {
+					@Override public int compare (Item o1, Item o2) {
+						return -Float.compare(first.dst2(o1.x, o1.y), first.dst2(o2.x, o2.y)) ;
+					}
+				});
+			} else {
+				items1.add(item);
+				final Vector2 first = lane0.get(0);
+				items1.sort(new Comparator<Item>() {
+					@Override public int compare (Item o1, Item o2) {
+						return -Float.compare(first.dst2(o1.x, o1.y), first.dst2(o2.x, o2.y)) ;
+					}
+				});
+			}
+			return true;
+		}
+
+		Vector2 vel = new Vector2();
+		public void update(float delta, Belt[] belts, Array<Item> items) {
+			for (int i = 0; i < items0.size; i++) {
+				Item item = items0.get(i);
+				float dst = Float.MAX_VALUE;
+				// find nearest segment
+				int near = -1;
+				for (int j = 0; j < lane0.size - 1; j++) {
+					Vector2 p1 = lane0.get(j);
+					Vector2 p2 = lane0.get(j + 1);
+					Intersector.nearestSegmentPoint(p1.x, p1.y, p2.x, p2.y, item.x, item.y, nearestTmp);
+					float dst2 = nearestTmp.dst2(item.x, item.y);
+					if (dst2 <= dst) {
+						dst = dst2;
+						nearest0.set(nearestTmp);
+						near = j;
+					}
+				}
+				// travel along it
+				if (near != -1) {
+					vel.set(lane0.get(near + 1)).sub(lane0.get(near));
+					vel.nor().scl(speed * delta);
+					float vx = vel.x;
+					float vy = vel.y;
+					// TODO handle end if path, we dont want to throw stuff on the ground
+					if (dst > 0.001f) {
+						vel.set(nearest0).sub(item.x, item.y);
+						vel.nor().scl(speed * delta);
+						vx += vel.x;
+						vy += vel.y;
+					}
+					item.x += vx;
+					item.y += vy;
+					item.bounds.set(item.x, item.y, .2f, .2f);
+					if (i > 0) {
+						Item prev = items0.get(i - 1);
+						if (item.bounds.overlaps(prev.bounds)) {
+							item.x -= vx;
+							item.y -= vy;
+							item.bounds.set(item.x, item.y, .2f, .2f);
+						}
+					} else {
+						Belt other = null;
+						switch (direction) {
+						case DIRECTION_NORTH: {
+							other = belts[x + (y + 1) * WIDTH];
+						}
+						break;
+						case DIRECTION_EAST: {
+							other = belts[x + 1 + y * WIDTH];
+						}
+						break;
+						case DIRECTION_SOUTH: {
+							other = belts[x + (y - 1) * WIDTH];
+						}
+						break;
+						case DIRECTION_WEST: {
+							other = belts[x - 1 + y * WIDTH];
+						}
+						break;
+						}
+						if (other != null) {
+							if (other.items0.size > 0) {
+								Item prev = other.items0.get(other.items0.size - 1);
+								if (item.bounds.overlaps(prev.bounds)) {
+									item.x -= vx;
+									item.y -= vy;
+									item.bounds.set(item.x, item.y, .2f, .2f);
+								}
+							}
+							if (other.items1.size > 0) {
+								Item prev = other.items1.get(other.items1.size - 1);
+								if (item.bounds.overlaps(prev.bounds)) {
+									item.x -= vx;
+									item.y -= vy;
+									item.bounds.set(item.x, item.y, .2f, .2f);
+								}
+							}
+						}
+					}
+
+					if (item.x < x && belts[x - 1 + y * WIDTH] == null) {
+						item.x = x;
+					}
+					if (item.x > x + 1&& belts[x + 1 + y * WIDTH] == null) {
+						item.x = x + 1;
+					}
+					if (item.y < y && belts[x + (y -1) * WIDTH] == null) {
+						item.y = y;
+					}
+					if (item.y > y + 1&& belts[x + (y +1) * WIDTH] == null) {
+						item.y = y + 1;
 					}
 				}
 			}
-			return 0;
-		} else if (nextValues[index] < 0) {
-			return -nextValues[index];
+//			for (Item item : items1) {
+			for (int i = 0; i < items1.size; i++) {
+				Item item = items1.get(i);
+				float dst = Float.MAX_VALUE;
+				// find nearest segment
+				int near = -1;
+				for (int j = 0; j < lane1.size - 1; j++) {
+					Vector2 p1 = lane1.get(j);
+					Vector2 p2 = lane1.get(j + 1);
+					Intersector.nearestSegmentPoint(p1.x, p1.y, p2.x, p2.y, item.x, item.y, nearestTmp);
+					float dst2 = nearestTmp.dst2(item.x, item.y);
+					if (dst2 <= dst) {
+						dst = dst2;
+						nearest1.set(nearestTmp);
+						near = j;
+					}
+				}
+				// travel along it
+				if (near != -1) {
+					vel.set(lane1.get(near + 1)).sub(lane1.get(near));
+					vel.nor().scl(speed * delta);
+					float vx = vel.x;
+					float vy = vel.y;
+					// TODO handle end if path, we dont want to throw stuff on the ground
+					if (dst > 0.001f) {
+						vel.set(nearest1).sub(item.x, item.y);
+						vel.nor().scl(speed * delta);
+						vx += vel.x;
+						vy += vel.y;
+					}
+					item.x += vx;
+					item.y += vy;
+					item.bounds.set(item.x, item.y, .2f, .2f);
+//					if (id > 0) {
+					if (i > 0) {
+						Item prev = items1.get(i - 1);
+						if (item.bounds.overlaps(prev.bounds)) {
+							item.x -= vx;
+							item.y -= vy;
+							item.bounds.set(item.x, item.y, .2f, .2f);
+						}
+					} else {
+						Belt other = null;
+						switch (direction) {
+						case DIRECTION_NORTH: {
+							other = belts[x + (y + 1) * WIDTH];
+						} break;
+						case DIRECTION_EAST: {
+							other = belts[x + 1 + y * WIDTH];
+						} break;
+						case DIRECTION_SOUTH: {
+							other = belts[x + (y - 1) * WIDTH];
+						} break;
+						case DIRECTION_WEST: {
+							other = belts[x - 1 + y * WIDTH];
+						} break;
+						}
+						if (other != null) {
+							if (other.items0.size > 0) {
+								Item prev = other.items0.get(other.items0.size - 1);
+								if (item.bounds.overlaps(prev.bounds)) {
+									item.x -= vx;
+									item.y -= vy;
+									item.bounds.set(item.x, item.y, .2f, .2f);
+								}
+							}
+							if (other.items1.size > 0) {
+								Item prev = other.items1.get(other.items1.size - 1);
+								if (item.bounds.overlaps(prev.bounds)) {
+									item.x -= vx;
+									item.y -= vy;
+									item.bounds.set(item.x, item.y, .2f, .2f);
+								}
+							}
+						}
+					}
+//					}
+					if (item.x < x && belts[x - 1 + y * WIDTH] == null) {
+						item.x = x;
+					}
+					if (item.x > x + 1&& belts[x + 1 + y * WIDTH] == null) {
+						item.x = x + 1;
+					}
+					if (item.y < y && belts[x + (y -1) * WIDTH] == null) {
+						item.y = y;
+					}
+					if (item.y > y + 1&& belts[x + (y +1) * WIDTH] == null) {
+						item.y = y + 1;
+					}
+				}
+			}
 		}
-		return extra;
+
+		public void remove (Item item) {
+			items0.removeValue(item, true);
+			items1.removeValue(item, true);
+		}
 	}
 
-	private Color getWaterColor(float value, Color out){
-		value = MathUtils.clamp(value, MIN_DRAW_VALUE, MAX_DRAW_VALUE);
-		out.set(.247f + value * value, .247f + value * value, .247f + value/5, 1);
-		return out;
+	static class Item {
+		public int type;
+		public float x, y;
+		public boolean searched;
+		public Belt onBelt;
+		public Rectangle bounds = new Rectangle();
+
+		public Item (float x, float y) {
+			this.x = x;
+			this.y = y;
+			bounds.set(x, y, .33f, .33f);
+		}
+
+		public void draw (ShapeRenderer renderer) {
+			renderer.setColor(Color.CYAN);
+			renderer.rect(x - .1f, y - .1f, .2f, .2f);
+		}
+
+		public void update (float delta, Belt[] belts) {
+			bounds.set(x, y, .2f, .2f);
+			if (onBelt == null) {
+				if (!searched) {
+					searched = true;
+					for (Belt belt : belts) {
+						if (belt != null && belt.accept(this))
+							break;
+					}
+				}
+			} else {
+				if (x < onBelt.x || x > onBelt.x + 1 || y < onBelt.y || y > onBelt.y + 1) {
+					onBelt.remove(this);
+					onBelt = null;
+					searched = false;
+				}
+			}
+		}
 	}
 
 	private float map (float value, float start1, float end1, float start2, float end2) {
@@ -352,7 +582,7 @@ public class TransportTest extends BaseScreen {
 		} break;
 		case Input.Keys.Z: {
 			for (int i = 0; i < WIDTH * HEIGHT; i++) {
-				values[i] = nextValues[i] = 0;
+
 			}
 		} break;
 		}
