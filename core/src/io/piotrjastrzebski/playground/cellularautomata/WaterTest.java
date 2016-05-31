@@ -1,4 +1,4 @@
-package io.piotrjastrzebski.playground.simple;
+package io.piotrjastrzebski.playground.cellularautomata;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
@@ -16,7 +16,7 @@ import io.piotrjastrzebski.playground.PlaygroundGame;
  * Created by EvilEntity on 25/01/2016.
  */
 @SuppressWarnings("Duplicates")
-public class CellularAutomataWaterTest extends BaseScreen {
+public class WaterTest extends BaseScreen {
 	BitmapFont font;
 	GlyphLayout glyphs;
 
@@ -38,7 +38,7 @@ public class CellularAutomataWaterTest extends BaseScreen {
 	public static float[] nextValues;
 	private boolean drawText;
 
-	public CellularAutomataWaterTest (GameReset game) {
+	public WaterTest (GameReset game) {
 		super(game);
 		BitmapFont visFont = VisUI.getSkin().getFont("default-font");
 		font = new BitmapFont(new BitmapFont.BitmapFontData(visFont.getData().fontFile, false), visFont.getRegions(), false);
@@ -307,6 +307,6 @@ public class CellularAutomataWaterTest extends BaseScreen {
 
 	// allow us to start this test directly
 	public static void main (String[] args) {
-		PlaygroundGame.start(args, CellularAutomataWaterTest.class);
+		PlaygroundGame.start(args, WaterTest.class);
 	}
 }

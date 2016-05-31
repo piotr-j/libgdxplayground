@@ -1,4 +1,4 @@
-package io.piotrjastrzebski.playground.simple;
+package io.piotrjastrzebski.playground.cellularautomata;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
@@ -8,8 +8,6 @@ import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.utils.IntArray;
-import com.badlogic.gdx.utils.IntMap;
 import com.kotcrab.vis.ui.VisUI;
 import io.piotrjastrzebski.playground.BaseScreen;
 import io.piotrjastrzebski.playground.GameReset;
@@ -19,7 +17,7 @@ import io.piotrjastrzebski.playground.PlaygroundGame;
  * Created by EvilEntity on 25/01/2016.
  */
 @SuppressWarnings("Duplicates")
-public class CellularAutomataEnergy4Test extends BaseScreen {
+public class TransportTest extends BaseScreen {
 	BitmapFont font;
 	GlyphLayout glyphs;
 
@@ -29,7 +27,6 @@ public class CellularAutomataEnergy4Test extends BaseScreen {
 	public final static int BLOCK = 1;
 	public final static int SOURCE = 2;
 	public final static int DRAIN = 3;
-	public final static int NO_GROUP = -1;
 	public final static float MIN_VALUE = 0.001f;
 	public final static float MAX_VALUE = 1;
 	public final static float MIN_FLOW = 0.01f;
@@ -44,15 +41,13 @@ public class CellularAutomataEnergy4Test extends BaseScreen {
 
 	public static int[] types;
 	public static int[] ticks;
-	public static int[] groups;
 	public static float[] values;
 	public static float[] nextValues;
 	public static float[] extraValues;
 	private boolean drawText;
-	private boolean drawGroupId;
 	private boolean simEnabled = true;
 
-	public CellularAutomataEnergy4Test (GameReset game) {
+	public TransportTest (GameReset game) {
 		super(game);
 		BitmapFont visFont = VisUI.getSkin().getFont("small-font");
 		font = new BitmapFont(new BitmapFont.BitmapFontData(visFont.getData().fontFile, false), visFont.getRegions(), false);
@@ -62,7 +57,6 @@ public class CellularAutomataEnergy4Test extends BaseScreen {
 		clear.set(Color.GRAY);
 		types = new int[WIDTH * HEIGHT];
 		ticks = new int[WIDTH * HEIGHT];
-		groups = new int[WIDTH * HEIGHT];
 		values = new float[WIDTH * HEIGHT];
 		nextValues = new float[WIDTH * HEIGHT];
 		extraValues = new float[WIDTH * HEIGHT];
@@ -124,9 +118,6 @@ public class CellularAutomataEnergy4Test extends BaseScreen {
 		}
 		if (Gdx.input.isKeyJustPressed(Input.Keys.T)) {
 			drawText = !drawText;
-		}
-		if (Gdx.input.isKeyJustPressed(Input.Keys.Y)) {
-			drawGroupId = !drawGroupId;
 		}
 		// simulate
 		tickTime += delta;
@@ -196,7 +187,6 @@ public class CellularAutomataEnergy4Test extends BaseScreen {
 						renderer.circle(x + .5f, y + .5f, .15f, 16);
 					}
 					if (types[index] == DRAIN) {
-						value = -value * 1/extraValues[index];
 						renderer.setColor(1-value, value, 0, 1);
 						renderer.rect(x, y, 1, .15f);
 					}
@@ -242,107 +232,87 @@ public class CellularAutomataEnergy4Test extends BaseScreen {
 			}
 			batch.end();
 		}
-		if (drawGroupId) {
-			batch.setProjectionMatrix(gameCamera.combined);
-			batch.begin();
-			for (int y = 0; y < HEIGHT; y++) {
-				for (int x = 0; x < WIDTH; x++) {
-					int index = x + y * WIDTH;
-					if (types[index] == EMPTY) continue;
-					glyphs.setText(font, String.format("%d", groups[index]));
-					font.draw(batch, glyphs, x + .5f - glyphs.width / 2, y + .5f + glyphs.height / 2);
-				}
-			}
-			batch.end();
-		}
 	}
-
-	public int groupCount = 0;
-	public IntMap<IntArray> groupToSources = new IntMap<>();
-	public IntMap<IntArray> groupToDrains = new IntMap<>();
-	public IntMap<IntArray> groupToBlocks = new IntMap<>();
+	int firstTick;
 	private void tick () {
-		groupCount = 0;
-		groupToSources.clear();
-		groupToDrains.clear();
-		groupToBlocks.clear();
-		for (int i = 0; i < WIDTH * HEIGHT; i++) {
-			groups[i] = NO_GROUP;
-		}
-
+		firstTick = tick++;
 		for (int y = 0; y < HEIGHT; y++) {
 			for (int x = 0; x < WIDTH; x++) {
 				int index = x + y * WIDTH;
-				if (types[index] == SOURCE && groups[index] == NO_GROUP) {
-					groupToSources.put(groupCount, new IntArray());
-					groupToDrains.put(groupCount, new IntArray());
-					groupToBlocks.put(groupCount, new IntArray());
-					buildGroup(x, y, groupCount);
-					groupCount++;
+				int type = types[index];
+				// TODO fix non sources with values
+				if (type == SOURCE) {
+					propagate(x, y, tick, 0f);
+					tick++;
 				}
 			}
 		}
-
-		for (int gId = 0; gId < groupCount; gId++) {
-			IntArray sources = groupToSources.get(gId);
-			IntArray drains = groupToDrains.get(gId);
-			IntArray blocks = groupToBlocks.get(gId);
-			float totalSource = 0;
-			for (int i = 0; i < sources.size; i++) {
-				totalSource += extraValues[sources.get(i)];
-			}
-
-			float extra = totalSource/drains.size;
-//			for (int i = 0; i < drains.size; i++) {
-//				values[drains.get(i)] += extraValues[drains.get(i)] + extra + .01f;
-//			}
-			for (int i = 0; i < drains.size; i++) {
-				values[drains.get(i)] = extra;
-			}
-			for (int i = 0; i < blocks.size; i++) {
-				values[blocks.get(i)] = extra;
-			}
-		}
-
-		// tick down not grouped
+		// tick down stuff that is not connected to a source
 		for (int y = 0; y < HEIGHT; y++) {
 			for (int x = 0; x < WIDTH; x++) {
 				int index = x + y * WIDTH;
-				if ((types[index] == BLOCK || types[index] == DRAIN) && groups[index] == NO_GROUP) {
-					values[index] -= 0.01f;
+				int type = types[index];
+				if (type != SOURCE && ticks[index] < firstTick && values[index] > 0) {
+					nextValues[index] += -.01f;
 				}
-				values[index] = MathUtils.clamp(values[index], 0, 1);
+			}
+		}
+		//Copy the new mass values to the mass array
+		for (int y = 0; y < HEIGHT; y++) {
+			for (int x = 0; x < WIDTH; x++) {
+				int index = x + y * WIDTH;
+				values[index] = nextValues[index];
+				if (types[index] == DRAIN) {
+					nextValues[index] = MathUtils.clamp(nextValues[index], -1, 1);
+				} else {
+					nextValues[index] = MathUtils.clamp(nextValues[index], 0, 1);
+				}
 			}
 		}
 	}
 
-	private void buildGroup (int x, int y, int groupId) {
+	private float propagate (int x, int y, int tick, float extra) {
 		int index = x + y * WIDTH;
-		if (groups[index] != NO_GROUP) return;
-		groups[index] = groupId;
-		switch (types[index]) {
-		case SOURCE: {
-			groupToSources.get(groupId).add(index);
-		}break;
-		case DRAIN: {
-			groupToDrains.get(groupId).add(index);
-		}break;
-		case BLOCK: {
-			groupToBlocks.get(groupId).add(index);
-		}break;
-		}
-		for (int ox = -1; ox <= 1; ox++) {
-			for (int oy = -1; oy <= 1; oy++) {
-				if (Math.abs(ox) == Math.abs(oy))
-					continue;
-				if (x + ox < 0 || x + ox >= WIDTH || y + oy < 0 || y + oy >= HEIGHT)
-					continue;
-				int otherId = (x + ox) + (y + oy) * WIDTH;
-				if (types[otherId] == EMPTY)
-					continue;
-				buildGroup(x + ox, y + oy, groupId);
+		float value = values[index];
+
+		if (ticks[index] >= tick)
+			return 0;
+
+		if (ticks[index] <= firstTick)
+			nextValues[index] += extraValues[index];
+
+		ticks[index] = tick;
+
+		nextValues[index] += extra;
+		if (nextValues[index] > MAX_VALUE) {
+			// we have extra value, we will pass it along
+			// extra we have is the excess above MAX_VALUE
+			float remaining = (nextValues[index] - MAX_VALUE);
+			nextValues[index] -= remaining;
+			// get per connection excess
+			for (int ox = -1; ox <= 1; ox++) {
+				for (int oy = -1; oy <= 1; oy++) {
+					if (Math.abs(ox) == Math.abs(oy))
+						continue;
+					if (x + ox < 0 || x + ox >= WIDTH || y + oy < 0 || y + oy >= HEIGHT)
+						continue;
+					int otherId = (x + ox) + (y + oy) * WIDTH;
+					if (types[otherId] == SOURCE || types[otherId] == EMPTY)
+						continue;
+					if (ticks[otherId] > tick)
+						continue;
+					float propagate = propagate(x + ox, y + oy, tick, remaining);
+					remaining -= propagate;
+					if (remaining <= 0) {
+						return remaining;
+					}
+				}
 			}
+			return 0;
+		} else if (nextValues[index] < 0) {
+			return -nextValues[index];
 		}
+		return extra;
 	}
 
 	private Color getWaterColor(float value, Color out){
@@ -396,6 +366,6 @@ public class CellularAutomataEnergy4Test extends BaseScreen {
 	
 	// allow us to start this test directly
 	public static void main (String[] args) {
-		PlaygroundGame.start(args, CellularAutomataEnergy4Test.class);
+		PlaygroundGame.start(args, TransportTest.class);
 	}
 }

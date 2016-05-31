@@ -1,4 +1,4 @@
-package io.piotrjastrzebski.playground.simple;
+package io.piotrjastrzebski.playground.cellularautomata;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
@@ -16,7 +16,7 @@ import io.piotrjastrzebski.playground.PlaygroundGame;
  * Created by EvilEntity on 25/01/2016.
  */
 @SuppressWarnings("Duplicates")
-public class CellularAutomataEnergyTest extends BaseScreen {
+public class Water2Test extends BaseScreen {
 	BitmapFont font;
 	GlyphLayout glyphs;
 
@@ -36,10 +36,9 @@ public class CellularAutomataEnergyTest extends BaseScreen {
 	public static int[] types;
 	public static float[] values;
 	public static float[] nextValues;
-	public static float[] extraValues;
 	private boolean drawText;
 
-	public CellularAutomataEnergyTest (GameReset game) {
+	public Water2Test (GameReset game) {
 		super(game);
 		BitmapFont visFont = VisUI.getSkin().getFont("default-font");
 		font = new BitmapFont(new BitmapFont.BitmapFontData(visFont.getData().fontFile, false), visFont.getRegions(), false);
@@ -50,7 +49,6 @@ public class CellularAutomataEnergyTest extends BaseScreen {
 		types = new int[WIDTH * HEIGHT];
 		values = new float[WIDTH * HEIGHT];
 		nextValues = new float[WIDTH * HEIGHT];
-		extraValues = new float[WIDTH * HEIGHT];
 		for (int y = 0; y < HEIGHT; y++) {
 			for (int x = 0; x < WIDTH; x++) {
 				int index = x + y * WIDTH;
@@ -77,22 +75,14 @@ public class CellularAutomataEnergyTest extends BaseScreen {
 				types[index] = BLOCK;
 				values[index] = 0;
 				nextValues[index] = 0;
-				extraValues[index] = -0.01f;
 			} else if (Gdx.input.isKeyPressed(Input.Keys.W)) {
-				types[index] = BLOCK;
-				values[index] = MAX_VALUE;
-				nextValues[index] = MAX_VALUE;
-				extraValues[index] = MAX_VALUE;
+				types[index] = WATER;
+				values[index] += MAX_VALUE;
+				nextValues[index] += MAX_VALUE;
 			} else if (Gdx.input.isKeyPressed(Input.Keys.E)) {
-				types[index] = BLOCK;
-				values[index] = 0;
-				nextValues[index] = 0;
-				extraValues[index] = -MAX_VALUE/3f;
-			} else if (Gdx.input.isKeyPressed(Input.Keys.R)) {
 				types[index] = EMPTY;
 				values[index] = 0;
 				nextValues[index] = 0;
-				extraValues[index] = 0;
 			}
 		}
 		if (Gdx.input.isKeyJustPressed(Input.Keys.T)) {
@@ -106,38 +96,78 @@ public class CellularAutomataEnergyTest extends BaseScreen {
 				for (int x = 0; x < WIDTH; x++) {
 					int index = x + y * WIDTH;
 					int type = types[index];
-					if (type != BLOCK)
-						continue;
+					if (type == BLOCK) continue;
 
 					float value = values[index];
-					if (value <= 0)
-						continue;
+					if (value <= 0) continue;
 
-					nextValues[index] += extraValues[index];
-
-					for (int ox = -1; ox <= 1; ox++) {
-						for (int oy = -1; oy <= 1; oy++) {
-							if (Math.abs(ox) == Math.abs(oy))
-								continue;
-							if (x + ox < 0 || x + ox >= WIDTH || y + oy < 0 || y + oy >= HEIGHT)
-								continue;
-							int otherId = (x + ox) + (y + oy) * WIDTH;
-							if (types[otherId] == BLOCK) {
-								float flow = (values[index] - values[otherId]) / 4f;
-								if (flow > MIN_FLOW) {
-									flow *= .5f;
-								}
-								flow = MathUtils.clamp(flow, 0, value);
-								nextValues[index] -= flow;
-								nextValues[otherId] += flow;
-								value -= flow;
-								if (value <= 0)
-									break;
+					// below
+					if (y > 0) {
+						int belowId = x + (y-1) * WIDTH;
+						if (types[belowId] != BLOCK) {
+							float flow = (values[index] - values[belowId])/4f;
+							if (flow > MIN_FLOW) {
+								flow *= .5f;
 							}
+							flow = MathUtils.clamp(flow, 0, value);
+
+							nextValues[index] -= flow;
+							nextValues[belowId] += flow;
+							value -= flow;
 						}
+					}
+					if (value <= 0) continue;
+
+					// left
+					if (x > 0) {
+						int leftId = (x - 1) + y * WIDTH;
+						if (types[leftId] != BLOCK) {
+							float flow = (values[index] - values[leftId])/4f;
+							if (flow > MIN_FLOW) {
+								flow *= .5f;
+							}
+							flow = MathUtils.clamp(flow, 0, value);
+
+							nextValues[index] -= flow;
+							nextValues[leftId] += flow;
+							value -= flow;
+						}
+					}
+					if (value <= 0) continue;
+
+					// right
+					if (x < WIDTH -1) {
+						int rightId = (x + 1) + y * WIDTH;
+						if (types[rightId] != BLOCK) {
+							float flow = (values[index] - values[rightId])/4f;
+							if (flow > MIN_FLOW) {
+								flow *= .5f;
+							}
+							flow = MathUtils.clamp(flow, 0, value);
+
+							nextValues[index] -= flow;
+							nextValues[rightId] += flow;
+							value -= flow;
+						}
+					}
+					if (value <= 0) continue;
+
+					// up
+					if (y < HEIGHT -1) {
+						int upId = x + (y + 1) * WIDTH;
+						float flow = (values[index] - values[upId])/4f;
+						if (flow > MIN_FLOW) {
+							flow *= .5f;
+						}
+						flow = MathUtils.clamp(flow, 0, value);
+
+						nextValues[index] -= flow;
+						nextValues[upId] += flow;
+						value -= flow;
 					}
 				}
 			}
+
 			//Copy the new mass values to the mass array
 			for (int i = 0; i < WIDTH * HEIGHT; i++) {
 				values[i] = nextValues[i];
@@ -154,6 +184,21 @@ public class CellularAutomataEnergyTest extends BaseScreen {
 					}
 				}
 			}
+
+			// update flags
+			for (int y = 0; y < HEIGHT; y++) {
+				for (int x = 0; x < WIDTH; x++) {
+					int index = x + y * WIDTH;
+					if(types[index] == BLOCK) continue;
+					if (values[index] > MIN_VALUE){
+						types[index] = WATER;
+					} else {
+						types[index] = EMPTY;
+					}
+				}
+			}
+
+			// clear water from edges?
 		}
 		// draw stuff
 		renderer.setProjectionMatrix(gameCamera.combined);
@@ -163,19 +208,15 @@ public class CellularAutomataEnergyTest extends BaseScreen {
 				int index = x + y * WIDTH;
 				switch (types[index]) {
 				case BLOCK: {
-
-					renderer.setColor(Color.BLACK);
-					if (extraValues[index] > 0.25f) {
-						renderer.setColor(Color.GREEN);
-					} else if (extraValues[index] < -0.25f) {
-						renderer.setColor(Color.RED);
-					}
+					renderer.setColor(Color.BROWN);
 					renderer.rect(x, y, 1, 1);
-
+				} break;
+				case WATER: {
+					renderer.setColor(Color.NAVY);
 					float value = values[index];
 					if (value > MIN_DRAW_VALUE) {
 						renderer.setColor(getWaterColor(value, water));
-						renderer.rect(x + .1f, y + .1f, .8f, .8f);
+						renderer.rect(x, y, 1, 1);
 					}
 				} break;
 				}
@@ -198,14 +239,10 @@ public class CellularAutomataEnergyTest extends BaseScreen {
 				for (int x = 0; x < WIDTH; x++) {
 					int index = x + y * WIDTH;
 					switch (types[index]) {
-					case BLOCK: {
+					case WATER: {
 						float value = values[index];
 						if (value > MIN_DRAW_VALUE) {
-							getWaterColor(value, water);
-							water.r = 1-water.r;
-							water.g = 1-water.g;
-							water.b = 1-water.b;
-							font.setColor(water);
+							font.setColor(Color.BLACK);
 							glyphs.setText(font, String.format("%.2f", values[index]));
 							font.draw(batch, glyphs, x + .5f - glyphs.width / 2, y + .5f + glyphs.height / 2);
 						}
@@ -256,6 +293,6 @@ public class CellularAutomataEnergyTest extends BaseScreen {
 	
 	// allow us to start this test directly
 	public static void main (String[] args) {
-		PlaygroundGame.start(args, CellularAutomataEnergyTest.class);
+		PlaygroundGame.start(args, Water2Test.class);
 	}
 }

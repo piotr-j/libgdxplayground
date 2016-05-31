@@ -1,4 +1,4 @@
-package io.piotrjastrzebski.playground.simple;
+package io.piotrjastrzebski.playground.cellularautomata;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
@@ -17,7 +17,7 @@ import io.piotrjastrzebski.playground.PlaygroundGame;
  * Created by EvilEntity on 25/01/2016.
  */
 @SuppressWarnings("Duplicates")
-public class CellularAutomataEnergy2Test extends BaseScreen {
+public class Energy3Test extends BaseScreen {
 	BitmapFont font;
 	GlyphLayout glyphs;
 
@@ -35,7 +35,9 @@ public class CellularAutomataEnergy2Test extends BaseScreen {
 	public final static float MIN_DRAW_VALUE = 0.01f;
 	public final static float MAX_DRAW_VALUE = 1.1f;
 	public final static float TYPE_TO_VALUE[] = {0, 0, MAX_VALUE, 0};
-	public final static float TYPE_TO_EXTRA[] = {0, -.01f, MAX_VALUE, -MAX_VALUE/3f};
+//	public final static float TYPE_TO_EXTRA[] = {0, -.01f, MAX_VALUE, -MAX_VALUE/3f};
+	public final static float TYPE_TO_EXTRA[] = {0, 0, MAX_VALUE, -MAX_VALUE/3};
+//	public final static float TYPE_TO_EXTRA[] = {0, 0, MAX_VALUE, -MAX_VALUE/3f};
 
 	public static int[] types;
 	public static int[] ticks;
@@ -45,7 +47,7 @@ public class CellularAutomataEnergy2Test extends BaseScreen {
 	private boolean drawText;
 	private boolean simEnabled = true;
 
-	public CellularAutomataEnergy2Test (GameReset game) {
+	public Energy3Test (GameReset game) {
 		super(game);
 		BitmapFont visFont = VisUI.getSkin().getFont("small-font");
 		font = new BitmapFont(new BitmapFont.BitmapFontData(visFont.getData().fontFile, false), visFont.getRegions(), false);
@@ -68,6 +70,18 @@ public class CellularAutomataEnergy2Test extends BaseScreen {
 			setTile(15 + y * WIDTH, BLOCK);
 			setTile(20 + y * WIDTH, BLOCK);
 		}
+
+		for (int x = 3; x <= 37; x++) {
+			if (x % 2 == 0) {
+				setTile(x + 18 * WIDTH, BLOCK);
+				setTile(x + 20 * WIDTH, BLOCK);
+			}
+			setTile(x + 19 * WIDTH, BLOCK);
+		}
+
+//		for (int i = 0; i < WIDTH * HEIGHT / 2; i++) {
+//			setTile(MathUtils.random(WIDTH -1) + MathUtils.random(HEIGHT -1) * WIDTH, BLOCK);
+//		}
 	}
 
 	void setTile (int index, int type) {
@@ -84,6 +98,7 @@ public class CellularAutomataEnergy2Test extends BaseScreen {
 	int tick;
 	float tickTime;
 	float tickDelta = 1/60f;
+//	float tickDelta = 1/10f;
 	@Override public void render (float delta) {
 		super.render(delta);
 		// handle input
@@ -108,8 +123,7 @@ public class CellularAutomataEnergy2Test extends BaseScreen {
 		tickTime += delta;
 		if (tickTime >= tickDelta && simEnabled) {
 			tickTime -= tickDelta;
-			tick++;
-			tick(tick);
+			tick();
 		}
 		// draw stuff
 		renderer.setProjectionMatrix(gameCamera.combined);
@@ -136,12 +150,12 @@ public class CellularAutomataEnergy2Test extends BaseScreen {
 						}
 					}
 					tmpColor3.set(Color.DARK_GRAY);
-					if (extraValues[index] > 0.25f) {
+					if (types[index] == SOURCE) {
 						tmpColor3.set(Color.GREEN);
 						renderer.setColor(tmpColor3);
 						renderer.circle(x + .5f, y + .5f, .5f, 8);
-					} else if (extraValues[index] < -0.25f) {
-						tmpColor3.set(Color.RED);
+					} else if (types[index] == DRAIN) {
+						tmpColor3.set(Color.MAGENTA);
 						renderer.setColor(tmpColor3);
 						renderer.circle(x + .5f, y + .5f, .5f, 8);
 					} else {
@@ -171,6 +185,10 @@ public class CellularAutomataEnergy2Test extends BaseScreen {
 						renderer.setColor(getWaterColor(value, water));
 //						renderer.rect(x + .35f, y + .35f, .3f, .3f);
 						renderer.circle(x + .5f, y + .5f, .15f, 16);
+					}
+					if (types[index] == DRAIN) {
+						renderer.setColor(1-value, value, 0, 1);
+						renderer.rect(x, y, 1, .15f);
 					}
 				} break;
 				}
@@ -215,64 +233,91 @@ public class CellularAutomataEnergy2Test extends BaseScreen {
 			batch.end();
 		}
 	}
-
-	private void tick (int tick) {
+	int firstTick;
+	private void tick () {
+		firstTick = tick++;
 		for (int y = 0; y < HEIGHT; y++) {
 			for (int x = 0; x < WIDTH; x++) {
 				int index = x + y * WIDTH;
 				int type = types[index];
-				if (type == EMPTY)
-					continue;
-				if (ticks[index] >= tick)
-					continue;
-
-				nextValues[index] += extraValues[index];
-
-				float value = values[index];
-				if (value <= 0)
-					continue;
-
-				propagate(x, y, tick);
-
+				// TODO fix non sources with values
+				if (type == SOURCE) {
+					propagate(x, y, tick, 0f);
+					tick++;
+				}
 			}
 		}
-
+		// tick down stuff that is not connected to a source
+		for (int y = 0; y < HEIGHT; y++) {
+			for (int x = 0; x < WIDTH; x++) {
+				int index = x + y * WIDTH;
+				int type = types[index];
+				if (type != SOURCE && ticks[index] < firstTick && values[index] > 0) {
+					nextValues[index] += -.01f;
+				}
+			}
+		}
 		//Copy the new mass values to the mass array
-		for (int i = 0; i < WIDTH * HEIGHT; i++) {
-			values[i] = nextValues[i];
+		for (int y = 0; y < HEIGHT; y++) {
+			for (int x = 0; x < WIDTH; x++) {
+				int index = x + y * WIDTH;
+				values[index] = nextValues[index];
+				if (types[index] == DRAIN) {
+					nextValues[index] = MathUtils.clamp(nextValues[index], -1, 1);
+				} else {
+					nextValues[index] = MathUtils.clamp(nextValues[index], 0, 1);
+				}
+			}
 		}
 	}
 
-	private void propagate (int x, int y, int tick) {
+	private float propagate (int x, int y, int tick, float extra) {
 		int index = x + y * WIDTH;
 		float value = values[index];
+
+		if (ticks[index] >= tick)
+			return 0;
+
+		if (ticks[index] <= firstTick)
+			nextValues[index] += extraValues[index];
+
 		ticks[index] = tick;
 
-		for (int ox = -1; ox <= 1; ox++) {
-			for (int oy = -1; oy <= 1; oy++) {
-				if (Math.abs(ox) == Math.abs(oy))
-					continue;
-				if (x + ox < 0 || x + ox >= WIDTH || y + oy < 0 || y + oy >= HEIGHT)
-					continue;
-				int otherId = (x + ox) + (y + oy) * WIDTH;
-				if (types[otherId] == EMPTY) continue;
-				float flow = (values[index] - values[otherId]) / 4f;
-				if (flow > MIN_FLOW) {
-					flow *= .5f;
+		nextValues[index] += extra;
+		if (nextValues[index] > MAX_VALUE) {
+			// we have extra value, we will pass it along
+			// extra we have is the excess above MAX_VALUE
+			float remaining = (nextValues[index] - MAX_VALUE);
+			nextValues[index] -= remaining;
+			// get per connection excess
+			for (int ox = -1; ox <= 1; ox++) {
+				for (int oy = -1; oy <= 1; oy++) {
+					if (Math.abs(ox) == Math.abs(oy))
+						continue;
+					if (x + ox < 0 || x + ox >= WIDTH || y + oy < 0 || y + oy >= HEIGHT)
+						continue;
+					int otherId = (x + ox) + (y + oy) * WIDTH;
+					if (types[otherId] == SOURCE || types[otherId] == EMPTY)
+						continue;
+					if (ticks[otherId] > tick)
+						continue;
+					float propagate = propagate(x + ox, y + oy, tick, remaining);
+					remaining -= propagate;
+					if (remaining <= 0) {
+						return remaining;
+					}
 				}
-				flow = MathUtils.clamp(flow, 0, value);
-				nextValues[index] -= flow;
-				nextValues[otherId] += flow;
-				value -= flow;
-				if (value <= 0)
-					break;
 			}
+			return 0;
+		} else if (nextValues[index] < 0) {
+			return -nextValues[index];
 		}
+		return extra;
 	}
 
 	private Color getWaterColor(float value, Color out){
 		value = MathUtils.clamp(value, MIN_DRAW_VALUE, MAX_DRAW_VALUE);
-		out.set(value * value, value * value, value/5, 0);
+		out.set(.247f + value * value, .247f + value * value, .247f + value/5, 1);
 		return out;
 	}
 
@@ -321,6 +366,6 @@ public class CellularAutomataEnergy2Test extends BaseScreen {
 	
 	// allow us to start this test directly
 	public static void main (String[] args) {
-		PlaygroundGame.start(args, CellularAutomataEnergy2Test.class);
+		PlaygroundGame.start(args, Energy3Test.class);
 	}
 }
