@@ -13,6 +13,8 @@ import io.piotrjastrzebski.playground.BaseScreen;
 import io.piotrjastrzebski.playground.GameReset;
 import io.piotrjastrzebski.playground.PlaygroundGame;
 
+import java.util.Comparator;
+
 /**
  * We want to implement transport belts or something
  * each belt hast 2 lanes items can move on, with at most 2 items per lanes, for 4 total
@@ -59,18 +61,35 @@ public class Transport3Test extends BaseScreen {
 			v2(1f -1, .3f)
 		));
 
+
+		setBelt(13, 7, BeltType.EW, -1);
+		setBelt(14, 7, BeltType.EW, -1);
+		setBelt(15, 7, BeltType.NS, 1);
 		setBelt(4, 8, BeltType.NS, 1);
 		setBelt(6, 8, BeltType.NS, -1);
 		setBelt(8, 8, BeltType.EW, 1);
 		setBelt(10, 8, BeltType.EW, -1);
+		setBelt(13, 8, BeltType.NS, -1);
+		setBelt(15, 8, BeltType.NS, 1);
+		setBelt(13, 9, BeltType.NS, -1);
+		setBelt(14, 9, BeltType.EW, 1);
+		setBelt(15, 9, BeltType.EW, 1);
 		setBelt(4, 10, BeltType.SW, 1);
 		setBelt(6, 10, BeltType.SW, -1);
 		setBelt(8, 10, BeltType.SE, 1);
 		setBelt(10, 10, BeltType.SE, -1);
+		setBelt(16, 11, BeltType.EW, -1);
+		setBelt(17, 11, BeltType.EW, -1);
+		setBelt(18, 11, BeltType.EW, -1);
+		setBelt(19, 11, BeltType.EW, -1);
 		setBelt(4, 12, BeltType.NW, 1);
 		setBelt(6, 12, BeltType.NW, -1);
 		setBelt(8, 12, BeltType.NE, 1);
 		setBelt(10, 12, BeltType.NE, -1);
+		setBelt(16, 12, BeltType.EW, 1);
+		setBelt(17, 12, BeltType.EW, 1);
+		setBelt(18, 12, BeltType.EW, 1);
+		setBelt(19, 12, BeltType.EW, 1);
 		setBelt(8, 16, BeltType.SW, 1);
 		setBelt(9, 16, BeltType.EW, 1);
 		setBelt(10, 16, BeltType.EW, 1);
@@ -158,13 +177,17 @@ public class Transport3Test extends BaseScreen {
 	}
 
 	public void addItem (Item item) {
-		int gx = (int)item.position.x;
-		int gy = (int)item.position.y;
-		int index = gx + gy * WIDTH;
-		Belt belt = belts[index];
+		Belt belt = getBelt(item.position.x, item.position.y);
 		if (belt != null) {
 			belt.add(item);
 		}
+	}
+
+	public Belt getBelt (float x, float y) {
+		int gx = (int)x;
+		int gy = (int)y;
+		int index = gx + gy * WIDTH;
+		return belts[index];
 	}
 
 
@@ -198,6 +221,9 @@ public class Transport3Test extends BaseScreen {
 		if (Gdx.input.isKeyJustPressed(Input.Keys.T)) {
 			drawText = !drawText;
 		}
+		if (Gdx.input.isKeyJustPressed(Input.Keys.Y)) {
+			simEnabled = !simEnabled;
+		}
 		if (Gdx.input.isKeyJustPressed(Input.Keys.H)) {
 			for (Belt belt : belts) {
 				if (belt != null) {
@@ -205,6 +231,17 @@ public class Transport3Test extends BaseScreen {
 				}
 			}
 
+		}
+
+		if (simEnabled) {
+			for (Belt belt : belts) {
+				if (belt != null) {
+					belt.update(delta);
+				}
+			}
+			for (Item item : items) {
+				item.update(delta);
+			}
 		}
 
 		// draw stuff
@@ -250,14 +287,12 @@ public class Transport3Test extends BaseScreen {
 //		draw(BeltType.SE, 6f, 5f, false);
 		for (Belt belt : belts) {
 			if (belt != null) {
-				belt.update(delta);
 				belt.draw(renderer);
 			}
 		}
 		renderer.end();
 		renderer.begin(ShapeRenderer.ShapeType.Filled);
 		for (Item item : items) {
-			item.update(delta);
 			item.draw(renderer);
 		}
 		renderer.end();
@@ -329,9 +364,13 @@ public class Transport3Test extends BaseScreen {
 		public BeltType type;
 		public int direction = DIRECTION_CW;
 		Bezier<Vector2> bezier = new Bezier<>();
+		Array<Item> lane0Items = new Array<>(true, 4);
+		Array<Item> lane1Items = new Array<>(true, 4);
+		Array<Item> items = new Array<>(true, 4);
 		// time in seconds it takes an item to travel over this belt
 		public float speed = 1;
 		private boolean drawCircles = false;
+		private boolean drawItems = true;
 
 		public Belt (int x, int y, BeltType type) {
 			this.x = x;
@@ -394,6 +433,26 @@ public class Transport3Test extends BaseScreen {
 					renderer.circle(x + tmp.x, y + tmp.y, .1f, 16);
 				}
 			}
+			if (drawItems) {
+				Color color = direction == DIRECTION_CW ? lane0Color : lane1Color;
+				for (int i = 0; i < lane0Items.size; i++) {
+//					float a = .25f + i/lane0Items.size * .75f;
+					float a = i/(float)lane0Items.size;
+					Item item = lane0Items.get(i);
+//					renderer.setColor(color.r, color.g, color.b, a);
+					renderer.setColor(a, 0, 1 - a, 1);
+					renderer.circle(item.position.x, item.position.y, .175f, 16);
+				}
+				color = direction == DIRECTION_CW ? lane1Color : lane0Color;
+				for (int i = 0; i < lane1Items.size; i++) {
+//					float a = .25f + i/lane1Items.size * .75f;
+					float a = i/(float)lane1Items.size;
+					Item item = lane1Items.get(i);
+//					renderer.setColor(color.r, color.g, color.b, a);
+					renderer.setColor(a, 0, 1 - a, 1);
+					renderer.circle(item.position.x, item.position.y, .175f, 16);
+				}
+			}
 		}
 
 		private void drawPath(ShapeRenderer renderer, Color color) {
@@ -417,16 +476,57 @@ public class Transport3Test extends BaseScreen {
 			if (dst(type.lane0, tmp) < dst(type.lane1, tmp)) {
 				item.lane = direction == DIRECTION_CW?0 : 1;
 				bezier.set(type.lane0);
+				lane0Items.add(item);
 			} else {
 				item.lane = direction == DIRECTION_CW?1 : 0;
 				bezier.set(type.lane1);
+				lane1Items.add(item);
 			}
+			items.add(item);
 			float progress = bezier.locate(tmp);
 			bezier.valueAt(tmp1, progress);
 			item.position.set(tmp1).add(x, y);
 			item.progress = direction == DIRECTION_CW?progress:1-progress;
 			item.direction = direction;
 			item.belt = this;
+
+			if (direction == DIRECTION_CW) {
+				lane0Items.sort(cmpCW);
+				lane1Items.sort(cmpCW);
+			} else {
+				lane0Items.sort(cmpCCW);
+				lane1Items.sort(cmpCCW);
+			}
+		}
+
+		Comparator<Item> cmpCW = new Comparator<Item>() {
+			@Override public int compare (Item o1, Item o2) {
+				return Float.compare(o2.progress, o1.progress);
+//				return Float.compare(o1.progress, o2.progress);
+			}
+		};
+
+		Comparator<Item> cmpCCW = new Comparator<Item>() {
+			@Override public int compare (Item o1, Item o2) {
+				return Float.compare(o1.progress, o2.progress);
+//				return Float.compare(o1.progress, o2.progress);
+			}
+		};
+
+		public Array<Item> getItems (Item item) {
+			if (direction == DIRECTION_CW) {
+				if (item.lane == 0) {
+					return lane0Items;
+				} else {
+					return lane1Items;
+				}
+			} else {
+				if (item.lane == 1) {
+					return lane0Items;
+				} else {
+					return lane1Items;
+				}
+			}
 		}
 
 		private float dst (Vector2[] lane, Vector2 point) {
@@ -441,6 +541,12 @@ public class Transport3Test extends BaseScreen {
 				val += SAMPLE_DST;
 			}
 			return nearest;
+		}
+
+		public void remove (Item item) {
+			lane0Items.removeValue(item, true);
+			lane1Items.removeValue(item, true);
+			items.removeValue(item, true);
 		}
 	}
 
@@ -470,24 +576,55 @@ public class Transport3Test extends BaseScreen {
 
 		public void update (float delta) {
 			if (belt == null) return;
-			progress += delta;
+			float p = progress;
+			p += delta;
 			if (belt.direction == Belt.DIRECTION_CW) {
 				if (lane == 0) {
 					belt.bezier.set(belt.type.lane0);
 				} else if (lane == 1) {
 					belt.bezier.set(belt.type.lane1);
 				}
-				belt.bezier.valueAt(tmp, progress);
+				belt.bezier.valueAt(tmp, p);
 			} else {
 				if (lane == 0) {
 					belt.bezier.set(belt.type.lane1);
 				} else if (lane == 1) {
 					belt.bezier.set(belt.type.lane0);
 				}
-				belt.bezier.valueAt(tmp, 1 - progress);
+				belt.bezier.valueAt(tmp, 1 - p);
 			}
-			position.set(tmp).add(belt.x, belt.y);
+			tmp.add(belt.x, belt.y);
+			Array<Item> items = belt.getItems(this);
+			int index = items.indexOf(this, true);
+			if (index == -1) throw new AssertionError("");
+			if (index > 0) {
+				Item other = items.get(index - 1);
+				if (other.position.dst2(tmp) > .2f * .2f) {
+					position.set(tmp);
+					progress = p;
+				}
+			} else {
+				Belt nextBelt = getBelt(tmp.x, tmp.y);
+				if (nextBelt != null && nextBelt != belt) {
+					boolean overlap = false;
+					for (Item other : nextBelt.items) {
+						if (other.position.dst2(tmp) <= .2f * .2f) {
+							overlap = true;
+							break;
+						}
+					}
+					if (!overlap) {
+						position.set(tmp);
+						progress = p;
+					}
+				} else if (nextBelt == belt){
+					position.set(tmp);
+					progress = p;
+				}
+			}
+
 			if (progress > 1) {
+				belt.remove(this);
 				belt = null;
 				addItem(this);
 			}
