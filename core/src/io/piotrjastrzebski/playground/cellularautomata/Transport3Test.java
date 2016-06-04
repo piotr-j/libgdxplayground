@@ -254,6 +254,8 @@ public class Transport3Test extends BaseScreen {
 				belt.draw(renderer);
 			}
 		}
+		renderer.end();
+		renderer.begin(ShapeRenderer.ShapeType.Filled);
 		for (Item item : items) {
 			item.update(delta);
 			item.draw(renderer);
@@ -457,10 +459,11 @@ public class Transport3Test extends BaseScreen {
 		public void draw (ShapeRenderer renderer) {
 			renderer.setColor(Color.YELLOW);
 			// lanes are swapped on ccw direction
+			float a = .25f + progress * .75f;
 			if (lane == 0) {
-				renderer.setColor(Color.RED);
+				renderer.setColor(a, 0, 0, 1);
 			} else if (lane == 1) {
-				renderer.setColor(Color.GREEN);
+				renderer.setColor(0, a, 0, 1);
 			}
 			renderer.circle(position.x, position.y, .1f, 16);
 		}
