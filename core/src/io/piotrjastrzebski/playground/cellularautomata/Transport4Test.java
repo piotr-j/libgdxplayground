@@ -2,6 +2,7 @@ package io.piotrjastrzebski.playground.cellularautomata;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
@@ -254,7 +255,17 @@ public class Transport4Test extends BaseScreen {
 		renderer.begin(ShapeRenderer.ShapeType.Filled);
 		for (Belt belt : belts) {
 			if (belt != null) {
+				belt.drawBase(renderer);
+			}
+		}
+		for (Belt belt : belts) {
+			if (belt != null) {
 				belt.draw(renderer);
+			}
+		}
+		for (Belt belt : belts) {
+			if (belt != null) {
+				belt.drawDots(renderer);
 			}
 		}
 		for (Item item : items) {
@@ -304,7 +315,7 @@ public class Transport4Test extends BaseScreen {
 			Slot nearest = getSlot(item.x, item.y);
 			if (nearest == null) throw new AssertionError("null nearest!");
 			nearest.queue.add(item);
-			item.pos(x + nearest.x, y + nearest.y);
+			item.target.set(x + nearest.x, y + nearest.y);
 		}
 
 		public Slot getSlot (float x, float y) {
@@ -386,19 +397,16 @@ public class Transport4Test extends BaseScreen {
 					belt = owner.getBelt(x + .5f + type.nextCCW.x, y + .5f + type.nextCCW.y);
 				}
 				if (belt == null) return;
-				update.progress += delta * speed;
 				Item item = update.queue.get(0);
-				if (direction == DIRECTION_CW) {
-					item.alpha = update.progress;
-				} else {
-					item.alpha = 1 - update.progress;
-				}
 
 				if (direction == DIRECTION_CW) {
-					next = belt.getSlot(x + update.x + type.nextCW.x * .1f, y + update.y + type.nextCW.y * .1f);
+					next = belt.getSlot(x + update.x + type.nextCW.x * .1f, y + update.y + type.nextCW.y * .33f);
 				} else {
-					next = belt.getSlot(x + update.x + type.nextCCW.x * .1f, y + update.y + type.nextCCW.y * .1f);
+					next = belt.getSlot(x + update.x + type.nextCCW.x * .1f, y + update.y + type.nextCCW.y * .33f);
 				}
+				if (next.queue.size > 0) return;
+				update.progress += delta * speed;
+				item.alpha = update.progress;
 				item.target.set(belt.x + next.x, belt.y + next.y);
 				if (update.progress > 1) {
 					update.progress -= 1;
@@ -416,6 +424,12 @@ public class Transport4Test extends BaseScreen {
 		boolean drawNextIndicator = false;
 		boolean drawSlots = false;
 		boolean drawSlotsConnections = true;
+
+		public void drawBase (ShapeRenderer renderer) {
+				renderer.setColor(Color.YELLOW);
+				renderer.rect(x, y, 1, 1);
+		}
+
 		public void draw (ShapeRenderer renderer) {
 			float ss = .3f;
 			if (direction == DIRECTION_CW) {
@@ -423,8 +437,6 @@ public class Transport4Test extends BaseScreen {
 					renderer.setColor(Color.CYAN);
 					renderer.rectLine(x + .5f, y + .5f, x + .5f + type.nextCW.x, y + .5f + type.nextCW.y, .1f);
 				}
-				renderer.setColor(Color.YELLOW);
-				renderer.rect(x, y, 1, 1);
 				if (drawSlots) {
 					for (Slot slot : lane0) {
 						renderer.setColor(1, 0, 0, .25f + slot.progress * .75f);
@@ -436,22 +448,27 @@ public class Transport4Test extends BaseScreen {
 					}
 				}
 				if (drawSlotsConnections) {
-					renderer.setColor(Color.NAVY);
 					for (int i = 0; i < 3; i++) {
 						Slot slot0 = lane0[i];
 						Slot slot01 = i == 2 ? null : lane0[i + 1];
 						if (slot01 == null) {
-							renderer.rectLine(x + slot0.x, y + slot0.y, x + slot0.x + type.nextCW.x * .33f, y + slot0.y + type.nextCW.y * .33f, .05f);
+							renderer.setColor(Color.SKY);
+							renderer.rectLine(x + slot0.x, y + slot0.y, x + slot0.x + type.nextCW.x * .33f, y + slot0.y + type.nextCW.y * .33f, .1f);
 						} else {
-							renderer.rectLine(x + slot0.x, y + slot0.y, x + slot01.x, y + slot01.y, .05f);
+							renderer.setColor(Color.NAVY);
+							renderer.rectLine(x + slot0.x, y + slot0.y, x + slot01.x, y + slot01.y, .1f);
 						}
+						renderer.circle(x + slot0.x, y + slot0.y, .075f, 12);
 						Slot slot1 = lane1[i];
 						Slot slot11 = i == 2 ? null : lane1[i + 1];
 						if (slot11 == null) {
-							renderer.rectLine(x + slot1.x, y + slot1.y, x + slot1.x + type.nextCW.x * .33f, y + slot1.y + type.nextCW.y * .33f, .05f);
+							renderer.setColor(Color.SKY);
+							renderer.rectLine(x + slot1.x, y + slot1.y, x + slot1.x + type.nextCW.x * .33f, y + slot1.y + type.nextCW.y * .33f, .1f);
 						} else {
-							renderer.rectLine(x + slot1.x, y + slot1.y, x + slot11.x, y + slot11.y, .05f);
+							renderer.setColor(Color.NAVY);
+							renderer.rectLine(x + slot1.x, y + slot1.y, x + slot11.x, y + slot11.y, .1f);
 						}
+						renderer.circle(x + slot1.x, y + slot1.y, .075f, 12);
 					}
 				}
 			} else {
@@ -459,8 +476,6 @@ public class Transport4Test extends BaseScreen {
 					renderer.setColor(Color.CYAN);
 					renderer.rectLine(x + .5f, y + .5f, x + .5f + type.nextCCW.x, y + .5f + type.nextCCW.y, .1f);
 				}
-				renderer.setColor(Color.YELLOW);
-				renderer.rect(x, y, 1, 1);
 				if (drawSlots) {
 					for (Slot slot : lane0) {
 						renderer.setColor(0, 1, 0, .25f + slot.progress * .75f);
@@ -472,24 +487,70 @@ public class Transport4Test extends BaseScreen {
 					}
 				}
 				if (drawSlotsConnections) {
-					renderer.setColor(Color.NAVY);
 					for (int i = 2; i >= 0; i--) {
 						Slot slot0 = lane0[i];
 						Slot slot01 = i == 0 ? null : lane0[i - 1];
 						if (slot01 == null) {
+							renderer.setColor(Color.SKY);
 							renderer.rectLine(x + slot0.x, y + slot0.y, x + slot0.x + type.nextCCW.x * .33f,
-								y + slot0.y + type.nextCCW.y * .33f, .05f);
+								y + slot0.y + type.nextCCW.y * .33f, .1f);
+
 						} else {
-							renderer.rectLine(x + slot0.x, y + slot0.y, x + slot01.x, y + slot01.y, .05f);
+							renderer.setColor(Color.NAVY);
+							renderer.rectLine(x + slot0.x, y + slot0.y, x + slot01.x, y + slot01.y, .1f);
 						}
 						Slot slot1 = lane1[i];
 						Slot slot11 = i == 0 ? null : lane1[i - 1];
 						if (slot11 == null) {
+							renderer.setColor(Color.SKY);
 							renderer.rectLine(x + slot1.x, y + slot1.y, x + slot1.x + type.nextCCW.x * .33f,
-								y + slot1.y + type.nextCCW.y * .33f, .05f);
+								y + slot1.y + type.nextCCW.y * .33f, .1f);
 						} else {
-							renderer.rectLine(x + slot1.x, y + slot1.y, x + slot11.x, y + slot11.y, .05f);
+							renderer.setColor(Color.NAVY);
+							renderer.rectLine(x + slot1.x, y + slot1.y, x + slot11.x, y + slot11.y, .1f);
 						}
+					}
+				}
+			}
+		}
+
+		public void drawDots (ShapeRenderer renderer) {
+			if (direction == DIRECTION_CW) {
+				if (drawSlotsConnections) {
+					for (int i = 0; i < 3; i++) {
+						Slot slot0 = lane0[i];
+						if (i == 2) {
+							renderer.setColor(Color.SKY);
+						} else {
+							renderer.setColor(Color.NAVY);
+						}
+						renderer.circle(x + slot0.x, y + slot0.y, .075f, 12);
+						Slot slot1 = lane1[i];
+						if (i == 2) {
+							renderer.setColor(Color.SKY);
+						} else {
+							renderer.setColor(Color.NAVY);
+						}
+						renderer.circle(x + slot1.x, y + slot1.y, .075f, 12);
+					}
+				}
+			} else {
+				if (drawSlotsConnections) {
+					for (int i = 2; i >= 0; i--) {
+						Slot slot0 = lane0[i];
+						if (i == 0) {
+							renderer.setColor(Color.SKY);
+						} else {
+							renderer.setColor(Color.NAVY);
+						}
+						renderer.circle(x + slot0.x, y + slot0.y, .075f, 12);
+						Slot slot1 = lane1[i];
+						if (i == 0) {
+							renderer.setColor(Color.SKY);
+						} else {
+							renderer.setColor(Color.NAVY);
+						}
+						renderer.circle(x + slot1.x, y + slot1.y, .075f, 12);
 					}
 				}
 			}
@@ -514,14 +575,16 @@ public class Transport4Test extends BaseScreen {
 		public float x;
 		public float y;
 		public float alpha;
-		public Vector2 target = new Vector2();;
-		Vector2 tmp = new Vector2();;
+		public Vector2 draw = new Vector2();
+		public Vector2 target = new Vector2();
+		Vector2 tmp = new Vector2();
 		public Belt belt;
 
 		public Item (float x, float y) {
 			this.x = x;
 			this.y = y;
 			target.set(x, y);
+			draw.set(target);
 		}
 
 		public void pos (float x, float y) {
@@ -533,9 +596,9 @@ public class Transport4Test extends BaseScreen {
 		public void draw (ShapeRenderer renderer) {
 			renderer.setColor(Color.CYAN);
 			renderer.circle(target.x, target.y, .1f, 16);
-			tmp.set(x, y).interpolate(target, alpha, Interpolation.linear);
+			draw.set(x, y).interpolate(target, alpha, Interpolation.linear);
 			renderer.setColor(Color.MAGENTA);
-			renderer.circle(tmp.x, tmp.y, .15f, 16);
+			renderer.circle(draw.x, draw.y, .15f, 16);
 		}
 
 		public void update (float delta) {
@@ -594,8 +657,14 @@ public class Transport4Test extends BaseScreen {
 		super.dispose();
 	}
 
-	// allow us to start this test directly
 	public static void main (String[] args) {
-		PlaygroundGame.start(args, Transport4Test.class);
+		LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
+		config.width = 1280;
+		config.height = 720;
+		config.useHDPI = true;
+		config.stencil = 8;
+		// for mesh based sub pixel rendering multi sampling is required or post process aa
+		config.samples = 4;
+		PlaygroundGame.start(args, config, Transport4Test.class);
 	}
 }
