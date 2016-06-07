@@ -21,7 +21,7 @@ allprojects {
         roboVMVersion = '1.2.0'
         box2DLightsVersion = '1.4'
         ashleyVersion = '1.4.0'
-        aiVersion = '1.6.1-SNAPSHOT'
+        aiVersion = '1.8.0'
         visuiVersion = '0.9.2'
         artemisOdbVersion = "2.0.0-SNAPSHOT"
         artemisOdbcontribVersion = "1.1.0"

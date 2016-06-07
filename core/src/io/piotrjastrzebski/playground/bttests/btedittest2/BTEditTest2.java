@@ -51,7 +51,7 @@ public class BTEditTest2 extends BaseScreen implements ViewTree.ViewTaskSelected
 			reader = Gdx.files.internal("btree/dog.tree").reader();
 			BehaviorTreeParser<Dog> parser = new BehaviorTreeParser<Dog>(BehaviorTreeParser.DEBUG_NONE) {
 				protected BehaviorTree<Dog> createBehaviorTree (Task<Dog> root, Dog object) {
-					if (debug > BehaviorTreeParser.DEBUG_LOW) printTree(root, 0);
+					if (debugLevel > BehaviorTreeParser.DEBUG_LOW) printTree(root, 0);
 					return new BehaviorTree<>(root, object);
 				}
 			};
