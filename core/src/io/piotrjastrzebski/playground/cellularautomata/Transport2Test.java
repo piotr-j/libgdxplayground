@@ -686,14 +686,16 @@ public class Transport2Test extends BaseScreen {
 				if (belt != null && belt != onBelt) {
 					items = belt.items.get(lane);
 					if (items.size > 0) {
-						Item next = items.get(items.size - 1);
 						tmpBounds.set(bounds);
 						tmpBounds.x += tmp.x * delta;
 						tmpBounds.y += tmp.y * delta;
-//						tmpBounds.radius += bounds.radius/2;
-						if (next.bounds.overlaps(tmpBounds)) {
-							nx -= tmp.x * delta;
-							ny -= tmp.y * delta;
+
+						for (Item item : items) {
+							if (item.bounds.overlaps(tmpBounds)) {
+								nx -= tmp.x * delta;
+								ny -= tmp.y * delta;
+								break;
+							}
 						}
 					}
 				}
