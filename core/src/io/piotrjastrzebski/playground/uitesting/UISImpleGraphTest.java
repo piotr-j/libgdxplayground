@@ -37,7 +37,7 @@ public class UISImpleGraphTest extends BaseScreen {
 			reader = Gdx.files.internal("btree/dog2.tree").reader();
 			BehaviorTreeParser<Dog> parser = new BehaviorTreeParser<Dog>(BehaviorTreeParser.DEBUG_NONE) {
 				protected BehaviorTree<Dog> createBehaviorTree (Task<Dog> root, Dog object) {
-					if (debugLevel > BehaviorTreeParser.DEBUG_LOW) printTree(root, 0);
+					if (debug > BehaviorTreeParser.DEBUG_LOW) printTree(root, 0);
 					return new BehaviorTree<>(root, object);
 				}
 			};
