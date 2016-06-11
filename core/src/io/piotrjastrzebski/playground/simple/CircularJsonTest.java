@@ -5,6 +5,7 @@ import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonValue;
 import com.badlogic.gdx.utils.reflect.ClassReflection;
+import com.badlogic.gdx.utils.reflect.Field;
 import com.badlogic.gdx.utils.reflect.ReflectionException;
 import io.piotrjastrzebski.playground.BaseScreen;
 import io.piotrjastrzebski.playground.GameReset;
@@ -106,15 +107,21 @@ public class CircularJsonTest extends BaseScreen {
 	}
 
 	public static class CircularSerializer<T> implements Json.Serializer<T> {
-		public static Array<CircularSerializer> instances = new Array<>();
-		public static final String REF_ID_KEY = "rid";
-		protected Array<T> serialized = new Array<>();
-		protected Array<T> deserialized = new Array<>();
+		public static final Array<CircularSerializer> instances = new Array<>();
+		public static String REF_ID_KEY = "_id";
+		protected static Array serialized = new Array<>();
+		protected static Array deserialized = new Array<>();
 		protected Class<?> cls;
 
 		public CircularSerializer (Class<?> cls) {
 			this.cls = cls;
 			instances.add(this);
+			Field[] fields = ClassReflection.getDeclaredFields(cls);
+			for (Field field : fields) {
+				if (field.getName().equals(REF_ID_KEY)) {
+					throw new AssertionError("Field name in class " + cls.getSimpleName() + " collides with internal key name: " + REF_ID_KEY);
+				}
+			}
 		}
 
 		@Override public void write (Json json, T object, Class knownType) {
@@ -134,7 +141,7 @@ public class CircularJsonTest extends BaseScreen {
 		@Override public T read (Json json, JsonValue jsonData, Class type) {
 			if (jsonData.has(REF_ID_KEY)) {
 				int index = jsonData.getInt(REF_ID_KEY);
-				return deserialized.get(index);
+				return (T)deserialized.get(index);
 			} else {
 				try {
 					T t = (T)ClassReflection.newInstance(cls);
