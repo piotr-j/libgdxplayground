@@ -131,8 +131,7 @@ public class CircularJsonTest extends BaseScreen {
 
 		@Override public T read (Json json, JsonValue jsonData, Class type) {
 			if (jsonData.isLong()) {
-				int index = jsonData.asInt();
-				return (T)deserialized.get(index);
+				return (T)deserialized.get(jsonData.asInt());
 			} else {
 				try {
 					T t = (T)ClassReflection.newInstance(cls);
