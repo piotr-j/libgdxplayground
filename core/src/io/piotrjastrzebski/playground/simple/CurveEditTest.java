@@ -44,6 +44,7 @@ public class CurveEditTest extends BaseScreen {
 		private static Vector2 tmp = new Vector2();
 		private static Vector2 tmp2 = new Vector2();
 		private static Vector2 tmpAngle = new Vector2();
+		private static Vector2 tmpOut = new Vector2();
 		private Bezier<Vector2> bezier;
 		private Handle[] handles = new Handle[4];
 		private Handle drag;
@@ -87,8 +88,12 @@ public class CurveEditTest extends BaseScreen {
 			while (at < 1) {
 				at += STEP;
 				bezier.valueAt(tmp2, at);
+
 				renderer.line(tmp, tmp2);
 				renderer.circle(tmp2.x, tmp2.y, .1f, 8);
+				bezier.derivativeAt(tmpOut, at);
+				tmpOut.nor().add(tmp2);
+				renderer.line(tmp2, tmpOut);
 				if (drawPolygon) {
 					polygon.setPosition(tmp.x, tmp.y);
 					float angle = tmpAngle.set(tmp2).sub(tmp).angle();
@@ -196,6 +201,8 @@ public class CurveEditTest extends BaseScreen {
 		}
 	}
 
+	private Vector2 tmp = new Vector2();
+	private Vector2 tmp2 = new Vector2();
 	float doubleClickTimer;
 	@Override public boolean touchDown (int screenX, int screenY, int pointer, int button) {
 		super.touchDown(screenX, screenY, pointer, button);
@@ -254,11 +261,15 @@ public class CurveEditTest extends BaseScreen {
 						Array<Vector2> c1ps = c1.bezier.points;
 						c1ps.get(0).set(cps.get(0));
 						c1ps.get(1).set(cps.get(1));
-						c1ps.get(2).set(cs.x, cs.y).add(-1, 0);
+						float at = curve.bezier.locate(cs);
+						curve.bezier.valueAt(tmp, at - .05f);
+						curve.bezier.valueAt(tmp2, at + .05f);
+						tmp2.sub(tmp).nor();
 						c1ps.get(3).set(cs.x, cs.y);
+						c1ps.get(2).set(cs.x, cs.y).add(-tmp2.x, -tmp2.y);
 						Array<Vector2> c2ps = c2.bezier.points;
 						c2ps.get(0).set(cs.x, cs.y);
-						c2ps.get(1).set(cs.x, cs.y).add(1, 0);
+						c2ps.get(1).set(cs.x, cs.y).add(tmp2.x, tmp2.y);
 						c2ps.get(2).set(cps.get(2));
 						c2ps.get(3).set(cps.get(3));
 					}
