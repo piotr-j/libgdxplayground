@@ -119,13 +119,13 @@ public class PathsTest extends BaseScreen {
 		renderer.begin(ShapeRenderer.ShapeType.Line);
 		Path<Vector2> path = paths.get(currentPath);
 		if (path instanceof Bezier) {
-			renderer.setColor(1f, 0f, 1f, 1f);
+			renderer.setColor(0f, 1f, 1f, 1f);
 			Bezier<Vector2> bezier = (Bezier<Vector2>)path;
 			for (Vector2 point : bezier.points) {
 				renderer.circle(point.x, point.y, .2f, 8);
 			}
 		} else if (path instanceof BSpline) {
-			renderer.setColor(1f, 0f, 1f, 1f);
+			renderer.setColor(0f, 1f, 1f, 1f);
 			BSpline<Vector2> bSpline = (BSpline<Vector2>)path;
 			for (Vector2 cp : bSpline.controlPoints) {
 				renderer.circle(cp.x, cp.y, .2f, 8);
@@ -137,7 +137,7 @@ public class PathsTest extends BaseScreen {
 
 		} else if (path instanceof CatmullRomSpline) {
 			CatmullRomSpline<Vector2> catmullRomSpline = (CatmullRomSpline<Vector2>)path;
-			renderer.setColor(1f, 0f, 1f, 1f);
+			renderer.setColor(0f, 1f, 1f, 1f);
 			for (Vector2 cp : catmullRomSpline.controlPoints) {
 				renderer.circle(cp.x, cp.y, .2f, 8);
 			}
