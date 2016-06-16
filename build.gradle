@@ -27,6 +27,7 @@ allprojects {
         artemisOdbcontribVersion = "1.1.0"
         gdxVideoVersion = "0.0.1"
         kryoVersion = "3.0.3"
+        gdxUtilsersion = "0.13.3"
     }
 
     repositories {
@@ -86,6 +87,9 @@ project(":core") {
 
         testCompile 'junit:junit:4.12'
         testCompile "org.mockito:mockito-core:1.+"
+
+        compile "net.dermetfan.libgdx-utils:libgdx-utils-box2d:$gdxUtilsersion"
+        compile "net.dermetfan.libgdx-utils:libgdx-utils:$gdxUtilsersion"
     }
 }
 
