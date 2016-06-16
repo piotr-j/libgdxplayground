@@ -7,11 +7,14 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.PolygonSpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import io.piotrjastrzebski.playground.BaseScreen;
 import io.piotrjastrzebski.playground.GameReset;
 import io.piotrjastrzebski.playground.PlaygroundGame;
+import io.piotrjastrzebski.playground.bttests.dog.MarkTask;
 
 /**
  * Created by EvilEntity on 25/01/2016.
@@ -28,6 +31,7 @@ public class PolygonEditorTest extends BaseScreen {
 		polyBatch = new PolygonSpriteBatch();
 		image = new Texture("badlogic.jpg");
 		editor = new PolygonEditor();
+		editor.grid(.25f, .25f);
 		editor.init(-8, -8, 16, 16);
 	}
 
@@ -57,8 +61,15 @@ public class PolygonEditorTest extends BaseScreen {
 
 	protected static class PolygonEditor {
 		private Array<Vertex> vertices = new Array<>();
+		private float gridX = 1, gridY = 1;
+		private Rectangle bounds = new Rectangle();
+		private Rectangle marginBounds = new Rectangle();
+		private float margin = 3;
+		private boolean drawGrid = true;
 
 		public void init (float x, float y, float width, float height){
+			bounds.set(x, y, width, height);
+			marginBounds.set(x - margin, y - margin, width + margin * 2, height + margin * 2);
 			// 0,1,2, 0,3,2
 			// build a basic rect
 			vertex(x, y);
@@ -71,6 +82,11 @@ public class PolygonEditorTest extends BaseScreen {
 			connect(1, 2);
 			connect(0, 3);
 			connect(3, 2);
+		}
+
+		public void grid (float gridX, float gridY) {
+			this.gridX = gridX;
+			this.gridY = gridY;
 		}
 
 		private void vertex(float x, float y) {
@@ -117,13 +133,29 @@ public class PolygonEditorTest extends BaseScreen {
 		}
 
 		public void drawLine(ShapeRenderer renderer) {
+			if (drawGrid) {
+				renderer.setColor(1, 1, 1, .5f);
+				renderer.rect(bounds.x, bounds.y, bounds.width, bounds.height);
+				renderer.rect(marginBounds.x, marginBounds.y, marginBounds.width, marginBounds.height);
+				renderer.setColor(1, 1, 1, .25f);
+				float sx = marginBounds.x;
+				float sy = marginBounds.y;
+				int width = MathUtils.ceil(marginBounds.width / gridX);
+				int height = MathUtils.ceil(marginBounds.height / gridY);
+				// major grid lines
+				for (int x = 0; x <= width; x++) {
+					renderer.line(sx + x * gridX, sy, sx + x * gridX, sy + height * gridY);
+				}
+				for (int y = 0; y <= height; y++) {
+					renderer.line(sx, sy + y * gridY, sx + width * gridX, sy + y * gridY);
+				}
+			}
 			for (Vertex vertex : vertices) {
 				renderer.setColor(0, 1, 1, .5f);
 				for (Vertex other : vertex.connections) {
 					renderer.line(vertex.pos, other.pos);
 				}
 			}
-
 		}
 
 		protected Vertex selected;
@@ -172,8 +204,36 @@ public class PolygonEditorTest extends BaseScreen {
 
 		public void touchUp (float x, float y) {
 			if (dragged != null) {
+				bounds.set(0, 0, 0, 0);
+				for(Vertex vertex : vertices) {
+					extendBounds(vertex.pos.x, vertex.pos.y);
+				}
+				updateMarginBounds();
 				dragged = null;
 			}
+		}
+
+		private void extendBounds (float x, float y) {
+			if (!bounds.contains(x, y)) {
+				if (x < bounds.x) {
+					float ox = bounds.x + bounds.width;
+					bounds.x = x;
+					bounds.width = ox - x;
+				} else if (x > bounds.x + bounds.width) {
+					bounds.width = x - bounds.x;
+				}
+				if (y < bounds.y) {
+					float oy = bounds.y + bounds.height;
+					bounds.y = y;
+					bounds.height = oy - y;
+				} else if (y > bounds.y + bounds.height) {
+					bounds.height = y - bounds.y;
+				}
+			}
+		}
+
+		private void updateMarginBounds() {
+			marginBounds.set(bounds.x - margin, bounds.y - margin, bounds.width + margin * 2, bounds.height + margin * 2);
 		}
 
 		private float doubleClick;
