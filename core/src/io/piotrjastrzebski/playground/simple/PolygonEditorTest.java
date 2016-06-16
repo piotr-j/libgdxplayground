@@ -249,7 +249,9 @@ public class PolygonEditorTest extends BaseScreen {
 			if (dragged != null) {
 				boolean snapToGrid = Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT);
 				if (snapToGrid) {
-					dragged.pos.set(toGrid(x, gridY), toGrid(y, gridY));
+					x += (x > 0)? gridX/2: -gridX/2;
+					y += (y > 0)? gridY/2: -gridY/2;
+					dragged.pos.set(toGrid(x, gridX), toGrid(y, gridY));
 				} else {
 					dragged.pos.set(x, y);
 				}
@@ -257,10 +259,7 @@ public class PolygonEditorTest extends BaseScreen {
 		}
 
 		protected float toGrid(float value, float grid) {
-			if (value > 0) {
-				return value - value % grid + grid/2;
-			}
-			return value - value % grid - grid/2;
+			return value - value % grid;
 		}
 
 		public void touchUp (float x, float y) {
