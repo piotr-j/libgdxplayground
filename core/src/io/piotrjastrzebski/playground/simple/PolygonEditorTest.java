@@ -61,7 +61,6 @@ public class PolygonEditorTest extends BaseScreen {
 		renderer.end();
 	}
 
-
 	protected static class PolygonEditor {
 		private Array<Vertex> vertices = new Array<>();
 		private Array<VertexConnection> connections = new Array<>();
@@ -185,14 +184,14 @@ public class PolygonEditorTest extends BaseScreen {
 				}
 			}
 			for (VertexConnection vc : connections) {
-				renderer.setColor(0, 1, 1, .5f);
+				renderer.setColor(0, 1, 1, .75f);
 				for (int i = 0; i < connections.size; i++) {
 					VertexConnection ovc = connections.get(i);
 					if (vc != ovc) {
 						// skip connections with shared vertices
 						if (vc.vertex1 == ovc.vertex1 || vc.vertex1 == ovc.vertex2 || vc.vertex2 == ovc.vertex1 || vc.vertex2 == ovc.vertex2) continue;
 						if (Intersector.intersectSegments(vc.vertex1.pos, vc.vertex2.pos, ovc.vertex1.pos, ovc.vertex2.pos, tmp)) {
-							renderer.setColor(1, 0, 0, .5f);
+							renderer.setColor(1, 0, 0, .75f);
 							break;
 						}
 					}
