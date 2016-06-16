@@ -35,13 +35,9 @@ public class XMLPathTest extends BaseScreen {
 		gameCamera.update();
 //		pieces.add(new Piece("box", parsePath(xmlBox), 0f, 3f));
 		pieces.add(new Piece("inner", parsePath(xmlInner), -4f, 0f));
-//		pieces.add(new Piece("edgeIOI", parsePath(xmlEdgeIOI), -2f, 0f));
+		pieces.add(new Piece("edgeIOI", parsePath(xmlEdgeIOI), -2f, 0f));
 		pieces.add(new Piece("edgeOIO", parsePath(xmlEdgeOIO), 0f, 0f));
-//		pieces.add(new Piece("corner", parsePath(xmlCorner), 2f, 0f));
-
-//		arrays = BayazitDecomposer.convexPartition(inner);
-//		DelaunayTriangulator dt = new DelaunayTriangulator();
-//		dt.computeTriangles()
+		pieces.add(new Piece("corner", parsePath(xmlCorner), 2f, 0f));
 	}
 
 	protected static Array<Vector2> parsePath (String path) {
@@ -76,7 +72,8 @@ public class XMLPathTest extends BaseScreen {
 				float y = Float.parseFloat(new String(temp, 0, len));
 				// dunno wtf is up this this translate, needed to move y to 0
 //				points.add(new Vector2(x * INV_SCALE, (y -952.36216f) * INV_SCALE));
-				points.add(new Vector2(x, (y -952.36216f)));
+				// -y + 100 to flip it
+				points.add(new Vector2(x, (-y +952.36216f + 100)));
 			} else if (aChar == 'Z') {
 //				points.add(points.get(0).cpy());
 			}
@@ -129,19 +126,6 @@ public class XMLPathTest extends BaseScreen {
 			piece.draw(renderer);
 		}
 
-//		for (Array<Vector2> array : arrays) {
-//			renderer.setColor(MathUtils.random(), MathUtils.random(), MathUtils.random(), 1);
-//			for (int i = 0; i < array.size -1; i++) {
-//				Vector2 p1 = array.get(i);
-//				Vector2 p2 = array.get(i + 1);
-//				renderer.line(p1.x, p1.y, p2.x, p2.y);
-//				if (i == array.size -2) {
-//					p1 = array.get(0);
-//					renderer.line(p1.x, p1.y, p2.x, p2.y);
-//				}
-//			}
-//		}
-
 		renderer.end();
 	}
 
@@ -178,8 +162,8 @@ public class XMLPathTest extends BaseScreen {
 			}
 		}
 
-		float scale = .02f;
-		float down = 2.5f;
+		float scale = .01f;
+		float down = 2f;
 		public void draw (ShapeRenderer renderer) {
 			renderer.setColor(Color.CYAN);
 			for (int i = 0; i < rawPoints.size -1; i++) {
@@ -187,42 +171,38 @@ public class XMLPathTest extends BaseScreen {
 				Vector2 p2 = rawPoints.get(i + 1);
 				renderer.line(pos.x + p1.x * scale, pos.y + p1.y * scale, pos.x + p2.x * scale, pos.y + p2.y * scale);
 			}
-//			for (Vector2 p : rawPoints) {
-//				renderer.circle(pos.x + p.x * scale, pos.y + p.y * scale -2, .016f, 8);
+
+//			for (int i = 0; i < rawPolygons.size; i++) {
+//				renderer.setColor(colors[i]);
+//				Array<Vector2> polygon = rawPolygons.get(i);
+//				for (int j = 0; j < polygon.size - 1; j++) {
+//					Vector2 p1 = polygon.get(j);
+//					Vector2 p2 = polygon.get(j + 1);
+//					renderer.line(pos.x + p1.x * scale, pos.y + p1.y * scale - down, pos.x + p2.x * scale, pos.y + p2.y * scale - down);
+//					if (j == polygon.size -2) {
+//						p1 = polygon.get(0);
+//						renderer.line(pos.x + p1.x * scale, pos.y + p1.y * scale - down, pos.x + p2.x * scale, pos.y + p2.y * scale - down);
+//					}
+//				}
 //			}
 
-			for (int i = 0; i < rawPolygons.size; i++) {
-				renderer.setColor(colors[i]);
-				Array<Vector2> polygon = rawPolygons.get(i);
-				for (int j = 0; j < polygon.size - 1; j++) {
-					Vector2 p1 = polygon.get(j);
-					Vector2 p2 = polygon.get(j + 1);
-					renderer.line(pos.x + p1.x * scale, pos.y + p1.y * scale - down, pos.x + p2.x * scale, pos.y + p2.y * scale - down);
-					if (j == polygon.size -2) {
-						p1 = polygon.get(0);
-						renderer.line(pos.x + p1.x * scale, pos.y + p1.y * scale - down, pos.x + p2.x * scale, pos.y + p2.y * scale - down);
-					}
-				}
-			}
-
-			renderer.setColor(Color.GREEN);
-//			renderer.setColor(Color.GRAY);
-			for (Polygon polygon : polygons) {
-				float[] vertices = polygon.vertices;
-				for (int i = 0; i < vertices.length -2; i+=2) {
-					float x1 = vertices[i];
-					float y1 = vertices[i + 1];
-					float x2 = vertices[i + 2];
-					float y2 = vertices[i + 3];
-					renderer.line(pos.x + x1 * scale, pos.y + y1 * scale - down, pos.x + x2 * scale, pos.y + y2 * scale - down);
-				}
-				float x1 = vertices[0];
-				float y1 = vertices[1];
-				float x2 = vertices[vertices.length -2];
-				float y2 = vertices[vertices.length -1];
-				renderer.line(pos.x + x1 * scale, pos.y + y1 * scale - down, pos.x + x2 * scale, pos.y + y2 * scale - down);
-
-			}
+//			renderer.setColor(Color.GREEN);
+//			for (Polygon polygon : polygons) {
+//				float[] vertices = polygon.vertices;
+//				for (int i = 0; i < vertices.length -2; i+=2) {
+//					float x1 = vertices[i];
+//					float y1 = vertices[i + 1];
+//					float x2 = vertices[i + 2];
+//					float y2 = vertices[i + 3];
+//					renderer.line(pos.x + x1 * scale, pos.y + y1 * scale - down, pos.x + x2 * scale, pos.y + y2 * scale - down);
+//				}
+//				float x1 = vertices[0];
+//				float y1 = vertices[1];
+//				float x2 = vertices[vertices.length -2];
+//				float y2 = vertices[vertices.length -1];
+//				renderer.line(pos.x + x1 * scale, pos.y + y1 * scale - down, pos.x + x2 * scale, pos.y + y2 * scale - down);
+//
+//			}
 
 			renderer.end();
 			renderer.begin(ShapeRenderer.ShapeType.Filled);
@@ -244,6 +224,19 @@ public class XMLPathTest extends BaseScreen {
 
 			renderer.end();
 			renderer.begin(ShapeRenderer.ShapeType.Line);
+			renderer.setColor(Color.MAGENTA);
+			for (int i = 0; i < rawPolygons.size; i++) {
+				Array<Vector2> polygon = rawPolygons.get(i);
+				for (int j = 0; j < polygon.size - 1; j++) {
+					Vector2 p1 = polygon.get(j);
+					Vector2 p2 = polygon.get(j + 1);
+					renderer.line(pos.x + p1.x * scale, pos.y + p1.y * scale - down, pos.x + p2.x * scale, pos.y + p2.y * scale - down);
+					if (j == polygon.size -2) {
+						p1 = polygon.get(0);
+						renderer.line(pos.x + p1.x * scale, pos.y + p1.y * scale - down, pos.x + p2.x * scale, pos.y + p2.y * scale - down);
+					}
+				}
+			}
 		}
 
 		static class Polygon {
