@@ -31,7 +31,7 @@ public class PolygonEditorTest extends BaseScreen {
 		polyBatch = new PolygonSpriteBatch();
 		image = new Texture("badlogic.jpg");
 		editor = new PolygonEditor();
-		editor.grid(.25f, .25f);
+		editor.grid(.5f, .5f);
 		editor.init(-8, -8, 16, 16);
 	}
 
@@ -138,8 +138,8 @@ public class PolygonEditorTest extends BaseScreen {
 				renderer.rect(bounds.x, bounds.y, bounds.width, bounds.height);
 				renderer.rect(marginBounds.x, marginBounds.y, marginBounds.width, marginBounds.height);
 				renderer.setColor(1, 1, 1, .25f);
-				float sx = marginBounds.x;
-				float sy = marginBounds.y;
+				float sx = toGrid(marginBounds.x, gridX);
+				float sy = toGrid(marginBounds.y, gridY);
 				int width = MathUtils.ceil(marginBounds.width / gridX);
 				int height = MathUtils.ceil(marginBounds.height / gridY);
 				// major grid lines
@@ -198,8 +198,20 @@ public class PolygonEditorTest extends BaseScreen {
 
 		public void touchDragged (float x, float y) {
 			if (dragged != null) {
-				dragged.pos.set(x, y);
+				boolean snapToGrid = Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT);
+				if (snapToGrid) {
+					dragged.pos.set(toGrid(x, gridY), toGrid(y, gridY));
+				} else {
+					dragged.pos.set(x, y);
+				}
 			}
+		}
+
+		protected float toGrid(float value, float grid) {
+			if (value > 0) {
+				return value - value % grid + grid/2;
+			}
+			return value - value % grid - grid/2;
 		}
 
 		public void touchUp (float x, float y) {
