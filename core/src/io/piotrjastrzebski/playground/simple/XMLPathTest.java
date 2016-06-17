@@ -162,9 +162,16 @@ public class XMLPathTest extends BaseScreen {
 				colors[i] = new Color(MathUtils.random(), MathUtils.random(), MathUtils.random(), 1);
 			}
 
-			System.out.println("PolygonPiece "+name+" = new PolygonPiece(");
-
-//				new Polygon(new float[] {33.42935f, 81.32148f, 35.46181f, 88.24254f, 36.45024, 94.60547, 35.93955, 97.370514}, new short[] {1, 3, 2, 1, 0, 3}),
+			System.out.println("static PiecePolygons "+name+" = new PiecePolygons(");
+			System.out.print("\tnew float[] {");
+			for (int i = 0; i < rawPoints.size; i++) {
+				Vector2 p = rawPoints.get(i);
+				System.out.print((p.x/100f) + "f, " + (p.y/100f) + "f");
+				if (i < rawPoints.size -1) {
+					System.out.print(", ");
+				}
+			}
+			System.out.print("},");
 
 			DelaunayTriangulator dt = new DelaunayTriangulator();
 			for (int j = 0; j < rawPolygons.size; j++) {
@@ -181,7 +188,7 @@ public class XMLPathTest extends BaseScreen {
 
 				System.out.print("\tnew Polygon(new float[] {");
 				for (int i = 0; i < polygon.vertices.length; i++) {
-					System.out.print(polygon.vertices[i] + "f");
+					System.out.print((polygon.vertices[i]/100f) + "f");
 					if (i < polygon.vertices.length -1) {
 						System.out.print(", ");
 					}
