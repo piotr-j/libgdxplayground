@@ -165,11 +165,26 @@ public class XMLPathTest extends BaseScreen {
 		float scale = .01f;
 		float down = 2f;
 		public void draw (ShapeRenderer renderer) {
+			float cos = (float)Math.cos(90 * MathUtils.degreesToRadians);
+			float sin = (float)Math.sin(90 * MathUtils.degreesToRadians);
+
+//			float newX = this.x * cos - this.y * sin;
+//			float newY = this.x * sin + this.y * cos;
+
 			renderer.setColor(Color.CYAN);
 			for (int i = 0; i < rawPoints.size -1; i++) {
 				Vector2 p1 = rawPoints.get(i);
 				Vector2 p2 = rawPoints.get(i + 1);
-				renderer.line(pos.x + p1.x * scale, pos.y + p1.y * scale, pos.x + p2.x * scale, pos.y + p2.y * scale);
+				float x1 = pos.x + (p1.x - 50) * scale * cos - (p1.y - 50) * scale * sin + 50 * scale;
+				float y1 = pos.y + (p1.x - 50) * scale * sin + (p1.y - 50) * scale * cos + 50 * scale;
+				float x2 = pos.x + (p2.x - 50) * scale * cos - (p2.y - 50) * scale * sin + 50 * scale;
+				float y2 = pos.y + (p2.x - 50) * scale * sin + (p2.y - 50) * scale * cos + 50 * scale;
+				renderer.line(x1, y1, x2, y2);
+//				p1.sub(50, 50).rotate(90).add(50, 50);
+//				p2.sub(50, 50).rotate(90).add(50, 50);
+//				renderer.line(pos.x + p1.x * scale, pos.y + p1.y * scale, pos.x + p2.x * scale, pos.y + p2.y * scale);
+//				p1.sub(50, 50).rotate(-90).add(50, 50);
+//				p2.sub(50, 50).rotate(-90).add(50, 50);
 			}
 
 //			for (int i = 0; i < rawPolygons.size; i++) {
