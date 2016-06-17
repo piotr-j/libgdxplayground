@@ -1,6 +1,12 @@
 package io.piotrjastrzebski.playground.simple;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Pixmap;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.DelaunayTriangulator;
 import com.badlogic.gdx.math.MathUtils;
@@ -44,14 +50,19 @@ public class XMLPathTest extends BaseScreen {
 		clear.set(Color.GRAY);
 		gameCamera.zoom = .25f;
 		gameCamera.update();
-//		pieces.add(new Piece("box", parsePath(xmlBox), 0f, 3f));
-		pieces.add(new Piece("inner", parsePath(xmlInner3), -4f, 0f));
-		pieces.add(new Piece("edgeIOI", parsePath(xmlEdgeIOI3), -2f, 0f));
-		pieces.add(new Piece("edgeOIO", parsePath(xmlEdgeOIO3), 0f, 0f));
-		pieces.add(new Piece("corner", parsePath(xmlCorner3), 2f, 0f));
+		pieces.add(new Piece("box", parsePath(xmlBox, 952.36216f), 0f, 1f));
+		pieces.add(new Piece("inner", parsePath(xmlInner3, 0), -4f, 0f));
+		pieces.add(new Piece("edgeIOI", parsePath(xmlEdgeIOI3, 0), -2f, 0f));
+		pieces.add(new Piece("edgeOIO", parsePath(xmlEdgeOIO3, 0), 0f, 0f));
+		pieces.add(new Piece("corner", parsePath(xmlCorner3, 0), 2f, 0f));
+
+		renderer.setProjectionMatrix(gameCamera.combined);
+		for (Piece piece : pieces) {
+			piece.buildTexture(renderer);
+		}
 	}
 
-	protected static Array<Vector2> parsePath (String path) {
+	protected static Array<Vector2> parsePath (String path, float yOffset) {
 		Array<Vector2> points = new Array<>();
 		char[] chars = path.toCharArray();
 		char[] temp = new char[8 + 1 + 8];
@@ -85,7 +96,7 @@ public class XMLPathTest extends BaseScreen {
 //				points.add(new Vector2(x * INV_SCALE, (y -952.36216f) * INV_SCALE));
 				// -y + 100 to flip it
 //				points.add(new Vector2(x, (-y +952.36216f + 100)));
-				points.add(new Vector2(x, (-y + 100)));
+				points.add(new Vector2(x, (-y + 100 + yOffset)));
 			} else if (aChar == 'Z') {
 //				points.add(points.get(0).cpy());
 			}
@@ -133,12 +144,14 @@ public class XMLPathTest extends BaseScreen {
 				renderer.line(sx, sy + y, sx + width, sy + y);
 			}
 		}
-
+		renderer.end();
+		batch.setProjectionMatrix(gameCamera.combined);
+		batch.begin();
 		for (Piece piece : pieces) {
-			piece.draw(renderer);
+			piece.draw(batch);
 		}
 
-		renderer.end();
+		batch.end();
 	}
 
 	protected static class Piece {
@@ -148,6 +161,7 @@ public class XMLPathTest extends BaseScreen {
 		Array<Array<Vector2>> rawPolygons = new Array<>();
 		Color[] colors;
 		Array<Polygon> polygons = new Array<>();
+		Texture texture;
 
 		public Piece (String name, Array<Vector2> rawPoints, float x, float y) {
 			this.name = name;
@@ -174,38 +188,65 @@ public class XMLPathTest extends BaseScreen {
 			}
 		}
 
-		float scale = .01f;
-		float down = 2f;
+		public void draw(SpriteBatch batch) {
+			if (texture != null) {
+				batch.draw(texture, pos.x, pos.y + 2, 2, -2);
+			}
+		}
+		int size = 400;
+		FrameBuffer fbo;
+		public void buildTexture(ShapeRenderer renderer) {
+			if (fbo != null) return;
+			fbo = new FrameBuffer(Pixmap.Format.RGBA8888, size, size, false);
+			fbo.begin();
+			Gdx.gl.glClearColor(1, 0, 0, 1);
+			Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+			float x = pos.x;
+			float y = pos.y;
+			pos.set(size/4, size/4);
+//			renderer.getProjectionMatrix().setToOrtho2D(pos.x - 64 * scale, pos.y - 64 * scale, 256 * scale, 256 * scale);
+			renderer.getProjectionMatrix().setToOrtho2D(0, 0, size, size);
+			draw(renderer);
+			fbo.end();
+			pos.x = x;
+			pos.y = y;
+			texture = fbo.getColorBufferTexture();
+		}
+
+//		float scale = 0.01f;
+		float scale = 2f;
+		float down = 0f;
 		public void draw (ShapeRenderer renderer) {
-			float cos = (float)Math.cos(90 * MathUtils.degreesToRadians);
-			float sin = (float)Math.sin(90 * MathUtils.degreesToRadians);
+//			renderer.begin(ShapeRenderer.ShapeType.Line);
+//			float cos = (float)Math.cos(90 * MathUtils.degreesToRadians);
+//			float sin = (float)Math.sin(90 * MathUtils.degreesToRadians);
 
 //			float newX = this.x * cos - this.y * sin;
 //			float newY = this.x * sin + this.y * cos;
 			Vector2 p1;
 			Vector2 p2;
-			renderer.setColor(Color.CYAN);
-			for (int i = 0; i < rawPoints.size -1; i++) {
-				p1 = rawPoints.get(i);
-				p2 = rawPoints.get(i + 1);
-				float x1 = pos.x + (p1.x - 50) * scale * cos - (p1.y - 50) * scale * sin + 50 * scale;
-				float y1 = pos.y + (p1.x - 50) * scale * sin + (p1.y - 50) * scale * cos + 50 * scale;
-				float x2 = pos.x + (p2.x - 50) * scale * cos - (p2.y - 50) * scale * sin + 50 * scale;
-				float y2 = pos.y + (p2.x - 50) * scale * sin + (p2.y - 50) * scale * cos + 50 * scale;
-				renderer.line(x1, y1, x2, y2);
-//				p1.sub(50, 50).rotate(90).add(50, 50);
-//				p2.sub(50, 50).rotate(90).add(50, 50);
-//				renderer.line(pos.x + p1.x * scale, pos.y + p1.y * scale, pos.x + p2.x * scale, pos.y + p2.y * scale);
-//				p1.sub(50, 50).rotate(-90).add(50, 50);
-//				p2.sub(50, 50).rotate(-90).add(50, 50);
-			}
-			p1 = rawPoints.get(0);
-			p2 = rawPoints.get(rawPoints.size -1);
-			float x1 = pos.x + (p1.x - 50) * scale * cos - (p1.y - 50) * scale * sin + 50 * scale;
-			float y1 = pos.y + (p1.x - 50) * scale * sin + (p1.y - 50) * scale * cos + 50 * scale;
-			float x2 = pos.x + (p2.x - 50) * scale * cos - (p2.y - 50) * scale * sin + 50 * scale;
-			float y2 = pos.y + (p2.x - 50) * scale * sin + (p2.y - 50) * scale * cos + 50 * scale;
-			renderer.line(x1, y1, x2, y2);
+//			renderer.setColor(Color.CYAN);
+//			for (int i = 0; i < rawPoints.size -1; i++) {
+//				p1 = rawPoints.get(i);
+//				p2 = rawPoints.get(i + 1);
+//				float x1 = pos.x + (p1.x - 50) * scale * cos - (p1.y - 50) * scale * sin + 50 * scale;
+//				float y1 = pos.y + (p1.x - 50) * scale * sin + (p1.y - 50) * scale * cos + 50 * scale;
+//				float x2 = pos.x + (p2.x - 50) * scale * cos - (p2.y - 50) * scale * sin + 50 * scale;
+//				float y2 = pos.y + (p2.x - 50) * scale * sin + (p2.y - 50) * scale * cos + 50 * scale;
+//				renderer.line(x1, y1, x2, y2);
+////				p1.sub(50, 50).rotate(90).add(50, 50);
+////				p2.sub(50, 50).rotate(90).add(50, 50);
+////				renderer.line(pos.x + p1.x * scale, pos.y + p1.y * scale, pos.x + p2.x * scale, pos.y + p2.y * scale);
+////				p1.sub(50, 50).rotate(-90).add(50, 50);
+////				p2.sub(50, 50).rotate(-90).add(50, 50);
+//			}
+//			p1 = rawPoints.get(0);
+//			p2 = rawPoints.get(rawPoints.size -1);
+//			float x1 = pos.x + (p1.x - 50) * scale * cos - (p1.y - 50) * scale * sin + 50 * scale;
+//			float y1 = pos.y + (p1.x - 50) * scale * sin + (p1.y - 50) * scale * cos + 50 * scale;
+//			float x2 = pos.x + (p2.x - 50) * scale * cos - (p2.y - 50) * scale * sin + 50 * scale;
+//			float y2 = pos.y + (p2.x - 50) * scale * sin + (p2.y - 50) * scale * cos + 50 * scale;
+//			renderer.line(x1, y1, x2, y2);
 
 //			for (int i = 0; i < rawPolygons.size; i++) {
 //				renderer.setColor(colors[i]);
@@ -239,9 +280,18 @@ public class XMLPathTest extends BaseScreen {
 //
 //			}
 
-			renderer.end();
+//			renderer.end();
 			renderer.begin(ShapeRenderer.ShapeType.Filled);
+			renderer.setColor(1, 1, 1, .5f);
+			int divs = 20;
+			for (int i = 0; i < size/divs; i++) {
+				renderer.rect(0, i * divs, size, 1);
+			}
+			for (int i = 0; i < size/divs; i++) {
+				renderer.rect(i * divs, 0, 1, size);
+			}
 
+			renderer.setColor(Color.CYAN);
 			for (Polygon polygon : polygons) {
 				float[] vertices = polygon.vertices;
 				ShortArray indices = polygon.indices;
@@ -272,6 +322,7 @@ public class XMLPathTest extends BaseScreen {
 					}
 				}
 			}
+			renderer.end();
 		}
 
 		static class Polygon {
@@ -285,6 +336,13 @@ public class XMLPathTest extends BaseScreen {
 			Vector2 p1 = points.get(i);
 			Vector2 p2 = points.get(i + 1);
 			renderer.line(p1.x + ox, p1.y + oy, p2.x + ox, p2.y + oy);
+		}
+	}
+
+	@Override public void dispose () {
+		super.dispose();
+		for (Piece piece : pieces) {
+			piece.fbo.dispose();
 		}
 	}
 
