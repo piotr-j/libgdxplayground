@@ -13,6 +13,8 @@ import io.piotrjastrzebski.playground.GameReset;
 import io.piotrjastrzebski.playground.PlaygroundGame;
 import net.dermetfan.gdx.math.BayazitDecomposer;
 
+import java.util.Arrays;
+
 /**
  * Created by EvilEntity on 25/01/2016.
  */
@@ -160,8 +162,13 @@ public class XMLPathTest extends BaseScreen {
 				colors[i] = new Color(MathUtils.random(), MathUtils.random(), MathUtils.random(), 1);
 			}
 
+			System.out.println("PolygonPiece "+name+" = new PolygonPiece(");
+
+//				new Polygon(new float[] {33.42935f, 81.32148f, 35.46181f, 88.24254f, 36.45024, 94.60547, 35.93955, 97.370514}, new short[] {1, 3, 2, 1, 0, 3}),
+
 			DelaunayTriangulator dt = new DelaunayTriangulator();
-			for (Array<Vector2> rawPolygon : rawPolygons) {
+			for (int j = 0; j < rawPolygons.size; j++) {
+				Array<Vector2> rawPolygon = rawPolygons.get(j);
 				Polygon polygon = new Polygon();
 				polygons.add(polygon);
 				polygon.vertices = new float[rawPolygon.size * 2];
@@ -171,7 +178,29 @@ public class XMLPathTest extends BaseScreen {
 					polygon.vertices[i * 2 + 1] = p.y;
 				}
 				polygon.indices = new ShortArray(dt.computeTriangles(polygon.vertices, false));
+
+				System.out.print("\tnew Polygon(new float[] {");
+				for (int i = 0; i < polygon.vertices.length; i++) {
+					System.out.print(polygon.vertices[i] + "f");
+					if (i < polygon.vertices.length -1) {
+						System.out.print(", ");
+					}
+				}
+				System.out.print("}, new short[] {");
+				for (int i = 0; i < polygon.indices.size; i++) {
+					System.out.print(polygon.indices.get(i));
+					if (i < polygon.indices.size -1) {
+						System.out.print(", ");
+					}
+				}
+				System.out.print("})");
+				if (j < rawPolygons.size -1) {
+					System.out.println(", ");
+				} else {
+					System.out.println("");
+				}
 			}
+			System.out.println(");");
 		}
 
 		float scale = .01f;
