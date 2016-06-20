@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
+import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.DelaunayTriangulator;
 import com.badlogic.gdx.math.MathUtils;
@@ -152,7 +153,6 @@ public class XMLPathTest extends BaseScreen {
 		for (Piece piece : pieces) {
 			piece.draw(batch);
 		}
-
 		batch.end();
 	}
 
@@ -176,16 +176,16 @@ public class XMLPathTest extends BaseScreen {
 				colors[i] = new Color(MathUtils.random(), MathUtils.random(), MathUtils.random(), 1);
 			}
 
-			System.out.println("static PiecePolygons "+name+" = new PiecePolygons(");
-			System.out.print("\tnew float[] {");
-			for (int i = 0; i < rawPoints.size; i++) {
-				Vector2 p = rawPoints.get(i);
-				System.out.print((p.x/100f) + "f, " + (p.y/100f) + "f");
-				if (i < rawPoints.size -1) {
-					System.out.print(", ");
-				}
-			}
-			System.out.print("},");
+//			System.out.println("static PiecePolygons "+name+" = new PiecePolygons(");
+//			System.out.print("\tnew float[] {");
+//			for (int i = 0; i < rawPoints.size; i++) {
+//				Vector2 p = rawPoints.get(i);
+//				System.out.print((p.x/100f) + "f, " + (p.y/100f) + "f");
+//				if (i < rawPoints.size -1) {
+//					System.out.print(", ");
+//				}
+//			}
+//			System.out.print("},");
 
 			DelaunayTriangulator dt = new DelaunayTriangulator();
 			for (int j = 0; j < rawPolygons.size; j++) {
@@ -200,28 +200,89 @@ public class XMLPathTest extends BaseScreen {
 				}
 				polygon.indices = new ShortArray(dt.computeTriangles(polygon.vertices, false));
 
-				System.out.print("\tnew Polygon(new float[] {");
-				for (int i = 0; i < polygon.vertices.length; i++) {
-					System.out.print((polygon.vertices[i]/100f) + "f");
-					if (i < polygon.vertices.length -1) {
-						System.out.print(", ");
-					}
+//				System.out.print("\tnew Polygon(new float[] {");
+//				for (int i = 0; i < polygon.vertices.length; i++) {
+//					System.out.print((polygon.vertices[i]/100f) + "f");
+//					if (i < polygon.vertices.length -1) {
+//						System.out.print(", ");/
+//					}
+//				}
+//				System.out.print("}, new short[] {");
+//				for (int i = 0; i < polygon.indices.size; i++) {
+//					System.out.print(polygon.indices.get(i));
+//					if (i < polygon.indices.size -1) {
+//						System.out.print(", ");
+//					}
+//				}
+//				System.out.print("})");
+//				if (j < rawPolygons.size -1) {
+//					System.out.println(", ");
+//				} else {
+//					System.out.println("");
+//				}
+			}
+//			System.out.println(");");
+
+			mergePolygons();
+		}
+
+		public float[] vertices;
+		public short[] triangles;
+		private void mergePolygons () {
+			int totalTriangles = 0;
+			int totalVertices = 0;
+			for (Polygon polygon : polygons) {
+				totalTriangles += polygon.indices.size;
+				totalVertices += polygon.vertices.length;
+			}
+			triangles = new short[totalTriangles];
+			vertices = new float[totalVertices];
+			if (vertices.length >= 1000) throw new AssertionError("");
+			int to = 0;
+			int vo = 0;
+			int tvo = 0;
+			for (Polygon polygon : polygons) {
+				float[] vs = polygon.vertices;
+				System.arraycopy(vs, 0, vertices, vo, vs.length);
+				ShortArray indices = polygon.indices;
+				for (int i = 0; i < indices.size; i++) {
+					triangles[to + i] = (short)(indices.get(i) + tvo);
 				}
-				System.out.print("}, new short[] {");
-				for (int i = 0; i < polygon.indices.size; i++) {
-					System.out.print(polygon.indices.get(i));
-					if (i < polygon.indices.size -1) {
-						System.out.print(", ");
-					}
-				}
-				System.out.print("})");
-				if (j < rawPolygons.size -1) {
-					System.out.println(", ");
-				} else {
-					System.out.println("");
+				to += indices.size;
+				vo += vs.length;
+				tvo += vs.length/2;
+			}
+
+			System.out.println("static PiecePolygons "+name+" = new PiecePolygons(");
+			// outline
+			System.out.print("\tnew float[] {");
+			for (int i = 0; i < rawPoints.size; i++) {
+				Vector2 p = rawPoints.get(i);
+				System.out.print((p.x/100f) + "f, " + (p.y/100f) + "f");
+				if (i < rawPoints.size -1) {
+					System.out.print(", ");
 				}
 			}
-			System.out.println(");");
+			System.out.print("},\n");
+			// verts
+			System.out.print("\tnew float[] {");
+			for (int i = 0; i < vertices.length; i++) {
+				System.out.print((vertices[i]/100f) + "f");
+				if (i < vertices.length -1) {
+					System.out.print(", ");
+				}
+			}
+			System.out.print("},\n");
+			// triangles
+			System.out.print("\tnew short[] {");
+			for (int i = 0; i < triangles.length; i++) {
+				System.out.print(triangles[i]);
+				if (i < triangles.length -1) {
+					System.out.print(", ");
+				}
+			}
+			System.out.print("});\n");
+
 		}
 
 		public void draw(SpriteBatch batch) {
@@ -235,7 +296,8 @@ public class XMLPathTest extends BaseScreen {
 			if (fbo != null) return;
 			fbo = new FrameBuffer(Pixmap.Format.RGBA8888, size, size, false);
 			fbo.begin();
-			Gdx.gl.glClearColor(1, 0, 0, 1);
+//			Gdx.gl.glClearColor(1, 0, 0, 1);
+			Gdx.gl.glClearColor(0, 0, 0, 0);
 			Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 			float x = pos.x;
 			float y = pos.y;
