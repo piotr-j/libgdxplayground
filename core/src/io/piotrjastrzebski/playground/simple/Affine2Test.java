@@ -141,13 +141,11 @@ public class Affine2Test extends BaseScreen {
 
 		public void debugDraw(ShapeRenderer renderer) {
 			renderer.setColor(Color.WHITE);
-			resultTransform.getTranslation(tmp);
-//			resultTransform.applyTo(tmp.set(position));
-//			resultTransform.applyTo(tmp);
+			tmp.set(origin);
+			resultTransform.applyTo(tmp);
 			for (Thing child : children) {
-				child.resultTransform.getTranslation(tmp2);
-//				child.resultTransform.applyTo(tmp2.set(child.position));
-//				child.resultTransform.applyTo(tmp2);
+				tmp2.set(child.origin);
+				child.resultTransform.applyTo(tmp2);
 				renderer.line(tmp, tmp2);
 				child.debugDraw(renderer);
 			}
