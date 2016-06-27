@@ -47,74 +47,36 @@ public class ECSAffine2Test extends ECSTestBase {
 		texture = new Texture("badlogic.jpg");
 		TextureRegion region = new TextureRegion(texture);
 
-		int entityId = world.create();
-		{
-			Transform tm = mTransform.create(entityId);
-			tm.set(-2, -2, 4, 4, 45f, 2f, 1f);
-			tm.scale.set(1.5f, 1.5f);
+		int root = create(-2, -2, 4, 4, 45f, 2f, 1f, 1.5f, 1.5f, region, new Color(0, .75f, 0, 1), -45f, -1);
 
-			GodComponent gc = mGodComponent.create(entityId);
-			gc.region = region;
-			gc.tint.set(0, .75f, 0, 1);
-			gc.rotation = -45;
-//			gc.rotation = 0;
-		}
-
-		int entityId2 = world.create();
 		// what can we do to make the order of entities not matter?
 		// as is, parents must be updated before children, ie have lower id
 		// this is easy to break when entities are deleted
 		// most obvious way is to make parents know about children, and update them after they are updated
 		// but that feels janky
 		// inheritors could sort entities by id of the parent, that way the order would be correct.
-		{
-			Transform tm = mTransform.create(entityId2);
-			// since it has a parent, the position is the offset from parents position
-			tm.set(1, 5, 2, 2, 0f, 1f, 1f);
+		int childA = create(1, 5, 2, 2, 0f, 1f, 1f, 1, 1, region, new Color(0, .75f, .75f, 1), 30, root);
 
-			GodComponent gc = mGodComponent.create(entityId2);
-			gc.region = region;
-			gc.tint.set(0, .75f, .75f, 1);
-			gc.rotation = 30;
-//			gc.parent = entityId;
-			mInheritor.create(entityId2).from = entityId;
-		}
+		int childB = create(-1.5f, .5f, 1, 1, 45f, .5f, .75f, 1, 1, region, new Color(.75f, 0, .75f, 1), -60, childA);
+		mGodComponent.get(childB).spawn(0.5f, 1f, 0f, 1f);
+		int childC = create(2.5f, .5f, 1, 1, -45f, .5f, .75f, 1, 1, region, new Color(.75f, 0, .75f, 1), 60, childA);
+		mGodComponent.get(childC).spawn(0.5f, 1f, 0f, 1f);
+	}
 
-		int entityId3 = world.create();
-		{
-			Transform tm = mTransform.create(entityId3);
-			// since it has a parent, the position is the offset from parents position
-//			tm.set(-1.5f, .5f, 1, 1, 30f, .5f, .5f);
-			tm.set(-1.5f, .5f, 1, 1, 45f, .5f, .75f);
+	private int create (float x, float y, float width, float height, float rotation, float originX, float originY, float scaleX,
+		float scaleY, TextureRegion region, Color color, float rotate, int parentId) {
+		int entityId = world.create();
+		Transform tm = mTransform.create(entityId);
+		tm.set(x, y, width, height, rotation, originX, originY);
+		tm.scale.set(scaleX, scaleY);
 
-			GodComponent gc = mGodComponent.create(entityId3);
-			gc.region = region;
-			gc.tint.set(.75f, 0, .75f, 1);
-			gc.rotation = 60;
-//			gc.parent = entityId2;
-			gc.spawn = true;
-			gc.spawnOffset.set(0.5f, 1);
-			gc.spawnDirection.set(0, 1);
-			mInheritor.create(entityId3).from = entityId2;
-		}
+		GodComponent gc = mGodComponent.create(entityId);
+		gc.region = region;
+		gc.tint.set(color);
+		gc.rotation = rotate;
 
-		int entityId4 = world.create();
-		{
-			Transform tm = mTransform.create(entityId4);
-			// since it has a parent, the position is the offset from parents position
-//			tm.set(2.5f, .5f, 1, 1, -30f, .5f, .5f);
-			tm.set(2.5f, .5f, 1, 1, -45f, .5f, .75f);
-
-			GodComponent gc = mGodComponent.create(entityId4);
-			gc.region = region;
-			gc.tint.set(.75f, 0, .75f, 1);
-			gc.rotation = 60;
-//			gc.parent = entityId2;
-			gc.spawn = true;
-			gc.spawnOffset.set(0.5f, 1);
-			gc.spawnDirection.set(0, 1);
-			mInheritor.create(entityId4).from = entityId2;
-		}
+		mInheritor.create(entityId).from = parentId;
+		return entityId;
 	}
 
 	protected static class Updater extends IteratingSystem {
@@ -457,6 +419,13 @@ public class ECSAffine2Test extends ECSTestBase {
 		public Vector2 spawnDirection = new Vector2();
 
 		public GodComponent() {}
+
+		public GodComponent spawn (float ox, float oy, float dx, float dy) {
+			spawn = true;
+			spawnOffset.set(ox, oy);
+			spawnDirection.set(dx, dy);
+			return this;
+		}
 	}
 
 	protected static class DotRenderer extends IteratingSystem {
