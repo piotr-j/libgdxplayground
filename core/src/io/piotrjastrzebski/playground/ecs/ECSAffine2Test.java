@@ -12,8 +12,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.math.Affine2;
-import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.*;
 import io.piotrjastrzebski.playground.GameReset;
 import io.piotrjastrzebski.playground.PlaygroundGame;
 
@@ -226,17 +225,29 @@ public class ECSAffine2Test extends ECSTestBase {
 			super(Aspect.all(Transform.class, GodComponent.class));
 		}
 
+		Vector3 cp = new Vector3();
+		float radius = 1;
 		@Override protected void begin () {
+			camera.unproject(cp.set(Gdx.input.getX(), Gdx.input.getY(), 0));
 			renderer.setProjectionMatrix(camera.combined);
 			renderer.begin(ShapeRenderer.ShapeType.Line);
+			renderer.setColor(Color.RED);
+			renderer.circle(cp.x, cp.y, radius, 16);
 		}
 
 		Vector2 tmp = new Vector2();
-		Vector2 tmp2 = new Vector2();
 		@Override protected void process (int entityId) {
 			Transform tf = mTransform.get(entityId);
-			renderer.setColor(Color.CYAN);
+
+			if (rectContains(cp.x, cp.y, tf.size.x, tf.size.y, tf.affine2)) {
+				renderer.setColor(Color.YELLOW);
+			} else if (rectOverlaps(cp.x, cp.y, radius, tf.size.x, tf.size.y, tf.affine2)) {
+				renderer.setColor(Color.ORANGE);
+			} else {
+				renderer.setColor(Color.CYAN);
+			}
 			rect(renderer, tf.size.x, tf.size.y, tf.affine2);
+
 			renderer.setColor(Color.ORANGE);
 			tmp.set(tf.origin);
 			tf.affine2.applyTo(tmp);
@@ -252,13 +263,13 @@ public class ECSAffine2Test extends ECSTestBase {
 				tmp.set(gc.spawnOffset);
 				tf.affine2.applyTo(tmp);
 				float scale = 1;
-				tmp2.set(gc.spawnOffset).add(gc.spawnDirection.x * scale, gc.spawnDirection.y * scale);
+				end.set(gc.spawnOffset).add(gc.spawnDirection.x * scale, gc.spawnDirection.y * scale);
 //				tmp2.set(gc.spawnDirection.x * .33f, gc.spawnDirection.y * .33f);
-				tf.affine2.applyTo(tmp2);
+				tf.affine2.applyTo(end);
 //				renderer.line(tmp.x, tmp.y, tmp.x + tmp2.x, tmp.y + tmp2.y);
-				renderer.line(tmp.x, tmp.y, tmp2.x, tmp2.y);
+				renderer.line(tmp.x, tmp.y, end.x, end.y);
 //				drawCross(renderer, tmp.x, tmp.y, .25f);
-				drawCross(renderer, tmp2.x, tmp2.y, .25f);
+				drawCross(renderer, end.x, end.y, .25f);
 			}
 
 //			renderer.setColor(Color.RED);
@@ -279,19 +290,66 @@ public class ECSAffine2Test extends ECSTestBase {
 		}
 
 		private void rect (ShapeRenderer renderer, float width, float height, Affine2 transform) {
-			float x1 = transform.m02;
-			float y1 = transform.m12;
-			float x2 = transform.m01 * height + transform.m02;
-			float y2 = transform.m11 * height + transform.m12;
-			float x3 = transform.m00 * width + transform.m01 * height + transform.m02;
-			float y3 = transform.m10 * width + transform.m11 * height + transform.m12;
-			float x4 = transform.m00 * width + transform.m02;
-			float y4 = transform.m10 * width + transform.m12;
+//			float x1 = transform.m02;
+//			float y1 = transform.m12;
+//			float x2 = transform.m01 * height + transform.m02;
+//			float y2 = transform.m11 * height + transform.m12;
+//			float x3 = transform.m00 * width + transform.m01 * height + transform.m02;
+//			float y3 = transform.m10 * width + transform.m11 * height + transform.m12;
+//			float x4 = transform.m00 * width + transform.m02;
+//			float y4 = transform.m10 * width + transform.m12;
+//			renderer.line(x1, y1, x2, y2);
+//			renderer.line(x2, y2, x3, y3);
+//			renderer.line(x3, y3, x4, y4);
+//			renderer.line(x4, y4, x1, y1);
+ 			setRect(width, height, transform, rect);
+			renderer.polygon(rect);
+		}
 
-			renderer.line(x1, y1, x2, y2);
-			renderer.line(x2, y2, x3, y3);
-			renderer.line(x3, y3, x4, y4);
-			renderer.line(x4, y4, x1, y1);
+		private final static int X1 = 0;
+		private final static int Y1 = 1;
+		private final static int X2 = 2;
+		private final static int Y2 = 3;
+		private final static int X3 = 4;
+		private final static int Y3 = 5;
+		private final static int X4 = 6;
+		private final static int Y4 = 7;
+		private final float[] rect = new float[8];
+
+		private boolean rectContains(float x, float y, float rWidth, float rHeight, Affine2 transform) {
+			setRect(rWidth, rHeight, transform, rect);
+			return Intersector.isPointInPolygon(rect, 0, 8, x, y);
+		}
+
+		private Vector2 start = new Vector2();
+		private Vector2 end = new Vector2();
+		private Vector2 centre = new Vector2();
+		private boolean rectOverlaps (float x, float y, float radius, float rWidth, float rHeight, Affine2 transform) {
+			setRect(rWidth, rHeight, transform, rect);
+			if (Intersector.isPointInPolygon(rect, 0, 0, x, y)) return true;
+			centre.set(x, y);
+			for (int i = 0, size = rect.length; i < size; i+=2) {
+				start.x = rect[(i % size)];
+				start.y = rect[(i + 1) % size];
+				end.x = rect[(i + 2) % size];
+				end.y = rect[(i + 3) % size];
+				if (Intersector.intersectSegmentCircle(start, end, centre, radius * radius)){
+					return true;
+				}
+			}
+			return false;
+		}
+
+		private float[] setRect(float width, float height, Affine2 transform, float[] out) {
+			out[X1] = transform.m02;
+			out[Y1] = transform.m12;
+			out[X2] = transform.m01 * height + transform.m02;
+			out[Y2] = transform.m11 * height + transform.m12;
+			out[X3] = transform.m00 * width + transform.m01 * height + transform.m02;
+			out[Y3] = transform.m10 * width + transform.m11 * height + transform.m12;
+			out[X4] = transform.m00 * width + transform.m02;
+			out[Y4] = transform.m10 * width + transform.m12;
+			return out;
 		}
 
 		private void drawCross (ShapeRenderer renderer, float x, float y, float size) {
