@@ -362,6 +362,8 @@ public class ECSAffine2Test extends ECSTestBase {
 			dot.position.add(dot.velocity.x * world.delta, dot.velocity.y * world.delta);
 			renderer.setColor(dot.tint);
 			renderer.circle(dot.position.x, dot.position.y, .1f, 8);
+			dot.alive -= world.delta;
+			if (dot.alive <= 0) world.delete(entityId);
 		}
 
 		@Override protected void end () {
@@ -373,6 +375,7 @@ public class ECSAffine2Test extends ECSTestBase {
 		public Color tint = new Color(Color.WHITE);
 		public Vector2 position = new Vector2();
 		public Vector2 velocity = new Vector2();
+		public float alive = 5;
 
 		public Dot () {}
 	}
