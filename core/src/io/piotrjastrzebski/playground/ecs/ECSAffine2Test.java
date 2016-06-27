@@ -4,6 +4,7 @@ import com.artemis.*;
 import com.artemis.annotations.EntityId;
 import com.artemis.annotations.Wire;
 import com.artemis.systems.IteratingSystem;
+import com.artemis.utils.IntBag;
 import com.badlogic.gdx.*;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
@@ -30,6 +31,7 @@ public class ECSAffine2Test extends ECSTestBase {
 	@Override protected void preInit (WorldConfiguration config) {
 		config.setSystem(Updater.class);
 		config.setSystem(Transformer.class);
+		config.setSystem(Inheritors.class);
 		config.setSystem(Spawner.class);
 		config.setSystem(Renderer.class);
 		config.setSystem(DotRenderer.class);
@@ -38,6 +40,7 @@ public class ECSAffine2Test extends ECSTestBase {
 
 	protected ComponentMapper<Transform> mTransform;
 	protected ComponentMapper<GodComponent> mGodComponent;
+	protected ComponentMapper<Inheritor> mInheritor;
 	Texture texture;
 	@Override protected void postInit () {
 		world.inject(this, false);
@@ -58,6 +61,12 @@ public class ECSAffine2Test extends ECSTestBase {
 		}
 
 		int entityId2 = world.create();
+		// what can we do to make the order of entities not matter?
+		// as is, parents must be updated before children, ie have lower id
+		// this is easy to break when entities are deleted
+		// most obvious way is to make parents know about children, and update them after they are updated
+		// but that feels janky
+		// inheritors could sort entities by id of the parent, that way the order would be correct.
 		{
 			Transform tm = mTransform.create(entityId2);
 			// since it has a parent, the position is the offset from parents position
@@ -67,8 +76,10 @@ public class ECSAffine2Test extends ECSTestBase {
 			gc.region = region;
 			gc.tint.set(0, .75f, .75f, 1);
 			gc.rotation = 30;
-			gc.parent = entityId;
+//			gc.parent = entityId;
+			mInheritor.create(entityId2).from = entityId;
 		}
+
 		int entityId3 = world.create();
 		{
 			Transform tm = mTransform.create(entityId3);
@@ -80,11 +91,13 @@ public class ECSAffine2Test extends ECSTestBase {
 			gc.region = region;
 			gc.tint.set(.75f, 0, .75f, 1);
 			gc.rotation = 60;
-			gc.parent = entityId2;
+//			gc.parent = entityId2;
 			gc.spawn = true;
 			gc.spawnOffset.set(0.5f, 1);
 			gc.spawnDirection.set(0, 1);
+			mInheritor.create(entityId3).from = entityId2;
 		}
+
 		int entityId4 = world.create();
 		{
 			Transform tm = mTransform.create(entityId4);
@@ -96,10 +109,11 @@ public class ECSAffine2Test extends ECSTestBase {
 			gc.region = region;
 			gc.tint.set(.75f, 0, .75f, 1);
 			gc.rotation = 60;
-			gc.parent = entityId2;
+//			gc.parent = entityId2;
 			gc.spawn = true;
 			gc.spawnOffset.set(0.5f, 1);
 			gc.spawnDirection.set(0, 1);
+			mInheritor.create(entityId4).from = entityId2;
 		}
 	}
 
@@ -130,25 +144,45 @@ public class ECSAffine2Test extends ECSTestBase {
 
 	protected static class Transformer extends IteratingSystem {
 		protected ComponentMapper<Transform> mTransform;
-		protected ComponentMapper<GodComponent> mGodComponent;
 		public Transformer () {
-			super(Aspect.all(Transform.class, GodComponent.class));
+			super(Aspect.all(Transform.class));
 		}
 
 		@Override protected void process (int entityId) {
 			Transform tf = mTransform.get(entityId);
-			GodComponent gc = mGodComponent.get(entityId);
 			// the obvious problem with this is the order of operations, if parents id is larger then child, there will be a frame of delay
-			if (tf.dirty || gc.parent >= 0) {
+			if (tf.dirty) {
 				tf.affine2.setToTrnRotScl(tf.position.x + tf.origin.x, tf.position.y + tf.origin.y, tf.rotation, tf.scale.x, tf.scale.y);
-//				if (tf.rotation != 0) {
+				if (tf.origin.x != 0 || tf.origin.y != 0) {
 					tf.affine2.translate(-tf.origin.x, -tf.origin.y);
-//				}
-				if (gc.parent >= 0) {
-					Transform ptf = mTransform.get(gc.parent);
-					tf.affine2.preMul(ptf.affine2);
 				}
 				tf.dirty = false;
+			}
+		}
+	}
+
+	protected static class Inheritor extends Component {
+		@EntityId
+		public int from = -1;
+		public Inheritor() {}
+	}
+
+	protected static class Inheritors extends IteratingSystem {
+		protected ComponentMapper<Transform> mTransform;
+		protected ComponentMapper<Inheritor> mInheritor;
+		public Inheritors () {
+			super(Aspect.all(Transform.class, Inheritor.class));
+		}
+
+		@Override protected void process (int entityId) {
+			Transform tf = mTransform.get(entityId);
+			Inheritor inheritor = mInheritor.get(entityId);
+			if (inheritor.from >= 0) {
+				Transform ptf = mTransform.get(inheritor.from);
+				// we could check if the from transform changed first
+				tf.affine2.preMul(ptf.affine2);
+				// force update on next frame
+				tf.dirty = true;
 			}
 		}
 	}
