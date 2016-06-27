@@ -227,12 +227,17 @@ public class ECSAffine2Test extends ECSTestBase {
 
 		Vector3 cp = new Vector3();
 		float radius = 1;
+		float size = 3;
 		@Override protected void begin () {
 			camera.unproject(cp.set(Gdx.input.getX(), Gdx.input.getY(), 0));
 			renderer.setProjectionMatrix(camera.combined);
 			renderer.begin(ShapeRenderer.ShapeType.Line);
-			renderer.setColor(Color.RED);
+			renderer.setColor(Color.YELLOW);
+			renderer.circle(cp.x, cp.y, .075f, 16);
+			renderer.setColor(Color.ORANGE);
 			renderer.circle(cp.x, cp.y, radius, 16);
+			renderer.setColor(Color.RED);
+			renderer.rect(cp.x - size/2, cp.y - size/2, size, size);
 		}
 
 		Vector2 tmp = new Vector2();
@@ -243,6 +248,8 @@ public class ECSAffine2Test extends ECSTestBase {
 				renderer.setColor(Color.YELLOW);
 			} else if (rectOverlaps(cp.x, cp.y, radius, tf.size.x, tf.size.y, tf.affine2)) {
 				renderer.setColor(Color.ORANGE);
+			} else if (rectOverlaps(cp.x - size/2, cp.y - size/2, size, size, tf.size.x, tf.size.y, tf.affine2)) {
+				renderer.setColor(Color.RED);
 			} else {
 				renderer.setColor(Color.CYAN);
 			}
@@ -315,6 +322,7 @@ public class ECSAffine2Test extends ECSTestBase {
 		private final static int X4 = 6;
 		private final static int Y4 = 7;
 		private final float[] rect = new float[8];
+		private final float[] rect2 = new float[8];
 
 		private boolean rectContains(float x, float y, float rWidth, float rHeight, Affine2 transform) {
 			setRect(rWidth, rHeight, transform, rect);
@@ -339,6 +347,11 @@ public class ECSAffine2Test extends ECSTestBase {
 			}
 			return false;
 		}
+		private boolean rectOverlaps (float x, float y, float width, float height, float rWidth, float rHeight, Affine2 transform) {
+			setRect(rWidth, rHeight, transform, rect);
+			setRect(x, y, width, height, rect2);
+			return Intersector.overlapConvexPolygons(rect, 0, 8, rect2, 0, 8, null);
+		}
 
 		private float[] setRect(float width, float height, Affine2 transform, float[] out) {
 			out[X1] = transform.m02;
@@ -349,6 +362,18 @@ public class ECSAffine2Test extends ECSTestBase {
 			out[Y3] = transform.m10 * width + transform.m11 * height + transform.m12;
 			out[X4] = transform.m00 * width + transform.m02;
 			out[Y4] = transform.m10 * width + transform.m12;
+			return out;
+		}
+
+		private float[] setRect(float x, float y, float width, float height, float[] out) {
+			out[X1] = x;
+			out[Y1] = y;
+			out[X2] = x + width;
+			out[Y2] = y;
+			out[X3] = x + width;
+			out[Y3] = y + height;
+			out[X4] = x;
+			out[Y4] = y + height;
 			return out;
 		}
 
