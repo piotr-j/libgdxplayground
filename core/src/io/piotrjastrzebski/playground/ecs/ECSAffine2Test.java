@@ -4,6 +4,8 @@ import com.artemis.*;
 import com.artemis.annotations.EntityId;
 import com.artemis.annotations.Wire;
 import com.artemis.systems.IteratingSystem;
+import com.badlogic.gdx.*;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
@@ -109,7 +111,15 @@ public class ECSAffine2Test extends ECSTestBase {
 			super(Aspect.all(Transform.class, GodComponent.class));
 		}
 
+		boolean rotate = true;
+		@Override protected void begin () {
+			if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
+				rotate = !rotate;
+			}
+		}
+
 		@Override protected void process (int entityId) {
+			if (!rotate) return;
 			Transform tf = mTransform.get(entityId);
 			GodComponent gc = mGodComponent.get(entityId);
 			if (gc.rotation != 0) {
