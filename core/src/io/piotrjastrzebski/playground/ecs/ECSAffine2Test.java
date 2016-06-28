@@ -14,6 +14,8 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.*;
+import com.badlogic.gdx.utils.IntIntMap;
+import com.badlogic.gdx.utils.IntSet;
 import io.piotrjastrzebski.playground.GameReset;
 import io.piotrjastrzebski.playground.PlaygroundGame;
 
@@ -41,6 +43,7 @@ public class ECSAffine2Test extends ECSTestBase {
 	protected ComponentMapper<Transform> mTransform;
 	protected ComponentMapper<GodComponent> mGodComponent;
 	protected ComponentMapper<Inheritor> mInheritor;
+	protected ComponentMapper<Inherited> mInherited;
 	Texture texture;
 	@Override protected void postInit () {
 		world.inject(this, false);
@@ -75,6 +78,7 @@ public class ECSAffine2Test extends ECSTestBase {
 
 	private void inheritTransform (int entity, int from) {
 		mInheritor.create(entity).from = from;
+		mInherited.create(from).to.add(entity);
 	}
 
 	private int create (float x, float y, float width, float height, float rotation, float originX, float originY, float scaleX,
@@ -119,18 +123,22 @@ public class ECSAffine2Test extends ECSTestBase {
 	protected static class Transformer extends IteratingSystem {
 		protected ComponentMapper<Transform> mTransform;
 		public Transformer () {
-			super(Aspect.all(Transform.class));
+			super(Aspect.all(Transform.class).exclude(Inheritor.class));
 		}
 
 		@Override protected void process (int entityId) {
 			Transform tf = mTransform.get(entityId);
 			// the obvious problem with this is the order of operations, if parents id is larger then child, there will be a frame of delay
 			if (tf.dirty) {
-				tf.affine2.setToTrnRotScl(tf.position.x + tf.origin.x, tf.position.y + tf.origin.y, tf.rotation, tf.scale.x, tf.scale.y);
-				if (tf.origin.x != 0 || tf.origin.y != 0) {
-					tf.affine2.translate(-tf.origin.x, -tf.origin.y);
-				}
+				update(tf);
 				tf.dirty = false;
+			}
+		}
+
+		public void update(Transform tf) {
+			tf.affine2.setToTrnRotScl(tf.position.x + tf.origin.x, tf.position.y + tf.origin.y, tf.rotation, tf.scale.x, tf.scale.y);
+			if (tf.origin.x != 0 || tf.origin.y != 0) {
+				tf.affine2.translate(-tf.origin.x, -tf.origin.y);
 			}
 		}
 	}
@@ -141,23 +149,42 @@ public class ECSAffine2Test extends ECSTestBase {
 		public Inheritor() {}
 	}
 
+	protected static class Inherited extends Component {
+		@EntityId
+		public IntBag to = new IntBag();
+		public Inherited() {}
+	}
+
 	protected static class Inheritors extends IteratingSystem {
 		protected ComponentMapper<Transform> mTransform;
 		protected ComponentMapper<Inheritor> mInheritor;
+		protected ComponentMapper<Inherited> mInherited;
+		@Wire Transformer transformer;
+		IntSet processed = new IntSet();
 		public Inheritors () {
-			super(Aspect.all(Transform.class, Inheritor.class));
+			super(Aspect.all(Transform.class, Inherited.class));
+		}
+
+		@Override protected void begin () {
+			processed.clear();
 		}
 
 		@Override protected void process (int entityId) {
+			if (processed.contains(entityId)) return;
+			processed.add(entityId);
 			Transform tf = mTransform.get(entityId);
-			Inheritor inheritor = mInheritor.get(entityId);
-			if (inheritor.from >= 0) {
-				Transform ptf = mTransform.get(inheritor.from);
-				// we could check if the from transform changed first
-				tf.affine2.preMul(ptf.affine2);
-				// force update on next frame
-				tf.dirty = true;
+			Inherited inherited = mInherited.get(entityId);
+			IntBag inheritors = inherited.to;
+			for (int i = 0; i < inheritors.size(); i++) {
+				int inheritorId = inheritors.get(i);
+				Transform itf = mTransform.get(inheritorId);
+				transformer.update(itf);
+				itf.affine2.preMul(tf.affine2);
+				if (mInherited.has(inheritorId)) {
+					process(inheritorId);
+				}
 			}
+
 		}
 	}
 
