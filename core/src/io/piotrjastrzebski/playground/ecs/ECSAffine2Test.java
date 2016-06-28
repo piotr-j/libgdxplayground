@@ -33,7 +33,6 @@ public class ECSAffine2Test extends ECSTestBase {
 	@Override protected void preInit (WorldConfiguration config) {
 		config.setSystem(Updater.class);
 		config.setSystem(Transformer.class);
-		config.setSystem(Inheritors.class);
 		config.setSystem(Spawner.class);
 		config.setSystem(Renderer.class);
 		config.setSystem(DotRenderer.class);
@@ -43,7 +42,6 @@ public class ECSAffine2Test extends ECSTestBase {
 	protected ComponentMapper<Transform> mTransform;
 	protected ComponentMapper<GodComponent> mGodComponent;
 	protected ComponentMapper<Inheritor> mInheritor;
-	protected ComponentMapper<Inherited> mInherited;
 	Texture texture;
 	@Override protected void postInit () {
 		world.inject(this, false);
@@ -59,12 +57,12 @@ public class ECSAffine2Test extends ECSTestBase {
 		// inheritors could sort entities by id of the parent, that way the order would be correct. ( doesnt work :( )
 
 
-		int childB = create(-1.5f, .5f, 1.5f, 1.5f, 45f, .5f, .75f, 1, 1, region, new Color(.75f, 0, .75f, 1), -60);
+		int childB = create(-2f, .5f, 1.5f, 1.5f, 45f, .5f, .75f, 1, 1, region, new Color(.75f, 0, .75f, 1), -60);
 		mGodComponent.get(childB).spawn(0.5f, 1f, 0f, 1f);
 
 		int childA = create(1, 5, 2, 2, 0f, 1f, 1f, 1, 1, region, new Color(0, .75f, .75f, 1), 30);
 
-		int childC = create(2.5f, .5f, 1.5f, 1.5f, -45f, .5f, .75f, 1, 1, region, new Color(.75f, 0, .75f, 1), 60);
+		int childC = create(2.5f, .5f, 1.5f, 1.5f, -45f, 1f, .75f, 1, 1, region, new Color(.75f, 0, .75f, 1), 60);
 		mGodComponent.get(childC).spawn(0.5f, 1f, 0f, 1f);
 
 
@@ -78,7 +76,7 @@ public class ECSAffine2Test extends ECSTestBase {
 
 	private void inheritTransform (int entity, int from) {
 		mInheritor.create(entity).from = from;
-		mInherited.create(from).to.add(entity);
+		mInheritor.create(from).to.add(entity);
 	}
 
 	private int create (float x, float y, float width, float height, float rotation, float originX, float originY, float scaleX,
@@ -120,50 +118,23 @@ public class ECSAffine2Test extends ECSTestBase {
 		}
 	}
 
-	protected static class Transformer extends IteratingSystem {
-		protected ComponentMapper<Transform> mTransform;
-		public Transformer () {
-			super(Aspect.all(Transform.class).exclude(Inheritor.class));
-		}
-
-		@Override protected void process (int entityId) {
-			Transform tf = mTransform.get(entityId);
-			// the obvious problem with this is the order of operations, if parents id is larger then child, there will be a frame of delay
-			if (tf.dirty) {
-				update(tf);
-				tf.dirty = false;
-			}
-		}
-
-		public void update(Transform tf) {
-			tf.affine2.setToTrnRotScl(tf.position.x + tf.origin.x, tf.position.y + tf.origin.y, tf.rotation, tf.scale.x, tf.scale.y);
-			if (tf.origin.x != 0 || tf.origin.y != 0) {
-				tf.affine2.translate(-tf.origin.x, -tf.origin.y);
-			}
-		}
-	}
 
 	protected static class Inheritor extends Component {
 		@EntityId
 		public int from = -1;
+		@EntityId
+		public IntBag to = new IntBag();
 		public Inheritor() {}
 	}
 
-	protected static class Inherited extends Component {
-		@EntityId
-		public IntBag to = new IntBag();
-		public Inherited() {}
-	}
-
-	protected static class Inheritors extends IteratingSystem {
+	protected static class Transformer extends IteratingSystem {
 		protected ComponentMapper<Transform> mTransform;
 		protected ComponentMapper<Inheritor> mInheritor;
-		protected ComponentMapper<Inherited> mInherited;
-		@Wire Transformer transformer;
-		IntSet processed = new IntSet();
-		public Inheritors () {
-			super(Aspect.all(Transform.class, Inherited.class));
+
+		public Transformer () {
+			super(Aspect.all(Transform.class));
 		}
+		IntSet processed = new IntSet();
 
 		@Override protected void begin () {
 			processed.clear();
@@ -173,18 +144,27 @@ public class ECSAffine2Test extends ECSTestBase {
 			if (processed.contains(entityId)) return;
 			processed.add(entityId);
 			Transform tf = mTransform.get(entityId);
-			Inherited inherited = mInherited.get(entityId);
-			IntBag inheritors = inherited.to;
-			for (int i = 0; i < inheritors.size(); i++) {
-				int inheritorId = inheritors.get(i);
-				Transform itf = mTransform.get(inheritorId);
-				transformer.update(itf);
-				itf.affine2.preMul(tf.affine2);
-				if (mInherited.has(inheritorId)) {
-					process(inheritorId);
+			// set up our affine2 matrix
+			tf.affine2.setToTrnRotScl(tf.position.x + tf.origin.x, tf.position.y + tf.origin.y, tf.rotation, tf.scale.x, tf.scale.y);
+			if (tf.origin.x != 0 || tf.origin.y != 0) {
+				tf.affine2.translate(-tf.origin.x, -tf.origin.y);
+			}
+			// update if we have a parent/children
+			if (mInheritor.has(entityId)) {
+				Inheritor inheritor = mInheritor.get(entityId);
+				// if we have a parent, we need its transform
+				if (inheritor.from >= 0) {
+					// make sure it is processed
+					process(inheritor.from);
+					Transform ftf = mTransform.get(inheritor.from);
+					tf.affine2.preMul(ftf.affine2);
+				}
+				// if we have children, we need to process them as well
+				IntBag ids = inheritor.to;
+				for (int i = 0; i < ids.size(); i++) {
+					process(ids.get(i));
 				}
 			}
-
 		}
 	}
 
