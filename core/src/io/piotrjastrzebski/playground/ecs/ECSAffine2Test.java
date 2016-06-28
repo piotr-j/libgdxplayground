@@ -349,7 +349,7 @@ public class ECSAffine2Test extends ECSTestBase {
 		private Vector2 centre = new Vector2();
 		private boolean rectOverlaps (float x, float y, float radius, float rWidth, float rHeight, Affine2 transform) {
 			setRect(rWidth, rHeight, transform, rect);
-			if (Intersector.isPointInPolygon(rect, 0, 0, x, y)) return true;
+			if (Intersector.isPointInPolygon(rect, 0, rect.length, x, y)) return true;
 			centre.set(x, y);
 			for (int i = 0, size = rect.length; i < size; i+=2) {
 				start.x = rect[(i % size)];
