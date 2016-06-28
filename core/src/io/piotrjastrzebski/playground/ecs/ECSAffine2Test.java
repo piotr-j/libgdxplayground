@@ -47,24 +47,38 @@ public class ECSAffine2Test extends ECSTestBase {
 		texture = new Texture("badlogic.jpg");
 		TextureRegion region = new TextureRegion(texture);
 
-		int root = create(-2, -2, 4, 4, 45f, 2f, 1f, 1.5f, 1.5f, region, new Color(0, .75f, 0, 1), -45f, -1);
 
 		// what can we do to make the order of entities not matter?
 		// as is, parents must be updated before children, ie have lower id
 		// this is easy to break when entities are deleted
 		// most obvious way is to make parents know about children, and update them after they are updated
 		// but that feels janky
-		// inheritors could sort entities by id of the parent, that way the order would be correct.
-		int childA = create(1, 5, 2, 2, 0f, 1f, 1f, 1, 1, region, new Color(0, .75f, .75f, 1), 30, root);
+		// inheritors could sort entities by id of the parent, that way the order would be correct. ( doesnt work :( )
 
-		int childB = create(-1.5f, .5f, 1, 1, 45f, .5f, .75f, 1, 1, region, new Color(.75f, 0, .75f, 1), -60, childA);
+
+		int childB = create(-1.5f, .5f, 1.5f, 1.5f, 45f, .5f, .75f, 1, 1, region, new Color(.75f, 0, .75f, 1), -60);
 		mGodComponent.get(childB).spawn(0.5f, 1f, 0f, 1f);
-		int childC = create(2.5f, .5f, 1, 1, -45f, .5f, .75f, 1, 1, region, new Color(.75f, 0, .75f, 1), 60, childA);
+
+		int childA = create(1, 5, 2, 2, 0f, 1f, 1f, 1, 1, region, new Color(0, .75f, .75f, 1), 30);
+
+		int childC = create(2.5f, .5f, 1.5f, 1.5f, -45f, .5f, .75f, 1, 1, region, new Color(.75f, 0, .75f, 1), 60);
 		mGodComponent.get(childC).spawn(0.5f, 1f, 0f, 1f);
+
+
+		int root = create(-2, -2, 4, 4, 45f, 2f, 1f, 1.5f, 1.5f, region, new Color(0, .75f, 0, 1), -45f);
+
+		inheritTransform(childA, root);
+		inheritTransform(childC, childA);
+		inheritTransform(childB, childA);
+
+	}
+
+	private void inheritTransform (int entity, int from) {
+		mInheritor.create(entity).from = from;
 	}
 
 	private int create (float x, float y, float width, float height, float rotation, float originX, float originY, float scaleX,
-		float scaleY, TextureRegion region, Color color, float rotate, int parentId) {
+		float scaleY, TextureRegion region, Color color, float rotate) {
 		int entityId = world.create();
 		Transform tm = mTransform.create(entityId);
 		tm.set(x, y, width, height, rotation, originX, originY);
@@ -74,8 +88,6 @@ public class ECSAffine2Test extends ECSTestBase {
 		gc.region = region;
 		gc.tint.set(color);
 		gc.rotation = rotate;
-
-		mInheritor.create(entityId).from = parentId;
 		return entityId;
 	}
 
