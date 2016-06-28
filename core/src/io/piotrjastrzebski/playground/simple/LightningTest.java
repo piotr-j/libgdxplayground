@@ -70,7 +70,6 @@ public class LightningTest extends BaseScreen {
 	protected static class Lightning {
 		public Node start = new Node();
 		public Node end = new Node(5, 0);
-		protected Tree tree;
 		public Lightning () {
 
 		}
@@ -79,17 +78,16 @@ public class LightningTest extends BaseScreen {
 		public void update (float delta) {
 			rebuild -= delta;
 			if (rebuild <= 0) {
-				rebuild = 1;
+				rebuild = .25f;
 				start.children.clear();
-				end.children.clear();
-				tree = build(start, end, 10);
+				build(start, end, 50);
 			}
 		}
 
 
 		public void draw(ShapeRenderer renderer) {
 			renderer.setColor(Color.GREEN);
-			tree.root.draw(renderer);
+			start.draw(renderer);
 
 			renderer.setColor(Color.YELLOW);
 			renderer.circle(start.x, start.y, .2f, 12);
@@ -109,6 +107,11 @@ public class LightningTest extends BaseScreen {
 			public Node (float x, float y) {
 				this.x = x;
 				this.y = y;
+			}
+
+			public Node (Node node) {
+				this.x = node.x;
+				this.y = node.y;
 			}
 
 			public void draw (ShapeRenderer renderer) {
@@ -156,34 +159,24 @@ public class LightningTest extends BaseScreen {
 			}
 		}
 
-		static class Tree {
-			public Node root;
-
-			public Node getClosestNode (Node target) {
-				return root.getClosestNode(target);
-			}
-		}
-
-		static Tree build (Node start, Node end, int maxIters) {
-			Tree tree = new Tree();
-			tree.root = start;
+		static Node rng = new Node();
+		static Node build (Node start, Node end, int maxIters) {
 			float dst = start.dst(end);
 			int iter = 0;
 			boolean goalReached = false;
 			while (iter < maxIters) {
-				Node rng = randomNode(end, dst);
+				Node rng = randomNode(end, dst/3);
 
-				Node closest = tree.getClosestNode(rng);
-				Node extension = createExtension(closest, rng, dst/maxIters, 0f);
+				Node closest = start.getClosestNode(rng);
+
+				Node extension = createExtension(closest, rng, .5f, 1.5f, 1f);
 				// If we managed to create a new node, add it to the tree.
-				if (extension != null)
-				{
+				if (extension != null) {
 					closest.add(extension);
 
 					// If we haven't yet reached the goal, and the new node
 					// is very near the goal, add the goal to the tree.
-					if(extension.isEqual(end))
-					{
+					if(extension.isEqual(end)) {
 						extension.add(end);
 						goalReached = true;
 						break;
@@ -192,42 +185,27 @@ public class LightningTest extends BaseScreen {
 				iter++;
 			}
 			if (!goalReached) {
-//				Node closest = tree.getClosestNode(end);
-//				closest.add(end);
+				Node closest = start.getClosestNode(end);
+				closest.add(end);
 			}
-			return tree;
+			return start;
 		}
 
 		static Node randomNode(Node target, float range) {
-			Node node = new Node();
 			rngPointInCircle(target.x, target.y, range, tmp);
-			node.x = tmp.x;
-			node.y = tmp.y;
-//			node.x = target.x;
-//			node.y = target.y;
-			return node;
+			rng.x = tmp.x;
+			rng.y = tmp.y;
+			return rng;
 		}
 
 		static Vector2 tmp = new Vector2();
-		static Node createExtension(Node from, Node to, float dst, float range) {
-//			if (MathUtils.random() > .75f) return null;
+		static Node createExtension(Node from, Node to, float minDst, float maxDst, float range) {
+			if (MathUtils.random() > .9f) return null;
 			Node node = new Node();
-			tmp.set(to.x, to.y).sub(from.x, from.y).nor().scl(dst);
-//			rngPointInCircle(tmp.x, tmp.y, range, tmp);
-			node.x = tmp.x;
-			node.y = tmp.y;
-
-//			float t = MathUtils.PI2 * MathUtils.random();
-//			float u = MathUtils.random(2f);
-//			float r = (float)Math.sqrt(u);
-//			float scl = 1;
-//			float x = r * MathUtils.cos(t) * scl;
-//			float y = r * MathUtils.sin(t) * scl;
-//			node.x = x;
-//			node.y = y;
-
-//			node.x = (from.x + to.x)/2 + MathUtils.random(-.25f, .25f) * dst;
-//			node.y = (from.y + to.y)/2 + MathUtils.random(-.25f, .25f) * dst;
+			tmp.set(to.x, to.y).sub(from.x, from.y).nor().scl(MathUtils.random(minDst, maxDst));
+			rngPointInCircle(tmp.x, tmp.y, range, tmp);
+			node.x = from.x + tmp.x;
+			node.y = from.y + tmp.y;
 			return node;
 		}
 	}
