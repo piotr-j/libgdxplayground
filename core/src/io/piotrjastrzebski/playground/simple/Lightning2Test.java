@@ -198,9 +198,7 @@ public class Lightning2Test extends BaseScreen {
 			}
 
 			public void draw (ShapeRenderer renderer, float alpha) {
-				float a = intensity * alpha;
-				renderer.setColor(a * .75f, a * .75f, a * 1.25f, 1);
-//				renderer.setColor(1, 1, 1, 1);
+				renderer.setColor(.75f, .75f, 1, alpha * intensity);
 				renderer.line(start, end);
 			}
 		}
