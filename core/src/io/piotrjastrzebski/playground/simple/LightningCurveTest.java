@@ -28,16 +28,17 @@ public class LightningCurveTest extends BaseScreen {
 	public LightningCurveTest (GameReset game) {
 		super(game);
 		clear.set(Color.DARK_GRAY);
-		curves.add(new Curve());
+
 
 		noise = new OpenNoise(9, .65, 6471423);
 
 		for (int x = 0; x < width; x++) {
 			for (int y = 0; y < height; y++) {
-				values[x][y] = (float)(noise.getNoise(x * step, y * step) + 1)/2;
+				values[x][y] = (float)noise.getNoise(x * step, y * step);
 			}
 		}
 
+		curves.add(new Curve(noise));
 	}
 
 	@Override public void render (float delta) {
@@ -47,7 +48,7 @@ public class LightningCurveTest extends BaseScreen {
 		renderer.begin(ShapeRenderer.ShapeType.Filled);
 		for (int x = 0; x < width; x++) {
 			for (int y = 0; y < height; y++) {
-				float a = values[x][y];
+				float a = (values[x][y] + 1)/2;
 				renderer.setColor(a, a, a, 1);
 				renderer.rect(-width * step /2 + x * step, -height * step /2 + y *step, step, step);
 			}
@@ -81,8 +82,11 @@ public class LightningCurveTest extends BaseScreen {
 		public Curve prev;
 		public Curve next;
 		private boolean drawPolygon;
+		private OpenNoise noise;
+		private boolean rngCircle = false;
 
-		public Curve () {
+		public Curve (OpenNoise noise) {
+			this.noise = noise;
 			tmps.clear();
 			tmps.add(new Vector2(0, 0));
 			tmps.add(new Vector2(0, 3f));
@@ -98,7 +102,7 @@ public class LightningCurveTest extends BaseScreen {
 		public float at(float a) {
 			return 0;
 		}
-
+		float scroll;
 		public void draw(ShapeRenderer renderer) {
 			renderer.setColor(Color.GREEN);
 			for (Handle handle : handles) {
@@ -113,7 +117,7 @@ public class LightningCurveTest extends BaseScreen {
 			dtmp.set(tmp);
 			renderer.setColor(Color.MAGENTA);
 			renderer.circle(tmp2.x, tmp2.y, .1f, 8);
-
+			scroll += Gdx.graphics.getDeltaTime();
 			while (at < 1) {
 				at += STEP;
 				bezier.valueAt(tmp2, at);
@@ -126,11 +130,22 @@ public class LightningCurveTest extends BaseScreen {
 				// dst from start would be better then that
 				float a = at < .5f?at * 2:2 * (1 - at);
 				a = Interpolation.circle.apply(a);
-				rngPointInCircle(dtmp2.x, dtmp2.y, .5f * a, tmpOut);
+				randomizePoint(dtmp2, a, tmpOut);
 				dtmp2.set(tmpOut);
 				renderer.setColor(Color.CYAN);
 				renderer.line(dtmp, dtmp2);
 				dtmp.set(dtmp2);
+			}
+		}
+
+		private void randomizePoint (Vector2 point, float a, Vector2 out) {
+			if (rngCircle) {
+				rngPointInCircle(point.x, point.y, .5f * a, out);
+			} else {
+				float s = .5f * scroll;
+				float ox = (float)noise.getNoise(point.x * s, point.y * s);
+				float oy = (float)noise.getNoise((point.x + 100) * s, (point.y + 100) * s);
+				out.set(point).add(ox * a, oy * a);
 			}
 		}
 
@@ -280,8 +295,8 @@ public class LightningCurveTest extends BaseScreen {
 				for (int i = curves.size - 1; i >= 0; i--) {
 					Curve curve = curves.get(i);
 					if (curve.contains(cs.x, cs.y)) {
-						Curve c1 = new Curve();
-						Curve c2 = new Curve();
+						Curve c1 = new Curve(noise);
+						Curve c2 = new Curve(noise);
 						c1.prev = curve.prev;
 						if (c1.prev != null) {
 							c1.prev.next = c1;
