@@ -23,9 +23,12 @@ public class CurveEditTest extends BaseScreen {
 	public CurveEditTest (GameReset game) {
 		super(game);
 		clear.set(Color.GRAY);
+		gameCamera.zoom = .5f;
+		gameCamera.update();
 		curves.add(new Curve());
 	}
 
+	Vector2 tmpOut = new Vector2();
 	@Override public void render (float delta) {
 		super.render(delta);
 		renderer.setProjectionMatrix(gameCamera.combined);
@@ -34,6 +37,20 @@ public class CurveEditTest extends BaseScreen {
 			curve.draw(renderer);
 		}
 		renderer.end();
+
+		renderer.begin(ShapeRenderer.ShapeType.Filled);
+		for (Curve curve : curves) {
+			if (curve.contains(cs.x, cs.y)) {
+				float at = curve.bezier.locate(cs);
+				curve.bezier.valueAt(tmpOut, at);
+				renderer.setColor(Color.BLUE);
+				renderer.circle(cs.x, cs.y, .1f, 8);
+				renderer.setColor(Color.RED);
+				renderer.circle(tmpOut.x, tmpOut.y, .1f, 8);
+			}
+		}
+		renderer.end();
+
 		if(doubleClickTimer > 0) doubleClickTimer -= delta;
 	}
 

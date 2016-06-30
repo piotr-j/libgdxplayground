@@ -2,10 +2,7 @@ package io.piotrjastrzebski.playground.simple;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.math.Bezier;
-import com.badlogic.gdx.math.Circle;
-import com.badlogic.gdx.math.Polygon;
-import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.*;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import io.piotrjastrzebski.playground.BaseScreen;
@@ -19,10 +16,12 @@ public class CurveEdit2Test extends BaseScreen {
 	private static final String TAG = CurveEdit2Test.class.getSimpleName();
 
 	Curves curves;
+	Vector2 out = new Vector2();
 	public CurveEdit2Test (GameReset game) {
 		super(game);
 		clear.set(Color.GRAY);
-
+		gameCamera.zoom = .33f;
+		gameCamera.update();
 		curves = new Curves();
 	}
 
@@ -30,10 +29,23 @@ public class CurveEdit2Test extends BaseScreen {
 		super.render(delta);
 
 		curves.update(delta);
-
 		renderer.setProjectionMatrix(gameCamera.combined);
 		renderer.begin(ShapeRenderer.ShapeType.Line);
 		curves.draw(renderer);
+		renderer.end();
+
+		renderer.begin(ShapeRenderer.ShapeType.Filled);
+		renderer.setColor(Color.SCARLET);
+		for (Curve curve : curves.curves) {
+			if (curve.pointOnLine(cs.x, cs.y)) {
+				renderer.setColor(Color.LIME);
+				out.setZero();
+				curve.closestPointTo(cs.x, cs.y, out);
+				break;
+			}
+		}
+		renderer.circle(cs.x, cs.y, .05f, 16);
+		renderer.circle(out.x, out.y, .025f, 16);
 		renderer.end();
 	}
 
@@ -43,9 +55,10 @@ public class CurveEdit2Test extends BaseScreen {
 
 		public Curves () {
 			Curve curve = new Curve();
-			curve.startHandle.set(0, 3);
-			curve.endHandle.set(3, 5);
-			curve.end.set(5, 5);
+			curve.start.set(-3, -3);
+			curve.startHandle.set(-3, 0);
+			curve.endHandle.set(0, 3);
+			curve.end.set(3, 3);
 			curve.rebuild();
 			curves.add(curve);
 		}
@@ -186,7 +199,6 @@ public class CurveEdit2Test extends BaseScreen {
 
 		private Array<Vector2> cache = new Array<>();
 
-		private Polygon polygon = new Polygon();
 		private static Pool<Vector2> cachePool = new Pool<Vector2>() {
 			@Override protected Vector2 newObject () {
 				return new Vector2();
@@ -210,7 +222,10 @@ public class CurveEdit2Test extends BaseScreen {
 			tmp5.set(tmp2).sub(tmp).nor().scl(.25f).rotate(90);
 			renderer.line(tmp.x, tmp.y, tmp.x + tmp5.x, tmp.y + tmp5.y);
 			renderer.line(tmp.x, tmp.y, tmp.x - tmp5.x, tmp.y - tmp5.y);
-
+			renderer.setColor(Color.RED);
+			renderer.circle(start.x, start.y, .1f, 16);
+			renderer.setColor(Color.BLUE);
+			renderer.circle(end.x, end.y, .1f, 16);
 			for (int i = 1; i < size; i++) {
 				tmp2.set(cache.get(i));
 				renderer.setColor(a, 1, 1 - a, 1);
@@ -226,20 +241,52 @@ public class CurveEdit2Test extends BaseScreen {
 				tmp.set(tmp2);
 				tmp3.set(tmp4);
 			}
+
+
+			renderer.setColor(Color.DARK_GRAY);
+			for (int i = 0; i < indices.length -3; i+=3) {
+				float x1 = vertices[indices[i] * 2];
+				float y1 = vertices[indices[i] * 2 + 1];
+				float x2 = vertices[indices[i + 1] * 2];
+				float y2 = vertices[indices[i + 1] * 2 + 1];
+				float x3 = vertices[indices[i + 2] * 2];
+				float y3 = vertices[indices[i + 2] * 2 + 1];
+				renderer.triangle(x1, y1, x2, y2, x3, y3);
+			}
+//			renderer.polygon(polygon);
 		}
 
+		public boolean pointOnLine(float x, float y) {
+			for (int i = 0; i < indices.length -3; i+=3) {
+				float x1 = vertices[indices[i] * 2];
+				float y1 = vertices[indices[i] * 2 + 1];
+				float x2 = vertices[indices[i + 1] * 2];
+				float y2 = vertices[indices[i + 1] * 2 + 1];
+				float x3 = vertices[indices[i + 2] * 2];
+				float y3 = vertices[indices[i + 2] * 2 + 1];
+				if (Intersector.isPointInTriangle(x, y, x1, y1, x2, y2, x3, y3)){
+					return true;
+				}
+			}
+			return false;
+		}
+
+		float polyScale = .33f;
+		float[] polygon;
+		float[] vertices;
+		int[] indices;
 		protected void rebuild() {
 			float len = approxLength(APPROX_LEN_SAMPLES);
 			// we want 10 samples per 1 unit of length
 			int iters = (int)(len * SAMPLES_PER_UNIT_LEN);
 			float step = 1f/iters;
 			// we need extra start point, so we start before 0
-			float at = -step;
-			at = 0;
+			float at = 0;
 			cachePool.freeAll(cache);
 			cache.clear();
 			valueAt(tmp, at);
 			cache.add(cachePool.obtain().set(tmp));
+
 			while (at < 1) {
 				at += step;
 				if (at > 1){
@@ -253,6 +300,53 @@ public class CurveEdit2Test extends BaseScreen {
 					cache.add(cachePool.obtain().set(tmp2));
 				}
 				tmp.set(tmp2);
+			}
+			vertices = new float[cache.size * 4];
+			polygon = new float[cache.size * 4];
+			int vid = 0;
+			int psid = 0;
+			int peid = polygon.length -1;
+
+			for (int i = 0; i < cache.size - 1; i++) {
+				tmp.set(cache.get(i));
+				tmp2.set(cache.get(i + 1));
+				tmp5.set(tmp2).sub(tmp).nor().scl(polyScale).rotate(90);
+				vertices[vid++] = tmp.x + tmp5.x;
+				vertices[vid++] = tmp.y + tmp5.y;
+				vertices[vid++] = tmp.x - tmp5.x;
+				vertices[vid++] = tmp.y - tmp5.y;
+
+				polygon[psid++] = tmp.x + tmp5.x;
+				polygon[psid++] = tmp.y + tmp5.y;
+				polygon[peid--] = tmp.y - tmp5.y;
+				polygon[peid--] = tmp.x - tmp5.x;
+			}
+
+			// add last point
+			tmp.set(cache.get(cache.size-1));
+			tmp2.set(cache.get(cache.size-2));
+			tmp5.set(tmp2).sub(tmp).nor().scl(polyScale).rotate(90);
+			vertices[vid++] = tmp.x - tmp5.x;
+			vertices[vid++] = tmp.y - tmp5.y;
+			vertices[vid++] = tmp.x + tmp5.x;
+			vertices[vid++] = tmp.y + tmp5.y;
+
+			polygon[psid++] = tmp.x - tmp5.x;
+			polygon[psid++] = tmp.y - tmp5.y;
+			polygon[peid--] = tmp.y + tmp5.y;
+			polygon[peid--] = tmp.x + tmp5.x;
+
+			int ox = 0;
+			indices = new int[cache.size * 6];
+			for (int i = 0; i < indices.length -6; i+=6) {
+				// 0, 1, 2, 1, 2, 3
+				indices[i] = ox;
+				indices[i + 1] = 1 + ox;
+				indices[i + 2] = 2 + ox;
+				indices[i + 3] = 1 + ox;
+				indices[i + 4] = 2 + ox;
+				indices[i + 5] = 3 + ox;
+				ox += 2;
 			}
 		}
 
@@ -273,6 +367,19 @@ public class CurveEdit2Test extends BaseScreen {
 
 		protected Vector2 derivativeAt (Vector2 out, float at) {
 			return Bezier.cubic_derivative(out, at, start, startHandle, endHandle, end, btmp);
+		}
+
+		public Vector2 closestPointTo (float x, float y, Vector2 out) {
+			Vector2 p1 = start;
+			Vector2 p2 = end;
+			Vector2 p3 = out.set(x, y);
+			float l1Sqr = p1.dst2(p2);
+			float l2Sqr = p3.dst2(p2);
+			float l3Sqr = p3.dst2(p1);
+			float l1 = (float)Math.sqrt(l1Sqr);
+			float s = (l2Sqr + l1Sqr - l3Sqr) / (2 * l1);
+			float at = MathUtils.clamp((l1 - s) / l1, 0f, 1f);
+			return valueAt(out, at);
 		}
 	}
 
