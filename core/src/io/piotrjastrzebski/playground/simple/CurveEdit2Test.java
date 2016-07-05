@@ -56,6 +56,7 @@ public class CurveEdit2Test extends BaseScreen {
 
 	protected static class Curves {
 		Array<Curve> curves = new Array<>();
+		private Vector2 out = new Vector2();
 		private float handleRadius = .25f;
 
 		public Curves () {
@@ -68,7 +69,7 @@ public class CurveEdit2Test extends BaseScreen {
 			curves.add(curve);
 		}
 
-		private float doubleClickDelay = .1f;
+		private float doubleClickDelay = .25f;
 		private float doubleClickTimer;
 		public void update(float delta) {
 			if (doubleClickTimer > 0) doubleClickTimer -= delta;
@@ -95,10 +96,10 @@ public class CurveEdit2Test extends BaseScreen {
 		private Circle tmpCircle = new Circle();
 		public boolean touchDown (float x, float y, int button) {
 			// do we care about the buttons?
+			tmpCircle.set(x, y, handleRadius);
 			if (doubleClickTimer <= 0) {
 				doubleClickTimer = doubleClickDelay;
 
-				tmpCircle.set(x, y, handleRadius);
 				// find handle to drag
 				for (Curve curve : curves) {
 					if (tmpCircle.contains(curve.startHandle)) {
@@ -140,11 +141,95 @@ public class CurveEdit2Test extends BaseScreen {
 					}
 				}
 			} else {
-				// on empty space, create
+				boolean onCurveHandle = false;
+				Curve onCurve = null;
+				Vector2 handle = null;
+				for (Curve curve : curves) {
+					if (tmpCircle.contains(curve.start)) {
+						onCurveHandle = true;
+						onCurve = curve;
+						handle = curve.startHandle;
+						break;
+					}
+					if (tmpCircle.contains(curve.end)) {
+						onCurveHandle = true;
+						onCurve = curve;
+						handle = curve.startHandle;
+						break;
+					}
+				}
+				if (onCurveHandle) {
+					// on end/start handle, remove handle, merge curves
+					if (onCurve.next == null && onCurve.prev == null) {
+						// not connected, just remove it
+						curves.removeValue(onCurve, true);
+					} else {
+						if (onCurve.start == handle) {
+							if (onCurve.prev != null) {
+								// merge prev and this one
+								onCurve.prev.next = onCurve.next;
+								onCurve.prev.end.set(onCurve.end);
+								onCurve.prev.endHandle.set(onCurve.endHandle);
+								onCurve.rebuild();
+							} else {
+								onCurve.next.prev = null;
+							}
+							curves.removeValue(onCurve, true);
+						} else if (onCurve.end == handle) {
+							if (onCurve.next != null) {
+								// merge next and this one
+								onCurve.next.prev = onCurve.prev;
+								onCurve.next.start.set(onCurve.start);
+								onCurve.next.startHandle.set(onCurve.startHandle);
+								onCurve.rebuild();
+							} else {
+								onCurve.prev.next = null;
+							}
+							curves.removeValue(onCurve, true);
+						}
+					}
+				} else {
+					boolean onCurvePath = false;
+					out.setZero();
+					for (Curve curve : curves) {
+						if (curve.pointOnLine(x, y, out)) {
+							onCurvePath = true;
+							onCurve = curve;
+							break;
+						}
+					}
+					if (onCurvePath) {
+						// on curve, split
+						int at = curves.indexOf(onCurve, true);
+						Curve curve = new Curve();
+						curve.start.set(x, y);
+						curve.startHandle.set(x, y + 1);
+						curve.endHandle.set(onCurve.endHandle);
+						curve.end.set(onCurve.end);
+						curve.rebuild();
+						curve.prev = onCurve;
+						onCurve.next = curve;
+						onCurve.end.set(x, y);
+						onCurve.endHandle.set(x, y - 1);
+						onCurve.rebuild();
 
-				// on curve, split
 
-				// on end/start handle, remove handle, merge curves
+						if (at == curves.size) {
+							curves.add(curve);
+						} else {
+							curves.insert(at + 1, curve);
+						}
+					} else {
+						// on empty space, create
+						Curve curve = new Curve();
+						curve.start.set(x, y);
+						curve.startHandle.set(x, y + 1);
+						curve.endHandle.set(x + 1, y + 1);
+						curve.end.set(x + 1, y);
+						curve.rebuild();
+						curves.add(curve);
+					}
+				}
 			}
 			return true;
 		}
@@ -155,6 +240,13 @@ public class CurveEdit2Test extends BaseScreen {
 				curveEdit.dragged.set(x, y).add(curveEdit.dragOffset);
 				if (curveEdit.handle != null) {
 					curveEdit.handle.set(curveEdit.dragged).add(curveEdit.handleOffset);
+					if (curveEdit.curve.end == curveEdit.dragged && curveEdit.curve.next != null) {
+						curveEdit.curve.next.start.set(curveEdit.curve.end);
+						curveEdit.curve.next.rebuild();
+					} else if (curveEdit.curve.start == curveEdit.dragged && curveEdit.curve.prev != null) {
+						curveEdit.curve.prev.end.set(curveEdit.curve.start);
+						curveEdit.curve.prev.rebuild();
+					}
 				}
 				curveEdit.curve.rebuild();
 			}
@@ -166,6 +258,12 @@ public class CurveEdit2Test extends BaseScreen {
 				curveEdit.dragged.set(x, y).add(curveEdit.dragOffset);
 				if (curveEdit.handle != null) {
 					curveEdit.handle.set(curveEdit.dragged).add(curveEdit.handleOffset);
+					if (curveEdit.curve.end == curveEdit.dragged && curveEdit.curve.next != null) {
+						curveEdit.curve.next.rebuild();
+					} else if (curveEdit.curve.start == curveEdit.dragged && curveEdit.curve.prev != null) {
+						curveEdit.curve.prev.end.set(curveEdit.curve.start);
+						curveEdit.curve.prev.rebuild();
+					}
 				}
 				curveEdit.curve.rebuild();
 				curveEdit.curve = null;
@@ -201,6 +299,9 @@ public class CurveEdit2Test extends BaseScreen {
 		private static Vector2 tmp3 = new Vector2();
 		private static Vector2 tmp4 = new Vector2();
 		private static Vector2 tmp5 = new Vector2();
+
+		protected Curve prev;
+		protected Curve next;
 
 		private Array<Vector2> cache = new Array<>();
 
