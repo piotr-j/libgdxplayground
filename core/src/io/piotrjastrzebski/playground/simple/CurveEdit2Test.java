@@ -1,6 +1,7 @@
 package io.piotrjastrzebski.playground.simple;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.FPSLogger;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.*;
 import com.badlogic.gdx.utils.Array;
@@ -17,6 +18,7 @@ public class CurveEdit2Test extends BaseScreen {
 
 	Curves curves;
 	Vector2 out = new Vector2();
+	FPSLogger fpsLogger = new FPSLogger();
 	public CurveEdit2Test (GameReset game) {
 		super(game);
 		clear.set(Color.GRAY);
@@ -27,26 +29,29 @@ public class CurveEdit2Test extends BaseScreen {
 
 	@Override public void render (float delta) {
 		super.render(delta);
-
+		fpsLogger.log();
 		curves.update(delta);
 		renderer.setProjectionMatrix(gameCamera.combined);
 		renderer.begin(ShapeRenderer.ShapeType.Line);
 		curves.draw(renderer);
 		renderer.end();
 
-		renderer.begin(ShapeRenderer.ShapeType.Filled);
-		renderer.setColor(Color.SCARLET);
 		for (Curve curve : curves.curves) {
-			if (curve.pointOnLine(cs.x, cs.y)) {
+			out.setZero();
+			if (curve.pointOnLine(cs.x, cs.y, out)) {
+				renderer.begin(ShapeRenderer.ShapeType.Filled);
+				renderer.setColor(Color.SCARLET);
+				renderer.circle(cs.x, cs.y, .05f, 16);
+				renderer.setColor(Color.ORANGE);
+				renderer.circle(out.x, out.y, .025f, 16);
 				renderer.setColor(Color.LIME);
-				out.setZero();
+				// this is more or less useless for anything but very straight curve
 				curve.closestPointTo(cs.x, cs.y, out);
+				renderer.circle(out.x, out.y, .025f, 16);
+				renderer.end();
 				break;
 			}
 		}
-		renderer.circle(cs.x, cs.y, .05f, 16);
-		renderer.circle(out.x, out.y, .025f, 16);
-		renderer.end();
 	}
 
 	protected static class Curves {
@@ -219,9 +224,9 @@ public class CurveEdit2Test extends BaseScreen {
 			tmp2.set(cache.get(1));
 
 			renderer.setColor(Color.RED);
-			tmp5.set(tmp2).sub(tmp).nor().scl(.25f).rotate(90);
-			renderer.line(tmp.x, tmp.y, tmp.x + tmp5.x, tmp.y + tmp5.y);
-			renderer.line(tmp.x, tmp.y, tmp.x - tmp5.x, tmp.y - tmp5.y);
+//			tmp5.set(tmp2).sub(tmp).nor().scl(.25f).rotate(90);
+//			renderer.line(tmp.x, tmp.y, tmp.x + tmp5.x, tmp.y + tmp5.y);
+//			renderer.line(tmp.x, tmp.y, tmp.x - tmp5.x, tmp.y - tmp5.y);
 			renderer.setColor(Color.RED);
 			renderer.circle(start.x, start.y, .1f, 16);
 			renderer.setColor(Color.BLUE);
@@ -232,16 +237,15 @@ public class CurveEdit2Test extends BaseScreen {
 				renderer.line(tmp, tmp2);
 
 				renderer.setColor(Color.RED);
-				tmp5.set(tmp).sub(tmp2).nor().scl(.25f).rotate(90);
-				renderer.line(tmp2.x, tmp2.y, tmp2.x + tmp5.x, tmp2.y + tmp5.y);
-				renderer.line(tmp2.x, tmp2.y, tmp2.x - tmp5.x, tmp2.y - tmp5.y);
+//				tmp5.set(tmp).sub(tmp2).nor().scl(.25f).rotate(90);
+//				renderer.line(tmp2.x, tmp2.y, tmp2.x + tmp5.x, tmp2.y + tmp5.y);
+//				renderer.line(tmp2.x, tmp2.y, tmp2.x - tmp5.x, tmp2.y - tmp5.y);
 
 				a += step;
 
 				tmp.set(tmp2);
 				tmp3.set(tmp4);
 			}
-
 
 			renderer.setColor(Color.DARK_GRAY);
 			for (int i = 0; i < indices.length -3; i+=3) {
@@ -253,10 +257,13 @@ public class CurveEdit2Test extends BaseScreen {
 				float y3 = vertices[indices[i + 2] * 2 + 1];
 				renderer.triangle(x1, y1, x2, y2, x3, y3);
 			}
+//			renderer.setColor(Color.MAGENTA);
 //			renderer.polygon(polygon);
 		}
 
-		public boolean pointOnLine(float x, float y) {
+		public boolean pointOnLine(float x, float y, Vector2 out) {
+			int triangle = 0;
+			int segment = 0;
 			for (int i = 0; i < indices.length -3; i+=3) {
 				float x1 = vertices[indices[i] * 2];
 				float y1 = vertices[indices[i] * 2 + 1];
@@ -264,15 +271,32 @@ public class CurveEdit2Test extends BaseScreen {
 				float y2 = vertices[indices[i + 1] * 2 + 1];
 				float x3 = vertices[indices[i + 2] * 2];
 				float y3 = vertices[indices[i + 2] * 2 + 1];
+				triangle++;
+				if (triangle > 1 && triangle %2 == 1) {
+					segment++;
+				}
 				if (Intersector.isPointInTriangle(x, y, x1, y1, x2, y2, x3, y3)){
+					if (out != null) {
+						Vector2 p1;
+						Vector2 p2;
+						if (segment == cache.size -1) {
+							p1 = cache.get(segment -1);
+							p2 = cache.get(segment);
+						} else {
+							p1 = cache.get(segment);
+							p2 = cache.get(segment + 1);
+						}
+						Intersector.nearestSegmentPoint(p1, p2, tmp.set(x, y), out);
+					}
 					return true;
 				}
 			}
 			return false;
 		}
 
-		float polyScale = .33f;
-		float[] polygon;
+		float polyScale = .1f;
+		// unless we want just an outline, polygon is kinda useless
+//		float[] polygon;
 		float[] vertices;
 		int[] indices;
 		protected void rebuild() {
@@ -302,39 +326,64 @@ public class CurveEdit2Test extends BaseScreen {
 				tmp.set(tmp2);
 			}
 			vertices = new float[cache.size * 4];
-			polygon = new float[cache.size * 4];
+//			polygon = new float[cache.size * 4];
 			int vid = 0;
-			int psid = 0;
-			int peid = polygon.length -1;
+//			int psid = 0;
+//			int peid = polygon.length -1;
 
-			for (int i = 0; i < cache.size - 1; i++) {
-				tmp.set(cache.get(i));
-				tmp2.set(cache.get(i + 1));
-				tmp5.set(tmp2).sub(tmp).nor().scl(polyScale).rotate(90);
-				vertices[vid++] = tmp.x + tmp5.x;
-				vertices[vid++] = tmp.y + tmp5.y;
-				vertices[vid++] = tmp.x - tmp5.x;
-				vertices[vid++] = tmp.y - tmp5.y;
+			tmp.set(cache.get(0));
+			tmp2.set(cache.get(1));
 
-				polygon[psid++] = tmp.x + tmp5.x;
-				polygon[psid++] = tmp.y + tmp5.y;
-				polygon[peid--] = tmp.y - tmp5.y;
-				polygon[peid--] = tmp.x - tmp5.x;
+			tmp3.set(tmp2).sub(tmp).nor().rotate(90).scl(polyScale);
+			vertices[vid++] = tmp.x + tmp3.x;
+			vertices[vid++] = tmp.y + tmp3.y;
+			vertices[vid++] = tmp.x - tmp3.x;
+			vertices[vid++] = tmp.y - tmp3.y;
+
+//			polygon[psid++] = tmp.x + tmp3.x;
+//			polygon[psid++] = tmp.y + tmp3.y;
+//			polygon[peid--] = tmp.y - tmp3.y;
+//			polygon[peid--] = tmp.x - tmp3.x;
+
+			int size = cache.size;
+			for (int i = 2; i < size; i++) {
+				tmp3.set(cache.get(i));
+
+				tmp4.set(tmp2).sub(tmp).nor();
+				tmp5.set(tmp2).sub(tmp3).nor();
+				float angle = tmp4.angle(tmp5);
+				// flip it around so we are always on the same side of the curve
+				if (angle < 0) {
+					angle = 360 + angle;
+				}
+				angle = tmp4.angle() + angle/2;
+				tmp5.set(1, 0).rotate(angle).nor().scl(polyScale);
+
+				vertices[vid++] = tmp2.x + tmp5.x;
+				vertices[vid++] = tmp2.y + tmp5.y;
+				vertices[vid++] = tmp2.x - tmp5.x;
+				vertices[vid++] = tmp2.y - tmp5.y;
+//				polygon[psid++] = tmp2.x + tmp5.x;
+//				polygon[psid++] = tmp2.y + tmp5.y;
+//				polygon[peid--] = tmp2.y - tmp5.y;
+//				polygon[peid--] = tmp2.x - tmp5.x;
+
+				tmp.set(tmp2);
+				tmp2.set(tmp3);
 			}
 
-			// add last point
 			tmp.set(cache.get(cache.size-1));
 			tmp2.set(cache.get(cache.size-2));
-			tmp5.set(tmp2).sub(tmp).nor().scl(polyScale).rotate(90);
-			vertices[vid++] = tmp.x - tmp5.x;
-			vertices[vid++] = tmp.y - tmp5.y;
-			vertices[vid++] = tmp.x + tmp5.x;
-			vertices[vid++] = tmp.y + tmp5.y;
+			tmp3.set(tmp2).sub(tmp).nor().rotate(90).scl(polyScale);
+			vertices[vid++] = tmp.x - tmp3.x;
+			vertices[vid++] = tmp.y - tmp3.y;
+			vertices[vid++] = tmp.x + tmp3.x;
+			vertices[vid++] = tmp.y + tmp3.y;
 
-			polygon[psid++] = tmp.x - tmp5.x;
-			polygon[psid++] = tmp.y - tmp5.y;
-			polygon[peid--] = tmp.y + tmp5.y;
-			polygon[peid--] = tmp.x + tmp5.x;
+//			polygon[psid++] = tmp.x - tmp3.x;
+//			polygon[psid++] = tmp.y - tmp3.y;
+//			polygon[peid--] = tmp.y + tmp3.y;
+//			polygon[peid--] = tmp.x + tmp3.x;
 
 			int ox = 0;
 			indices = new int[cache.size * 6];
