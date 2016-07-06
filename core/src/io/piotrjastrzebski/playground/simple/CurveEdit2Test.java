@@ -313,6 +313,8 @@ public class CurveEdit2Test extends BaseScreen {
 		protected Curve prev;
 		protected Curve next;
 
+		protected Rectangle bounds = new Rectangle();
+
 		private Array<Vector2> cache = new Array<>();
 
 		private static Pool<Vector2> cachePool = new Pool<Vector2>() {
@@ -370,6 +372,9 @@ public class CurveEdit2Test extends BaseScreen {
 			}
 //			renderer.setColor(Color.MAGENTA);
 //			renderer.polygon(polygon);
+
+			renderer.setColor(Color.GREEN);
+			renderer.rect(bounds.x, bounds.y, bounds.width, bounds.height);
 		}
 
 		public void drawFilled(ShapeRenderer renderer) {
@@ -391,6 +396,7 @@ public class CurveEdit2Test extends BaseScreen {
 		}
 
 		public boolean pointOnLine(float x, float y, Vector2 out) {
+			if (!bounds.contains(x, y)) return false;
 			int triangle = 0;
 			int segment = 0;
 			for (int i = 0; i < indices.length -3; i+=3) {
@@ -440,6 +446,11 @@ public class CurveEdit2Test extends BaseScreen {
 			valueAt(tmp, at);
 			cache.add(cachePool.obtain().set(tmp));
 
+			float sx = tmp.x;
+			float sy = tmp.y;
+			float ex = tmp.x;
+			float ey = tmp.y;
+
 			while (at < 1) {
 				at += step;
 				if (at > 1){
@@ -447,13 +458,24 @@ public class CurveEdit2Test extends BaseScreen {
 					valueAt(tmp2, at);
 					if (!cache.get(cache.size -1).epsilonEquals(tmp2, .01f)) {
 						cache.add(cachePool.obtain().set(tmp2));
+						if (tmp2.x < sx) sx = tmp2.x;
+						if (tmp2.y < sy) sy = tmp2.y;
+						if (tmp2.x > ex) ex = tmp2.x;
+						if (tmp2.y > ey) ey = tmp2.y;
 					}
 				} else {
 					valueAt(tmp2, at);
 					cache.add(cachePool.obtain().set(tmp2));
+					if (tmp2.x < sx) sx = tmp2.x;
+					if (tmp2.y < sy) sy = tmp2.y;
+					if (tmp2.x > ex) ex = tmp2.x;
+					if (tmp2.y > ey) ey = tmp2.y;
 				}
 				tmp.set(tmp2);
 			}
+			// extend by scale, we could set bounds by extending with verts, but this is good enough
+			bounds.set(sx - polyScale, sy - polyScale, ex - sx + polyScale * 2, ey - sy + polyScale * 2);
+
 			vertices = new float[cache.size * 4];
 //			polygon = new float[cache.size * 4];
 			int vid = 0;
