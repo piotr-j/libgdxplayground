@@ -32,6 +32,9 @@ public class CurveEdit2Test extends BaseScreen {
 		fpsLogger.log();
 		curves.update(delta);
 		renderer.setProjectionMatrix(gameCamera.combined);
+		renderer.begin(ShapeRenderer.ShapeType.Filled);
+		curves.drawFilled(renderer);
+		renderer.end();
 		renderer.begin(ShapeRenderer.ShapeType.Line);
 		curves.draw(renderer);
 		renderer.end();
@@ -79,6 +82,13 @@ public class CurveEdit2Test extends BaseScreen {
 			for (Curve curve : curves) {
 				drawHandles(renderer, curve);
 				curve.draw(renderer);
+			}
+		}
+
+
+		public void drawFilled (ShapeRenderer renderer) {
+			for (Curve curve : curves) {
+				curve.drawFilled(renderer);
 			}
 		}
 
@@ -347,6 +357,24 @@ public class CurveEdit2Test extends BaseScreen {
 				tmp.set(tmp2);
 				tmp3.set(tmp4);
 			}
+
+			renderer.setColor(Color.LIGHT_GRAY);
+			for (int i = 0; i < indices.length -3; i+=3) {
+				float x1 = vertices[indices[i] * 2];
+				float y1 = vertices[indices[i] * 2 + 1];
+				float x2 = vertices[indices[i + 1] * 2];
+				float y2 = vertices[indices[i + 1] * 2 + 1];
+				float x3 = vertices[indices[i + 2] * 2];
+				float y3 = vertices[indices[i + 2] * 2 + 1];
+				renderer.triangle(x1, y1, x2, y2, x3, y3);
+			}
+//			renderer.setColor(Color.MAGENTA);
+//			renderer.polygon(polygon);
+		}
+
+		public void drawFilled(ShapeRenderer renderer) {
+			int size = cache.size;
+			if (size == 0) return;
 
 			renderer.setColor(Color.DARK_GRAY);
 			for (int i = 0; i < indices.length -3; i+=3) {
