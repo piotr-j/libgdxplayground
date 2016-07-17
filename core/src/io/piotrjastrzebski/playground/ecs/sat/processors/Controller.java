@@ -43,12 +43,12 @@ public class Controller extends IteratingSystem implements Input, InputProcessor
 	@Override protected void process (int e) {
 		if (selected >= 0 && selected != e) return;
 
-		Polygon polygon = mPolygon.getSafe(e);
+		Polygon polygon = mPolygon.get(e);
 		if (polygon != null && polygon.polygon.contains(touch.x, touch.y)) {
 			selected = e;
 		}
 
-		Circle circle = mCircle.getSafe(e);
+		Circle circle = mCircle.get(e);
 		if (circle != null && circle.circle.contains(touch.x, touch.y)) {
 			selected = e;
 		}

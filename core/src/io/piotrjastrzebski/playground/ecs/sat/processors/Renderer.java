@@ -41,12 +41,12 @@ public class Renderer extends EntityProcessingSystem {
 		renderer.rect(b.x, b.y, b.width, b.height);
 
 		renderer.setColor(mTint.get(e).color);
-		Polygon polygon = mPolygon.getSafe(e);
+		Polygon polygon = mPolygon.get(e);
 		if (polygon != null) {
 			renderer.polygon(polygon.polygon.getTransformedVertices());
 		}
 
-		Circle circle = mCircle.getSafe(e);
+		Circle circle = mCircle.get(e);
 		if (circle != null) {
 			com.badlogic.gdx.math.Circle c = circle.circle;
 			renderer.circle(c.x, c.y, c.radius, 32);

@@ -29,9 +29,9 @@ public class DeferredSystemTest extends BaseScreen {
 		editB.create(CommonComp.class);
 		editB.create(CompB.class);
 		world.process();
-		editA.deleteEntity();
+		world.delete(editA.getEntityId());
 		world.process();
-		editB.deleteEntity();
+		world.delete(editB.getEntityId());
 		world.process();
 
 	}
