@@ -90,7 +90,7 @@ public class ECSWorldIOTest extends BaseScreen {
 
 		SaveFileFormat save = new SaveFileFormat(subscription);
 		StringWriter writer = new StringWriter();
-		manager.save(writer, save);
+//		manager.save(writer, save);
 		String jsonSave = writer.toString();
 		Gdx.app.log("saveData", jsonSave);
 

@@ -60,7 +60,7 @@ public class QTDebugSystem extends BaseSystem {
 	VisLabel fps;
 	@Override protected void initialize () {
 		super.initialize();
-		AspectSubscriptionManager manager = world.getManager(AspectSubscriptionManager.class);
+		AspectSubscriptionManager manager = world.getSystem(AspectSubscriptionManager.class);
 		entitySub = manager.get(Aspect.all(Position.class, Size.class));
 		VisTable container = new VisTable(true);
 		VisWindow window = new VisWindow("Config, options that modify entities require restart");

@@ -18,7 +18,7 @@ public class JobMaker extends BaseSystem {
 	EntitySubscription jobs;
 	@Override protected void initialize () {
 		super.initialize();
-		AspectSubscriptionManager manager = world.getManager(AspectSubscriptionManager.class);
+		AspectSubscriptionManager manager = world.getSystem(AspectSubscriptionManager.class);
 		jobs = manager.get(Aspect.all(Job.class));
 	}
 

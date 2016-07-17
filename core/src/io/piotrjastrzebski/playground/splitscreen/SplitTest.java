@@ -16,6 +16,8 @@ import com.badlogic.gdx.physics.box2d.joints.MouseJoint;
 import com.badlogic.gdx.physics.box2d.joints.MouseJointDef;
 import io.piotrjastrzebski.playground.BaseScreen;
 import io.piotrjastrzebski.playground.GameReset;
+import io.piotrjastrzebski.playground.PlaygroundGame;
+import io.piotrjastrzebski.playground.simple.CurveEdit2Test;
 
 import java.util.ArrayList;
 
@@ -137,10 +139,12 @@ public class SplitTest extends BaseScreen {
 
 		boolean stepped = fixedStep(Gdx.graphics.getDeltaTime());
 
+		Gdx.gl.glDisable(GL20.GL_SCISSOR_TEST);
 		Gdx.gl.glScissor(0, 0, 600, 600);
 		Gdx.gl.glViewport(0, 0, 600, 600);
 		Gdx.gl.glClearColor(.5f,.5f,.5f,1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+		Gdx.gl.glEnable(GL20.GL_SCISSOR_TEST);
 
 		ORIGIN_X = 0;
 		ORIGIN_Y = 0;
@@ -576,5 +580,9 @@ public class SplitTest extends BaseScreen {
 	public boolean scrolled(int amount) {
 		camera1.rotate((float) amount * 3f, 0, 0, 1);
 		return false;
+	}
+
+	public static void main (String[] args) {
+		PlaygroundGame.start(args, SplitTest.class);
 	}
 }
