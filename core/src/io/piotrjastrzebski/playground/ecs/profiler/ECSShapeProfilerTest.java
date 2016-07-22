@@ -88,7 +88,7 @@ public class ECSShapeProfilerTest extends BaseScreen {
 		}
 
 		boolean initialized;
-		@Override protected void process () {
+		@Override protected void process (Bag<BaseSystem> systems) {
 			if (!initialized) initialize();
 			total.start();
 			Object[] systemsData = systems.getData();

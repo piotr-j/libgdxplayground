@@ -5,6 +5,7 @@ import com.artemis.SystemInvocationStrategy;
 import com.artemis.World;
 import com.artemis.utils.Bag;
 import com.artemis.utils.ImmutableBag;
+import com.badlogic.gdx.utils.Array;
 
 /**
  *
@@ -20,7 +21,7 @@ public class ProfilerInvocationStrategy extends SystemInvocationStrategy {
 	}
 
 	boolean initialized;
-	@Override protected void process () {
+	@Override protected void process (Bag<BaseSystem> systems) {
 		if (!initialized) initialize();
 		total.start();
 		Object[] systemsData = systems.getData();
