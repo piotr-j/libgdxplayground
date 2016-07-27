@@ -12,6 +12,8 @@ import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ObjectMap;
+import com.badlogic.gdx.utils.reflect.ClassReflection;
+import com.badlogic.gdx.utils.reflect.ReflectionException;
 import com.kotcrab.vis.ui.VisUI;
 import com.kotcrab.vis.ui.widget.*;
 import io.piotrjastrzebski.playground.asyncscreentest.AsyncScreenTest;
@@ -121,9 +123,8 @@ public class PlaygroundGame extends Game implements GameReset {
 	public void reset () {
 		if (target != null) {
 			try {
-				Constructor constructor = target.getConstructor(GameReset.class);
-				setScreen((BaseScreen)constructor.newInstance(PlaygroundGame.this));
-			} catch (InvocationTargetException | InstantiationException | IllegalAccessException | NoSuchMethodException e) {
+				setScreen((BaseScreen)ClassReflection.getConstructor(target, GameReset.class).newInstance(PlaygroundGame.this));
+			} catch (ReflectionException e) {
 				e.printStackTrace();
 			}
 			target = null;
