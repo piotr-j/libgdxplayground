@@ -35,7 +35,7 @@ public class SimpleSweepCollisionTest extends BaseScreen {
 	}
 
 	@Override public void render (float delta) {
-		// move our drag target if we have any
+		// setPosition our drag target if we have any
 		if (drag != null) {
 			drag.x1(cs.x + dragOffset.x);
 			drag.y1(cs.y + dragOffset.y);

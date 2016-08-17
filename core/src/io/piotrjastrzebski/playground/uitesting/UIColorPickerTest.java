@@ -31,6 +31,10 @@ public class UIColorPickerTest extends BaseScreen {
 			@Override public void finished (Color newColor) {
 				Gdx.app.log("", "Finished " + newColor);
 			}
+
+			@Override public void reset (Color previousColor, Color newColor) {
+
+			}
 		});
 
 		root.add(colorPicker);

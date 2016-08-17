@@ -24,7 +24,7 @@ public enum TaskType {
 	}
 
 	/**
-	 * Check if this count is a valid for this {@link TaskType}
+	 * Check if this count is a update for this {@link TaskType}
 	 * @param count count to check
 	 * @return if count is within min and max
 	 */

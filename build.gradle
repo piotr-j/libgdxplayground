@@ -17,13 +17,13 @@ allprojects {
     version = '1.0'
     ext {
         appName = 'playground'
-        gdxVersion = '1.8.0'
+        gdxVersion = '1.9.3'
         roboVMVersion = '1.2.0'
         box2DLightsVersion = '1.4'
         ashleyVersion = '1.4.0'
         aiVersion = '1.8.0'
-        visuiVersion = '0.9.2'
-        artemisOdbVersion = "2.0.0-SNAPSHOT"
+        visuiVersion = '1.1.5'
+        artemisOdbVersion = "2.0.0"
         artemisOdbcontribVersion = "1.1.0"
         gdxVideoVersion = "0.0.1"
         kryoVersion = "3.0.3"

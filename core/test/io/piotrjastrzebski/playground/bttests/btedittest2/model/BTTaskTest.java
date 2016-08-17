@@ -307,7 +307,7 @@ public class BTTaskTest {
 
 		assertFalse(root.isValid());
 		assertEquals(0, root.getChildCount());
-		// root is not valid, does nothing
+		// root is not update, does nothing
 		root.executePending();
 		assertFalse(root.isValid());
 		root.addChild(care);
@@ -347,7 +347,7 @@ public class BTTaskTest {
 		assertFalse(root.isValid());
 		assertTrue(root.isDirty());
 
-		// cant execute as root is not valid
+		// cant execute as root is not update
 		root.executePending();
 		assertTrue(root.isDirty());
 

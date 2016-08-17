@@ -159,7 +159,7 @@ public class Lightning2Test extends BaseScreen {
 					float displace = dst * displaceNormalScale;
 					normal.nor().rotate(90).scl(MathUtils.random(-displace, displace));
 					midpoint.add(normal);
-//					rngPointInCircle(tmp.x, tmp.y, dst/5, tmp);
+//					rngPointInCircle(tmpCircle.x, tmpCircle.y, dst/5, tmpCircle);
 					segments.add(new Segment(segment.start, midpoint, segment.intensity));
 					segments.add(new Segment(midpoint, segment.end, segment.intensity));
 					// add an extra point

@@ -109,7 +109,7 @@ public class BTTask<E> implements Pool.Poolable {
 
 	public void setValid (boolean newValid) {
 		if (isValid != newValid) {
-			// notify that valid status changed
+			// notify that update status changed
 
 		}
 		isValid = newValid;
@@ -132,7 +132,7 @@ public class BTTask<E> implements Pool.Poolable {
 		return "BTTask{" +
 			"task=" + (task != null ? task.getClass().getSimpleName() : "null") +
 			", type=" + type +
-			", valid=" + isValid +
+			", update=" + isValid +
 			", children=" + getChildCount() +
 			'}';
 	}

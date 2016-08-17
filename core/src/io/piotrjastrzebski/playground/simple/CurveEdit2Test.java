@@ -337,9 +337,9 @@ public class CurveEdit2Test extends BaseScreen {
 			tmp2.set(cache.get(1));
 
 			renderer.setColor(Color.RED);
-//			tmp5.set(tmp2).sub(tmp).nor().scl(.25f).rotate(90);
-//			renderer.line(tmp.x, tmp.y, tmp.x + tmp5.x, tmp.y + tmp5.y);
-//			renderer.line(tmp.x, tmp.y, tmp.x - tmp5.x, tmp.y - tmp5.y);
+//			tmp5.set(tmp2).sub(tmpCircle).nor().scl(.25f).rotate(90);
+//			renderer.line(tmpCircle.x, tmpCircle.y, tmpCircle.x + tmp5.x, tmpCircle.y + tmp5.y);
+//			renderer.line(tmpCircle.x, tmpCircle.y, tmpCircle.x - tmp5.x, tmpCircle.y - tmp5.y);
 			renderer.setColor(Color.RED);
 			renderer.circle(start.x, start.y, .1f, 16);
 			renderer.setColor(Color.BLUE);
@@ -350,7 +350,7 @@ public class CurveEdit2Test extends BaseScreen {
 				renderer.line(tmp, tmp2);
 
 				renderer.setColor(Color.RED);
-//				tmp5.set(tmp).sub(tmp2).nor().scl(.25f).rotate(90);
+//				tmp5.set(tmpCircle).sub(tmp2).nor().scl(.25f).rotate(90);
 //				renderer.line(tmp2.x, tmp2.y, tmp2.x + tmp5.x, tmp2.y + tmp5.y);
 //				renderer.line(tmp2.x, tmp2.y, tmp2.x - tmp5.x, tmp2.y - tmp5.y);
 
@@ -491,10 +491,10 @@ public class CurveEdit2Test extends BaseScreen {
 			vertices[vid++] = tmp.x - tmp3.x;
 			vertices[vid++] = tmp.y - tmp3.y;
 
-//			polygon[psid++] = tmp.x + tmp3.x;
-//			polygon[psid++] = tmp.y + tmp3.y;
-//			polygon[peid--] = tmp.y - tmp3.y;
-//			polygon[peid--] = tmp.x - tmp3.x;
+//			polygon[psid++] = tmpCircle.x + tmp3.x;
+//			polygon[psid++] = tmpCircle.y + tmp3.y;
+//			polygon[peid--] = tmpCircle.y - tmp3.y;
+//			polygon[peid--] = tmpCircle.x - tmp3.x;
 
 			int size = cache.size;
 			for (int i = 2; i < size; i++) {
@@ -531,10 +531,10 @@ public class CurveEdit2Test extends BaseScreen {
 			vertices[vid++] = tmp.x + tmp3.x;
 			vertices[vid++] = tmp.y + tmp3.y;
 
-//			polygon[psid++] = tmp.x - tmp3.x;
-//			polygon[psid++] = tmp.y - tmp3.y;
-//			polygon[peid--] = tmp.y + tmp3.y;
-//			polygon[peid--] = tmp.x + tmp3.x;
+//			polygon[psid++] = tmpCircle.x - tmp3.x;
+//			polygon[psid++] = tmpCircle.y - tmp3.y;
+//			polygon[peid--] = tmpCircle.y + tmp3.y;
+//			polygon[peid--] = tmpCircle.x + tmp3.x;
 
 			int ox = 0;
 			indices = new int[cache.size * 6];

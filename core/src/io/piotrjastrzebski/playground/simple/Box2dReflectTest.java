@@ -77,7 +77,7 @@ public class Box2dReflectTest extends BaseScreen implements RayCastCallback {
 			renderer.rectLine(rayStart.x, rayStart.y, lastPoint.x, lastPoint.y, 0.1f);
 //			renderer.circle(rayStart.x, rayStart.y, 0.05f, 16);
 //			renderer.circle(lastPoint.x, lastPoint.y, 0.05f, 16);
-//			tmp.set(rayEnd);
+//			tmpCircle.set(rayEnd);
 			renderer.setColor(Color.CYAN);
 			renderer.rectLine(lastPoint.x, lastPoint.y, lastPoint.x + lastNormal.x * 0.5f, lastPoint.y + lastNormal.y * 0.5f, 0.025f);
 			// calculate reflected normalized vector
@@ -87,7 +87,7 @@ public class Box2dReflectTest extends BaseScreen implements RayCastCallback {
 			rayEnd.sub(lastNormal);
 			// set length to be larger then the map, so we will get everything when we ray cast
 			rayEnd.setLength2(900);
-			// we need to move the start point a bit so the edge we ended on wont get picked up again
+			// we need to setPosition the start point a bit so the edge we ended on wont get picked up again
 			rayEnd.add(lastPoint);
 			tmp.set(rayEnd).setLength2(0.0025f);
 			rayStart.set(lastPoint.x, lastPoint.y).add(tmp);
