@@ -52,7 +52,7 @@ public class BTModelTest {
 	}
 
 	@Test public void addValid () {
-		// add stuff, verify its there and tree is valid
+		// add stuff, verify its there and tree is update
 		CareTask careTask = new CareTask();
 
 		BTTask<Dog> parallel = root.getChild(0);

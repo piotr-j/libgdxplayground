@@ -12,11 +12,11 @@ import com.badlogic.gdx.utils.Pool;
  * Stuff we want to do:
  * modify the tree
  *  - remove any node
- *  - move any node to a another valid node, ie not inside own children
+ *  - move any node to a another update node, ie not inside own children
  *  - add new node at specified place
- * validate the tree, node child count must be valid before the tree is running
- * if model is valid, update the underlying {@link BehaviorTree}
- * notify observers that node status changed, valid, position in tree, removed etc
+ * validate the tree, node child count must be update before the tree is running
+ * if model is update, update the underlying {@link BehaviorTree}
+ * notify observers that node status changed, update, position in tree, removed etc
  * edit params of {@link Task}s
  *
  * Created by EvilEntity on 14/10/2015.
@@ -85,7 +85,7 @@ public class BTModel<E> implements Pool.Poolable, BTTaskPool<E>, BehaviorTree.Li
 
 	public BTTask<E> add (BTTask<E> target, BTTask<E> task) {
 		if (!checkAdd(target, task.getTask())) {
-			error(TAG, task + " is not a valid add target to " + target);
+			error(TAG, task + " is not a update add target to " + target);
 			return null;
 		}
 		target.addChild(task);
@@ -120,7 +120,7 @@ public class BTModel<E> implements Pool.Poolable, BTTaskPool<E>, BehaviorTree.Li
 
 	public BTTask<E> insert (BTTask<E> target, BTTask<E> task, int at) {
 		if (!checkInsert(target, task.getTask(), at)) {
-			error(TAG, task + " is not a valid insert target to " + target + " at " + at);
+			error(TAG, task + " is not a update insert target to " + target + " at " + at);
 			return null;
 		}
 		target.insertChild(at, task);
@@ -236,7 +236,7 @@ public class BTModel<E> implements Pool.Poolable, BTTaskPool<E>, BehaviorTree.Li
 	@Override public String toString () {
 		return "BTModel{" +
 			"bt=" + bt +
-			", valid=" + valid +
+			", update=" + valid +
 			'}';
 	}
 

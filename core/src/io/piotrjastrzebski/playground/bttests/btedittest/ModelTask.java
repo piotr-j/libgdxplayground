@@ -99,7 +99,7 @@ public class ModelTask<E> implements Pool.Poolable, Iterable<ModelTask<E>> {
 	 */
 	public void remove () {
 		// TODO same as in insert/add but we can probably set the child in parent to null/remove
-		// TODO then tree wont be valid and wont run
+		// TODO then tree wont be update and wont run
 	}
 
 	public Task<E> getTask () {
@@ -165,7 +165,7 @@ public class ModelTask<E> implements Pool.Poolable, Iterable<ModelTask<E>> {
 	}
 
 	/**
-	 * If this task is valid, ie has proper count of children and all of its children
+	 * If this task is update, ie has proper count of children and all of its children
 	 */
 	public boolean isValid() {
 		return isValid;

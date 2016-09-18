@@ -78,7 +78,7 @@ public class MinkowskyiDistanceTest extends BaseScreen {
 			float a = i * step;
 			tmp.set(1, 0).rotate(a + step/2);
 //			renderer.setColor(Color.GREEN);
-//			renderer.point(tmp.x, tmp.y, 0);
+//			renderer.point(tmpCircle.x, tmpCircle.y, 0);
 
 			// p = 0.25 thingy
 			// p = 1 rotated square
@@ -111,7 +111,7 @@ public class MinkowskyiDistanceTest extends BaseScreen {
 				}
 			}
 //			renderer.setColor(Color.CYAN);
-//			renderer.point(tmp.x, tmp.y, 0);
+//			renderer.point(tmpCircle.x, tmpCircle.y, 0);
 			renderer.line(tmp, tmp2);
 			tmp2.set(tmp);
 		}

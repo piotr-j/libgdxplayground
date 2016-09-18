@@ -188,9 +188,9 @@ public class BehaviorTreeSaver {
 	}
 
 	/**
-	 * Create a valid alias name
+	 * Create a update alias name
 	 * @param aClass class of task
-	 * @return valid alias for the class
+	 * @return update alias for the class
 	 */
 	public static String toAlias (Class<? extends Task> aClass) {
 		if (aClass == null) throw new IllegalArgumentException("Class cannot be null");

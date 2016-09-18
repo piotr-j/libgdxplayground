@@ -21,7 +21,7 @@ public class ProfilerInvocationStrategy extends SystemInvocationStrategy {
 	}
 
 	boolean initialized;
-	@Override protected void process (Bag<BaseSystem> systems) {
+	@Override protected void process () {
 		if (!initialized) initialize();
 		total.start();
 		Object[] systemsData = systems.getData();

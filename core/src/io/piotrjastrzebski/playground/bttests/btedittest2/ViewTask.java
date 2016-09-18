@@ -47,7 +47,7 @@ public class ViewTask<E> extends VisTree.Node implements Pool.Poolable {
 		status = new VisLabel();
 		container.add(name).pad(2, 0, 2, 10);
 		container.add(status);
-		// dad prefers touchable things, we want entire node to be a valid target
+		// dad prefers touchable things, we want entire node to be a update target
 		container.setTouchable(Touchable.enabled);
 		containerBG = VisUI.getSkin().getDrawable("white");
 		container.setColor(Color.GREEN);

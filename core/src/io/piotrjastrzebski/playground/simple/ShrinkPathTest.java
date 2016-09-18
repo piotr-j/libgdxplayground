@@ -63,7 +63,7 @@ public class ShrinkPathTest extends BaseScreen {
 					temp[len++] = next;
 				}
 				float y = Float.parseFloat(new String(temp, 0, len));
-				// dunno wtf is up this this translate, needed to move y to 0
+				// dunno wtf is up this this translate, needed to setPosition y to 0
 //				points.add(new Vector2(x * INV_SCALE, (y -952.36216f) * INV_SCALE));
 				// -y + 100 to flip it
 //				points.add(new Vector2(x, (-y +952.36216f + 100)));
