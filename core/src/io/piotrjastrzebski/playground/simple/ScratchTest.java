@@ -76,7 +76,7 @@ public class ScratchTest extends BaseScreen {
 			batch.setBlendFunction(GL20.GL_ZERO, GL20.GL_ONE_MINUS_SRC_ALPHA);
 			batch.enableBlending();
 			batch.begin();
-			batch.draw(clearBrush, cs.x - .5f, cs.y - .5f, 2, 2);
+			batch.draw(clearBrush, cs.x - 1, cs.y - 1, 2, 2);
 			batch.end();
 			scratchFBO.end();
 			lcs.set(cs);
@@ -91,7 +91,7 @@ public class ScratchTest extends BaseScreen {
 		batch.draw(scratchRegion, -4, -4, 8, 8);
 
 		batch.setColor(Color.FOREST);
-		batch.draw(clearBrush, cs.x - .5f, cs.y - .5f, 2, 2);
+		batch.draw(clearBrush, cs.x - 1, cs.y - 1, 2, 2);
 		batch.end();
 	}
 
