@@ -70,7 +70,8 @@ public class MouseZoomTest extends BaseScreen {
 		gameCamera.update();
 
 		gameCamera.unproject(tp.set(Gdx.input.getX(), Gdx.input.getY(), 0 ));
-		gameCamera.position.sub(tp.x - oldX, tp.y - oldY, 0);
+		gameCamera.position.add(oldX - tp.x, oldY - tp.y, 0);
+
 		gameCamera.update();
 		return true;
 	}
