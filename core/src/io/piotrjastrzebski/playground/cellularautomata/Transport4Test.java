@@ -115,12 +115,12 @@ public class Transport4Test extends BaseScreen {
 	}
 
 	protected enum BeltType {
-		SN(v2s(v2(.3f, .15f), v2(.3f, .5f), v2(.3f, .85f)), v2s(v2(.7f, .15f), v2(.7f, .5f), v2(.7f, .85f)), v2(0, 1), v2(0, -1)),
-		EW(v2s(v2(.85f, .3f), v2(.5f, .3f), v2(.15f, .3f)), v2s(v2(.85f, .7f), v2(.5f, .7f), v2(.15f, .7f)), v2(-1, 0), v2(1, 0)),
-		NW(v2s(v2(.3f, .15f), v2(.4f, .6f), v2(.85f, .7f)), v2s(v2(.7f, .15f), v2(.75f, .25f), v2(.85f, .3f)), v2(1, 0), v2(0, -1)),
-		NE(v2s(v2(.15f, .7f), v2(.6f, .6f), v2(.7f, .15f)), v2s(v2(.15f, .3f), v2(.25f, .25f), v2(.3f, .15f)), v2(0, -1), v2(-1, 0)),
-		SE(v2s(v2(.7f, .85f), v2(.6f, .4f), v2(.15f, .3f)), v2s(v2(.3f, .85f), v2(.25f, .75f), v2(.15f, .7f)), v2(-1, 0), v2(0, 1)),
-		SW(v2s(v2(.85f, 0.3f), v2(.4f, .4f), v2(.3f, .85f)), v2s(v2(.85f, .7f), v2(.75f, .75f), v2(.7f, .85f)), v2(0, 1), v2(1, 0));
+		SN(v2s(.3f, .15f, .3f, .5f, .3f, .85f),  v2s(.7f, .15f, .7f, .5f, .7f, .85f),   v2(0, 1),  v2(0, -1)),
+		EW(v2s(.85f, .3f,.5f, .3f, .15f, .3f),   v2s(.85f, .7f, .5f, .7f, .15f, .7f),   v2(-1, 0), v2(1, 0)),
+		NW(v2s(.3f, .15f,.4f, .6f, .85f, .7f),   v2s(.7f, .15f, .75f, .25f, .85f, .3f), v2(1, 0),  v2(0, -1)),
+		NE(v2s(.15f, .7f,.6f, .6f, .7f, .15f),   v2s(.15f, .3f, .25f, .25f, .3f, .15f), v2(0, -1), v2(-1, 0)),
+		SE(v2s(.7f, .85f,.6f, .4f, .15f, .3f),   v2s(.3f, .85f, .25f, .75f, .15f, .7f), v2(-1, 0), v2(0, 1)),
+		SW(v2s(.85f, 0.3f, .4f, .4f, .3f, .85f), v2s(.85f, .7f, .75f, .75f, .7f, .85f), v2(0, 1),  v2(1, 0));
 
 		public final Vector2[] lane0;
 		public final Vector2[] lane1;
@@ -612,6 +612,10 @@ public class Transport4Test extends BaseScreen {
 
 	protected static Vector2[] v2s (Vector2... v2s) {
 		return v2s;
+	}
+
+	protected static Vector2[] v2s (float x1, float y1, float x2, float y2, float x3, float y3) {
+		return new Vector2[]{new Vector2(x1, y1), new Vector2(x2, y2), new Vector2(x3, y3)};
 	}
 
 	protected static Vector2 v2 (float x, float y) {
