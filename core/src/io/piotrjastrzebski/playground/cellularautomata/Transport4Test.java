@@ -41,8 +41,6 @@ public class Transport4Test extends BaseScreen {
 		font.getData().setScale(INV_SCALE);
 		layout = new GlyphLayout();
 		clear.set(Color.GRAY);
-//		gameCamera.zoom = .5f;
-//		gameCamera.update();
 
 		setBelt(13, 7, BeltType.EW, -1);
 		setBelt(14, 7, BeltType.EW, -1);
@@ -165,24 +163,20 @@ public class Transport4Test extends BaseScreen {
 	private void clearBelt (int x, int y) {
 		System.out.println("Clear " + x + ", " + y);
 		int index = x + y * WIDTH;
-		Belt belt = belts[index];
-		if (belt != null) {
-			belt.clear();
-		}
 		belts[index] = null;
 	}
 
 	public void spawnItem (float x, float y) {
 		Item item = new Item(x, y);
 		items.add(item);
-		addItem(item);
+		addItem(item, false);
 	}
 
-	public void addItem (Item item) {
+	public void addItem (Item item, boolean snapToSlot) {
 		Belt belt = getBelt(item.x, item.y);
 		item.belt = belt;
 		if (belt != null) {
-			belt.add(item);
+			belt.add(item, snapToSlot);
 		}
 	}
 
@@ -193,10 +187,6 @@ public class Transport4Test extends BaseScreen {
 		return belts[index];
 	}
 
-
-	static final Vector2 tmpV = new Vector2();
-	static final Vector2 tmpV2 = new Vector2();
-	float alpha;
 	@Override public void render (float delta) {
 		super.render(delta);
 		// handle input
@@ -236,10 +226,6 @@ public class Transport4Test extends BaseScreen {
 			if (belt != null) {
 				belt.update(delta);
 			}
-		}
-
-		for (Item item : items) {
-			item.update(delta);
 		}
 
 		enableBlending();
@@ -311,11 +297,15 @@ public class Transport4Test extends BaseScreen {
 		}
 
 		Vector2 tmp = new Vector2();
-		public void add (Item item) {
+		public void add (Item item, boolean snapToSlot) {
 			Slot nearest = getSlot(item.x, item.y);
 			if (nearest == null) throw new AssertionError("null nearest!");
 			nearest.queue.add(item);
 			item.target.set(x + nearest.x, y + nearest.y);
+			if (snapToSlot) {
+				item.pos(x + nearest.x, y + nearest.y);
+
+			}
 		}
 
 		public Slot getSlot (float x, float y) {
@@ -337,14 +327,6 @@ public class Transport4Test extends BaseScreen {
 				}
 			}
 			return nearest;
-		}
-
-		public void remove (Item item) {
-
-		}
-
-		public void clear () {
-
 		}
 
 		public void update (float delta) {
@@ -416,7 +398,7 @@ public class Transport4Test extends BaseScreen {
 					} else {
 						item.pos(item.x + type.nextCCW.x * .33f, item.y + type.nextCCW.y * .33f);
 					}
-					owner.addItem(item);
+					owner.addItem(item, true);
 				}
 			}
 		}
@@ -577,7 +559,6 @@ public class Transport4Test extends BaseScreen {
 		public float alpha;
 		public Vector2 draw = new Vector2();
 		public Vector2 target = new Vector2();
-		Vector2 tmp = new Vector2();
 		public Belt belt;
 
 		public Item (float x, float y) {
@@ -600,18 +581,10 @@ public class Transport4Test extends BaseScreen {
 			renderer.setColor(Color.MAGENTA);
 			renderer.circle(draw.x, draw.y, .15f, 16);
 		}
-
-		public void update (float delta) {
-
-		}
 	}
 
 	protected static float map (float value, float start1, float end1, float start2, float end2) {
 		return start2 + ((end2 - start2) / (end1 - start1)) * (value - start1);
-	}
-
-	protected static Vector2[] v2s (Vector2... v2s) {
-		return v2s;
 	}
 
 	protected static Vector2[] v2s (float x1, float y1, float x2, float y2, float x3, float y3) {
