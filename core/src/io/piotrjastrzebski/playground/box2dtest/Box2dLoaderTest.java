@@ -16,6 +16,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import io.piotrjastrzebski.playground.BaseScreen;
 import io.piotrjastrzebski.playground.GameReset;
+import io.piotrjastrzebski.playground.PlaygroundGame;
 
 /**
  * Created by PiotrJ on 31/07/15.
@@ -225,5 +226,9 @@ public class Box2dLoaderTest extends BaseScreen {
 			debugDraw = !debugDraw;
 		}
 		return super.keyDown(keycode);
+	}
+
+	public static void main (String[] args) {
+		PlaygroundGame.start(args, Box2dLoaderTest.class);
 	}
 }
