@@ -6,11 +6,14 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import io.piotrjastrzebski.playground.BaseScreen;
 import io.piotrjastrzebski.playground.GameReset;
 import io.piotrjastrzebski.playground.PlaygroundGame;
+
+import java.util.Comparator;
 
 /**
  * Created by EvilEntity on 25/01/2016.
@@ -23,9 +26,28 @@ public class MeshShadowTest extends BaseScreen {
 		super(game);
 
 		for (int i = 0; i < 20; i++) {
-			casters.add(new ShadowCaster(MathUtils.random(-17, 15), MathUtils.random(-10, 10), MathUtils.random(1, 3), MathUtils.random(1, 3)));
-			casters.add(new ShadowCaster(MathUtils.random(-17, 15), MathUtils.random(-10, 10), MathUtils.random(.5f, 1.5f)));
+			casters.add(new ShadowCaster(MathUtils.random(-17f, 15), MathUtils.random(-10f, 10), MathUtils.random(1, 3), MathUtils.random(1, 3)));
+			casters.add(new ShadowCaster(MathUtils.random(-17f, 15), MathUtils.random(-10f, 10), MathUtils.random(.5f, 1.5f)));
+
+			float x = MathUtils.random(-17f, 15);
+			float y = MathUtils.random(-10f, 10);
+			float angle = MathUtils.random(360);
+			Vector2[] vector2s = new Vector2[]{
+				v2(x + -1, y + 0).rotate(angle),
+				v2(x + 1, y + 0).rotate(angle),
+				v2(x + 0, y + .5f).rotate(angle)
+			};
+			casters.add(new ShadowCaster(x, y, vector2s));
 		}
+		casters.sort(new Comparator<ShadowCaster>() {
+			@Override public int compare (ShadowCaster o1, ShadowCaster o2) {
+				return o1.y > o2.y? -1:1;
+			}
+		});
+	}
+
+	private Vector2 v2 (float x, float y) {
+		return new Vector2(x, y);
 	}
 
 	Vector3 lightPos = new Vector3();
@@ -33,10 +55,25 @@ public class MeshShadowTest extends BaseScreen {
 	@Override public void render (float delta) {
 		if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
 			casters.clear();
-			for (int i = 0; i < 20; i++) {
-				casters.add(new ShadowCaster(MathUtils.random(-17, 15), MathUtils.random(-10, 10), MathUtils.random(1, 3), MathUtils.random(1, 3)));
-				casters.add(new ShadowCaster(MathUtils.random(-17, 15), MathUtils.random(-10, 10), MathUtils.random(.5f, 1.5f)));
+			for (int i = 0; i < 10; i++) {
+				casters.add(new ShadowCaster(MathUtils.random(-17f, 15), MathUtils.random(-10f, 10), MathUtils.random(1, 3), MathUtils.random(1, 3)));
+				casters.add(new ShadowCaster(MathUtils.random(-17f, 15), MathUtils.random(-10f, 10), MathUtils.random(.5f, 1.5f)));
+				float x = MathUtils.random(-17f, 15);
+				float y = MathUtils.random(-10f, 10);
+				float angle = MathUtils.random(360);
+				Vector2[] vector2s = new Vector2[]{
+					v2(x + -1, y + 0).rotate(angle),
+					v2(x + 1, y + 0).rotate(angle),
+					v2(x + 0, y + .5f).rotate(angle)
+				};
+				casters.add(new ShadowCaster(x, y, vector2s));
 			}
+
+			casters.sort(new Comparator<ShadowCaster>() {
+				@Override public int compare (ShadowCaster o1, ShadowCaster o2) {
+					return o1.y > o2.y? -1:1;
+				}
+			});
 		}
 
 		Gdx.gl.glClearColor(.3f, .7f, .3f, 1);
@@ -58,8 +95,6 @@ public class MeshShadowTest extends BaseScreen {
 		for (ShadowCaster caster : casters) {
 			caster.update(lightPos);
 			caster.draw(renderer);
-		}
-		for (ShadowCaster caster : casters) {
 			caster.update(lightPos);
 			caster.drawShape(renderer);
 		}
@@ -67,7 +102,9 @@ public class MeshShadowTest extends BaseScreen {
 	}
 
 	public static class ShadowCaster {
-		enum ShadowType {RECT, CIRCLE}
+		private Vector2[] polyVerts;
+
+		enum ShadowType {RECT, CIRCLE, POLY}
 		public ShadowType type;
 		public float x;
 		public float y;
@@ -75,7 +112,8 @@ public class MeshShadowTest extends BaseScreen {
 		public float height;
 		public Vector3 lightDir = new Vector3();
 		public Color dark = new Color(.25f, .25f, .25f, .33f);
-		public Color light = new Color(.33f, .33f, .33f, .15f);
+//		public Color light = new Color(.25f, .25f, .25f, .33f);
+		public Color light = new Color(.33f, .33f, .33f, .05f);
 		public Color shape = new Color(MathUtils.random(), MathUtils.random(), MathUtils.random(), 1);
 
 		public ShadowCaster (float x, float y, float radius) {
@@ -91,6 +129,13 @@ public class MeshShadowTest extends BaseScreen {
 			this.width = width;
 			this.height = height;
 			type = ShadowType.RECT;
+		}
+
+		public ShadowCaster (float x, float y, Vector2[] verts) {
+			this.x = x;
+			this.y = y;
+			this.polyVerts = verts;
+			type = ShadowType.POLY;
 		}
 
 		public void update (Vector3 light) {
@@ -161,17 +206,62 @@ public class MeshShadowTest extends BaseScreen {
 					vertices[8], vertices[9]
 				);
 				break;
-			case CIRCLE:
+			case CIRCLE: {
 				renderer.setColor(.25f, .25f, .25f, .33f);
 				float cx = x + width;
 				float cy = y + width;
 
 				float angle = (float)Math.atan2(lightDir.y, lightDir.x) * MathUtils.radiansToDegrees + 90;
-				if (angle < 0) angle += 360;
+				if (angle < 0)
+					angle += 360;
 				renderer.rect(x, y + width, width, 0, width * 2, lightDir.z, 1, 1, angle, dark, dark, light, light);
 				renderer.setColor(light);
 				renderer.arc(cx - lightDir.x * lightDir.z, cy - lightDir.y * lightDir.z, width, angle, 180, 16);
-				break;
+			}break;
+			case POLY: {
+				Vector2 tmp1 = new Vector2();
+				Vector2 tmpOffset = new Vector2();
+				Vector2 tmpFirst = new Vector2();
+				Vector2 tmpSecond = new Vector2();
+//				float angle = (float)Math.atan2(lightDir.y, lightDir.x) * MathUtils.radiansToDegrees + 90;
+//				if (angle < 0) angle += 360;
+				renderer.setColor(dark);
+				tmpOffset.set(lightDir.x, lightDir.y).scl(-lightDir.z);
+				Vector2 first = polyVerts[polyVerts.length-1];
+				for (int i = 0; i < polyVerts.length; i++) {
+					Vector2 second = polyVerts[i];
+
+					// find out normal
+					tmp1.set(first).sub(second).nor().set(-tmp1.y, tmp1.x);
+					float dot = tmp1.dot(lightDir.x, lightDir.y);
+					if (dot > 0) {
+						tmpFirst.set(first).add(tmpOffset);
+						tmpSecond.set(second).add(tmpOffset);
+
+						renderer.triangle(
+							first.x,first.y,
+							second.x, second.y,
+							tmpFirst.x, tmpFirst.y, dark, dark, light
+						);
+						renderer.triangle(
+							tmpFirst.x, tmpFirst.y,
+							second.x, second.y,
+							tmpSecond.x,tmpSecond.y, light, dark, light
+						);
+					}
+//					renderer.rectLine(tmpFirst, tmpSecond, .1f);
+					first = second;
+				}
+				if (false) {
+					// we know that we actually have triangles, not polys so whatever
+					renderer.setColor(light);
+					Vector2 v1 = polyVerts[0];
+					Vector2 v2 = polyVerts[1];
+					Vector2 v3 = polyVerts[2];
+					renderer.triangle(v1.x + tmpOffset.x, v1.y + tmpOffset.y, v2.x + tmpOffset.x, v2.y + tmpOffset.y, v3.x + tmpOffset.x,
+						v3.y + tmpOffset.y);
+				}
+			} break;
 			}
 		}
 		public void drawShape (ShapeRenderer renderer) {
@@ -182,6 +272,24 @@ public class MeshShadowTest extends BaseScreen {
 				break;
 			case CIRCLE:
 				renderer.circle(x + width, y + width, width, 16);
+				break;
+			case POLY:
+				Vector2 tmp1 = new Vector2();
+				Vector2 first = polyVerts[polyVerts.length-1];
+				for (int i = 0; i < polyVerts.length; i++) {
+					Vector2 second = polyVerts[i];
+					renderer.setColor(Color.CYAN);
+					tmp1.set(first).sub(second).nor().set(-tmp1.y, tmp1.x);
+//					renderer.rectLine(firs .x, first.y, first.x + tmp1.x, first.y + tmp1.y, .05f);
+					float dot = tmp1.dot(lightDir.x, lightDir.y);
+					if (dot < 0) {
+						renderer.setColor(Color.BLACK);
+					} else {
+						renderer.setColor(shape.r, shape.g, shape.b, 1);
+					}
+					renderer.rectLine(first, second, .1f);
+					first = second;
+				}
 				break;
 			}
 		}
