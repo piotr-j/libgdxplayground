@@ -1,7 +1,5 @@
 package io.piotrjastrzebski.playground.box2dtest.iforce2d;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
@@ -65,13 +63,21 @@ public class RayCastForce2dTest extends BaseIForce2dTest implements RayCastCallb
 		renderer.end();
 	}
 
+	Body last;
 	private void drawReflect(Vector2 start, Vector2 end) {
 		bounces++;
+		last = null;
 		world.rayCast(this, start, end);
 		renderer.setColor(Color.WHITE);
 		renderer.line(start, point);
 		renderer.setColor(Color.GREEN);
 		renderer.line(point, tmpD.set(point).add(normal));
+		if (last != null) {
+			// note that the bounds position is at center of the screen
+			Vector2 position = last.getPosition();
+			renderer.setColor(Color.ORANGE);
+			renderer.circle(position.x, position.y, .5f, 16);
+		}
 		if (bounces >= 2) return;
 
 		Vector2 remainingRay = tmpC.set(end).sub(point);
@@ -85,6 +91,7 @@ public class RayCastForce2dTest extends BaseIForce2dTest implements RayCastCallb
 	@Override public float reportRayFixture (Fixture fixture, Vector2 point, Vector2 normal, float fraction) {
 		this.point.set(point);
 		this.normal.set(normal);
+		last = fixture.getBody();
 		return fraction;
 	}
 
