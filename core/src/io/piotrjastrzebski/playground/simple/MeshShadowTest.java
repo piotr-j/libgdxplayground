@@ -25,25 +25,7 @@ public class MeshShadowTest extends BaseScreen {
 	public MeshShadowTest (GameReset game) {
 		super(game);
 
-		for (int i = 0; i < 20; i++) {
-			casters.add(new ShadowCaster(MathUtils.random(-17f, 15), MathUtils.random(-10f, 10), MathUtils.random(1, 3), MathUtils.random(1, 3)));
-			casters.add(new ShadowCaster(MathUtils.random(-17f, 15), MathUtils.random(-10f, 10), MathUtils.random(.5f, 1.5f)));
-
-			float x = MathUtils.random(-17f, 15);
-			float y = MathUtils.random(-10f, 10);
-			float angle = MathUtils.random(360);
-			Vector2[] vector2s = new Vector2[]{
-				v2(x + -1, y + 0).rotate(angle),
-				v2(x + 1, y + 0).rotate(angle),
-				v2(x + 0, y + .5f).rotate(angle)
-			};
-			casters.add(new ShadowCaster(x, y, vector2s));
-		}
-		casters.sort(new Comparator<ShadowCaster>() {
-			@Override public int compare (ShadowCaster o1, ShadowCaster o2) {
-				return o1.y > o2.y? -1:1;
-			}
-		});
+		addCasters(20);
 	}
 
 	private Vector2 v2 (float x, float y) {
@@ -52,12 +34,42 @@ public class MeshShadowTest extends BaseScreen {
 
 	Vector3 lightPos = new Vector3();
 
-	@Override public void render (float delta) {
-		if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
-			casters.clear();
-			for (int i = 0; i < 10; i++) {
-				casters.add(new ShadowCaster(MathUtils.random(-17f, 15), MathUtils.random(-10f, 10), MathUtils.random(1, 3), MathUtils.random(1, 3)));
-				casters.add(new ShadowCaster(MathUtils.random(-17f, 15), MathUtils.random(-10f, 10), MathUtils.random(.5f, 1.5f)));
+	private void addCasters(int count) {
+		for (int i = 0; i < count; i++) {
+			switch (MathUtils.random(3)) {
+			case 0: { // poly rect
+//				casters.add(new ShadowCaster(MathUtils.random(-17f, 15), MathUtils.random(-10f, 10), MathUtils.random(1, 3), MathUtils.random(1, 3)));
+				float x = MathUtils.random(-17f, 15);
+				float y = MathUtils.random(-10f, 10);
+				float w = MathUtils.random(1, 3);
+				float h = MathUtils.random(1, 3);
+				float angle = MathUtils.random(360);
+				Vector2[] vector2s = new Vector2[]{
+					v2(x + -w/2, y + -h/2).rotate(angle),
+					v2(x + w/2, y - h/2).rotate(angle),
+					v2(x + w/2, y + h/2).rotate(angle),
+					v2(x + -w/2, y + h/2).rotate(angle)
+				};
+				casters.add(new ShadowCaster(x, y, vector2s));
+			} break;
+			case 1: { // circle
+//				casters.add(new ShadowCaster(MathUtils.random(-17f, 15), MathUtils.random(-10f, 10), MathUtils.random(.5f, 1.5f)));
+				float x = MathUtils.random(-17f, 15);
+				float y = MathUtils.random(-10f, 10);
+				float r = MathUtils.random(1, 3);
+				final int c = MathUtils.random(2, 4) * 6;
+				Vector2 tmp = new Vector2();
+				Vector2[] vector2s = new Vector2[c];
+				float angle = 0;
+				float step = 360f/(c-1);
+				for (int j = 0; j < c; j++) {
+					tmp.set(1, 0).rotate(angle).scl(r);
+					vector2s[j] = new Vector2(x, y).add(tmp);
+					angle += step;
+				}
+				casters.add(new ShadowCaster(x, y, vector2s));
+			} break;
+			case 2: { // polygon aka triangle
 				float x = MathUtils.random(-17f, 15);
 				float y = MathUtils.random(-10f, 10);
 				float angle = MathUtils.random(360);
@@ -67,13 +79,37 @@ public class MeshShadowTest extends BaseScreen {
 					v2(x + 0, y + .5f).rotate(angle)
 				};
 				casters.add(new ShadowCaster(x, y, vector2s));
-			}
+			} break;
+			case 3: { // star?
+				/*
 
-			casters.sort(new Comparator<ShadowCaster>() {
-				@Override public int compare (ShadowCaster o1, ShadowCaster o2) {
-					return o1.y > o2.y? -1:1;
-				}
-			});
+				 */
+				float x = MathUtils.random(-17f, 15);
+				float y = MathUtils.random(-10f, 10);
+				float angle = MathUtils.random(360);
+				Vector2[] vector2s = new Vector2[]{
+					v2(x + 0, y + 1).rotate(angle),
+					v2(x - 1, y - 1).rotate(angle),
+					v2(x + 0, y + 0).rotate(angle),
+					v2(x + 1, y - 1).rotate(angle),
+//					v2(x + 0, y + 0).rotate(angle),
+//					v2(x + 0, y + 0).rotate(angle)
+				};
+				casters.add(new ShadowCaster(x, y, vector2s));
+			} break;
+		}
+		}
+		casters.sort(new Comparator<ShadowCaster>() {
+			@Override public int compare (ShadowCaster o1, ShadowCaster o2) {
+				return o1.y > o2.y? -1:1;
+			}
+		});
+	}
+
+	@Override public void render (float delta) {
+		if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
+			casters.clear();
+			addCasters(20);
 		}
 
 		Gdx.gl.glClearColor(.3f, .7f, .3f, 1);
@@ -234,7 +270,7 @@ public class MeshShadowTest extends BaseScreen {
 					// find out normal
 					tmp1.set(first).sub(second).nor().set(-tmp1.y, tmp1.x);
 					float dot = tmp1.dot(lightDir.x, lightDir.y);
-					if (dot > 0) {
+					if (dot < 0) {
 						tmpFirst.set(first).add(tmpOffset);
 						tmpSecond.set(second).add(tmpOffset);
 
