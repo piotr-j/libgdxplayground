@@ -9,9 +9,9 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Affine2;
 import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.math.Matrix3;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.TimeUtils;
 import io.piotrjastrzebski.playground.BaseScreen;
 import io.piotrjastrzebski.playground.GameReset;
 import io.piotrjastrzebski.playground.PlaygroundGame;
@@ -26,6 +26,12 @@ public class Affine2Test extends BaseScreen {
 	public Affine2Test (GameReset game) {
 		super(game);
 		texture = new Texture("badlogic.jpg");
+		rebuild();
+	}
+
+	private void rebuild () {
+		things.clear();
+		MathUtils.random.setSeed(3458531);
 		Thing thing = new Thing();
 		thing.tint.set(Color.RED);
 		thing.rotate = MathUtils.random(-90, 90);
@@ -54,14 +60,17 @@ public class Affine2Test extends BaseScreen {
 			child2.origin.set(.5f, .5f);
 		}
 		things.add(thing);
+		MathUtils.random.setSeed(TimeUtils.millis());
 	}
 
-
+	float state = 0;
 	@Override public void render (float delta) {
+		rebuild();
+		state += delta;
 		Gdx.gl.glClearColor(.5f, .5f, .5f, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 		for (Thing thing : things) {
-			thing.update(delta);
+			thing.update(delta, state);
 		}
 
 		Gdx.gl.glEnable(GL20.GL_BLEND);
@@ -116,18 +125,19 @@ public class Affine2Test extends BaseScreen {
 
 		protected float rotate;
 
-		public void update (float delta) {
+		public void update (float delta, float state) {
+			rotation = state * rotate;
 			transform.setToTrnRotScl(position.x + origin.x, position.y + origin.y, rotation, scale.x, scale.y);
 			if (origin.x != 0 || origin.y != 0) transform.translate(-origin.x, -origin.y);
 			resultTransform.set(transform);
 			if (parent != null) {
-				rotation += rotate * delta;
+//				rotation += rotate * delta;
 				resultTransform.preMul(parent.resultTransform);
 			} else {
-				rotation += rotate * delta;
+//				rotation += rotate * delta;
 			}
 			for (Thing child : children) {
-				child.update(delta);
+				child.update(delta, state);
 			}
 		}
 
