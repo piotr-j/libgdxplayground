@@ -23,7 +23,7 @@ allprojects {
         ashleyVersion = '1.4.0'
         aiVersion = '1.8.0'
         visuiVersion = '1.2.4'
-        artemisOdbVersion = "2.0.0"
+        artemisOdbVersion = "2.1.0"
         artemisOdbcontribVersion = "1.1.0"
         gdxVideoVersion = "0.0.1"
         kryoVersion = "3.0.3"
@@ -68,7 +68,7 @@ project(":core") {
         compile "com.badlogicgames.gdx:gdx-ai:$aiVersion"
         compile "com.kotcrab.vis:vis-ui:$visuiVersion"
         compile "net.onedaybeard.artemis:artemis-odb:$artemisOdbVersion"
-        compile "net.onedaybeard.artemis:artemis-odb-serializer-json:$artemisOdbVersion"
+        compile "net.onedaybeard.artemis:artemis-odb-serializer-json-libgdx:$artemisOdbVersion"
         compile "net.mostlyoriginal.artemis-odb:contrib-core:$artemisOdbcontribVersion"
         compile "com.esotericsoftware:kryo:$kryoVersion"
 
