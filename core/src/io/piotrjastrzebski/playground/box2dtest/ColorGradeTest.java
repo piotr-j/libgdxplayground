@@ -42,7 +42,7 @@ public class ColorGradeTest extends BaseScreen {
 	TextureRegion fboRegion;
 	boolean useFbo;
 	Texture cgtBase;
-	Texture[] cgts = new Texture[4];
+	Texture[] cgts = new Texture[5];
 	Texture cgtSelected;
 	ShaderProgram colorGradeShader;
 
@@ -58,6 +58,7 @@ public class ColorGradeTest extends BaseScreen {
 		cgts[1] = new Texture("color_grade_sepia.png");
 		cgts[2] = new Texture("color_grade_bw.png");
 		cgts[3] = new Texture("color_grade_gradient.png");
+		cgts[4] = cgtBase;
 		cgtSelected = cgts[0];
 		createBounds();
 		reset();
@@ -151,6 +152,10 @@ public class ColorGradeTest extends BaseScreen {
 		if (Gdx.input.isKeyJustPressed(Input.Keys.F4)) {
 			cgtSelected = cgts[3];
 			Gdx.app.log(TAG, "gradient");
+		}
+		if (Gdx.input.isKeyJustPressed(Input.Keys.F6)) {
+			cgtSelected = cgts[4];
+			Gdx.app.log(TAG, "same");
 		}
 
 		if (Gdx.input.isKeyJustPressed(Input.Keys.R)) {

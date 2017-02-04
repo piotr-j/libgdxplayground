@@ -1,0 +1,125 @@
+
+tiles_renderer.png
+size: 2048,512
+format: RGBA8888
+filter: Nearest,Nearest
+repeat: none
+prop_bridge
+  rotate: false
+  xy: 1827, 331
+  size: 170, 112
+  orig: 256, 384
+  offset: 41, 75
+  index: -1
+prop_cage
+  rotate: false
+  xy: 1648, 286
+  size: 177, 157
+  orig: 256, 384
+  offset: 39, 99
+  index: -1
+prop_cloud
+  rotate: false
+  xy: 518, 247
+  size: 256, 196
+  orig: 256, 384
+  offset: 0, 38
+  index: -1
+prop_field
+  rotate: false
+  xy: 1034, 328
+  size: 226, 115
+  orig: 256, 384
+  offset: 15, 88
+  index: -1
+prop_forest
+  rotate: false
+  xy: 1262, 309
+  size: 196, 134
+  orig: 256, 384
+  offset: 39, 102
+  index: -1
+prop_hut
+  rotate: false
+  xy: 776, 76
+  size: 130, 98
+  orig: 256, 384
+  offset: 63, 114
+  index: -1
+prop_lair
+  rotate: false
+  xy: 908, 2
+  size: 102, 172
+  orig: 256, 384
+  offset: 77, 100
+  index: -1
+prop_mountain
+  rotate: false
+  xy: 776, 176
+  size: 230, 135
+  orig: 256, 384
+  offset: 12, 90
+  index: -1
+prop_portal
+  rotate: false
+  xy: 1827, 168
+  size: 114, 161
+  orig: 256, 384
+  offset: 71, 111
+  index: -1
+prop_station
+  rotate: false
+  xy: 1460, 309
+  size: 186, 134
+  orig: 256, 384
+  offset: 35, 94
+  index: -1
+prop_tower
+  rotate: false
+  xy: 1943, 159
+  size: 102, 170
+  orig: 256, 384
+  offset: 77, 100
+  index: -1
+tile_ground
+  rotate: false
+  xy: 776, 313
+  size: 256, 130
+  orig: 256, 384
+  offset: 0, 81
+  index: -1
+tile_ground_corner
+  rotate: false
+  xy: 2, 232
+  size: 256, 211
+  orig: 256, 384
+  offset: 0, 0
+  index: -1
+tile_water
+  rotate: false
+  xy: 518, 90
+  size: 256, 155
+  orig: 256, 384
+  offset: 0, 44
+  index: -1
+tile_water_corner
+  rotate: false
+  xy: 2, 31
+  size: 256, 199
+  orig: 256, 384
+  offset: 0, 0
+  index: -1
+tile_water_east
+  rotate: false
+  xy: 260, 244
+  size: 256, 199
+  orig: 256, 384
+  offset: 0, 0
+  index: -1
+tile_water_west
+  rotate: false
+  xy: 260, 43
+  size: 256, 199
+  orig: 256, 384
+  offset: 0, 0
+  index: -1
