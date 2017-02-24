@@ -25,7 +25,9 @@ import io.piotrjastrzebski.playground.PlaygroundGame;
 public class InterpolationTest extends BaseScreen {
 	VisList<String> list;
 	String interpolationNames[], selectedInterpolation;
-	float graphSize = 400, steps = graphSize / 2, time = 0, duration = 2.5f;
+	float graphWidth = 800;
+	float graphHeight = 400;
+	float steps = graphWidth / 2, time = 0, duration = 2.5f;
 	Vector2 startPosition = new Vector2(), targetPosition = new Vector2(), position = new Vector2();
 
 	public InterpolationTest (GameReset game) {
@@ -61,7 +63,7 @@ public class InterpolationTest extends BaseScreen {
 		scroll.setFadeScrollBars(false);
 		scroll.setScrollingDisabled(true, false);
 
-		root.add(scroll).expandX().left().width(100);
+		root.add(scroll).expandX().left().width(300);
 		multiplexer.getProcessors().insert(0, new InputAdapter() {
 			public boolean scrolled (int amount) {
 				if (!Gdx.input.isKeyPressed(Input.Keys.CONTROL_LEFT)) return false;
@@ -84,24 +86,26 @@ public class InterpolationTest extends BaseScreen {
 		super.render(delta);
 
 		Gdx.gl.glClearColor(.3f, .3f, .3f, 1);
-		float bottomLeftX = Gdx.graphics.getWidth() / 2 - graphSize / 2, bottomLeftY = Gdx.graphics.getHeight() / 2 - graphSize / 2;
+		float bottomLeftX = Gdx.graphics.getWidth() / 2 - graphWidth / 2, bottomLeftY =
+			Gdx.graphics.getHeight() / 2 - graphHeight / 2;
 
 		// only show up to two decimals
 		String text = String.valueOf(duration);
-		if (text.length() > 4) text = text.substring(0, text.lastIndexOf('.') + 3);
+		if (text.length() > 4)
+			text = text.substring(0, text.lastIndexOf('.') + 3);
 		text = "duration: " + text + " s (ctrl + scroll to change)";
 		stage.getBatch().begin();
-		list.getStyle().font.draw(stage.getBatch(), text, bottomLeftX + graphSize / 2, bottomLeftY + graphSize
-			+ list.getStyle().font.getLineHeight(), 0, Align.center, false);
+		list.getStyle().font.draw(stage.getBatch(), text, bottomLeftX + graphWidth / 2,
+			bottomLeftY + graphHeight + list.getStyle().font.getLineHeight(), 0, Align.center, false);
 		stage.getBatch().end();
 
 		renderer.begin(ShapeRenderer.ShapeType.Line);
-		renderer.rect(bottomLeftX, bottomLeftY, graphSize, graphSize); // graph bounds
+		renderer.rect(bottomLeftX, bottomLeftY, graphWidth, graphHeight); // graph bounds
 		float lastX = bottomLeftX, lastY = bottomLeftY;
 		for (float step = 0; step <= steps; step++) {
 			Interpolation interpolation = getInterpolation(selectedInterpolation);
 			float percent = step / steps;
-			float x = bottomLeftX + graphSize * percent, y = bottomLeftY + graphSize * interpolation.apply(percent);
+			float x = bottomLeftX + graphWidth * percent, y = bottomLeftY + graphHeight * interpolation.apply(percent);
 			renderer.line(lastX, lastY, x, y);
 			lastX = x;
 			lastY = y;
@@ -112,8 +116,8 @@ public class InterpolationTest extends BaseScreen {
 			startPosition.set(targetPosition); // set startPosition to targetPosition for next click
 		}
 		// draw time marker
-		renderer.line(bottomLeftX + graphSize * time / duration, bottomLeftY, bottomLeftX + graphSize * time / duration,
-			bottomLeftY + graphSize);
+		renderer.line(bottomLeftX + graphWidth * time / duration, bottomLeftY, bottomLeftX + graphWidth * time / duration,
+			bottomLeftY + graphHeight);
 		// draw path
 		renderer.setColor(Color.GRAY);
 		renderer.line(startPosition, targetPosition);
