@@ -18,6 +18,7 @@ import com.kotcrab.vis.ui.VisUI;
 import com.kotcrab.vis.ui.widget.*;
 import io.piotrjastrzebski.playground.BaseScreen;
 import io.piotrjastrzebski.playground.GameReset;
+import io.piotrjastrzebski.playground.PlaygroundGame;
 
 /**
  * We want to figure out a way to drag and drop stuff from one tree to another, to proper places
@@ -323,5 +324,9 @@ public class UIDaDTest extends BaseScreen {
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 		stage.act(delta);
 		stage.draw();
+	}
+
+	public static void main (String[] args) {
+		PlaygroundGame.start(args, UIDaDTest.class);
 	}
 }

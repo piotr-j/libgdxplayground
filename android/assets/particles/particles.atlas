@@ -1,0 +1,20 @@
+
+particle.png
+size: 32,32
+format: RGBA8888
+filter: Nearest,Nearest
+repeat: none
+particle
+  rotate: false
+  xy: 2, 2
+  size: 32, 31
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+particle-extended
+  rotate: false
+  xy: 2, 2
+  size: 32, 31
+  orig: 36, 36
+  offset: 2, 2
+  index: -1

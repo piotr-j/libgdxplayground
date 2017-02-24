@@ -20,6 +20,7 @@ import com.kotcrab.vis.ui.VisUI;
 import com.kotcrab.vis.ui.widget.*;
 import io.piotrjastrzebski.playground.BaseScreen;
 import io.piotrjastrzebski.playground.GameReset;
+import io.piotrjastrzebski.playground.PlaygroundGame;
 import io.piotrjastrzebski.playground.ecs.assettest.SpriteRenderable;
 
 /**
@@ -111,5 +112,9 @@ public class UIDaDSpriteTest extends BaseScreen {
 	@Override public void dispose () {
 		super.dispose();
 		texture.dispose();
+	}
+
+	public static void main (String[] args) {
+		PlaygroundGame.start(args, UIDaDSpriteTest.class);
 	}
 }

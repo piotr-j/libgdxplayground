@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
@@ -22,6 +23,7 @@ import io.piotrjastrzebski.playground.PlaygroundGame;
 
 /**
  * Based on http://www.slickentertainment.com/tech/dev-blog-128-color-grading-another-cool-rendering-trick/
+ * and https://github.com/voodoosoft/gameroots/tree/master/examples/src/main/java/de/voodoosoft/gameroots/examples/colorgrading
  *
  * Created by PiotrJ on 31/07/15.
  */
@@ -40,9 +42,10 @@ public class ColorGradeTest extends BaseScreen {
 	boolean debugDraw = true;
 	FrameBuffer fbo;
 	TextureRegion fboRegion;
-	boolean useFbo;
+	boolean useColorGrade;
+	Texture generatedLUT;
 	Texture cgtBase;
-	Texture[] cgts = new Texture[4];
+	Texture[] cgts = new Texture[5];
 	Texture cgtSelected;
 	ShaderProgram colorGradeShader;
 
@@ -58,16 +61,20 @@ public class ColorGradeTest extends BaseScreen {
 		cgts[1] = new Texture("color_grade_sepia.png");
 		cgts[2] = new Texture("color_grade_bw.png");
 		cgts[3] = new Texture("color_grade_gradient.png");
-		cgtSelected = cgts[0];
+		cgts[4] = cgtBase;
+		cgtSelected = cgts[4];
 		createBounds();
 		reset();
+
+		generatedLUT = new Texture(generateLUT(16));
 
 		fbo = new FrameBuffer(Pixmap.Format.RGBA8888, Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), false);
 		fbo.getColorBufferTexture().setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
 		fboRegion = new TextureRegion(fbo.getColorBufferTexture());
 		fboRegion.flip(false, true);
 
-		colorGradeShader = new ShaderProgram(Gdx.files.internal("shaders/colorgrade.vert"), Gdx.files.internal("shaders/colorgrade.frag"));
+//		colorGradeShader = new ShaderProgram(Gdx.files.internal("shaders/colorgrade.vert"), Gdx.files.internal("shaders/colorgrade.frag"));
+		colorGradeShader = new ShaderProgram(Gdx.files.internal("shaders/colorgrade.vert"), Gdx.files.internal("shaders/colorgrade2.frag"));
 		if (!colorGradeShader.isCompiled()) {
 			Gdx.app.error(TAG, colorGradeShader.getLog());
 			throw new AssertionError("welp");
@@ -75,6 +82,7 @@ public class ColorGradeTest extends BaseScreen {
 		colorGradeShader.begin();
 		colorGradeShader.setUniformi(colorGradeShader.getUniformLocation("u_texture"), 0);
 		colorGradeShader.setUniformi(colorGradeShader.getUniformLocation("u_color_grade"), 1);
+		colorGradeShader.setUniformf(colorGradeShader.getUniformLocation("u_lut_size"), 16.0f);
 		colorGradeShader.end();
 	}
 
@@ -133,8 +141,8 @@ public class ColorGradeTest extends BaseScreen {
 	@Override public void render (float delta) {
 		super.render(delta);
 		if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
-			useFbo = !useFbo;
-			Gdx.app.log(TAG, "use fbo = " + useFbo);
+			useColorGrade = !useColorGrade;
+			Gdx.app.log(TAG, "use color grading = " + useColorGrade);
 		}
 		if (Gdx.input.isKeyJustPressed(Input.Keys.F1)) {
 			cgtSelected = cgts[0];
@@ -152,10 +160,14 @@ public class ColorGradeTest extends BaseScreen {
 			cgtSelected = cgts[3];
 			Gdx.app.log(TAG, "gradient");
 		}
+		if (Gdx.input.isKeyJustPressed(Input.Keys.F6)) {
+			cgtSelected = cgts[4];
+			Gdx.app.log(TAG, "same");
+		}
 
 		if (Gdx.input.isKeyJustPressed(Input.Keys.R)) {
 			Gdx.app.log(TAG, "Reloading shader...");
-			ShaderProgram shader = new ShaderProgram(Gdx.files.internal("shaders/colorgrade.vert"), Gdx.files.internal("shaders/colorgrade.frag"));
+			ShaderProgram shader = new ShaderProgram(Gdx.files.internal("shaders/colorgrade.vert"), Gdx.files.internal("shaders/colorgrade2.frag"));
 			if (!shader.isCompiled()) {
 				Gdx.app.error(TAG, colorGradeShader.getLog());
 			} else {
@@ -163,6 +175,7 @@ public class ColorGradeTest extends BaseScreen {
 				colorGradeShader.begin();
 				colorGradeShader.setUniformi(colorGradeShader.getUniformLocation("u_texture"), 0);
 				colorGradeShader.setUniformi(colorGradeShader.getUniformLocation("u_color_grade"), 1);
+				colorGradeShader.setUniformf(colorGradeShader.getUniformLocation("u_lut_size"), 16.0f);
 				colorGradeShader.end();
 			}
 		}
@@ -176,9 +189,7 @@ public class ColorGradeTest extends BaseScreen {
 
 	private void draw () {
 		Gdx.gl.glEnable(GL20.GL_BLEND);
-		if (useFbo) {
-			fbo.begin();
-		}
+		fbo.begin();
 		batch.setShader(null);
 		Gdx.gl.glClearColor(clear.r, clear.g, clear.b, clear.a);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
@@ -191,20 +202,40 @@ public class ColorGradeTest extends BaseScreen {
 			box.draw(batch);
 		}
 
-		batch.draw(cgtBase, -cgtBase.getWidth() * INV_SCALE * 3/2f, 0, cgtBase.getWidth() * INV_SCALE * 3, cgtBase.getHeight() * INV_SCALE * 3);
+		batch.draw(cgtBase, -cgtBase.getWidth() * INV_SCALE * 5/2f, 4, cgtBase.getWidth() * INV_SCALE * 5, cgtBase.getHeight() * INV_SCALE * 5);
 		batch.end();
 
 		Gdx.gl.glDisable(GL20.GL_BLEND);
-		if (useFbo) {
-			fbo.end();
+		fbo.end();
+
+		if (useColorGrade) {
 			cgtSelected.bind(1);
-			fboRegion.getTexture().bind(0);
 			batch.setShader(colorGradeShader);
-			batch.getProjectionMatrix().setToOrtho2D(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-			batch.begin();
-			batch.draw(fboRegion, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-			batch.end();
+		} else {
+			batch.setShader(null);
 		}
+		fboRegion.getTexture().bind(0);
+		batch.getProjectionMatrix().setToOrtho2D(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+		batch.begin();
+		batch.draw(fboRegion, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+		batch.end();
+
+		batch.setProjectionMatrix(gameCamera.combined);
+		batch.setShader(null);
+		batch.begin();
+		batch.draw(cgtBase, -cgtBase.getWidth() * INV_SCALE * 5/2f, 7, cgtBase.getWidth() * INV_SCALE * 5, cgtBase.getHeight() * INV_SCALE * 5);
+		batch.draw(generatedLUT, -cgtBase.getWidth() * INV_SCALE * 5/2f, 1, cgtBase.getWidth() * INV_SCALE * 5, cgtBase.getHeight() * INV_SCALE * 5);
+		batch.end();
+
+		renderer.setProjectionMatrix(gameCamera.combined);
+		renderer.begin(ShapeRenderer.ShapeType.Filled);
+		if (useColorGrade) {
+			renderer.setColor(Color.GREEN);
+		} else {
+			renderer.setColor(Color.RED);
+		}
+		renderer.rect(-VP_WIDTH/2, VP_HEIGHT/2-1, 1, 1);
+		renderer.end();
 	}
 
 	private class Box {
@@ -326,6 +357,33 @@ public class ColorGradeTest extends BaseScreen {
 		super.dispose();
 		box.dispose();
 	}
+
+	@Override public void resize (int width, int height) {
+		super.resize(width, height);
+		if (fbo != null) fbo.dispose();
+		fbo = new FrameBuffer(Pixmap.Format.RGBA8888, Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), false);
+		fbo.getColorBufferTexture().setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
+		fboRegion = new TextureRegion(fbo.getColorBufferTexture());
+		fboRegion.flip(false, true);
+	}
+
+	public static Pixmap generateLUT(int size) {
+		if (size <= 0) throw new AssertionError("Size cant be <= 0");
+		Pixmap pixmap = new Pixmap(size * size, size, Pixmap.Format.RGB888);
+		Pixmap.setBlending(Pixmap.Blending.None);
+		float s = size-1.0f;
+		for (int r = 0; r < size; r++) {
+			for (int g = 0; g < size; g++) {
+				for (int b = 0; b < size; b++) {
+					int rgba = Color.rgba8888(r/s, g/s, b/s, 1);
+					pixmap.drawPixel(r + b * size, g, rgba);
+				}
+			}
+		}
+		Pixmap.setBlending(Pixmap.Blending.SourceOver);
+		return pixmap;
+	}
+
 	public static void main (String[] args) {
 		PlaygroundGame.start(args, ColorGradeTest.class);
 	}

@@ -1,5 +1,6 @@
 package io.piotrjastrzebski.playground;
 
+import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
@@ -232,5 +233,13 @@ public class PlaygroundGame extends Game implements GameReset {
 
 	public static void start (String[] args, LwjglApplicationConfiguration config, Class<? extends BaseScreen> target) {
 		new LwjglApplication(new PlaygroundGame(new DesktopBridge(), target), config);
+	}
+
+	public static void start (ApplicationListener listener, LwjglApplicationConfiguration config) {
+		new LwjglApplication(listener, config);
+	}
+
+	public static void start (ApplicationListener listener) {
+		new LwjglApplication(listener, config());
 	}
 }

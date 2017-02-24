@@ -18,6 +18,7 @@ import com.badlogic.gdx.physics.box2d.joints.MouseJointDef;
 import com.badlogic.gdx.utils.Array;
 import io.piotrjastrzebski.playground.BaseScreen;
 import io.piotrjastrzebski.playground.GameReset;
+import io.piotrjastrzebski.playground.PlaygroundGame;
 
 /**
  * Created by PiotrJ on 31/07/15.
@@ -362,4 +363,9 @@ public class Box2dRayTest extends BaseScreen {
 		pBatch.dispose();
 		lightTexture.dispose();
 	}
+
+	public static void main (String[] args) {
+		PlaygroundGame.start(args, Box2dRayTest.class);
+	}
+
 }
