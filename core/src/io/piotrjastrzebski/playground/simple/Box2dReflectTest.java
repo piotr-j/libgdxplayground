@@ -29,8 +29,8 @@ public class Box2dReflectTest extends BaseScreen implements RayCastCallback {
 		world = new World(new Vector2(), true);
 		debugRenderer = new Box2DDebugRenderer();
 		boundary = createBoundary();
-		gameCamera.zoom = .4f;
-		gameCamera.position.x += 3;
+		gameCamera.zoom = .7f;
+//		gameCamera.position.x += 3;
 		gameCamera.update();
 	}
 
@@ -112,14 +112,14 @@ public class Box2dReflectTest extends BaseScreen implements RayCastCallback {
 	}
 
 	@Override public boolean mouseMoved (int screenX, int screenY) {
-		gameCamera.unproject(mouse.set(screenX, screenY, 0));
+		gameViewport.unproject(mouse.set(screenX, screenY, 1));
 		return super.mouseMoved(screenX, screenY);
 	}
 
 	private Circle drag;
 	private Vector2 dragOffset = new Vector2();
 	@Override public boolean touchDown (int screenX, int screenY, int pointer, int button) {
-		gameCamera.unproject(mouse.set(screenX, screenY, 0));
+		gameViewport.unproject(mouse.set(screenX, screenY, 1));
 		if (button == Input.Buttons.LEFT) {
 			if (handleA.contains(mouse.x, mouse.y)) {
 				dragOffset.set(mouse.x, mouse.y).sub(handleA.x, handleA.y);
@@ -134,7 +134,7 @@ public class Box2dReflectTest extends BaseScreen implements RayCastCallback {
 	}
 
 	@Override public boolean touchDragged (int screenX, int screenY, int pointer) {
-		gameCamera.unproject(mouse.set(screenX, screenY, 0));
+		gameViewport.unproject(mouse.set(screenX, screenY, 1));
 		if (drag != null) {
 			drag.setPosition(mouse.x - dragOffset.x, mouse.y - dragOffset.y);
 		}
@@ -142,7 +142,7 @@ public class Box2dReflectTest extends BaseScreen implements RayCastCallback {
 	}
 
 	@Override public boolean touchUp (int screenX, int screenY, int pointer, int button) {
-		gameCamera.unproject(mouse.set(screenX, screenY, 0));
+		gameViewport.unproject(mouse.set(screenX, screenY, 1));
 		if (button == Input.Buttons.LEFT) {
 			if (drag != null) {
 				drag = null;
