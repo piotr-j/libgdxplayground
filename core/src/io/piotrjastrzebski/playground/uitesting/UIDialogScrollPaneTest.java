@@ -8,6 +8,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.Tree;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop;
@@ -29,13 +30,35 @@ public class UIDialogScrollPaneTest extends BaseScreen {
 		super(game);
 		VisDialog dialog = new VisDialog("Dialog with pane!");
 		VisTable content = new VisTable();
-		VisScrollPane scrollPane = new VisScrollPane(content);
-		for (int i = 1; i <= 100; i++) {
+		final VisScrollPane scrollPane = new VisScrollPane(content);
+		for (int i = 1; i <= 500; i++) {
 			content.add(new VisLabel("Label " + i)).expandX().fillX();
+			content.add().pad(5).expandX().fillX();
 			content.add(new VisTextButton("Button " + i)).row();
 		}
+		scrollPane.setScrollingDisabled(true, false);
 		dialog.getContentTable().add(scrollPane).expandX().fillX().row();
-		dialog.getContentTable().add(new VisTextButton("Close"));
+		VisTextButton scrollToBottom = new VisTextButton("Bottom");
+		scrollToBottom.addListener(new ClickListener(){
+			@Override public void clicked (InputEvent event, float x, float y) {
+				scrollPane.setScrollPercentY(1);
+//				float height = scrollPane.getMaxY();
+//				int size = scrollPane.getChildren().size;
+//				float childHeight = height/size;
+//				scrollPane.setScrollY(childHeight * size);
+			}
+		});
+		VisTextButton scrollToTop = new VisTextButton("Top");
+		scrollToTop.addListener(new ClickListener(){
+			@Override public void clicked (InputEvent event, float x, float y) {
+				scrollPane.setScrollPercentY(0);
+			}
+		});
+		Table buttons = new Table();
+		buttons.add(scrollToBottom).left();
+		buttons.add(new VisTextButton("Close")).expandX();
+		buttons.add(scrollToTop).right();
+		dialog.getContentTable().add(buttons).expandX().fillX();
 		stage.addActor(dialog.fadeIn());
 		dialog.setResizable(true);
 		dialog.centerWindow();
