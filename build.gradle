@@ -51,6 +51,8 @@ project(":desktop") {
         compile "com.badlogicgames.gdx:gdx-freetype-platform:$gdxVersion:natives-desktop"
 //        compile "com.badlogicgames.gdxvideo:gdx-video-desktop:$gdxVideoVersion"
 //        compile "com.badlogicgames.gdxvideo:gdx-video-platform:$gdxVideoVersion:natives-desktop"
+
+        compile "com.badlogicgames.gdx:gdx-tools:$gdxVersion"
     }
 }
 
