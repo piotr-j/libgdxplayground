@@ -80,9 +80,9 @@ public class SimpleKoalioTest extends BaseScreen {
 	private OrthogonalTiledMapRenderer renderer;
 	private OrthographicCamera camera;
 	private Texture koalaTexture;
-	private Animation stand;
-	private Animation walk;
-	private Animation jump;
+	private Animation<TextureRegion> stand;
+	private Animation<TextureRegion> walk;
+	private Animation<TextureRegion> jump;
 	private Koala koala;
 	private Pool<Rectangle> rectPool = new Pool<Rectangle>() {
 		@Override protected Rectangle newObject () {
