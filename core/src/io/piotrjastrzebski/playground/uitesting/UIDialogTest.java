@@ -2,12 +2,15 @@ package io.piotrjastrzebski.playground.uitesting;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.kotcrab.vis.ui.widget.VisDialog;
 import com.kotcrab.vis.ui.widget.VisTextButton;
 import io.piotrjastrzebski.playground.BaseScreen;
 import io.piotrjastrzebski.playground.GameReset;
+import io.piotrjastrzebski.playground.PlaygroundGame;
 
 /**
  * Created by PiotrJ on 20/06/15.
@@ -18,13 +21,26 @@ public class UIDialogTest extends BaseScreen {
 	public UIDialogTest (GameReset game) {
 		super(game);
 
-		VisTextButton button = new VisTextButton("Show dialog");
+		final VisTextButton button = new VisTextButton("Show dialog");
 		button.addListener(new ClickListener(){
 			@Override public void clicked (InputEvent event, float x, float y) {
 				showDialog();
+				button.addAction(
+					Actions.sequence(
+						Actions.moveBy(10, 0, .1f, Interpolation.bounce),
+						Actions.moveBy(-10, 0, .1f, Interpolation.bounce)
+					));
 			}
 		});
+
+
 		root.add(button);
+	}
+
+	@Override public void render (float delta) {
+		super.render(delta);
+		stage.act(delta);
+		stage.draw();
 	}
 
 	enum Result {YES, NO}
@@ -46,5 +62,8 @@ public class UIDialogTest extends BaseScreen {
 		dialog.show(stage);
 	}
 
+	public static void main (String[] args) {
+		PlaygroundGame.start(args, UIDialogTest.class);
+	}
 
 }
