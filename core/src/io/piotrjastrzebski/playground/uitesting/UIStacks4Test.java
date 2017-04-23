@@ -2,7 +2,6 @@ package io.piotrjastrzebski.playground.uitesting;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
@@ -16,10 +15,11 @@ import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup;
 import com.badlogic.gdx.scenes.scene2d.utils.ActorGestureListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.SnapshotArray;
-import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import com.kotcrab.vis.ui.widget.VisLabel;
 import io.piotrjastrzebski.playground.BaseScreen;
 import io.piotrjastrzebski.playground.GameReset;
 import io.piotrjastrzebski.playground.PlaygroundGame;
@@ -29,11 +29,12 @@ import static com.badlogic.gdx.scenes.scene2d.actions.Actions.*;
 /**
  * Created by PiotrJ on 20/06/15.
  */
-public class UIStacks3Test extends BaseScreen {
-	protected final static String TAG = UIStacks3Test.class.getSimpleName();
+public class UIStacks4Test extends BaseScreen {
+	protected final static String TAG = UIStacks4Test.class.getSimpleName();
 
+	DragAndDrop dad;
 	TextureRegion region;
-	public UIStacks3Test (GameReset game) {
+	public UIStacks4Test (GameReset game) {
 		super(game);
 		// TODO we want to figure out a way to position stacks of images, say coins or whatever
 		// we want multiple columns of stacks of coins
@@ -64,6 +65,8 @@ public class UIStacks3Test extends BaseScreen {
 	protected void rebuild() {
 		root.clear();
 
+		dad = new DragAndDrop();
+
 		final float group1Scale = .75f;
 		final float group2Scale = 1.5f;
 		final VerticalGroup group1 = new VerticalGroup();
@@ -77,6 +80,14 @@ public class UIStacks3Test extends BaseScreen {
 			group1.addActor(image);
 		}
 
+		dad.addSource(new DragAndDrop.Source(group1) {
+			@Override public DragAndDrop.Payload dragStart (InputEvent event, float x, float y, int pointer) {
+				DragAndDrop.Payload payload = new DragAndDrop.Payload();
+				payload.setDragActor(new VisLabel("Welp"));
+				return payload;
+			}
+		});
+
 		final VerticalGroup group2 = new VerticalGroup();
 		group2.reverse();
 		group2.space(-region.getRegionHeight() * group2Scale * .8f);
@@ -87,39 +98,49 @@ public class UIStacks3Test extends BaseScreen {
 			group2.addActor(image);
 		}
 
-		group1.addListener(new ActorGestureListener(){
-			@Override public void tap (InputEvent event, float x, float y, int count, int button) {
-				float duration = 1;
-				Actor hit = group1.hit(x, y, true);
-				if (hit != null) {
-					hit.addAction(rotateBy(360, duration));
-				}
+		dad.addTarget(new DragAndDrop.Target(group2) {
+			@Override public boolean drag (DragAndDrop.Source source, DragAndDrop.Payload payload, float x, float y, int pointer) {
+				return false;
 			}
 
-			@Override public void fling (InputEvent event, float velocityX, float velocityY, int button) {
-				SnapshotArray<Actor> children = group1.getChildren();
-				if (children.size > 0) {
-					moveChild((Image)children.get(children.size -1), group1, group2, Color.BLUE, group2Scale);
-				}
+			@Override public void drop (DragAndDrop.Source source, DragAndDrop.Payload payload, float x, float y, int pointer) {
+
 			}
 		});
 
-		group2.addListener(new ActorGestureListener(){
-			@Override public void tap (InputEvent event, float x, float y, int count, int button) {
-				float duration = 1;
-				Actor hit = group2.hit(x, y, true);
-				if (hit != null) {
-					hit.addAction(rotateBy(360, duration));
-				}
-			}
-
-			@Override public void fling (InputEvent event, float velocityX, float velocityY, int button) {
-				SnapshotArray<Actor> children = group2.getChildren();
-				if (children.size > 0) {
-					moveChild((Image)children.get(children.size -1), group2, group1, Color.RED, group1Scale);
-				}
-			}
-		});
+//		group1.addListener(new ActorGestureListener(){
+//			@Override public void tap (InputEvent event, float x, float y, int count, int button) {
+//				float duration = 1;
+//				Actor hit = group1.hit(x, y, true);
+//				if (hit != null) {
+//					hit.addAction(rotateBy(360, duration));
+//				}
+//			}
+//
+//			@Override public void fling (InputEvent event, float velocityX, float velocityY, int button) {
+//				SnapshotArray<Actor> children = group1.getChildren();
+//				if (children.size > 0) {
+//					moveChild((Image)children.get(children.size -1), group1, group2, Color.BLUE, group2Scale);
+//				}
+//			}
+//		});
+//
+//		group2.addListener(new ActorGestureListener(){
+//			@Override public void tap (InputEvent event, float x, float y, int count, int button) {
+//				float duration = 1;
+//				Actor hit = group2.hit(x, y, true);
+//				if (hit != null) {
+//					hit.addAction(rotateBy(360, duration));
+//				}
+//			}
+//
+//			@Override public void fling (InputEvent event, float velocityX, float velocityY, int button) {
+//				SnapshotArray<Actor> children = group2.getChildren();
+//				if (children.size > 0) {
+//					moveChild((Image)children.get(children.size -1), group2, group1, Color.RED, group1Scale);
+//				}
+//			}
+//		});
 	}
 
 	void moveChild (final Image actor, final VerticalGroup from, final VerticalGroup to, Color targetColor, float scale) {
@@ -231,16 +252,8 @@ public class UIStacks3Test extends BaseScreen {
 		region.getTexture().dispose();
 	}
 
-	public ScreenViewport getViewport() {
-		return guiViewport;
-	}
-
-	public InputProcessor getInputProcessor() {
-		return multiplexer;
-	}
-
 	public static void main (String[] args) {
-		PlaygroundGame.start(args, UIStacks3Test.class);
+		PlaygroundGame.start(args, UIStacks4Test.class);
 	}
 
 }
