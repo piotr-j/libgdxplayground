@@ -1,6 +1,9 @@
 package io.piotrjastrzebski.playground.asyncscreentest;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Pixmap;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.maps.tiled.renderers.IsometricTiledMapRenderer;
@@ -32,17 +35,28 @@ public class AsyncScreenTest extends BaseScreen {
 		mapRenderer = new IsometricTiledMapRenderer(map, INV_SCALE, batch);
 	}
 
+	private Texture texture;
 	@Override public void render (float delta) {
 		super.render(delta);
 		if (result != null && result.isDone()) {
-			Gdx.app.log("", "SlowLoadStuff done " + result.get());
+			SlowLoadStuff loadStuff = result.get();
+			Gdx.app.log("", "SlowLoadStuff done " + loadStuff);
 			// got to reset or it will be called all the time
+			texture = new Texture(loadStuff.pixmap);
+			loadStuff.pixmap.dispose();
+			loadStuff.pixmap = null;
 			result = null;
 		}
 		gameCamera.position.x += 1 * delta;
 		gameCamera.update();
 		mapRenderer.setView(gameCamera);
 		mapRenderer.render();
+		if (texture != null) {
+			batch.setProjectionMatrix(guiCamera.combined);
+			batch.begin();
+			batch.draw(texture, 0, 0);
+			batch.end();
+		}
 
 	}
 
@@ -57,10 +71,19 @@ public class AsyncScreenTest extends BaseScreen {
 	}
 
 	private class SlowLoadStuff {
+		Pixmap pixmap;
+		Texture texture;
 		public SlowLoadStuff () throws InterruptedException {
 			Gdx.app.log("SlowLoadStuff", "Started");
 			Thread.sleep(2000);
 			Gdx.app.log("SlowLoadStuff", "Finished");
+			pixmap = new Pixmap(256, 256, Pixmap.Format.RGBA8888);
+			pixmap.setColor(Color.BROWN);
+			pixmap.fill();
+			pixmap.setColor(Color.GREEN);
+			pixmap.fillCircle(128, 128, 128);
+			// nope
+//			texture = new Texture(pixmap);
 		}
 	}
 
