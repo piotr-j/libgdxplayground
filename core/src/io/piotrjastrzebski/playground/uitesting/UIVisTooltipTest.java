@@ -5,23 +5,22 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.IntMap;
-import com.kotcrab.vis.ui.FocusManager;
 import com.kotcrab.vis.ui.widget.Tooltip;
 import com.kotcrab.vis.ui.widget.VisLabel;
 import com.kotcrab.vis.ui.widget.VisTable;
 import com.kotcrab.vis.ui.widget.VisTextButton;
 import io.piotrjastrzebski.playground.BaseScreen;
 import io.piotrjastrzebski.playground.GameReset;
+import io.piotrjastrzebski.playground.PlaygroundGame;
 
 /**
  * Created by PiotrJ on 20/06/15.
  */
-public class UITest extends BaseScreen {
-	public UITest (GameReset game) {
+public class UIVisTooltipTest extends BaseScreen {
+	public UIVisTooltipTest (GameReset game) {
 		super(game);
 		VisTable table = new VisTable(true);
 		VisLabel label = new VisLabel("Test");
-		new Tooltip.Builder("Test tooltip").target(label).build();
 		table.add(label);
 
 		table.row();
@@ -40,12 +39,22 @@ public class UITest extends BaseScreen {
 			}
 		}));
 		root.add(table);
+
+		clear.set(.5f, .5f, .5f, 1);
+	}
+
+	@Override public void render (float delta) {
+		super.render(delta);
+		stage.act(delta);
+		stage.draw();
 	}
 
 	private VisTextButton createBtn (String text, String tt, final BtnAction btnAction) {
 		VisTextButton button = new VisTextButton(text);
 		btnAction.setOwner(button);
 //		new Tooltip(button, tt + " shortcut: " + Input.Keys.toString(btnAction.keyCode));
+		Tooltip build = new Tooltip.Builder("welp").target(button).build();
+
 		button.addListener(new ClickListener() {
 			@Override public void clicked (InputEvent event, float x, float y) {
 				btnAction.execute();
@@ -83,5 +92,9 @@ public class UITest extends BaseScreen {
 		public void setOwner (VisTextButton owner) {
 			this.owner = owner;
 		}
+	}
+
+	public static void main (String[] args) {
+		PlaygroundGame.start(args, UIVisTooltipTest.class);
 	}
 }

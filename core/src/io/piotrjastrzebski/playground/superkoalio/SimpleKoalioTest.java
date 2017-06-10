@@ -263,13 +263,13 @@ public class SimpleKoalioTest extends BaseScreen {
 		TextureRegion frame = null;
 		switch (koala.state) {
 		case Standing:
-			frame = stand.getKeyFrame(koala.stateTime);
+			frame = (TextureRegion)stand.getKeyFrame(koala.stateTime);
 			break;
 		case Walking:
-			frame = walk.getKeyFrame(koala.stateTime);
+			frame = (TextureRegion)walk.getKeyFrame(koala.stateTime);
 			break;
 		case Jumping:
-			frame = jump.getKeyFrame(koala.stateTime);
+			frame = (TextureRegion)jump.getKeyFrame(koala.stateTime);
 			break;
 		}
 

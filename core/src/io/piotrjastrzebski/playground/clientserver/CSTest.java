@@ -8,8 +8,6 @@ import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.kotcrab.vis.ui.widget.VisCheckBox;
 import com.kotcrab.vis.ui.widget.VisLabel;
 import com.kotcrab.vis.ui.widget.VisTable;
-import com.kotcrab.vis.ui.widget.spinner.IntSpinnerModel;
-import com.kotcrab.vis.ui.widget.spinner.Spinner;
 import io.piotrjastrzebski.playground.BaseScreen;
 import io.piotrjastrzebski.playground.GameReset;
 
@@ -34,14 +32,14 @@ public class CSTest extends BaseScreen {
 		root.row();
 		VisTable serverTable = new VisTable(true);
 		root.add(serverTable);
-		final IntSpinnerModel fpsModel = new IntSpinnerModel(60, 5, 120, 5);
-		Spinner serverFPSSelector = new Spinner("Server FPS", fpsModel);
-		serverFPSSelector.addListener(new ChangeListener() {
-			@Override public void changed (ChangeEvent event, Actor actor) {
-
-			}
-		});
-		serverTable.add(serverFPSSelector);
+//		NumberSelector serverFPSSelector = new NumberSelector("Server FPS", 60, 5, 120, 5);
+//		serverFPSSelector.addChangeListener(new NumberSelector.NumberSelectorListener() {
+//			@Override public void changed (float number) {
+//
+//			}
+//		});
+//		serverFPSSelector.setValue(5);
+//		serverTable.add(serverFPSSelector);
 	}
 
 	int clientId = 0;
@@ -55,16 +53,15 @@ public class CSTest extends BaseScreen {
 		// large pad for client rendering
 		root.add(clientTable).padBottom(150);
 		root.row();
-		final IntSpinnerModel lagModel = new IntSpinnerModel(250, 0, 1000, 10);
-		Spinner lagSelector = new Spinner("Lag", lagModel);
-		lagSelector.addListener(new ChangeListener() {
-			@Override public void changed (ChangeEvent event, Actor actor) {
-				client.setLag(lagModel.getValue());
-			}
-		});
-		lagModel.setValue(250);
+//		NumberSelector lagSelector = new NumberSelector("Lag", 250, 0, 1000, 10);
+//		lagSelector.addChangeListener(new NumberSelector.NumberSelectorListener() {
+//			@Override public void changed (float number) {
+//				client.setLag((int)number);
+//			}
+//		});
+//		lagSelector.setValue(250);
 
-		clientTable.add(lagSelector);
+//		clientTable.add(lagSelector);
 		final VisCheckBox predictionCB = new VisCheckBox("Prediction");
 		clientTable.add(predictionCB);
 		final VisCheckBox reconciliationCB = new VisCheckBox("Reconciliation");

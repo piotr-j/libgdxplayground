@@ -19,23 +19,19 @@ public class UIColorPickerTest extends BaseScreen {
 		super(game);
 		stage.setDebugAll(true);
 
-		colorPicker = new ColorPicker("", new ColorPickerListener() {
-			@Override public void canceled (Color oldColor) {
-
-			}
-
-			@Override public void changed (Color newColor) {
-
-			}
-
-			@Override public void finished (Color newColor) {
-				Gdx.app.log("", "Finished " + newColor);
-			}
-
-			@Override public void reset (Color previousColor, Color newColor) {
-
-			}
-		});
+//		colorPicker = new ColorPicker("", new ColorPickerListener() {
+//			@Override public void canceled (Color oldColor) {
+//
+//			}
+//
+//			@Override public void changed (Color newColor) {
+//
+//			}
+//
+//			@Override public void finished (Color newColor) {
+//				Gdx.app.log("", "Finished " + newColor);
+//			}
+//		});
 
 		root.add(colorPicker);
 	}

@@ -2,26 +2,39 @@ package io.piotrjastrzebski.playground.uitesting;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.ui.TextTooltip;
+import com.badlogic.gdx.scenes.scene2d.ui.TooltipManager;
+import com.badlogic.gdx.scenes.scene2d.utils.ActorGestureListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.IntMap;
-import com.kotcrab.vis.ui.FocusManager;
+import com.kotcrab.vis.ui.VisUI;
 import com.kotcrab.vis.ui.widget.Tooltip;
 import com.kotcrab.vis.ui.widget.VisLabel;
 import com.kotcrab.vis.ui.widget.VisTable;
 import com.kotcrab.vis.ui.widget.VisTextButton;
 import io.piotrjastrzebski.playground.BaseScreen;
 import io.piotrjastrzebski.playground.GameReset;
+import io.piotrjastrzebski.playground.PlaygroundGame;
 
 /**
  * Created by PiotrJ on 20/06/15.
  */
-public class UITest extends BaseScreen {
-	public UITest (GameReset game) {
+public class UITooltipTest extends BaseScreen {
+	private final static String TAG = UITooltipTest.class.getSimpleName();
+
+	public UITooltipTest (GameReset game) {
 		super(game);
+
+		TooltipManager tooltipManager = TooltipManager.getInstance();
+		tooltipManager.offsetX = 0;
+		tooltipManager.offsetY = -70;
+		tooltipManager.edgeDistance = 7;
+		tooltipManager.initialTime = 1;
+
 		VisTable table = new VisTable(true);
 		VisLabel label = new VisLabel("Test");
-		new Tooltip.Builder("Test tooltip").target(label).build();
 		table.add(label);
 
 		table.row();
@@ -40,15 +53,32 @@ public class UITest extends BaseScreen {
 			}
 		}));
 		root.add(table);
+
+		clear.set(.5f, .5f, .5f, 1);
+	}
+
+	@Override public void render (float delta) {
+		super.render(delta);
+		stage.act(delta);
+		stage.draw();
 	}
 
 	private VisTextButton createBtn (String text, String tt, final BtnAction btnAction) {
 		VisTextButton button = new VisTextButton(text);
 		btnAction.setOwner(button);
 //		new Tooltip(button, tt + " shortcut: " + Input.Keys.toString(btnAction.keyCode));
-		button.addListener(new ClickListener() {
-			@Override public void clicked (InputEvent event, float x, float y) {
+//		Tooltip build = new Tooltip.Builder("welp").target(button).build();
+		TextTooltip tooltip = new TextTooltip(tt, VisUI.getSkin());
+		button.addListener(tooltip);
+		button.addListener(new ActorGestureListener(){
+			@Override public void tap (InputEvent event, float x, float y, int count, int button) {
 				btnAction.execute();
+			}
+
+			@Override public boolean longPress (Actor actor, float x, float y) {
+				// show tooltip?
+				Gdx.app.log(TAG, "long press?");
+				return true;
 			}
 		});
 		// todo handle modifiers
@@ -83,5 +113,9 @@ public class UITest extends BaseScreen {
 		public void setOwner (VisTextButton owner) {
 			this.owner = owner;
 		}
+	}
+
+	public static void main (String[] args) {
+		PlaygroundGame.start(args, UITooltipTest.class);
 	}
 }
