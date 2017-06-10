@@ -29,7 +29,7 @@ public class UIBlendTest extends BaseScreen {
 
 		atlas = new Texture(Gdx.files.internal("slider.png"));
 
-		// ideally you would use a texture packer like in LibGDX
+		// ideally you would use a region packer like in LibGDX
 		track = new TextureRegion(atlas, 0, 0, 64, 256);
 		thumb = new TextureRegion(atlas, 65, 0, 64, 128);
 
@@ -103,9 +103,9 @@ public class UIBlendTest extends BaseScreen {
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
 		// whenever the slider moves we will need to call renderSlider() to
-		// update the offscreen texture
+		// update the offscreen region
 
-		// render the offscreen texture with "premultiplied alpha" blending
+		// render the offscreen region with "premultiplied alpha" blending
 		batch.setBlendFunction(GL20.GL_ONE, GL20.GL_ONE_MINUS_SRC_ALPHA);
 
 		batch.begin();

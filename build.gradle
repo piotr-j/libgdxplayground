@@ -17,11 +17,11 @@ allprojects {
     version = '1.0'
     ext {
         appName = 'playground'
-        gdxVersion = '1.9.5'
+        gdxVersion = '1.9.6'
         roboVMVersion = '1.2.0'
         box2DLightsVersion = '1.4'
         ashleyVersion = '1.4.0'
-        aiVersion = '1.8.0'
+        aiVersion = '1.8.1'
         visuiVersion = '1.2.4'
         artemisOdbVersion = "2.1.0"
         artemisOdbcontribVersion = "1.1.0"
@@ -51,6 +51,8 @@ project(":desktop") {
         compile "com.badlogicgames.gdx:gdx-freetype-platform:$gdxVersion:natives-desktop"
 //        compile "com.badlogicgames.gdxvideo:gdx-video-desktop:$gdxVideoVersion"
 //        compile "com.badlogicgames.gdxvideo:gdx-video-platform:$gdxVideoVersion:natives-desktop"
+
+        compile "com.badlogicgames.gdx:gdx-tools:$gdxVersion"
     }
 }
 
@@ -84,6 +86,7 @@ project(":core") {
         compile "com.badlogicgames.gdx:gdx-box2d-platform:$gdxVersion:natives-desktop"
 
         compile "com.badlogicgames.gdx:gdx-freetype:$gdxVersion"
+        compile "com.badlogicgames.gdx:gdx-freetype-platform:$gdxVersion:natives-desktop"
 
         testCompile 'junit:junit:4.12'
         testCompile "org.mockito:mockito-core:1.+"
