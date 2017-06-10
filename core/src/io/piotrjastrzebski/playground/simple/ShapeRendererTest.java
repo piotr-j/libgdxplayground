@@ -57,7 +57,7 @@ public class ShapeRendererTest extends BaseScreen {
 		drawer = new PolygonShapeDrawer();
 		batch = new PolygonSpriteBatch();
 
-		// replace with stage with custom batch
+		// replace with stage with custom polyBatch
 		stage = new Stage(guiViewport, batch);
 		stage.addActor(root);
 

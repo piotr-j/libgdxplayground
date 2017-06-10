@@ -1,7 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <map version="1.0" orientation="orthogonal" renderorder="right-down" width="64" height="48" tilewidth="32" tileheight="32" nextobjectid="1">
- <tileset firstgid="1" name="tiles" tilewidth="32" tileheight="32" tilecount="64">
+ <tileset firstgid="1" name="tiles" tilewidth="32" tileheight="32" tilecount="10" columns="5">
   <image source="tiles.png" width="191" height="64"/>
+  <tile id="6">
+   <animation>
+    <frame tileid="7" duration="100"/>
+    <frame tileid="6" duration="100"/>
+    <frame tileid="8" duration="100"/>
+   </animation>
+  </tile>
  </tileset>
  <layer name="bg" width="64" height="48">
   <data encoding="base64">

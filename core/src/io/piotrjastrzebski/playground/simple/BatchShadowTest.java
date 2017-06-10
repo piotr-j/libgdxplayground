@@ -33,7 +33,7 @@ public class BatchShadowTest extends BaseScreen {
 		final int width = 4;
 		final int height = 8;
 		Pixmap pixmap = new Pixmap(width, height, Pixmap.Format.RGBA8888);
-		Pixmap.setBlending(Pixmap.Blending.None);
+		pixmap.setBlending(Pixmap.Blending.None);
 
 		for (int y = 0; y < height; y++) {
 			float a = ((float)y)/(height-1);
@@ -46,7 +46,7 @@ public class BatchShadowTest extends BaseScreen {
 		shadowTexture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
 		ShadowCaster.texture = shadowTexture;
 		pixmap.dispose();
-		Pixmap.setBlending(Pixmap.Blending.SourceOver);
+		pixmap.setBlending(Pixmap.Blending.SourceOver);
 		addCasters(20);
 	}
 
@@ -157,7 +157,7 @@ public class BatchShadowTest extends BaseScreen {
 			caster.update(lightPos);
 			caster.draw(batch);
 		}
-//		batch.draw(shadowTexture, 0, 0, shadowTexture.getWidth()/2, shadowTexture.getHeight()/2);
+//		polyBatch.draw(shadowTexture, 0, 0, shadowTexture.getWidth()/2, shadowTexture.getHeight()/2);
 
 		quad(quad, Color.RED, v2(0, 0), v2(0, 1), v2(1, 1), v2(1, 0));
 		batch.draw(shadowTexture, quad, 0, quad.length);
