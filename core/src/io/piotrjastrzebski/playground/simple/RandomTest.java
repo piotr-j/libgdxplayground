@@ -1,9 +1,14 @@
 package io.piotrjastrzebski.playground.simple;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.Array;
 import io.piotrjastrzebski.playground.BaseScreen;
 import io.piotrjastrzebski.playground.GameReset;
+import io.piotrjastrzebski.playground.PlaygroundGame;
 
 public class RandomTest extends BaseScreen {
 	private final static String TAG = RandomTest.class.getSimpleName();
@@ -19,6 +24,42 @@ public class RandomTest extends BaseScreen {
 		test2();
 		Gdx.app.log(TAG, "Running test 3");
 		test3();
+	}
+
+	Array<Vector2> rng = new Array<>();
+	Array<Vector2> rngTri = new Array<>();
+	Array<Vector2> rngCircle = new Array<>();
+	Array<Vector2> rngTriCircle = new Array<>();
+
+	@Override public void render (float delta) {
+		super.render(delta);
+		if (rng.size < 100000) {
+			for (int i = 0; i < 100; i++) {
+				float rot = MathUtils.random(0f, 180f);
+				rngCircle.add(new Vector2(MathUtils.random(-5f, 5f), 0).rotate(rot));
+				rngTriCircle.add(new Vector2(MathUtils.randomTriangular(-5f, 5f), 0).rotate(rot));
+				rng.add(new Vector2(MathUtils.random(-5f, 5f), MathUtils.random(-5f, 5f)));
+				rngTri.add(new Vector2(MathUtils.randomTriangular(-5f, 5f), MathUtils.randomTriangular(-5f, 5f)));
+			}
+		}
+		enableBlending();
+		renderer.setProjectionMatrix(gameCamera.combined);
+		renderer.begin(ShapeRenderer.ShapeType.Point);
+		for (int i = 0; i < rng.size; i++) {
+			Vector2 v2 = rng.get(i);
+			renderer.setColor(1, 1, 1, .1f);
+			renderer.point(v2.x - 6, v2.y + 6, 0);
+			v2 = rngTri.get(i);
+			renderer.setColor(1, 1, 1, .1f);
+			renderer.point(v2.x + 6, v2.y + 6, 0);
+			v2 = rngCircle.get(i);
+			renderer.setColor(1, 1, 1, .1f);
+			renderer.point(v2.x - 6, v2.y - 6, 0);
+			v2 = rngTriCircle.get(i);
+			renderer.setColor(1, 1, 1, .1f);
+			renderer.point(v2.x + 6, v2.y - 6, 0);
+		}
+		renderer.end();
 	}
 
 	private void test1() {
@@ -80,5 +121,14 @@ public class RandomTest extends BaseScreen {
 			float percent = (choices[choice]/(float)runs)*100f;
 			Gdx.app.log(TAG, "m" + choice + " " + percent + "%, expected "+prob[choice]+"%");
 		}
+	}
+
+
+	// allow us to start this test directly
+	public static void main (String[] args) {
+		LwjglApplicationConfiguration config = PlaygroundGame.config();
+		config.width = 1280/2;
+		config.height = 720/2;
+		PlaygroundGame.start(args, config, RandomTest.class);
 	}
 }
