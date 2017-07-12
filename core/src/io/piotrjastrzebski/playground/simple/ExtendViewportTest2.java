@@ -33,7 +33,7 @@ public class ExtendViewportTest2 extends BaseScreen {
 	public ExtendViewportTest2 (GameReset game) {
 		super(game);
 		gameCamera = new OrthographicCamera();
-		gameViewport = new ExtendViewport(VP_WIDTH, VP_HEIGHT, VP_WIDTH, VP_HEIGHT, gameCamera);
+		gameViewport = new ExtendViewport(VP_WIDTH, VP_HEIGHT, gameCamera);
 		stage = new Stage(gameViewport, batch);
 
 		Table table = new Table();
@@ -45,17 +45,25 @@ public class ExtendViewportTest2 extends BaseScreen {
 	}
 
 	@Override public void render (float delta) {
-		Gdx.gl.glClearColor(1, 0, 0, 1);
+		Gdx.gl.glClearColor(.5f, .5f, .5f, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-		renderer.setProjectionMatrix(gameCamera.combined);
-		renderer.setColor(Color.GREEN);
-		renderer.begin(ShapeRenderer.ShapeType.Filled);
-		renderer.rect(0, 0, VP_WIDTH, VP_HEIGHT);
-		renderer.end();
 		stage.act(delta);
 		stage.draw();
 
+		renderer.setProjectionMatrix(gameCamera.combined);
+		renderer.begin(ShapeRenderer.ShapeType.Line);
+		renderer.setColor(Color.YELLOW);
+		renderer.rect(-100, -100, VP_WIDTH + 200, VP_HEIGHT + 200);
+		renderer.setColor(Color.GREEN);
+		renderer.rect(0, 0, VP_WIDTH, VP_HEIGHT);
+		renderer.setColor(Color.MAGENTA);
+		renderer.rect(
+			gameCamera.position.x - gameCamera.viewportWidth/2,
+			gameCamera.position.y - gameCamera.viewportHeight/2,
+			gameCamera.viewportWidth,
+			gameCamera.viewportHeight);
+		renderer.end();
 	}
 
 	@Override public void dispose () {
@@ -65,6 +73,8 @@ public class ExtendViewportTest2 extends BaseScreen {
 
 	@Override public void resize (int width, int height) {
 		gameViewport.update(width, height, true);
+		gameCamera.position.x += -(gameCamera.viewportWidth - VP_WIDTH)/2;
+		gameCamera.position.y += -(gameCamera.viewportHeight - VP_HEIGHT)/2;
 	}
 
 	// allow us to start this test directly
