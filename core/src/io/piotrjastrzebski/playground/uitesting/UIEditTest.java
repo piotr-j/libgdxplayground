@@ -10,9 +10,11 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.NinePatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.*;
 import com.badlogic.gdx.utils.Align;
@@ -20,10 +22,15 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Scaling;
 import com.badlogic.gdx.utils.SnapshotArray;
 import com.kotcrab.vis.ui.VisUI;
+import com.kotcrab.vis.ui.widget.VisLabel;
 import com.kotcrab.vis.ui.widget.VisWindow;
 import io.piotrjastrzebski.playground.BaseScreen;
 import io.piotrjastrzebski.playground.GameReset;
 import io.piotrjastrzebski.playground.PlaygroundGame;
+
+import static com.badlogic.gdx.scenes.scene2d.actions.Actions.*;
+import static com.badlogic.gdx.scenes.scene2d.actions.Actions.delay;
+import static com.badlogic.gdx.scenes.scene2d.actions.Actions.sequence;
 
 /**
  * Created by PiotrJ on 20/06/15.
@@ -158,7 +165,7 @@ public class UIEditTest extends BaseScreen {
 			actor = group;
 		}
 
-		if (true) {
+		if (false) {
 			Table table = new Table();
 //			for (int j = 0, n = MathUtils.random(3, 8); j < n; j++) {
 			for (int j = 0, n = 8; j < n; j++) {
@@ -204,24 +211,36 @@ public class UIEditTest extends BaseScreen {
 			for (int i = 0; i < 4; i++) {
 
 				Table table = new Table();
-//			for (int j = 0, n = MathUtils.random(3, 8); j < n; j++) {
-				for (int j = 0, n = 8; j < n; j++) {
-					final Img2 image = new Img2(coin);
+			for (int j = 0, n = MathUtils.random(3, 8); j < 8; j++) {
+//				for (int j = 0, n = 8; j < n; j++) {
+//					final Img2 image = new Img2(coin);
+					final Img2 image = new Img2(new TextureRegionDrawable(coin){
+						@Override public float getMinHeight () {
+							return super.getMinHeight() * .25f;
+						}
+
+						@Override public void draw (Batch batch, float x, float y, float width, float height) {
+							super.draw(batch, x, y, width, height * 4);
+						}
+					});
 					image.setScaling(Scaling.fillY);
-					image.debug();
+//					image.debug();
 //				image.setAlign(Align.bottom);
 					image.layout();
+					if (j < n) {
+						image.setColor(0, 0,0 ,0 );
+					}
 //				table.add(image).expand().fill().padTop(-10).row();
 					Cell<Img2> cell = table.add(image).expand().fill();
-					if (j < n - 1) {
-						cell.padBottom(new Value() {
-							@Override public float get (Actor context) {
-								return -image.getImageHeight() * .75f;
-							}
-						});
-						cell.row();
-					}
-				}
+//					if (j < 7) {
+//						cell.padBottom(new Value() {
+//							@Override public float get (Actor context) {
+//								return -image.getImageHeight() * .75f;
+//							}
+//						});
+//					}
+				cell.row();
+			}
 				SnapshotArray<Actor> children = table.getChildren();
 				for (int k = 0; k < children.size; k++) {
 					children.get(0).setZIndex(children.size - 1 - k);
@@ -234,6 +253,10 @@ public class UIEditTest extends BaseScreen {
 			outer.pack();
 			root.addActor(outer);
 			actor = outer;
+		}
+		if (true) {
+			actor = new PokerLabel("", "", "ASDG!!!", skin, 1);
+			root.addActor(actor);
 		}
 	}
 
@@ -568,7 +591,7 @@ public class UIEditTest extends BaseScreen {
 //			actorHeight = ((Layout)actor).getPrefHeight();
 //		}
 		renderer.setColor(Color.MAGENTA);
-		renderer.rect(actorX, actorY, actorWidth, actorHeight);
+//		renderer.rect(actorX, actorY, actorWidth, actorHeight);
 		renderer.end();
 		if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
 			edit = !edit;
@@ -580,6 +603,10 @@ public class UIEditTest extends BaseScreen {
 		}
 		if (Gdx.input.isKeyJustPressed(Input.Keys.R)) {
 			rebuild();
+		}
+		if (Gdx.input.isKeyJustPressed(Input.Keys.T)) {
+			PokerLabel pl = (PokerLabel)actor;
+			pl.pulse("WELP", 1, 1.25f, 1);
 		}
 //		Gdx.app.log(TAG, "Window = " + window.getWidth() + "x" + window.getHeight() + ", img = " + white.getWidth() + "x" + white.getHeight());
 	}
@@ -593,21 +620,30 @@ public class UIEditTest extends BaseScreen {
 		float actorHeight = actor.getHeight();
 		root.addActor(actor);
 		actor.setPosition(v2.x, v2.y);
-		actor.setSize(actorWidth, actorHeight);
+//		actor.setSize(actorWidth, actorHeight);
 		window.clearChildren();
 		window.remove();
 	}
 
 	private void startEdit () {
 		// we assume that the actor is added to root directly as addActor
+//		if (actor instanceof Layout) {
+//			((Layout)actor).invalidateHierarchy();
+//			((Layout)actor).layout();
+//		}
+//		if (actor instanceof Container) {
+//			Container container = (Container)actor;
+//			container.setSize(container.getPrefWidth(), container.getPrefHeight());
+//			container.setPosition(container.getX() - container.getWidth()/2, container.getY() - container.getHeight()/2);
+//		}
 		float actorX = actor.getX();
 		float actorY = actor.getY();
 		float actorWidth = actor.getWidth();
 		float actorHeight = actor.getHeight();
-//		if (actor instanceof Layout) {
-//			actorWidth = ((Layout)actor).getPrefWidth();
-//			actorHeight = ((Layout)actor).getPrefHeight();
-//		}
+		if (actor instanceof Layout) {
+			actorWidth = ((Layout)actor).getPrefWidth();
+			actorHeight = ((Layout)actor).getPrefHeight();
+		}
 		window.add(actor).expand().fill();
 		// note this is skin dependant
 
@@ -616,6 +652,104 @@ public class UIEditTest extends BaseScreen {
 		window.setPosition(actorX - lw, actorY-bh);
 		window.setResizeBorder(16);
 		root.addActor(window);
+	}
+
+	static class PokerLabel extends Container {
+
+		private String ownerTag;
+		private Label label;
+		private String tag;
+
+		/**
+		 * @param text
+		 * @param skin
+		 * @param fontScale
+		 */
+		public PokerLabel (final String ownerTag, final String tag, String text, Skin skin, float fontScale) {
+			super();
+			this.ownerTag = ownerTag;
+			this.tag = tag;
+			label = new Label(text, skin, "default") {
+				@Override public String toString () {
+					return tag + "::" + super.toString();
+				}
+			};
+			setText(text);
+			label.setFontScale(fontScale);
+			setActor(label);
+			setTransform(false);
+			setOrigin(0, 0);
+			setPosition(100, 100);
+			//setDebug(true, true);
+		}
+
+		/**
+		 * need to call layout? set center?
+		 *
+		 * @param text
+		 */
+		public void setText (String text) {
+			label.setText(text);
+//			invalidateHierarchy();  // hierarchy because it affects width, etc.
+//			layout();
+			setSize(label.getPrefWidth(), label.getPrefHeight());
+			setOrigin(Align.center);
+			// layout or ???
+		}
+
+		public float getLabelWidth () {
+			return label.getWidth();
+		}
+
+		public float getLabelHeight () {
+			return label.getHeight();
+		}
+
+		@Override public void setColor (Color c) {
+			label.setColor(c);
+		}
+
+		public void pulse (String s, float duration, float maxScale) {
+			pulse(s, duration, maxScale, 0.15f);
+		}
+
+		/**
+		 * Maybe change from maxScale to a proportion to existing scale? then can be
+		 * negative for making smaller...
+		 *
+		 * @param s
+		 * @param duration
+		 * @param maxScale
+		 */
+		public void pulse (String s, float duration, float maxScale, float finalAlpha) {
+			clearActions();
+
+			setText(s);
+			setTransform(true);
+			setScale(1);
+			addAction(sequence(scaleTo(maxScale, maxScale, duration * .2f, Interpolation.sineOut),
+				scaleTo(1, 1, duration * .2f, Interpolation.sine), Actions.run(new Runnable() {
+					@Override public void run () {
+						setTransform(false);
+					}
+				})));
+		}
+
+		public void fadeOut (float delay, float duration) {
+			addAction(sequence(delay(delay), Actions.fadeOut(duration)));
+		}
+
+		public void fadeIn (float delay, float duration) {
+			addAction(sequence(delay(delay), Actions.fadeIn(duration)));
+		}
+
+		@Override public boolean remove () {
+			return super.remove();
+		}
+
+		@Override public String toString () {
+			return "PokerLabel{'" + tag + "', " + label.getText() + '}';
+		}
 	}
 
 	public static void main (String[] args) {
