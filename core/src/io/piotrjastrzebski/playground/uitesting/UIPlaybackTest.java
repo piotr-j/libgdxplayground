@@ -26,22 +26,6 @@ public class UIPlaybackTest extends BaseScreen {
 		super(game);
 
 		clear.set(Color.DARK_GRAY);
-
-		// simple coin
-		float scale = .5f;
-		Pixmap pixmap = new Pixmap((int)(128 * scale), (int)(140 * scale), Pixmap.Format.RGBA8888);
-		pixmap.setColor(Color.LIGHT_GRAY);
-		pixmap.fillCircle((int)(64 * scale), (int)(64 * scale), (int)(60 * scale));
-		pixmap.setColor(Color.WHITE);
-		pixmap.fillCircle((int)(64 * scale), (int)(74 * scale), (int)(60 * scale));
-		pixmap.setColor(Color.LIGHT_GRAY);
-		pixmap.fillCircle((int)(64 * scale), (int)(74 * scale), (int)(40 * scale));
-		pixmap.setColor(Color.WHITE);
-		pixmap.fillCircle((int)(64 * scale), (int)(70 * scale), (int)(36 * scale));
-		region = new TextureRegion(new Texture(pixmap));
-		region.flip(false, true);
-		pixmap.dispose();
-
 		rebuild();
 	}
 
@@ -50,11 +34,6 @@ public class UIPlaybackTest extends BaseScreen {
 	protected StepsRunner stepsRunner = new StepsRunner();
 	protected void rebuild() {
 		root.clear();
-		/* TODO
-		 * we want an array of steps that we want to play forwards and backwards, with ability to increase speed rapidly
-		 * each action has predelay and postdelay with step run in between
-		 *
- 		 */
 
 		steps.clear();
 		steps.add(new StepC());
@@ -99,8 +78,6 @@ public class UIPlaybackTest extends BaseScreen {
 		stage.act(delta);
 		stage.draw();
 		tick++;
-//		System.out.print(tick%2==0?"tick ":"tock ");
-//		System.out.println(tick%2==0?"tick ":"tock ");
 
 		if (stepsRunner.update(delta)) {
 			String dirStrng = stepsRunner.runDir == StepsRunner.RUN_FORWARD?"FORWARD":"BACKWARD";
@@ -135,10 +112,12 @@ public class UIPlaybackTest extends BaseScreen {
 
 		if (Gdx.input.isKeyJustPressed(Input.Keys.COMMA)) {
 			int count = stepsRunner.fastBackward();
+			// breaks fancy percent stuff...
 //			log(TAG, "Fast backward " + count);
 		}
 		if (Gdx.input.isKeyJustPressed(Input.Keys.PERIOD)) {
 			int count = stepsRunner.fastForward();
+			// breaks fancy percent stuff...
 //			log(TAG, "Fast forward " + count);
 		}
 
@@ -346,11 +325,9 @@ public class UIPlaybackTest extends BaseScreen {
 
 	private static float preDelay(Step step) {
 		if (step instanceof StepA) {
-//			return .25f ;
 			return 2.5f ;
 		}
 		if (step instanceof StepB) {
-//			return .5f;
 			return 3.5f;
 		}
 		// StepC, no delay
@@ -359,11 +336,9 @@ public class UIPlaybackTest extends BaseScreen {
 
 	private static float postDelay(Step step) {
 		if (step instanceof StepA) {
-//			return .25f ;
 			return 2.5f ;
 		}
 		if (step instanceof StepB) {
-//			return .5f;
 			return 3.5f;
 		}
 		// StepC, no delay
