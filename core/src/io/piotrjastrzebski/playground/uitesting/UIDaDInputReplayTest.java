@@ -312,8 +312,7 @@ public class UIDaDInputReplayTest extends BaseScreen {
 				recordStartTime = TimeUtils.millis();
 				break;
 			case REPLAY:
-				replayStartTime = TimeUtils.millis();
-				eventId = 0;
+				restart();
 				break;
 			case PASS:
 				break;
@@ -323,6 +322,7 @@ public class UIDaDInputReplayTest extends BaseScreen {
 		}
 
 		public void restart () {
+			replayStartTime = TimeUtils.millis();
 			eventId = 0;
 		}
 
@@ -336,16 +336,16 @@ public class UIDaDInputReplayTest extends BaseScreen {
 				break;
 			case REPLAY:
 				long replayDiff = TimeUtils.millis() - replayStartTime;
-				for (int i = eventId; i < replayEvents.size; i++) {
-					ReplayEvent event = replayEvents.get(i);
+				for (; eventId < replayEvents.size; eventId++) {
+					ReplayEvent event = replayEvents.get(eventId);
 					long eventDiff = event.timestamp() - recordStartTime;
 					if (replayDiff >= eventDiff) {
 						process(event);
-						eventId = i;
 					} else {
 						break;
 					}
 				}
+				if (eventId >= replayEvents.size) restart();
 				break;
 			case PASS:
 				break;
