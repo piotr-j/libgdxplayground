@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.math.Matrix4;
+import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.WidgetGroup;
 import com.kotcrab.vis.ui.widget.VisWindow;
@@ -31,6 +32,7 @@ public class UIPerspectiveWidgetTest extends BaseScreen {
 		guiCamera.update();
 		cardWidget = new CardWidget(new Image(badlogic));
 		root.add(cardWidget);
+		;
 	}
 
 
