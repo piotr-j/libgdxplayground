@@ -93,6 +93,8 @@ project(":core") {
 
         compile "net.dermetfan.libgdx-utils:libgdx-utils-box2d:$gdxUtilsersion"
         compile "net.dermetfan.libgdx-utils:libgdx-utils:$gdxUtilsersion"
+
+        compile "com.badlogicgames.gdx:gdx-tools:$gdxVersion"
     }
 }
 
