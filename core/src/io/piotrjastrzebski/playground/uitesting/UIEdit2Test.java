@@ -13,22 +13,25 @@ import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
-import com.badlogic.gdx.scenes.scene2d.ui.Container;
-import com.badlogic.gdx.scenes.scene2d.ui.Label;
-import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.ui.*;
+import com.badlogic.gdx.scenes.scene2d.utils.ActorGestureListener;
 import com.badlogic.gdx.scenes.scene2d.utils.Layout;
 import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
+import com.kotcrab.vis.ui.VisUI;
+import com.kotcrab.vis.ui.widget.VisLabel;
+import com.kotcrab.vis.ui.widget.VisTextButton;
 import com.kotcrab.vis.ui.widget.VisWindow;
 import io.piotrjastrzebski.playground.BaseScreen;
 import io.piotrjastrzebski.playground.GameReset;
 import io.piotrjastrzebski.playground.PlaygroundGame;
 
 import static com.badlogic.gdx.scenes.scene2d.actions.Actions.*;
-import static com.badlogic.gdx.scenes.scene2d.ui.Table.Debug.actor;
 
 /**
  * Created by PiotrJ on 20/06/15.
@@ -37,8 +40,8 @@ public class UIEdit2Test extends BaseScreen {
 	private final static String TAG = UIEdit2Test.class.getSimpleName();
 	TextureRegion region;
 	Array<Actor> editables = new Array<>();
-	Array<VisWindow> windows = new Array<>();
-//	Image white;
+	Array<Actor> windows = new Array<>();
+
 	float lw;
 	float rw;
 	float th;
@@ -66,7 +69,7 @@ public class UIEdit2Test extends BaseScreen {
 		pixmap.dispose();
 		pixmap2.dispose();
 
-		VisWindow window = createWindow();
+		VisWindow window = createContainer("Dummy");
 		NinePatchDrawable np = (NinePatchDrawable)window.getBackground();
 		lw = np.getLeftWidth();
 		rw = np.getRightWidth();
@@ -76,16 +79,85 @@ public class UIEdit2Test extends BaseScreen {
 		rebuild();
 	}
 
-	private VisWindow createWindow () {
-		VisWindow window = new VisWindow("") {
+	private VisWindow createContainer (String title) {
+		Window.WindowStyle style = new Window.WindowStyle(VisUI.getSkin().get("default", Window.WindowStyle.class));
+		style.background = VisUI.getSkin().getDrawable("border");
+		final VisWindow window = new VisWindow(title, style) {
+			Color tmp = new Color();
 			@Override protected void drawBackground (Batch batch, float parentAlpha, float x, float y) {
-				setColor(1, 1, 1, .5f);
+				tmp.set(getColor());
+				setColor(tmp.r, tmp.g, tmp.b, tmp.a * .75f);
 				super.drawBackground(batch, parentAlpha, x, y);
-				setColor(Color.WHITE);
+				setColor(tmp);
+			}
+
+			@Override public void draw (Batch batch, float parentAlpha) {
+				// pretty much the same as default, but we draw bg on top of children
+				// this kinda assumes that bg is transparent for the most part :/
+				validate();
+				if (isTransform()) {
+					applyTransform(batch, computeTransform());
+					if (getClip()) {
+						batch.flush();
+						float padLeft = getPadLeft(), padBottom = getPadBottom();
+						if (clipBegin(padLeft, padBottom, getWidth() - padLeft - getPadRight(),
+							getHeight() - padBottom - getPadTop())) {
+							drawChildren(batch, parentAlpha);
+							batch.flush();
+							clipEnd();
+						}
+					} else
+						drawChildren(batch, parentAlpha);
+					drawBackground(batch, parentAlpha, 0, 0);
+					resetTransform(batch);
+				} else {
+					super.draw(batch, parentAlpha);
+					drawBackground(batch, parentAlpha, getX(), getY());
+				}
 			}
 		};
+		// disabling clip breaks title label :/
+//		window.setClip(false);
 		window.setResizable(true);
-		window.setMovable(true);
+		window.setMovable(false);
+		window.setTouchable(Touchable.enabled);
+		window.setDebug(false);
+		final float halfTapSquareSize = 20;
+		window.addListener(new ActorGestureListener(halfTapSquareSize, 0.4f, 1.1f, 0.15f){
+			@Override public void tap (InputEvent event, float x, float y, int count, int button) {
+				if (count >= 2) {
+					window.toBack();
+				}
+			}
+
+			float sx = -1, sy = -1;
+			@Override public void touchDown (InputEvent event, float x, float y, int pointer, int button) {
+				if (sx == -1 && sy == -1) {
+					sx = x;
+					sy = y;
+				}
+			}
+
+			Vector2 v2 = new Vector2();
+			boolean panning = false;
+			@Override public void pan (InputEvent event, float x, float y, float deltaX, float deltaY) {
+				v2.set(0, 0);
+				if (window.isDragging()) return;
+ 				if (!panning) {
+					panning = true;
+					// we want to offset the dead zone of tap square
+					v2.set(x-sx, y-sy).nor().scl(halfTapSquareSize);
+				}
+				v2.add(deltaX, deltaY);
+				window.setPosition(Math.round(window.getX() + v2.x), Math.round(window.getY() + v2.y));
+			}
+
+			@Override public void touchUp (InputEvent event, float x, float y, int pointer, int button) {
+				panning = false;
+				sx = -1;
+				sy = -1;
+			}
+		});
 		return window;
 	}
 
@@ -101,7 +173,22 @@ public class UIEdit2Test extends BaseScreen {
 		TextureRegionDrawable coin = new TextureRegionDrawable(region);
 
 		for (int i = 0; i < 3; i++) {
-			Actor actor = new PulsingLabel("", "", "ASDG!!!" + i * 3, skin, 1);
+			Actor actor = new PulsingLabel("", "", "ASDF!!!" + i * 3, skin, 1);
+			actor.setUserObject("Label"+i);
+			editables.add(actor);
+			actor.setPosition(MathUtils.random(0, Gdx.graphics.getWidth() - 100), MathUtils.random(0, Gdx.graphics.getHeight() - 100));
+			root.addActor(actor);
+		}
+		for (int i = 0; i < 3; i++) {
+			Actor actor = new Image(region);
+			actor.setUserObject("Image"+i);
+			editables.add(actor);
+			actor.setPosition(MathUtils.random(0, Gdx.graphics.getWidth() - 100), MathUtils.random(0, Gdx.graphics.getHeight() - 100));
+			root.addActor(actor);
+		}
+		for (int i = 0; i < 3; i++) {
+			Actor actor = new VisTextButton("Button! " + i);
+			actor.setUserObject("Button"+i);
 			editables.add(actor);
 			actor.setPosition(MathUtils.random(0, Gdx.graphics.getWidth() - 100), MathUtils.random(0, Gdx.graphics.getHeight() - 100));
 			root.addActor(actor);
@@ -113,22 +200,25 @@ public class UIEdit2Test extends BaseScreen {
 		super.render(delta);
 		stage.act(delta);
 		stage.draw();
-		renderer.setProjectionMatrix(guiCamera.combined);
-		renderer.begin(ShapeRenderer.ShapeType.Line);
-		for (Actor editable : editables) {
-			editable.localToStageCoordinates(v2.set(0, 0));
-			float actorX = v2.x;
-			float actorY = v2.y;
-			float actorWidth = editable.getWidth();
-			float actorHeight = editable.getHeight();
-			if (editable instanceof Layout) {
-				actorWidth = ((Layout)editable).getPrefWidth();
-				actorHeight = ((Layout)editable).getPrefHeight();
+
+		if (false) {
+			renderer.setProjectionMatrix(guiCamera.combined);
+			renderer.begin(ShapeRenderer.ShapeType.Line);
+			for (Actor editable : editables) {
+				editable.localToStageCoordinates(v2.set(0, 0));
+				float actorX = v2.x;
+				float actorY = v2.y;
+				float actorWidth = editable.getWidth();
+				float actorHeight = editable.getHeight();
+				if (editable instanceof Layout) {
+					actorWidth = ((Layout)editable).getPrefWidth();
+					actorHeight = ((Layout)editable).getPrefHeight();
+				}
+				renderer.setColor(Color.MAGENTA);
+				renderer.rect(actorX, actorY, actorWidth, actorHeight);
 			}
-			renderer.setColor(Color.MAGENTA);
-			renderer.rect(actorX, actorY, actorWidth, actorHeight);
+			renderer.end();
 		}
-		renderer.end();
 
 		if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
 			edit = !edit;
@@ -146,35 +236,20 @@ public class UIEdit2Test extends BaseScreen {
 
 	private Vector2 v2 = new Vector2();
 	private void endEdit () {
-		if (actor == null) return;
 		edit = false;
 
 		for (int i = 0; i < editables.size; i++) {
 			Actor actor = editables.get(i);
-			VisWindow window = windows.get(i);
+			windows.get(i).remove();
 			actor.localToStageCoordinates(v2.set(0, 0));
-			float actorWidth = actor.getWidth();
-			float actorHeight = actor.getHeight();
 			root.addActor(actor);
+			actor.setTouchable(Touchable.enabled);
 			actor.setPosition(v2.x, v2.y);
-//		actor.setSize(actorWidth, actorHeight);
-			window.clearChildren();
-			window.remove();
 		}
+		windows.clear();
 	}
 
 	private void startEdit () {
-		// we assume that the actor is added to root directly as addActor
-//		if (actor instanceof Layout) {
-//			((Layout)actor).invalidateHierarchy();
-//			((Layout)actor).layout();
-//		}
-//		if (actor instanceof Container) {
-//			Container container = (Container)actor;
-//			container.setSize(container.getPrefWidth(), container.getPrefHeight());
-//			container.setPosition(container.getX() - container.getWidth()/2, container.getY() - container.getHeight()/2);
-//		}
-		windows.clear();
 		for (Actor actor : editables) {
 			float actorX = actor.getX();
 			float actorY = actor.getY();
@@ -184,8 +259,10 @@ public class UIEdit2Test extends BaseScreen {
 				actorWidth = ((Layout)actor).getPrefWidth();
 				actorHeight = ((Layout)actor).getPrefHeight();
 			}
-			VisWindow window = createWindow();
+			VisWindow window = createContainer((String)actor.getUserObject());
 			window.add(actor).expand().fill();
+			window.getTitleTable().toFront();
+			actor.setTouchable(Touchable.disabled);
 			// note this is skin dependant
 
 			window.setSize(actorWidth + lw + rw, actorHeight + bh+ th );
@@ -195,7 +272,6 @@ public class UIEdit2Test extends BaseScreen {
 			windows.add(window);
 			root.addActor(window);
 		}
-
 	}
 
 	static class PulsingLabel extends Container {
