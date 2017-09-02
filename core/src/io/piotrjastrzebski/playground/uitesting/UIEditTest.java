@@ -21,8 +21,6 @@ import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Scaling;
 import com.badlogic.gdx.utils.SnapshotArray;
-import com.kotcrab.vis.ui.VisUI;
-import com.kotcrab.vis.ui.widget.VisLabel;
 import com.kotcrab.vis.ui.widget.VisWindow;
 import io.piotrjastrzebski.playground.BaseScreen;
 import io.piotrjastrzebski.playground.GameReset;
@@ -255,7 +253,7 @@ public class UIEditTest extends BaseScreen {
 			actor = outer;
 		}
 		if (true) {
-			actor = new PokerLabel("", "", "ASDG!!!", skin, 1);
+			actor = new PulsingLabel("", "", "ASDG!!!", skin, 1);
 			root.addActor(actor);
 		}
 	}
@@ -605,7 +603,7 @@ public class UIEditTest extends BaseScreen {
 			rebuild();
 		}
 		if (Gdx.input.isKeyJustPressed(Input.Keys.T)) {
-			PokerLabel pl = (PokerLabel)actor;
+			PulsingLabel pl = (PulsingLabel)actor;
 			pl.pulse("WELP", 1, 1.25f, 1);
 		}
 //		Gdx.app.log(TAG, "Window = " + window.getWidth() + "x" + window.getHeight() + ", img = " + white.getWidth() + "x" + white.getHeight());
@@ -654,7 +652,7 @@ public class UIEditTest extends BaseScreen {
 		root.addActor(window);
 	}
 
-	static class PokerLabel extends Container {
+	static class PulsingLabel extends Container {
 
 		private String ownerTag;
 		private Label label;
@@ -665,7 +663,7 @@ public class UIEditTest extends BaseScreen {
 		 * @param skin
 		 * @param fontScale
 		 */
-		public PokerLabel (final String ownerTag, final String tag, String text, Skin skin, float fontScale) {
+		public PulsingLabel (final String ownerTag, final String tag, String text, Skin skin, float fontScale) {
 			super();
 			this.ownerTag = ownerTag;
 			this.tag = tag;
