@@ -1,0 +1,29 @@
+# ignored comment
+1 # version
+# item name
+actor-1
+    # values are indented, tab or spaces work
+    x:100 # pos in x
+    y:200
+    w:128.256 # width
+    h:256.128 # height
+    # extra stuff
+    extra-1:0.96
+    extra-2:0
+    extra-3:255
+
+# next item
+actor-2
+# x,y,w,h required
+    x:25
+    y:784
+    w:336
+    h:128
+    # extras can be skipped
+
+actor-3
+# x,y,w,h required
+    x:1
+    y:2
+    w:3
+    h:4
