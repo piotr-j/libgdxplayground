@@ -10,15 +10,15 @@
   dialogDim: { name: white, color: { r: 0, g: 0, b: 0, a: 0.45 } }
 },
   com.badlogic.gdx.scenes.scene2d.ui.Button$ButtonStyle: {
-  default: { down: default-round-down, up: default-round },
+  default: { down: default-round-down, up: default-round, over: default-round-down },
   toggle: { down: default-round-down, checked: default-round-down, up: default-round }
 },
   com.badlogic.gdx.scenes.scene2d.ui.ImageButton$ImageButtonStyle: {
-  default: { down: default-round-down, up: default-round },
+  default: { down: default-round-down, up: default-round, over: default-round-down},
   toggle: { down: default-round-down, checked: default-round-down, up: default-round }
 },
   com.badlogic.gdx.scenes.scene2d.ui.TextButton$TextButtonStyle: {
-  default: { down: default-round-down, up: default-round, font: default-font, fontColor: white },
+  default: { down: default-round-down, up: default-round, font: default-font, fontColor: white, over: default-round-down },
   toggle: { down: default-round-down, up: default-round, checked: default-round-down, font: default-font, fontColor: white, downFontColor: red }
 },
   com.badlogic.gdx.scenes.scene2d.ui.ScrollPane$ScrollPaneStyle: {
