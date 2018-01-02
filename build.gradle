@@ -28,6 +28,7 @@ allprojects {
         gdxVideoVersion = "0.0.1"
         kryoVersion = "3.0.3"
         gdxUtilsersion = "0.13.3"
+        spineVersion = '3.6.34.0'
     }
 
     repositories {
@@ -95,6 +96,7 @@ project(":core") {
         compile "net.dermetfan.libgdx-utils:libgdx-utils:$gdxUtilsersion"
 
         compile "com.badlogicgames.gdx:gdx-tools:$gdxVersion"
+        compile "com.esotericsoftware.spine:spine-libgdx:$spineVersion"
     }
 }
 
