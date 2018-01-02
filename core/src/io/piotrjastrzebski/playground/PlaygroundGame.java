@@ -125,8 +125,9 @@ public class PlaygroundGame extends Game implements GameReset {
 		if (target != null) {
 			try {
 				setScreen((BaseScreen)ClassReflection.getConstructor(target, GameReset.class).newInstance(PlaygroundGame.this));
-			} catch (ReflectionException e) {
-				e.printStackTrace();
+			} catch (Exception ex) {
+				ex.printStackTrace();
+				Gdx.app.exit();
 			}
 			target = null;
 		} else {
