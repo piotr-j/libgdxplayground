@@ -2,6 +2,7 @@ package spine;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
+import com.badlogic.gdx.graphics.g2d.PolygonSpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
@@ -24,12 +25,13 @@ public class ReorderTest extends BaseScreen {
     Skeleton skeleton;
     AnimationState state;
     SkeletonBounds bounds;
+    PolygonSpriteBatch polyBatch;
     int[] drawOrders;
 
 	public ReorderTest(GameReset game) {
 		super(game);
 		clear.set(0.5f, 0.5f, 0.5f, 1);
-
+        polyBatch = new PolygonSpriteBatch();
         renderer = new SkeletonRenderer();
         debugRenderer = new SkeletonRendererDebug();
 //        debugRenderer.setBoundingBoxes(false);
@@ -122,12 +124,12 @@ public class ReorderTest extends BaseScreen {
         bounds.update(skeleton, false);
 
 
-        batch.setProjectionMatrix(gameCamera.combined);
         debugRenderer.getShapeRenderer().setProjectionMatrix(gameCamera.combined);
 
-        batch.begin();
-        renderer.draw(batch, skeleton);
-        batch.end();
+        polyBatch.setProjectionMatrix(gameCamera.combined);
+        polyBatch.begin();
+        renderer.draw(polyBatch, skeleton);
+        polyBatch.end();
 
 //        debugRenderer.draw(skeleton);
 
@@ -144,6 +146,7 @@ public class ReorderTest extends BaseScreen {
             // seems that SkeletonBounds doesnt care about this order, so lets skip that
 //            bringToBack(attachment.getName());
             bringToBack(attachment.getName().replace("bb", "badlogic"));
+            bringToBack(attachment.getName().replace("bb", "clip"));
             printDrawOrder("New", drawOrders);
         }
         return true;
@@ -151,6 +154,7 @@ public class ReorderTest extends BaseScreen {
 
     private void bringToBack(String slotName) {
         Slot slot = skeleton.findSlot(slotName);
+        if (slot == null) return;
 
         int index = slot.getData().getIndex();
         int[] drawOrders = this.drawOrders;
@@ -163,6 +167,12 @@ public class ReorderTest extends BaseScreen {
         drawOrders[0] = index;
 
         state.setAnimation(1, "draw_order", false);
+    }
+
+    @Override
+    public void dispose() {
+        super.dispose();
+        polyBatch.dispose();
     }
 
     // allow us to start this test directly
