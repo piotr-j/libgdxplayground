@@ -1,4 +1,4 @@
-package spine;
+package io.piotrjastrzebski.playground.spine;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
