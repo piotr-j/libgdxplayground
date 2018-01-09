@@ -44,6 +44,33 @@ import java.util.Iterator;
         layout = new GlyphLayout();
         clear.set(Color.GRAY);
 
+
+        if (true) {
+            createLoop(0, 0);
+            createLoopReverse(4, 0);
+        }
+    }
+
+    private void createLoop (int x, int y) {
+        setBelt(x + 0, y + 0, 3, 2);
+        setBelt(x + 1, y + 0, 1, 2);
+        setBelt(x + 2, y + 0, 3, 1);
+        setBelt(x + 0, y + 1, 1, 3);
+        setBelt(x + 2, y + 1, 1, 1);
+        setBelt(x + 0, y + 2, 3, 3);
+        setBelt(x + 1, y + 2, 1, 4);
+        setBelt(x + 2, y + 2, 3, 4);
+    }
+
+    private void createLoopReverse (int x, int y) {
+        setBelt(x + 0, y + 0, 2, 1);
+        setBelt(x + 1, y + 0, 1, 4);
+        setBelt(x + 2, y + 0, 2, 4);
+        setBelt(x + 0, y + 1, 1, 1);
+        setBelt(x + 2, y + 1, 1, 3);
+        setBelt(x + 0, y + 2, 2, 2);
+        setBelt(x + 1, y + 2, 1, 2);
+        setBelt(x + 2, y + 2, 2, 3);
     }
 
     private Belt getBelt (int x, int y) {
@@ -133,7 +160,11 @@ import java.util.Iterator;
             simEnabled = !simEnabled;
         }
         if (Gdx.input.isKeyJustPressed(Input.Keys.H)) {
-//
+            for (Belt belt : belts) {
+                if (belt != null) {
+                    System.out.println("setBelt("+belt.x + ", " + belt.y + ", " + belt.type + ", " + belt.direction+");");
+                }
+            }
         }
         {
             tickTimer += delta;
