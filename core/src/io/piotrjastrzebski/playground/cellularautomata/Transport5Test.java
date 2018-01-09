@@ -14,6 +14,7 @@ import io.piotrjastrzebski.playground.BaseScreen;
 import io.piotrjastrzebski.playground.GameReset;
 import io.piotrjastrzebski.playground.PlaygroundGame;
 
+import java.util.Arrays;
 import java.util.Iterator;
 
 /**
@@ -32,6 +33,7 @@ import java.util.Iterator;
 
     private boolean simEnabled = true;
     private Array<Item> items = new Array<>();
+    private GameMap map;
 
     public Transport5Test (GameReset game) {
         super(game);
@@ -44,6 +46,7 @@ import java.util.Iterator;
         layout = new GlyphLayout();
         clear.set(Color.GRAY);
 
+        map = new GameMap();
 
         if (true) {
             createLoop(0, 0);
@@ -52,69 +55,38 @@ import java.util.Iterator;
     }
 
     private void createLoop (int x, int y) {
-        setBelt(x + 0, y + 0, 3, 2);
-        setBelt(x + 1, y + 0, 1, 2);
-        setBelt(x + 2, y + 0, 3, 1);
-        setBelt(x + 0, y + 1, 1, 3);
-        setBelt(x + 2, y + 1, 1, 1);
-        setBelt(x + 0, y + 2, 3, 3);
-        setBelt(x + 1, y + 2, 1, 4);
-        setBelt(x + 2, y + 2, 3, 4);
+        map.setBelt(x + 0, y + 0, 3, 2);
+        map.setBelt(x + 1, y + 0, 1, 2);
+        map.setBelt(x + 2, y + 0, 3, 1);
+        map.setBelt(x + 0, y + 1, 1, 3);
+        map.setBelt(x + 2, y + 1, 1, 1);
+        map.setBelt(x + 0, y + 2, 3, 3);
+        map.setBelt(x + 1, y + 2, 1, 4);
+        map.setBelt(x + 2, y + 2, 3, 4);
     }
 
     private void createLoopReverse (int x, int y) {
-        setBelt(x + 0, y + 0, 2, 1);
-        setBelt(x + 1, y + 0, 1, 4);
-        setBelt(x + 2, y + 0, 2, 4);
-        setBelt(x + 0, y + 1, 1, 1);
-        setBelt(x + 2, y + 1, 1, 3);
-        setBelt(x + 0, y + 2, 2, 2);
-        setBelt(x + 1, y + 2, 1, 2);
-        setBelt(x + 2, y + 2, 2, 3);
-    }
-
-    private Belt getBelt (int x, int y) {
-        int index = x + y * WIDTH;
-        if (index < 0 || index > belts.length)
-            return null;
-        return belts[index];
-    }
-
-    private Belt setBelt (int x, int y, int type) {
-        System.out.println("Belt " + x + ", " + y + ", " + type);
-        Belt belt = getBelt(x, y);
-        if (belt == null) {
-            belt = new Belt(x, y, type);
-            belts[belt.index] = belt;
-        } else {
-            belt.setType(type);
-        }
-        return belt;
-    }
-
-    private void setBelt (int x, int y, int type, int direction) {
-        Belt belt = setBelt(x, y, type);
-        belt.rotate(direction);
-    }
-
-    private void clearBelt (int x, int y) {
-        System.out.println("Clear " + x + ", " + y);
-        int index = x + y * WIDTH;
-        belts[index] = null;
+        map.setBelt(x + 0, y + 0, 2, 1);
+        map.setBelt(x + 1, y + 0, 1, 4);
+        map.setBelt(x + 2, y + 0, 2, 4);
+        map.setBelt(x + 0, y + 1, 1, 1);
+        map.setBelt(x + 2, y + 1, 1, 3);
+        map.setBelt(x + 0, y + 2, 2, 2);
+        map.setBelt(x + 1, y + 2, 1, 2);
+        map.setBelt(x + 2, y + 2, 2, 3);
     }
 
     private void spawnItem(float x, float y) {
         Item item = new Item(x, y);
         items.add(item);
 
-        Belt belt = getBelt((int)x, (int)y);
+        Belt belt = map.getBelt((int)x, (int)y);
         if (belt != null) {
             belt.enqueue(item);
             item.despawn = -1;
         }
     }
 
-    Belt[] belts = new Belt[WIDTH * HEIGHT];
     int direction = Belt.DIR_EAST;
     float tickTimer = 0;
     @Override public void render (float delta) {
@@ -124,11 +96,11 @@ import java.util.Iterator;
         int my = (int)cs.y;
         if (mx >= 0 && mx < WIDTH && my >= 0 && my < HEIGHT) {
             if (Gdx.input.isKeyJustPressed(Input.Keys.Q)) {
-                setBelt(mx, my, Belt.TYPE_STRAIGHT, direction);
+                map.setBelt(mx, my, Belt.TYPE_STRAIGHT, direction);
             } else if (Gdx.input.isKeyJustPressed(Input.Keys.W)) {
-                setBelt(mx, my, Belt.TYPE_CURVE, direction);
+                map.setBelt(mx, my, Belt.TYPE_CURVE_CW, direction);
             } else if (Gdx.input.isKeyJustPressed(Input.Keys.E)) {
-                setBelt(mx, my, Belt.TYPE_CURVE_REV, direction);
+                map.setBelt(mx, my, Belt.TYPE_CURVE_CCW, direction);
             } else if (Gdx.input.isKeyJustPressed(Input.Keys.R)) {
                 if (Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT) || Gdx.input.isKeyPressed(Input.Keys.SHIFT_RIGHT)) {
                     direction--;
@@ -142,7 +114,7 @@ import java.util.Iterator;
                     }
                 }
                 Gdx.app.log("ROT", "" + direction);
-                Belt belt = getBelt(mx, my);
+                Belt belt = map.getBelt(mx, my);
                 if (belt != null) {
                     belt.rotate(direction);
                 }
@@ -151,7 +123,7 @@ import java.util.Iterator;
             } else if (Gdx.input.isKeyJustPressed(Input.Keys.D)) {
 //                setBelt(mx, my, 0);
             } else if (Gdx.input.isKeyJustPressed(Input.Keys.Z)) {
-                clearBelt(mx, my);
+                map.clearBelt(mx, my);
             } else if (Gdx.input.isKeyJustPressed(Input.Keys.X)) {
                 spawnItem(cs.x, cs.y);
             }
@@ -160,22 +132,14 @@ import java.util.Iterator;
             simEnabled = !simEnabled;
         }
         if (Gdx.input.isKeyJustPressed(Input.Keys.H)) {
-            for (Belt belt : belts) {
-                if (belt != null) {
-                    System.out.println("setBelt("+belt.x + ", " + belt.y + ", " + belt.type + ", " + belt.direction+");");
-                }
-            }
+            map.print();
         }
         {
             tickTimer += delta;
             final float tickPeriod = .5f;
             if (tickTimer >= tickPeriod) {
                 tickTimer -= tickPeriod;
-                for (Belt belt : belts) {
-                    if (belt != null) {
-                        belt.tick();
-                    }
-                }
+                map.tick();
             }
         }
         {
@@ -201,11 +165,8 @@ import java.util.Iterator;
         renderer.end();
         renderer.begin(ShapeRenderer.ShapeType.Filled);
         enableBlending();
-        for (Belt belt : belts) {
-            if (belt != null) {
-                belt.render(renderer);
-            }
-        }
+        map.render(renderer);
+
         for (Item item : items) {
             item.render(renderer);
         }
@@ -225,8 +186,125 @@ import java.util.Iterator;
         return new Vector2(x, y);
     }
 
+    protected static class GameMap {
+        Belt[] belts = new Belt[WIDTH * HEIGHT];
+
+        public Belt getBelt (int x, int y) {
+            int index = x + y * WIDTH;
+            if (index < 0 || index > belts.length)
+                return null;
+            return belts[index];
+        }
+
+        public Belt setBelt (int x, int y, int type) {
+//        System.out.println("Belt " + x + ", " + y + ", " + type);
+            Belt belt = getBelt(x, y);
+            if (belt == null) {
+                belt = new Belt(this, x, y, type);
+                belts[belt.index] = belt;
+            } else {
+                belt.setType(type);
+            }
+            return belt;
+        }
+
+        public void setBelt (int x, int y, int type, int direction) {
+            Belt belt = setBelt(x, y, type);
+            belt.rotate(direction);
+        }
+
+        public void clearBelt (int x, int y) {
+//        System.out.println("Clear " + x + ", " + y);
+            int index = x + y * WIDTH;
+            belts[index] = null;
+        }
+
+        public void tick () {
+            for (Belt belt : belts) {
+                if (belt != null) {
+                    belt.tick();
+                }
+            }
+        }
+
+        public void render (ShapeRenderer renderer) {
+            for (Belt belt : belts) {
+                if (belt != null) {
+                    belt.render(renderer);
+                }
+            }
+        }
+
+        public Belt getNext (Belt belt) {
+            int tx = belt.x, ty = belt.y;
+            switch (belt.direction) {
+            case Belt.DIR_NORTH: {
+                tx += 0;
+                ty += 1;
+            } break;
+            case Belt.DIR_EAST: {
+                tx += 1;
+                ty += 0;
+            } break;
+            case Belt.DIR_SOUTH: {
+                tx += 0;
+                ty += -1;
+            } break;
+            case Belt.DIR_WEST: {
+                tx += -1;
+                ty += 0;
+            } break;
+            }
+            if (tx < 0 || tx >= WIDTH) return null;
+            if (ty < 0 || ty >= HEIGHT) return null;
+            // check if we can connect to it
+            Belt next = getBelt(tx, ty);
+            if (next == null) return null;
+            if (next.type == Belt.TYPE_STRAIGHT && belt.direction == next.direction) {
+                return next;
+            }
+            if (next.type == Belt.TYPE_CURVE_CW && belt.direction == ccw(next.direction)) {
+                return next;
+            }
+            if (next.type == Belt.TYPE_CURVE_CCW && belt.direction == cw(next.direction)) {
+                return next;
+            }
+            return null;
+        }
+
+        private int cw (int direction) {
+            switch (direction) {
+            case Belt.DIR_NORTH: return Belt.DIR_EAST;
+            case Belt.DIR_EAST: return Belt.DIR_SOUTH;
+            case Belt.DIR_SOUTH: return Belt.DIR_WEST;
+            case Belt.DIR_WEST: return Belt.DIR_NORTH;
+            }
+            return 0;
+        }
+
+        private int ccw (int direction) {
+            switch (direction) {
+            case Belt.DIR_NORTH: return Belt.DIR_WEST;
+            case Belt.DIR_EAST: return Belt.DIR_NORTH;
+            case Belt.DIR_SOUTH: return Belt.DIR_EAST;
+            case Belt.DIR_WEST: return Belt.DIR_SOUTH;
+            }
+            return 0;
+        }
+
+        public void print () {
+            for (Belt belt : belts) {
+                if (belt != null) {
+                    System.out.println("setBelt("+belt.x + ", " + belt.y + ", " + belt.type + ", " + belt.direction+");");
+                }
+            }
+        }
+    }
+
     protected static class Item {
         public final static int ITEM_SIZE = 3;
+        static int ids = 0;
+        protected int id = ++ids;
         protected float x;
         protected float y;
         protected float despawn = 2;
@@ -264,6 +342,10 @@ import java.util.Iterator;
             }
 
         }
+
+        @Override public String toString () {
+            return "Item{" + id + '}';
+        }
     }
 
     protected static class Belt {
@@ -278,19 +360,22 @@ import java.util.Iterator;
         public static final int DIR_ROT_RIGHT = 1;
 
         public static final int TYPE_STRAIGHT = 1;
-        public static final int TYPE_CURVE = 2;
-        public static final int TYPE_CURVE_REV = 3;
+        public static final int TYPE_CURVE_CW = 2;
+        public static final int TYPE_CURVE_CCW = 3;
         private Array<Item> queue = new Array<>();
         // single item takes multiple slots
         Slot[] slots = new Slot[BELT_STRAIGHT_SIZE];
         int speed = 1;
+        final GameMap map;
         int x;
         int y;
         int type;
         int direction = DIR_NORTH;
         int index;
+        Belt next;
 
-        public Belt (int x, int y, int type) {
+        public Belt (GameMap map, int x, int y, int type) {
+            this.map = map;
             this.x = x;
             this.y = y;
             index = x + y * WIDTH;
@@ -304,28 +389,27 @@ import java.util.Iterator;
                 slots = new Slot[BELT_STRAIGHT_SIZE];
                 for (int i = 0; i < BELT_STRAIGHT_SIZE; i++) {
                     float a = (i + .5f) / BELT_STRAIGHT_SIZE;
-                    slots[i] = new Slot(this, .5f - a, 0);
+                    slots[i] = new Slot(this, i, a - .5f, 0);
                 }
             }
             break;
-            case TYPE_CURVE: {
+            case TYPE_CURVE_CW: {
                 slots = new Slot[BELT_CURVE_SIZE];
                 Vector2 tmp = new Vector2();
                 for (int i = 0; i < BELT_CURVE_SIZE; i++) {
-                    float a = (i + .5f) / BELT_CURVE_SIZE * 90;
+                    float a = 90 - (i + .5f) / BELT_CURVE_SIZE * 90;
                     tmp.set(0, .5f).rotate(a);
-                    slots[i] = new Slot(this, tmp.x + .5f, tmp.y - .5f);
+                    slots[i] = new Slot(this, i, tmp.x + .5f, tmp.y - .5f);
                 }
             }
             break;
-            case TYPE_CURVE_REV: {
+            case TYPE_CURVE_CCW: {
                 slots = new Slot[BELT_CURVE_SIZE];
                 Vector2 tmp = new Vector2();
                 for (int i = 0; i < BELT_CURVE_SIZE; i++) {
-//                        float a = 90 - (i + .5f)/BELT_CURVE_SIZE * 90;
-                    float a = -(i + .5f) / BELT_CURVE_SIZE * 90;
+                    float a = (i + .5f) / BELT_CURVE_SIZE * 90 - 90;
                     tmp.set(0, -.5f).rotate(a);
-                    slots[i] = new Slot(this, tmp.x + .5f, tmp.y + .5f);
+                    slots[i] = new Slot(this, i, tmp.x + .5f, tmp.y + .5f);
                 }
             }
             break;
@@ -339,12 +423,12 @@ import java.util.Iterator;
                 renderer.rect(x, y, 1, 1);
             }
             break;
-            case TYPE_CURVE: {
+            case TYPE_CURVE_CW: {
                 renderer.setColor(Color.ORANGE);
                 renderer.rect(x, y, 1, 1);
             }
             break;
-            case TYPE_CURVE_REV: {
+            case TYPE_CURVE_CCW: {
                 renderer.setColor(Color.ORANGE);
                 renderer.rect(x, y, 1, 1);
             }
@@ -364,30 +448,42 @@ import java.util.Iterator;
                 renderer.circle(sx, sy, r, 6);
             }
 
+            if (next != null) {
+//                renderer.setColor(Color.MAGENTA);
+//                renderer.rectLine(x + .5f, y + .5f, next.x + .5f, next.y + .5f, .1f);
+            }
+
         }
 
         public void tick () {
             // TODO advance items by #speed slots
+            next = map.getNext(this);
             if (queue.size > 0) {
                 Item item = queue.peek();
                 if (put(item)) {
                     queue.pop();
                 }
             }
-            for (int i = slots.length -2; i >= 0; i--) {
-                // need a way to get next slot easily
-                Slot next = slots[i + 1];
-                Slot slot = slots[i];
-                Item item = slot.item;
-                if (next.item != null || item == null) continue;
-                next.item = item;
-                slot.item = null;
-                int indexOf = item.slots.indexOf(slot, true);
-                if (indexOf == -1) {
-                    throw new AssertionError("Welp");
-                }
-                item.slots.set(indexOf, next);
+            // we probably want to use two sets of state and swap them
+            Slot to = null;
+            if (next != null) {
+                to = next.slots[0];
             }
+            int slotId = slots.length -1;
+            do {
+                Slot from = slots[slotId--];
+                Item item = from.item;
+                if (to != null && to.item == null && item != null) {
+                    to.item = item;
+                    from.item = null;
+                    int indexOf = item.slots.indexOf(from, true);
+                    if (indexOf == -1) {
+                        throw new AssertionError("Welp");
+                    }
+                    item.slots.set(indexOf, to);
+                }
+                to = from;
+            } while (slotId >= 0);
         }
 
         private boolean put (Item item) {
@@ -400,9 +496,6 @@ import java.util.Iterator;
                 Slot slotB = slots[i + 1];
                 Slot slotC = slots[i + 2];
                 if (slotA.item == null && slotB.item == null && slotC.item == null) {
-                    // middle slot probably makes sense
-                    item.x = slotB.tx;
-                    item.y = slotB.ty;
                     slotA.item = item;
                     slotB.item = item;
                     slotC.item = item;
@@ -427,16 +520,23 @@ import java.util.Iterator;
             queue.add(item);
         }
 
+        @Override public String toString () {
+            return "Belt{" + "slots=" + Arrays.toString(slots) + ", x=" + x + ", y=" + y + ", type=" + type + ", direction="
+                + direction + '}';
+        }
+
         protected static class Slot {
             private final Belt parent;
             public Item item;
+            private int id;
             // relative to center of the belt
             public final float x;
             public final float y;
             public float tx, ty;
 
-            public Slot (Belt parent, float x, float y) {
+            public Slot (Belt parent, int id, float x, float y) {
                 this.parent = parent;
+                this.id = id;
                 this.x = x;
                 this.y = y;
             }
@@ -465,6 +565,10 @@ import java.util.Iterator;
                 }
                 tx = parent.x + v2.x + .5f;
                 ty = parent.y + v2.y + .5f;
+            }
+
+            @Override public String toString () {
+                return id + ":"+ (item!=null?item.id:"_");
             }
         }
     }
