@@ -219,12 +219,19 @@ import java.util.Iterator;
             belts[index] = null;
         }
 
+        int tick = 0;
         public void tick () {
             for (Belt belt : belts) {
                 if (belt != null) {
-                    belt.tick();
+                    belt.tick(tick);
                 }
             }
+            for (Belt belt : belts) {
+                if (belt != null) {
+                    belt.swap();
+                }
+            }
+            tick++;
         }
 
         public void render (ShapeRenderer renderer) {
@@ -315,8 +322,6 @@ import java.util.Iterator;
         public Item (float x, float y) {
             this.x = x;
             this.y = y;
-            // so set() works
-            slots.size = ITEM_SIZE;
         }
 
         public void update (float delta) {
@@ -324,27 +329,43 @@ import java.util.Iterator;
                 despawn -= delta;
                 done = despawn <= 0;
             }
-            Belt.Slot slot = slots.get(ITEM_SIZE / 2);
-            if (slot != null) {
-                x = slot.tx;
-                y = slot.ty;
+            if (slots.size > 0) {
+                x = 0;
+                y = 0;
+                for (Belt.Slot slot : slots) {
+                    x += slot.tx;
+                    y += slot.ty;
+                }
+                x /= slots.size;
+                y /= slots.size;
             }
         }
 
         public void render (ShapeRenderer renderer) {
-            renderer.setColor(Color.MAGENTA);
+            renderer.setColor(Color.GOLD);
             renderer.circle(x, y, .15f, 8);
-            renderer.setColor(Color.CYAN);
+            float c = 0;
             for (Belt.Slot slot : slots) {
+                renderer.setColor(c, 0, 1-c, 1);
                 if (slot != null) {
-                    renderer.rectLine(x, y, slot.tx, slot.ty, .05f);
+//                    renderer.circle(slot.tx, slot.ty, .075f, 6);
+//                    renderer.circle(slot.tx, slot.ty, .1f, 6);
+//                    renderer.rectLine(slot.tx, slot.ty-.2f, slot.tx, slot.ty+.2f, .05f);
                 }
+                c += 1f/ITEM_SIZE;
             }
 
         }
 
         @Override public String toString () {
             return "Item{" + id + '}';
+        }
+
+        public void next (Belt.Slot slot) {
+            slots.add(slot);
+            while (slots.size > ITEM_SIZE) {
+                slots.removeIndex(0);
+            }
         }
     }
 
@@ -455,7 +476,13 @@ import java.util.Iterator;
 
         }
 
-        public void tick () {
+        public void swap() {
+            for (Slot slot : slots) {
+                slot.swap();
+            }
+        }
+
+        public void tick (int tick) {
             // TODO advance items by #speed slots
             next = map.getNext(this);
             if (queue.size > 0) {
@@ -464,26 +491,22 @@ import java.util.Iterator;
                     queue.pop();
                 }
             }
-            // we probably want to use two sets of state and swap them
-            Slot to = null;
-            if (next != null) {
-                to = next.slots[0];
-            }
-            int slotId = slots.length -1;
-            do {
-                Slot from = slots[slotId--];
-                Item item = from.item;
-                if (to != null && to.item == null && item != null) {
-                    to.item = item;
-                    from.item = null;
-                    int indexOf = item.slots.indexOf(from, true);
-                    if (indexOf == -1) {
-                        throw new AssertionError("Welp");
-                    }
-                    item.slots.set(indexOf, to);
+            for (int s = 0; s < speed; s++) {
+                Slot to = null;
+                if (next != null) {
+                    to = next.slots[0];
                 }
-                to = from;
-            } while (slotId >= 0);
+                int slotId = slots.length - 1;
+                do {
+                    Slot from = slots[slotId--];
+                    Item item = from.item;
+                    if (to != null && (to.item == null || to.item == item) && item != null) {
+                        to.itemNext = item;
+                        item.next(to);
+                    }
+                    to = from;
+                } while (slotId >= 0);
+            }
         }
 
         private boolean put (Item item) {
@@ -492,16 +515,20 @@ import java.util.Iterator;
             // lets do this dumb way for now
             final Slot[] slots = this.slots;
             for (int i = 0, n = slots.length - (size -1); i < n; i++) {
-                Slot slotA = slots[i];
-                Slot slotB = slots[i + 1];
-                Slot slotC = slots[i + 2];
-                if (slotA.item == null && slotB.item == null && slotC.item == null) {
-                    slotA.item = item;
-                    slotB.item = item;
-                    slotC.item = item;
-                    item.slots.set(0, slotA);
-                    item.slots.set(1, slotB);
-                    item.slots.set(2, slotC);
+                boolean hasSpace = true;
+                for (int j = 0; j < size; j++) {
+                    Slot slot = slots[i + j];
+                    if (slot.item != null) {
+                        hasSpace = false;
+                        break;
+                    }
+                }
+                if (hasSpace) {
+                    for (int j = size -1; j >= 0; j--) {
+                        Slot slot = slots[i + j];
+                        slot.item = item;
+                        item.slots.add(slot);
+                    }
                     return true;
                 }
             }
@@ -528,6 +555,7 @@ import java.util.Iterator;
         protected static class Slot {
             private final Belt parent;
             public Item item;
+            public Item itemNext;
             private int id;
             // relative to center of the belt
             public final float x;
@@ -569,6 +597,11 @@ import java.util.Iterator;
 
             @Override public String toString () {
                 return id + ":"+ (item!=null?item.id:"_");
+            }
+
+            public void swap () {
+                item = itemNext;
+                itemNext = null;
             }
         }
     }
