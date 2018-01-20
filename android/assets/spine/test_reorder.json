@@ -1,5 +1,5 @@
 {
-"skeleton": { "hash": "CPM+RKn5hL3ZCXVu2TjuE4bgxf4", "spine": "3.6.50", "width": 418.33, "height": 322.23, "images": "../" },
+"skeleton": { "hash": "Bcdpit8XaeGQxBaWIc4f/vKqtCE", "spine": "3.6.50", "width": 418.33, "height": 322.23, "images": "../" },
 "bones": [
 	{ "name": "root" },
 	{ "name": "bone", "parent": "root", "x": -68.28, "y": 126.85 },
@@ -7,10 +7,10 @@
 	{ "name": "bone3", "parent": "root", "x": 81.14, "y": 181.14 }
 ],
 "slots": [
-	{ "name": "badlogic_blue", "bone": "bone3", "color": "0a00ffff", "attachment": "badlogic" },
+	{ "name": "badlogic_blue", "bone": "bone3", "color": "0a00ffff", "dark": "000000", "attachment": "badlogic" },
 	{ "name": "clip_green", "bone": "bone2", "attachment": "clip_green" },
-	{ "name": "badlogic_green", "bone": "bone2", "color": "13ff00ff", "attachment": "badlogic" },
-	{ "name": "badlogic_red", "bone": "bone", "color": "ff0000ff", "attachment": "badlogic" },
+	{ "name": "badlogic_green", "bone": "bone2", "color": "13ff00ff", "dark": "000000", "attachment": "badlogic" },
+	{ "name": "badlogic_red", "bone": "bone", "color": "ff0000ff", "dark": "000000", "attachment": "badlogic" },
 	{ "name": "bb_red", "bone": "bone", "attachment": "bb_red" },
 	{ "name": "bb_green", "bone": "bone2", "attachment": "bb_green" },
 	{ "name": "bb_blue", "bone": "bone3", "attachment": "bb_blue" }
@@ -65,6 +65,29 @@
 		]
 	},
 	"idle": {
+		"slots": {
+			"badlogic_blue": {
+				"twoColor": [
+					{ "time": 0, "light": "0a00ffff", "dark": "000000" },
+					{ "time": 1, "light": "0a00ffff", "dark": "ffffff" },
+					{ "time": 2, "light": "0a00ffff", "dark": "000000" }
+				]
+			},
+			"badlogic_green": {
+				"twoColor": [
+					{ "time": 0, "light": "13ff00ff", "dark": "000000" },
+					{ "time": 1, "light": "000000ff", "dark": "ffa300" },
+					{ "time": 2, "light": "13ff00ff", "dark": "000000" }
+				]
+			},
+			"badlogic_red": {
+				"twoColor": [
+					{ "time": 0, "light": "ff0000ff", "dark": "000000" },
+					{ "time": 1, "light": "ff0000ff", "dark": "0020ff" },
+					{ "time": 2, "light": "ff0000ff", "dark": "000000" }
+				]
+			}
+		},
 		"bones": {
 			"bone": {
 				"rotate": [
