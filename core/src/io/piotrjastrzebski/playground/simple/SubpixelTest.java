@@ -29,27 +29,28 @@ public class SubpixelTest extends BaseScreen {
         super(game);
         position.set(Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() / 2);
 
-        Pixmap pixmap = new Pixmap(64, 64, Pixmap.Format.RGBA8888);
+        int scale = 4;
+        Pixmap pixmap = new Pixmap(64 * scale, 64 * scale, Pixmap.Format.RGBA8888);
         pixmap.setBlending(Pixmap.Blending.None);
         // transparent border is essential for sub pixel rendering to work
         pixmap.setColor(0, 0, 0, 0);
         pixmap.fill();
         pixmap.setColor(1, 1, 1, 1);
-        pixmap.fillRectangle(1, 1, 62, 62);
+        pixmap.fillRectangle(1 * scale, 1 * scale, 62 * scale, 62 * scale);
         texture = new Texture(pixmap, true);
         // linear filtering is essential for sub pixel rendering to work
         texture.setFilter(Texture.TextureFilter.MipMapLinearLinear, Texture.TextureFilter.MipMapLinearLinear);
         region = new TextureRegion(texture);
         region.flip(false, true);
 
-        pixmap = new Pixmap(64, 64, Pixmap.Format.RGBA8888);
+        pixmap = new Pixmap(64 * scale, 64 * scale, Pixmap.Format.RGBA8888);
         pixmap.setBlending(Pixmap.Blending.None);
         pixmap.setColor(0, 0, 0, 0);
         pixmap.fill();
         pixmap.setColor(Color.CHARTREUSE);
-        pixmap.fillCircle(32, 32, 30);
+        pixmap.fillCircle(32 * scale, 32 * scale, 30 * scale);
         pixmap.setColor(0, 0, 0, 0);
-        pixmap.fillCircle(32, 32, 15);
+        pixmap.fillCircle(32 * scale, 32 * scale, 15 * scale);
 
         texture2 = new Texture(pixmap, true);
         // linear filtering is essential for sub pixel rendering to work
@@ -80,6 +81,7 @@ public class SubpixelTest extends BaseScreen {
 
         batch.setProjectionMatrix(gameCamera.combined);
         batch.begin();
+        // seems that if stuff ends up larger then source, it breaks, weird
         // top rect, texture based
         batch.draw(region, position.x, position.y + .5f, 1, 1, 2, 2, 1, 1, 45);
         // top circle, texture based
