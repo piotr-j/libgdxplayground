@@ -2,13 +2,12 @@ package io.piotrjastrzebski.playground.uitesting;
 
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
 import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.math.WindowedMean;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.FloatArray;
 import com.badlogic.gdx.utils.TimeUtils;
 import com.kotcrab.vis.ui.widget.VisLabel;
 import io.piotrjastrzebski.playground.BaseScreen;
 import io.piotrjastrzebski.playground.GameReset;
-import io.piotrjastrzebski.playground.PLog;
 import io.piotrjastrzebski.playground.PlaygroundGame;
 
 import java.text.SimpleDateFormat;
@@ -52,7 +51,7 @@ public class UIClockSyncTest extends BaseScreen {
             client1STime = new VisLabel("Client 1: ") {
                 @Override public void act (float delta) {
                     super.act(delta);
-                    setText(sdf.format(client1.serverTime) + " :: " + client2.timeDiff);
+                    setText(sdf.format(client1.serverTime) + " :: " + client1.timeDiff);
                 }
             };
             root.add(client1STime).expandX().left().row();
@@ -61,7 +60,7 @@ public class UIClockSyncTest extends BaseScreen {
             client1CTime = new VisLabel("Client 1: ") {
                 @Override public void act (float delta) {
                     super.act(delta);
-                    setText(sdf.format(client1.localTime));
+                    setText(sdf.format(client1.localTime) + " :: " +(client1.localTime - client1.serverTime));
                 }
             };
             root.add(client1CTime).expandX().left().row();
@@ -90,7 +89,7 @@ public class UIClockSyncTest extends BaseScreen {
             client2CTime = new VisLabel("Client 2: ") {
                 @Override public void act (float delta) {
                     super.act(delta);
-                    setText(sdf.format(client2.localTime));
+                    setText(sdf.format(client2.localTime) + " :: " +(client2.localTime - client2.serverTime));
                 }
             };
             root.add(client2CTime).expandX().left().row();
@@ -124,8 +123,8 @@ public class UIClockSyncTest extends BaseScreen {
     }
 
     private static class Server {
-        float lagMinMS = 750;
-        float lagMaxMS = 1250;
+        float lagMinMS = 2750;
+        float lagMaxMS = 3250;
         ScheduledExecutorService service;
         private long serverTime;
         Array<Client> clients = new Array<>();
@@ -137,7 +136,9 @@ public class UIClockSyncTest extends BaseScreen {
         public void tick () {
             for (final Client client : clients) {
                 final TimeMessage message = new TimeMessage(serverTime);
-                final long lag = (long)MathUtils.randomTriangular(lagMinMS, lagMaxMS);
+                // lag + random spike
+                long spike = MathUtils.random(1f) <= .05f ? 2 : 1;
+                final long lag = (long)(MathUtils.random(lagMinMS, lagMaxMS)) * spike;
                 service.schedule(new Runnable() {
                     @Override public void run () {
                         client.message(message);
@@ -154,25 +155,33 @@ public class UIClockSyncTest extends BaseScreen {
     private static class Client {
         private long serverTime;
         private long localTime;
-        private long timeDiff;
-        private WindowedMean mean = new WindowedMean(10);
+        private long timeDiff = -1;
+        private SkipMean mean = new SkipMean(10, 1, 3);
 
         public Client () {
-
+            localTime = TimeUtils.millis();
         }
 
         public void update (float delta) {
-            localTime = TimeUtils.millis() - timeDiff;
+            // we probably dont want the time to go back
+            long newTime = TimeUtils.millis() - timeDiff;
+            if (newTime > localTime) {
+                localTime = newTime;
+            }
         }
 
         public void message (TimeMessage message) {
+            // ignore old messages, tho cant really happen with tcp
+            if (message.ts < serverTime) {
+                return;
+            }
             serverTime = message.ts;
             long timeDiff = TimeUtils.millis() - serverTime;
-
             mean.addValue(timeDiff);
-            float meanDiff = mean.getMean();
-            if (meanDiff > 0) {
-                this.timeDiff = (long)meanDiff;
+            if (!mean.hasEnoughData()) {
+                this.timeDiff = timeDiff;
+            } else {
+                this.timeDiff = (long)mean.getMean();
             }
         }
     }
@@ -184,6 +193,75 @@ public class UIClockSyncTest extends BaseScreen {
             this.ts = ts;
         }
     }
+
+    private static class SkipMean {
+        float values[];
+        int addedValues = 0;
+        int lastValue;
+        float mean = 0;
+        int skipLow = 0;
+        int skipHigh = 0;
+        boolean dirty = true;
+        FloatArray tmpValues;
+
+        public SkipMean (int windowSize, int skipLow, int skipHigh) {
+            values = new float[windowSize];
+            if (windowSize < skipLow + skipHigh + 1) {
+                throw new AssertionError("Window size too small for given skip counts");
+            }
+            this.skipLow = skipLow;
+            this.skipHigh = skipHigh;
+            tmpValues = new FloatArray(windowSize);
+            tmpValues.size = windowSize;
+        }
+
+        public boolean hasEnoughData () {
+            return addedValues >= values.length;
+        }
+
+        public void clear () {
+            addedValues = 0;
+            lastValue = 0;
+            for (int i = 0; i < values.length; i++) {
+                values[i] = 0;
+            }
+            dirty = true;
+        }
+
+        public void addValue (float value) {
+            if (addedValues < values.length) {
+                addedValues++;
+            }
+            values[lastValue++] = value;
+            if (lastValue > values.length - 1) {
+                lastValue = 0;
+            }
+            dirty = true;
+        }
+
+        public float getMean () {
+            if (hasEnoughData()) {
+                if (dirty) {
+                    for (int i = 0; i < values.length; i++) {
+                        tmpValues.set(i, values[i]);
+                    }
+                    tmpValues.sort();
+                    float[] items = tmpValues.items;
+                    float mean = 0;
+                    int count = items.length - (skipLow + skipHigh);
+                    for (int i = skipLow; i < count; i++)
+                        mean += values[i];
+
+                    this.mean = mean / count;
+                    dirty = false;
+                }
+                return this.mean;
+            } else {
+                return 0;
+            }
+        }
+    }
+
 
     // allow us to start this test directly
     public static void main (String[] args) {
