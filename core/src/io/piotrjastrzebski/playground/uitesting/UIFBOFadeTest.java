@@ -6,14 +6,20 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.graphics.glutils.HdpiUtils;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Matrix4;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
+import com.badlogic.gdx.utils.viewport.ExtendViewport;
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import com.badlogic.gdx.utils.viewport.Viewport;
+import com.kotcrab.vis.ui.VisUI;
 import com.kotcrab.vis.ui.widget.*;
 import io.piotrjastrzebski.playground.BaseScreen;
 import io.piotrjastrzebski.playground.GameReset;
@@ -28,6 +34,14 @@ import static com.badlogic.gdx.scenes.scene2d.actions.Actions.sequence;
 public class UIFBOFadeTest extends BaseScreen {
     protected static final String TAG = UIFBOFadeTest.class.getSimpleName();
 
+    public final static float SCALE = 2f;
+    public final static float INV_SCALE = 1.f/SCALE;
+    public final static float VP_WIDTH = 1280 * INV_SCALE;
+    public final static float VP_HEIGHT = 720 * INV_SCALE;
+
+    protected OrthographicCamera camera;
+    protected ExtendViewport viewport;
+
     protected FadeDialog dialog;
     private FrameBuffer fbo;
     public UIFBOFadeTest (GameReset game) {
@@ -35,8 +49,9 @@ public class UIFBOFadeTest extends BaseScreen {
         clear.set(Color.DARK_GRAY);
         FadeRenderer.init();
 
+        viewport = new ExtendViewport(VP_WIDTH, VP_HEIGHT, camera = new OrthographicCamera());
 
-        VisWindow.FADE_TIME = 2.0f;
+//        VisWindow.FADE_TIME = 2.0f;
 
         fbo = new FrameBuffer(Pixmap.Format.RGBA8888, 2048, 2048, false);
         VisTextButton button = new VisTextButton("Dialog?");
@@ -65,17 +80,19 @@ public class UIFBOFadeTest extends BaseScreen {
         });
         dialog = new FadeDialog("Hello!");
         dialog.addCloseButton();
-
-        for (int i = 0; i < 20 + MathUtils.random(10); i++) {
-            if (MathUtils.randomBoolean()) {
-                dialog.getContentTable().add(new VisLabel("Dummy text " + MathUtils.random(0, 200)));
-            } else {
-                dialog.getContentTable().add(new VisSlider(0, 5 + MathUtils.random(5.f), 1, false));
-            }
-            if (i > 0 && i % 2 == 0) {
-                dialog.getContentTable().row();
-            }
-        }
+        FadeLabel dummyText = new FadeLabel("Dummy text");
+        dummyText.setAlignment(Align.bottomLeft);
+        dialog.getContentTable().add(dummyText).size(200).pad(20);
+//        for (int i = 0; i < 20 + MathUtils.random(10); i++) {
+//            if (MathUtils.randomBoolean()) {
+//                dialog.getContentTable().add(new FadeLabel("Dummy text " + MathUtils.random(0, 200)));
+//            } else {
+//                dialog.getContentTable().add(new VisSlider(0, 5 + MathUtils.random(5.f), 1, false));
+//            }
+//            if (i > 0 && i % 2 == 0) {
+//                dialog.getContentTable().row();
+//            }
+//        }
         VisTextButton ok = new VisTextButton("OK?");
         ok.addListener(new ClickListener(){
             @Override public void clicked (InputEvent event, float x, float y) {
@@ -93,11 +110,17 @@ public class UIFBOFadeTest extends BaseScreen {
 
         dialog.pack();
         dialog.setTransform(true);
+        stage.setViewport(viewport);
 //        dialog.setColor(1, 1, 1, 0);
 //        dialog.show(stage, forever(
 //            sequence(Actions.fadeIn(2),
 //            sequence(Actions.fadeOut(2)))
 //        ));
+    }
+
+    @Override public void resize (int width, int height) {
+        super.resize(width, height);
+        viewport.update(width, height, true);
     }
 
     @Override public void render (float delta) {
@@ -115,14 +138,18 @@ public class UIFBOFadeTest extends BaseScreen {
     static class FadeRenderer {
         protected static final String TAG = FadeRenderer.class.getSimpleName();
         static FrameBuffer fbo;
-        static TextureRegion region;
+        static ScreenViewport viewport;
         static OrthographicCamera camera;
+        static TextureRegion region;
         static Matrix4 projection;
+        static ShapeRenderer shapeRenderer;
         static final int size = 2048;
+        static Vector2 v2 = new Vector2();
 
         public static void init () {
             projection = new Matrix4();
-
+            viewport = new ScreenViewport(camera = new OrthographicCamera());
+            shapeRenderer = new ShapeRenderer();
             resize(size, size);
         }
 
@@ -130,11 +157,11 @@ public class UIFBOFadeTest extends BaseScreen {
             if (fbo != null) fbo.dispose();
             fbo = new FrameBuffer(Pixmap.Format.RGBA8888, width, height, false);
             fbo.getColorBufferTexture().setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
-            camera = new OrthographicCamera(width, height);
             region = new TextureRegion(fbo.getColorBufferTexture(), 0, 0, width, height);
             region.flip(false, true);
         }
 
+        static boolean inFbo = false;
         public static void draw (Actor actor, Batch batch, float parentAlpha) {
             if (!(actor instanceof FadeActor)) {
                 Gdx.app.log(TAG, "Invalid actor " + actor);
@@ -144,7 +171,8 @@ public class UIFBOFadeTest extends BaseScreen {
 
             Color color = actor.getColor();
             // we need to use custom path only when semi transparent
-            if (!MathUtils.isEqual(color.a * parentAlpha, 1.0f)) {
+            // stuff gets kinda broken when this is nested, so lets not do that
+            if (!inFbo && !MathUtils.isEqual(color.a * parentAlpha, 1.0f)) {
                 // we probably cant do a whole lot about ending the batch, we need to do it so stuff in fbo is what we expect
                 // cant defer either, as we need this to be in order in case stuff overlaps
                 batch.end();
@@ -152,34 +180,66 @@ public class UIFBOFadeTest extends BaseScreen {
                 final int margin = 2;
                 final int width = MathUtils.round(actor.getWidth()) + margin * 2;
                 final int height = MathUtils.round(actor.getHeight()) + margin * 2;
-                camera.setToOrtho(false, width, height);
-                camera.position.x = width/2;
-                camera.position.y = height/2;
-                camera.update();
 
+                inFbo = true;
                 fbo.begin();
-                // with some luck this will make it faster to clear, as we need just the region
-                HdpiUtils.glViewport(0, 0, width, height);
-                Gdx.gl.glClearColor(1, 0, 0, 1);
+                viewport.update(width, height, true);
+
+                float x = actor.getX();
+                float y = actor.getY();
+
+
+                Viewport prevViewport = actor.getStage().getViewport();
+                actor.getStage().setViewport(viewport);
+
+                actor.localToStageCoordinates(v2.set(0, 0));
+
+                // should be 0, 0, 0, 0 for non test
+                Gdx.gl.glClearColor(.5f, 0, 0, 1);
                 Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-                projection.set(batch.getProjectionMatrix());
+                if (false) {
+                    shapeRenderer.setProjectionMatrix(camera.combined);
+                    shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+                    {
+                        shapeRenderer.setColor(Color.CYAN);
+                        if (false) {
+                            int size = 16;
+                            for (int gx = -100; gx < 100; gx++) {
+                                for (int gy = -100; gy < 100; gy++) {
+                                    if (gx % 2 == 0 && gy % 2 != 0)
+                                        continue;
+                                    if (gx % 2 != 0 && gy % 2 == 0)
+                                        continue;
+                                    shapeRenderer.rect(gx * size, gy * size, size, size);
+                                }
+                            }
+                        }
+                        shapeRenderer.setColor(Color.YELLOW);
+                        shapeRenderer.rect(0, 0, 16, 16);
+                    }
+                    shapeRenderer.end();
+                }
 
+                projection.set(batch.getProjectionMatrix());
                 batch.setProjectionMatrix(camera.combined);
                 batch.begin();
                 float a = color.a;
                 color.a = 1;
-                float x = actor.getX();
-                float y = actor.getY();
-                actor.setPosition(margin, margin);
+
+                actor.setPosition(margin - v2.x + x,  margin - v2.y + y);
                 fa.fadeDraw(batch, 1);
+
                 actor.setPosition(x, y);
+                actor.getStage().setViewport(prevViewport);
+
                 batch.end();
                 color.a = a;
                 // reset the color just in case
                 batch.setColor(Color.WHITE);
 
                 fbo.end();
+                inFbo = false;
                 // flipped
                 region.setRegion(0, height, width, -height);
 
@@ -205,6 +265,35 @@ public class UIFBOFadeTest extends BaseScreen {
     static class FadeDialog extends VisDialog implements FadeActor {
         public FadeDialog (String title) {
             super(title);
+            setClip(false);
+        }
+
+        @Override public void draw (Batch batch, float parentAlpha) {
+            // this is annoying
+            FadeRenderer.draw(this, batch, parentAlpha);
+        }
+
+        @Override public void fadeDraw (Batch batch, float parentAlpha) {
+            super.draw(batch, parentAlpha);
+        }
+    }
+
+    static class FadeLabel extends VisLabel implements FadeActor {
+        public FadeLabel (String title) {
+            super(title);
+            getColor().a = .5f;
+            ;
+            LabelStyle labelStyle = new LabelStyle(getStyle());
+            labelStyle.background = VisUI.getSkin().getDrawable("textfield");
+            setStyle(labelStyle);
+            setFontScale(1.5f);
+            addAction(Actions.forever(
+                Actions.sequence(
+                    Actions.fadeOut(2f),
+                    Actions.fadeIn(2f),
+                    Actions.delay(1)
+                )
+            ));
         }
 
         @Override public void draw (Batch batch, float parentAlpha) {
