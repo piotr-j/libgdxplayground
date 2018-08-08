@@ -44,6 +44,7 @@ public class UIButtonsTest extends BaseScreen {
 		clear.set(.5f, .5f, .5f, 1);
 		// TODO we want a button that we can long press to do some action
 		textButton = new TextButton("PRESS OR HOLD ME", VisUI.getSkin(), "toggle");
+		textButton.addActor(new Image(skin.getDrawable("tree-plus")));
 		textButton.addListener(new ActorGestureListener(){
 			boolean longPress;
 			@Override
