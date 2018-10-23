@@ -12,7 +12,7 @@ android {
             jniLibs.srcDirs = ['libs']
         }
 
-        instrumentTest.setRoot('tests')
+//        instrumentTest.setRoot('tests')
     }
 }
 
