@@ -18,7 +18,7 @@ public class PolygonOverlapTest extends BaseScreen {
 
     public PolygonOverlapTest (GameReset game) {
         super(game);
-        clear.set(.1f, .1f, .1f, 1);
+        clear.set(.5f, .5f, .5f, 1);
         // probably should be counter clockwise
         float[] triangle = new float[] {
             -1, -.5f,
@@ -84,9 +84,15 @@ public class PolygonOverlapTest extends BaseScreen {
                     translated.setScale(sp.getScaleX(), sp.getScaleY());
                     float ox = mtv.normal.x * mtv.depth;
                     float oy = mtv.normal.y * mtv.depth;
+
                     translated.setPosition(sp.getX() + ox, sp.getY() + oy);
-                    renderer.setColor(selected.color.r, selected.color.g, selected.color.b, .5f);
+                    renderer.setColor(1, 0, 0, .5f);
                     renderer.polygon(translated.getTransformedVertices());
+
+                    translated.setPosition(sp.getX() - ox, sp.getY() - oy);
+                    renderer.setColor(0, 0, 1, .5f);
+                    renderer.polygon(translated.getTransformedVertices());
+
                     renderer.setColor(Color.YELLOW);
                     renderer.line(sp.getX(), sp.getY(), sp.getX() + ox, sp.getY() + oy);
                 }
