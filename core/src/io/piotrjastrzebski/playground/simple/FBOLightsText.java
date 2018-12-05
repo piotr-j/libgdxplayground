@@ -47,24 +47,23 @@ public class FBOLightsText extends BaseScreen {
         gameCamera.position.set(w/2f, h/2f, 0);
         gameCamera.update();
 
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < 500; i++) {
             lights.add(new Vector2(MathUtils.random(w), MathUtils.random(h)));
         }
         resizeFBO(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
     }
 
-    private float camMoveSpeed = 5;
+    private float camMoveSpeed = 10;
     @Override public void render (float delta) {
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-        Gdx.gl.glEnable(GL20.GL_BLEND);
-        Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
         processInput(delta);
 
+        // draw lights to fbo
+        // could be updated only when stuff changes
         fbo.begin();
         Gdx.gl.glClearColor(0.5f, 0.5f, 0.5f, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-
         Gdx.gl.glEnable(GL20.GL_BLEND);
         Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE);
         renderer.setProjectionMatrix(gameCamera.combined);
@@ -76,8 +75,11 @@ public class FBOLightsText extends BaseScreen {
         renderer.end();
         fbo.end();
 
+        // draw map
         mapRenderer.setView(gameCamera);
         mapRenderer.render();
+
+        // draw light objects
         renderer.setProjectionMatrix(gameCamera.combined);
         renderer.begin(ShapeRenderer.ShapeType.Filled);
         renderer.setColor(Color.YELLOW);
@@ -86,6 +88,7 @@ public class FBOLightsText extends BaseScreen {
         }
         renderer.end();
 
+        // draw fullscreen lightmap
         batch.enableBlending();
         batch.setProjectionMatrix(gameCamera.combined);
         batch.begin();
@@ -104,6 +107,7 @@ public class FBOLightsText extends BaseScreen {
     }
 
     private void resizeFBO (int width, int height) {
+        // screen size fbo
         if (fbo == null || (fbo.getWidth() != width && fbo.getHeight() != height)) {
             if (fbo != null) {
                 fbo.dispose();
