@@ -370,7 +370,7 @@ public class ColorGradeTest extends BaseScreen {
 	public static Pixmap generateLUT(int size) {
 		if (size <= 0) throw new AssertionError("Size cant be <= 0");
 		Pixmap pixmap = new Pixmap(size * size, size, Pixmap.Format.RGB888);
-		Pixmap.setBlending(Pixmap.Blending.None);
+		pixmap.setBlending(Pixmap.Blending.None);
 		float s = size-1.0f;
 		for (int r = 0; r < size; r++) {
 			for (int g = 0; g < size; g++) {
@@ -380,7 +380,7 @@ public class ColorGradeTest extends BaseScreen {
 				}
 			}
 		}
-		Pixmap.setBlending(Pixmap.Blending.SourceOver);
+		pixmap.setBlending(Pixmap.Blending.SourceOver);
 		return pixmap;
 	}
 
