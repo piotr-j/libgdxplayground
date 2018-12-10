@@ -1,0 +1,119 @@
+{
+"skeleton": { "hash": "Bcdpit8XaeGQxBaWIc4f/vKqtCE", "spine": "3.6.50", "width": 418.33, "height": 322.23, "images": "../" },
+"bones": [
+	{ "name": "root" },
+	{ "name": "bone", "parent": "root", "x": -68.28, "y": 126.85 },
+	{ "name": "bone2", "parent": "root", "x": 4.02, "y": 152.66 },
+	{ "name": "bone3", "parent": "root", "x": 81.14, "y": 181.14 }
+],
+"slots": [
+	{ "name": "badlogic_blue", "bone": "bone3", "color": "0a00ffff", "dark": "000000", "attachment": "badlogic" },
+	{ "name": "clip_green", "bone": "bone2", "attachment": "clip_green" },
+	{ "name": "badlogic_green", "bone": "bone2", "color": "13ff00ff", "dark": "000000", "attachment": "badlogic" },
+	{ "name": "badlogic_red", "bone": "bone", "color": "ff0000ff", "dark": "000000", "attachment": "badlogic" },
+	{ "name": "bb_red", "bone": "bone", "attachment": "bb_red" },
+	{ "name": "bb_green", "bone": "bone2", "attachment": "bb_green" },
+	{ "name": "bb_blue", "bone": "bone3", "attachment": "bb_blue" }
+],
+"skins": {
+	"default": {
+		"badlogic_blue": {
+			"badlogic": { "x": 12.89, "y": 14.74, "rotation": -0.16, "width": 256, "height": 256 }
+		},
+		"badlogic_green": {
+			"badlogic": { "x": 2.76, "y": 6.45, "width": 256, "height": 256 }
+		},
+		"badlogic_red": {
+			"badlogic": { "x": 0.35, "y": 3.15, "width": 256, "height": 256 }
+		},
+		"bb_blue": {
+			"bb_blue": {
+				"type": "boundingbox",
+				"vertexCount": 4,
+				"vertices": [ -112.96, 139.82, 139.68, 139.82, 137.1, -114.11, -115.54, -114.11 ]
+			}
+		},
+		"bb_green": {
+			"bb_green": {
+				"type": "boundingbox",
+				"vertexCount": 4,
+				"vertices": [ -122.21, 129.63, 123.99, 129.63, 127.86, -121.73, -120.92, -121.73 ]
+			}
+		},
+		"bb_red": {
+			"bb_red": {
+				"type": "boundingbox",
+				"vertexCount": 4,
+				"vertices": [ -125.95, 125.79, 124.11, 125.79, 126.69, -124.28, -127.24, -124.28 ]
+			}
+		},
+		"clip_green": {
+			"clip_green": {
+				"type": "clipping",
+				"end": "badlogic_green",
+				"vertexCount": 8,
+				"vertices": [ -143.48, 43.76, -45.67, 150.15, 55.57, 151.86, 146.52, 78.08, 141.37, -43.76, 48.71, -124.41, -25.08, -132.99, -136.62, -52.34 ],
+				"color": "ce3a3aff"
+			}
+		}
+	}
+},
+"animations": {
+	"draw_order": {
+		"drawOrder": [
+			{ "time": 0 }
+		]
+	},
+	"idle": {
+		"slots": {
+			"badlogic_blue": {
+				"twoColor": [
+					{ "time": 0, "light": "0a00ffff", "dark": "000000" },
+					{ "time": 1, "light": "0a00ffff", "dark": "ffffff" },
+					{ "time": 2, "light": "0a00ffff", "dark": "000000" }
+				]
+			},
+			"badlogic_green": {
+				"twoColor": [
+					{ "time": 0, "light": "13ff00ff", "dark": "000000" },
+					{ "time": 1, "light": "000000ff", "dark": "ffa300" },
+					{ "time": 2, "light": "13ff00ff", "dark": "000000" }
+				]
+			},
+			"badlogic_red": {
+				"twoColor": [
+					{ "time": 0, "light": "ff0000ff", "dark": "000000" },
+					{ "time": 1, "light": "ff0000ff", "dark": "0020ff" },
+					{ "time": 2, "light": "ff0000ff", "dark": "000000" }
+				]
+			}
+		},
+		"bones": {
+			"bone": {
+				"rotate": [
+					{ "time": 0, "angle": 0 },
+					{ "time": 0.6667, "angle": 120 },
+					{ "time": 1.3333, "angle": -120 },
+					{ "time": 2, "angle": 0 }
+				]
+			},
+			"bone3": {
+				"rotate": [
+					{ "time": 0, "angle": 0 },
+					{ "time": 0.6667, "angle": 120 },
+					{ "time": 1.3333, "angle": -120 },
+					{ "time": 2, "angle": 0 }
+				]
+			},
+			"bone2": {
+				"rotate": [
+					{ "time": 0, "angle": 0 },
+					{ "time": 0.6667, "angle": 120 },
+					{ "time": 1.3333, "angle": -120 },
+					{ "time": 2, "angle": 0 }
+				]
+			}
+		}
+	}
+}
+}

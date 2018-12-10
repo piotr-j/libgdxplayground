@@ -2,10 +2,7 @@ package io.piotrjastrzebski.playground.ecs.profilerv2.lib;
 
 import com.artemis.BaseSystem;
 import com.artemis.SystemInvocationStrategy;
-import com.artemis.World;
-import com.artemis.utils.Bag;
 import com.artemis.utils.ImmutableBag;
-import com.badlogic.gdx.utils.Array;
 
 /**
  *

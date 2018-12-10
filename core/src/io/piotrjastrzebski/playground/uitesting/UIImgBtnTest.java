@@ -9,6 +9,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.SpriteDrawable;
 import io.piotrjastrzebski.playground.BaseScreen;
 import io.piotrjastrzebski.playground.GameReset;
+import io.piotrjastrzebski.playground.PlaygroundGame;
 
 /**
  * Created by PiotrJ on 20/06/15.
@@ -39,5 +40,10 @@ public class UIImgBtnTest extends BaseScreen {
 	@Override public void dispose () {
 		super.dispose();
 		texture.dispose();
+	}
+
+	// allow us to start this test directly
+	public static void main (String[] args) {
+		PlaygroundGame.start(args, UIImgBtnTest.class);
 	}
 }

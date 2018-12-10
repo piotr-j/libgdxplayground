@@ -1,0 +1,13 @@
+
+tree.png
+size: 16,16
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+white
+  rotate: false
+  xy: 2, 2
+  size: 3, 3
+  orig: 3, 3
+  offset: 0, 0
+  index: -1

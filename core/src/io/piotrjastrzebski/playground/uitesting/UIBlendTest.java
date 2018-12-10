@@ -10,6 +10,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import io.piotrjastrzebski.playground.BaseScreen;
 import io.piotrjastrzebski.playground.GameReset;
+import io.piotrjastrzebski.playground.PlaygroundGame;
 
 /**
  * Created by PiotrJ on 20/06/15.
@@ -149,5 +150,9 @@ public class UIBlendTest extends BaseScreen {
 	@Override public void dispose () {
 		super.dispose();
 		atlas.dispose();
+	}
+
+	public static void main (String[] args) {
+		PlaygroundGame.start(args, UIBlendTest.class);
 	}
 }

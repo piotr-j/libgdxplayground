@@ -45,7 +45,7 @@ public class UITest extends BaseScreen {
 	private VisTextButton createBtn (String text, String tt, final BtnAction btnAction) {
 		VisTextButton button = new VisTextButton(text);
 		btnAction.setOwner(button);
-		new Tooltip.Builder(tt + " shortcut: " + Input.Keys.toString(btnAction.keyCode)).target(button).build();
+//		new Tooltip(button, tt + " shortcut: " + Input.Keys.toString(btnAction.keyCode));
 		button.addListener(new ClickListener() {
 			@Override public void clicked (InputEvent event, float x, float y) {
 				btnAction.execute();
