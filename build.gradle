@@ -28,7 +28,8 @@ allprojects {
         artemisOdbcontribVersion = "1.1.0"
         gdxVideoVersion = "0.0.1"
         kryoVersion = "4.0.2"
-        gdxUtilsersion = "0.13.3"
+        gdxUtilsVersion = "0.13.3"
+        spineVersion = "3.6.34.0"
     }
 
     repositories {
@@ -77,6 +78,7 @@ project(":core") {
         compile "net.onedaybeard.artemis:artemis-odb-serializer-json-libgdx:$artemisOdbVersion"
         compile "net.mostlyoriginal.artemis-odb:contrib-core:$artemisOdbcontribVersion"
         compile "com.esotericsoftware:kryo:$kryoVersion"
+        compile "com.esotericsoftware.spine:spine-libgdx:$spineVersion"
 
 //        compile "com.badlogicgames.gdxvideo:gdx-video:$gdxVideoVersion"
 
@@ -94,8 +96,10 @@ project(":core") {
         testCompile 'junit:junit:4.12'
         testCompile "org.mockito:mockito-core:1.+"
 
-        compile "net.dermetfan.libgdx-utils:libgdx-utils-box2d:$gdxUtilsersion"
-        compile "net.dermetfan.libgdx-utils:libgdx-utils:$gdxUtilsersion"
+        compile "net.dermetfan.libgdx-utils:libgdx-utils-box2d:$gdxUtilsVersion"
+        compile "net.dermetfan.libgdx-utils:libgdx-utils:$gdxUtilsVersion"
+
+        compile "com.badlogicgames.gdx:gdx-tools:$gdxVersion"
     }
 }
 
