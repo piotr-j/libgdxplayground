@@ -8,13 +8,11 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.math.*;
-import com.badlogic.gdx.scenes.scene2d.Action;
+import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
-import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.actions.TemporalAction;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Value;
@@ -70,7 +68,7 @@ public class UIStacks5Test extends BaseScreen {
 		root.clear();
 
 		final float group1Scale = .75f;
-		final float group2Scale = .75f;
+		final float group2Scale = 1.5f;
 		final VerticalGroup group1 = new VerticalGroup();
 		group1.reverse();
 		group1.space(-region.getRegionHeight() * group1Scale * .8f);
@@ -87,8 +85,7 @@ public class UIStacks5Test extends BaseScreen {
 		group2.space(-region.getRegionHeight() * group2Scale * .8f);
 		group2.setTouchable(Touchable.enabled);
 		group2.align(Align.bottom);
-//		root.add(group2).expandX().fillY().left().height(Value.percentHeight(.25f, root)).pad(50);
-		root.add(group2).expand().bottom().left().pad(50);
+		root.add(group2).expandX().fillY().left().height(Value.percentHeight(.25f, root)).pad(50);
 		for (int i = 0; i < 5; i++) {
 			Image image = createImage(group2Scale, group2Scale, Color.BLUE);
 			group2.addActor(image);
@@ -134,25 +131,18 @@ public class UIStacks5Test extends BaseScreen {
 	void moveChild (final Image actor, final VerticalGroup from, final VerticalGroup to, Color targetColor, float scale) {
 		from.localToStageCoordinates(v2.set(actor.getX(), actor.getY()));
 		stage.addActor(actor);
-		float sx = v2.x;
-		float sy = v2.y;
-		actor.setPosition(sx, sy);
+		actor.setPosition(v2.x, v2.y);
 
 		to.localToStageCoordinates(v2.set(0, to.getHeight() -region.getRegionHeight() * scale * .8f));
 		float duration = 3;
-		Bezier<Vector2> path = new Bezier<>();
-		path.set(v2s(
-			sx, sy,
-			(sx + v2.x)/2, (sy + v2.y)/2 + 250,
-			v2.x, v2.y));
-		this.path = path;
 		actor.addAction(
 			sequence(
 				parallel(
-					new MoveToPath(path, duration),
+					moveTo(v2.x, v2.y, duration),
 					color(targetColor, duration),
 					rotateBy(360, duration),
-					new ImageScaleToAction().scaleXY(scale).duration(duration)),
+					new ImageScaleToAction().scaleXY(scale).duration(duration)
+				),
 				run(new Runnable() {
 					@Override public void run () {
 						to.addActor(actor);
@@ -160,30 +150,6 @@ public class UIStacks5Test extends BaseScreen {
 				})
 			)
 		);
-	}
-
-	private Vector2[] v2s (float x1, float y1, float x2, float y2) {
-		return new Vector2[]{
-			new Vector2(x1, y1),
-			new Vector2(x2, y2)
-		};
-	}
-
-	private Vector2[] v2s (float x1, float y1, float x2, float y2, float x3, float y3) {
-		return new Vector2[]{
-			new Vector2(x1, y1),
-			new Vector2(x2, y2),
-			new Vector2(x3, y3)
-		};
-	}
-
-	private Vector2[] v2s (float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4) {
-		return new Vector2[]{
-			new Vector2(x1, y1),
-			new Vector2(x2, y2),
-			new Vector2(x3, y3),
-			new Vector2(x4, y4)
-		};
 	}
 
 	protected Image createImage(final float scaleX, float scaleY, Color color) {
@@ -200,26 +166,7 @@ public class UIStacks5Test extends BaseScreen {
 		return image;
 	}
 
-	static class MoveToPath extends TemporalAction {
-		private final Path<Vector2> path;
-
-		public MoveToPath (Path<Vector2> path, float duration) {
-			this(path, duration, null);
-		}
-
-		public MoveToPath (Path<Vector2> path, float duration, Interpolation interpolation) {
-			super(duration, interpolation);
-			if (path == null) throw new AssertionError("path cannot be null");
-			this.path = path;
-		}
-		private Vector2 out = new Vector2();
-		@Override protected void update (float percent) {
-			path.valueAt(out, percent);
-			target.setPosition(out.x, out.y);
-		}
-	}
-
-	static class ImageScaleToAction extends TemporalAction {
+	public class ImageScaleToAction extends TemporalAction {
 		private float startWidth, startHeight;
 		private float endWidth, endHeight;
 		private float sizeScaleX;
@@ -275,42 +222,10 @@ public class UIStacks5Test extends BaseScreen {
 		}
 	}
 
-	int SAMPLE_POINTS = 100;
-	float SAMPLE_POINT_DISTANCE = 1f / SAMPLE_POINTS;
-	final Vector2 tmpV = new Vector2();
-	final Vector2 tmpV2 = new Vector2();
-	private Path<Vector2> path;
 	@Override public void render (float delta) {
 		super.render(delta);
 		stage.act(delta);
 		stage.draw();
-
-		if (path != null) {
-			renderer.setProjectionMatrix(guiCamera.combined);
-			renderer.begin(ShapeRenderer.ShapeType.Line);
-			if (path instanceof Bezier) {
-				renderer.setColor(0f, 1f, 1f, 1f);
-				Bezier<Vector2> bezier = (Bezier<Vector2>)path;
-				for (Vector2 point : bezier.points) {
-					renderer.circle(point.x, point.y, .2f, 8);
-				}
-			} else if (path instanceof CatmullRomSpline) {
-				CatmullRomSpline<Vector2> catmullRomSpline = (CatmullRomSpline<Vector2>)path;
-				renderer.setColor(1f, 1f, 0, 1f);
-				for (Vector2 cp : catmullRomSpline.controlPoints) {
-					renderer.circle(cp.x, cp.y, 8f, 16);
-				}
-			}
-			float val = 0f;
-			renderer.setColor(0f, 1f, 1f, 1f);
-			while (val <= 1f - SAMPLE_POINT_DISTANCE) {
-				path.valueAt(/* out: */tmpV, val);
-				path.valueAt(/* out: */tmpV2, val + SAMPLE_POINT_DISTANCE);
-				renderer.line(tmpV.x, tmpV.y, tmpV2.x, tmpV2.y);
-				val += SAMPLE_POINT_DISTANCE;
-			}
-			renderer.end();
-		}
 
 		if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
 			rebuild();
@@ -323,15 +238,15 @@ public class UIStacks5Test extends BaseScreen {
 	}
 
 	@Override public void resize (int width, int height) {
-//		float maxWidth = 1280;
-//		float minWidth = 1280/4;
+		float maxWidth = 1280;
+		float minWidth = 1280/4;
 
-//		float scale = MathUtils.clamp((width - minWidth)/(maxWidth - minWidth), .25f, 1.25f);
-//		guiViewport.setUnitsPerPixel(1/scale);
-//		for (int i = 1280/4 - 300; i <= 1280 + 300; i+= 100) {
-//			scale = MathUtils.clamp((i - minWidth)/(maxWidth - minWidth), .25f, 1.25f);
-//			Gdx.app.log("", "welp " + i + " " + scale);
-//		}
+		float scale = MathUtils.clamp((width - minWidth)/(maxWidth - minWidth), .25f, 1.25f);
+		guiViewport.setUnitsPerPixel(1/scale);
+		for (int i = 1280/4 - 300; i <= 1280 + 300; i+= 100) {
+			scale = MathUtils.clamp((i - minWidth)/(maxWidth - minWidth), .25f, 1.25f);
+			Gdx.app.log("", "welp " + i + " " + scale);
+		}
 		super.resize(width, height);
 	}
 
