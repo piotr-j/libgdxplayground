@@ -146,7 +146,9 @@ public class UIShaderTest extends BaseScreen {
 			forward = false;
 			backward = false;
 		}
+		shaderRenderer.begin();
 		stage.draw();
+		shaderRenderer.end();
 		renderer.setProjectionMatrix(guiCamera.combined);
 		renderer.begin(ShapeRenderer.ShapeType.Line);
 		renderer.setColor(Color.MAGENTA);
@@ -195,6 +197,9 @@ public class UIShaderTest extends BaseScreen {
 //			shader.setUniformf("u_saturation", 1.5f + MathUtils.sin(saturation) * 1.5f);
 			super.draw(batch, parentAlpha);
 			batch.setShader(old);
+			if (true) { // if the shader replaces source...
+				super.draw(batch, parentAlpha);
+			}
 		}
 	}
 
@@ -256,12 +261,12 @@ public class UIShaderTest extends BaseScreen {
 
 		final int size = 2048;
 		boolean debug = false;
-		int fboWidth = 0;
-		int fboHeight = 0;
+		ShapeRenderer shapes;
 
 		public ActorShaderRenderer () {
 			viewport = new ScreenViewport(camera = new OrthographicCamera());
 			resize(size, size);
+			shapes = new ShapeRenderer();
 		}
 
 		void resize (final int width, final int height) {
@@ -272,7 +277,7 @@ public class UIShaderTest extends BaseScreen {
 //					int vpWidth = MathUtils.nextPowerOfTwo(fboWidth);
 //					int vpHeight = MathUtils.nextPowerOfTwo(fboHeight);
 //					Gdx.gl20.glViewport(0, 0, vpWidth, vpHeight);
-					Gdx.gl20.glViewport(0, 0, fboWidth, fboHeight);
+					Gdx.gl20.glViewport(bounds.x, bounds.y, bounds.width, bounds.height);
 				}
 			};
 //			fbo = new FrameBuffer(Pixmap.Format.RGBA8888, width, height, false);
@@ -286,6 +291,18 @@ public class UIShaderTest extends BaseScreen {
 		private Matrix4 prevProjection = new Matrix4();
 		private Matrix4 prevTransform = new Matrix4();
 
+		private IntRect bounds = new IntRect();
+
+		public void begin () {
+			bounds.x = 0;
+			bounds.y = 0;
+			bounds.width = 100;
+			bounds.height = 100;
+		}
+
+		public void end () {
+
+		}
 		/**
 		 * Draw the actor
 		 *
@@ -313,13 +330,24 @@ public class UIShaderTest extends BaseScreen {
 				margins.reset();
 				sa.margins(margins);
 
-				final int width = fboWidth = MathUtils.round(actor.getWidth()) + margins.left + margins.right;
-				final int height = fboHeight = MathUtils.round(actor.getHeight()) + margins.top + margins.bottom;
 
+				bounds.x = 0;
+				bounds.y = 0;
+
+				final int width = MathUtils.round(actor.getWidth()) + margins.left + margins.right;
+				final int height = MathUtils.round(actor.getHeight()) + margins.top + margins.bottom;
+				bounds.width = width;
+				bounds.height = height;
+
+				// multi pass shaders are tricky...
+				// we need 2 ping pong buffers, draw result (last ine) to target (screen?)
+				// we can get screen bounds with actor.localToScreenCoordinates()
+				// expand them to for any extras i guess?
+				// move camera, draw stuff
 				FrameBuffers.begin(fbo);
 
-				camera.position.x = width/2f - margins.left;
-				camera.position.y = height/2f - margins.bottom;
+				camera.position.x = bounds.x + width/2f - margins.left;
+				camera.position.y = bounds.y + height/2f - margins.bottom;
 				viewport.update(width, height, false);
 
 				if (debug) {
@@ -348,7 +376,7 @@ public class UIShaderTest extends BaseScreen {
 				prevTransform.set(batch.getTransformMatrix());
 				batch.setTransformMatrix(batch.getTransformMatrix().idt());
 
-				actor.setPosition(0, 0);
+				actor.setPosition(bounds.x, bounds.y);
 				actor.setScale(1f, 1f);
 				actor.setRotation(0);
 
@@ -362,14 +390,28 @@ public class UIShaderTest extends BaseScreen {
 				// reset the color just in case
 				batch.setColor(Color.WHITE);
 
-				batch.flush();
+				batch.end();
+
+				if (false) {
+					shapes.setProjectionMatrix(camera.combined);
+					shapes.begin(ShapeRenderer.ShapeType.Filled);
+					shapes.setColor(0, 1, 1, .5f);
+					rect(shapes, bounds.x, bounds.y, bounds.width, bounds.height, 4);
+//				shapes.rect(bounds.x + 1, bounds.y + 1, bounds.width - 2, bounds.height - 2);
+//				shapes.rect(bounds.x, bounds.y, 3, bounds.height);
+//				shapes.rect(bounds.x, bounds.y, bounds.width, 3);
+//				shapes.rect(bounds.x, bounds.y, bounds.width, bounds.height);
+//				shapes.rect(bounds.x, bounds.y, bounds.width, bounds.height);
+					shapes.end();
+
+				}
 				FrameBuffers.end();
 
 				// restore if it was enabled
 				if (scissors) Gdx.gl.glEnable(GL20.GL_SCISSOR_TEST);
 
 				// flipped on y
-				region.setRegion(0, height, width, -height);
+				region.setRegion(bounds.x, bounds.y + height, width, -height);
 
 				batch.setProjectionMatrix(prevProjection);
 				batch.setTransformMatrix(prevTransform);
@@ -381,19 +423,26 @@ public class UIShaderTest extends BaseScreen {
 				// if > 1 we need to draw to another buffer first
 				ShaderProgram shader = sa.shader();
 				batch.setShader(shader);
+				batch.flush();
+				for (int i = 0; i < passes; i++) {
+
 //                sa.init(shader, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-                sa.init(shader, width, height, 0);
+					sa.init(shader, width, height, i);
 //                sa.init(shader, 4096, 4096);
-                // draw the region from fbo
-				batch.draw(region,
-					x - margins.left,
-					y - margins.bottom,
-					margins.left + actor.getOriginX(),
-					margins.bottom + actor.getOriginY(),
-					width, height,
-					sx, sy,
-					actor.getRotation()
-				);
+
+					// draw the region from fbo
+					batch.draw(region,
+						x - margins.left,
+						y - margins.bottom,
+						margins.left + actor.getOriginX(),
+						margins.bottom + actor.getOriginY(),
+						width, height,
+						sx, sy,
+						actor.getRotation()
+					);
+					batch.flush();
+				}
+
 				batch.setColor(Color.WHITE);
                 batch.setShader(oldShader);
 				inFbo = false;
@@ -410,8 +459,26 @@ public class UIShaderTest extends BaseScreen {
 			if (debug) {
 				region.setRegion(0, size, size, -size);
 				batch.setColor(Color.WHITE);
-				batch.draw(region, 450, 400, size, size);
+//				batch.draw(region, 450, 400, size, size);
+				batch.draw(region, 450, 0, size, size);
 			}
+		}
+
+		private void rect (ShapeRenderer shapes, int x, int y, int width, int height, int thickness) {
+			shapes.rect(x, y, width, thickness);
+			shapes.rect(x, y + height - thickness * 4, width, thickness);
+
+//			shapes.rect(x, y + thickness, thickness, height - thickness * 2);
+//			shapes.rect(x + width - thickness, y + thickness, thickness, height - thickness * 2);
+			shapes.setColor(0, 1, 0, .5f);
+			shapes.rect(x, y, width/2, height/2);
+
+			shapes.setColor(0, 0, 1, .5f);
+			shapes.rect(x-width/2, y-width/2, width/2, height/2);
+		}
+
+		static class IntRect {
+			public int x, y, width, height;
 		}
 
         public static class Margins {

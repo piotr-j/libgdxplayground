@@ -103,34 +103,34 @@ project(":core") {
     }
 }
 
-project(":android") {
-    apply plugin: "android"
-
-    configurations { natives }
-
-    dependencies {
-        implementation project(":core")
-        implementation "com.badlogicgames.gdx:gdx-backend-android:$gdxVersion"
-        natives "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-armeabi"
-        natives "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-armeabi-v7a"
-        natives "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-x86"
-        implementation "com.badlogicgames.gdx:gdx-box2d:$gdxVersion"
-        natives "com.badlogicgames.gdx:gdx-box2d-platform:$gdxVersion:natives-armeabi"
-        natives "com.badlogicgames.gdx:gdx-box2d-platform:$gdxVersion:natives-armeabi-v7a"
-        natives "com.badlogicgames.gdx:gdx-box2d-platform:$gdxVersion:natives-x86"
-        implementation "com.badlogicgames.box2dlights:box2dlights:$box2DLightsVersion"
-        implementation "com.badlogicgames.gdx:gdx-ai:$aiVersion"
-
-        implementation "com.badlogicgames.gdx:gdx-freetype:$gdxVersion"
-        natives "com.badlogicgames.gdx:gdx-freetype-platform:$gdxVersion:natives-armeabi"
-        natives "com.badlogicgames.gdx:gdx-freetype-platform:$gdxVersion:natives-armeabi-v7a"
-        implementation "com.badlogicgames.gdx:gdx-freetype-platform:$gdxVersion:natives-x86"
-
-        implementation fileTree(dir: '../libs', include: '*.jar')
-
-//        implementation "com.badlogicgames.gdxvideo:gdx-video-android:$gdxVideoVersion"
-    }
-}
+//project(":android") {
+//    apply plugin: "android"
+//
+//    configurations { natives }
+//
+//    dependencies {
+//        implementation project(":core")
+//        implementation "com.badlogicgames.gdx:gdx-backend-android:$gdxVersion"
+//        natives "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-armeabi"
+//        natives "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-armeabi-v7a"
+//        natives "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-x86"
+//        implementation "com.badlogicgames.gdx:gdx-box2d:$gdxVersion"
+//        natives "com.badlogicgames.gdx:gdx-box2d-platform:$gdxVersion:natives-armeabi"
+//        natives "com.badlogicgames.gdx:gdx-box2d-platform:$gdxVersion:natives-armeabi-v7a"
+//        natives "com.badlogicgames.gdx:gdx-box2d-platform:$gdxVersion:natives-x86"
+//        implementation "com.badlogicgames.box2dlights:box2dlights:$box2DLightsVersion"
+//        implementation "com.badlogicgames.gdx:gdx-ai:$aiVersion"
+//
+//        implementation "com.badlogicgames.gdx:gdx-freetype:$gdxVersion"
+//        natives "com.badlogicgames.gdx:gdx-freetype-platform:$gdxVersion:natives-armeabi"
+//        natives "com.badlogicgames.gdx:gdx-freetype-platform:$gdxVersion:natives-armeabi-v7a"
+//        implementation "com.badlogicgames.gdx:gdx-freetype-platform:$gdxVersion:natives-x86"
+//
+//        implementation fileTree(dir: '../libs', include: '*.jar')
+//
+////        implementation "com.badlogicgames.gdxvideo:gdx-video-android:$gdxVideoVersion"
+//    }
+//}
 
 tasks.eclipse.doLast {
     delete ".project"
