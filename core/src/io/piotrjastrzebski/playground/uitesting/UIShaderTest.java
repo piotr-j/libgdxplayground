@@ -390,7 +390,7 @@ public class UIShaderTest extends BaseScreen {
 				// reset the color just in case
 				batch.setColor(Color.WHITE);
 
-				batch.end();
+//				batch.end();
 
 				if (false) {
 					shapes.setProjectionMatrix(camera.combined);
