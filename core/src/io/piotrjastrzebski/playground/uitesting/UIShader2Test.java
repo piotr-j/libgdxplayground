@@ -38,6 +38,7 @@ public class UIShader2Test extends BaseScreen {
 	private ActorShaderRenderer shaderRenderer;
 	private ShaderProgram saturationShader;
 	private ShaderProgram outlineShader;
+	private ShaderProgram blurShader;
 
 	public UIShader2Test (GameReset game) {
 		super(game);
@@ -50,6 +51,11 @@ public class UIShader2Test extends BaseScreen {
 		outlineShader = new ShaderProgram(Gdx.files.internal("shaders/outline2.vert"), Gdx.files.internal("shaders/outline2.frag"));
 		if (!outlineShader.isCompiled()) {
 			throw new AssertionError(TAG + " : Shader not compiled!\n" + outlineShader.getLog());
+		}
+
+		blurShader = new ShaderProgram(Gdx.files.internal("shaders/gblur2.vert"), Gdx.files.internal("shaders/gblur2.frag"));
+		if (!blurShader.isCompiled()) {
+			throw new AssertionError(TAG + " : Shader not compiled!\n" + blurShader.getLog());
 		}
 
 		outlineShader.begin();
@@ -67,11 +73,11 @@ public class UIShader2Test extends BaseScreen {
 		root.add().expand(2, 1);
 //		texture = new Texture("badlogic.jpg");
 //		texture = new Texture("shaders/rect-128.png");
-		texture = new Texture("puncher/punch.png");
+		texture = new Texture("shaders/badlogic.png");
 		float size = 128;
 		container.add().height(Value.percentHeight(.05f, root)).row();
 		{
-			Image image = new ShaderImage(new TextureRegionDrawable(new TextureRegion(texture)), outlineShader, shaderRenderer);
+			Image image = new ShaderImage(new TextureRegionDrawable(new TextureRegion(texture)), blurShader, shaderRenderer);
 			addActions(image, size);
 			container.add(image).size(size).row();
 		}
@@ -196,6 +202,17 @@ public class UIShader2Test extends BaseScreen {
 
 		@Override public void init (ShaderProgram shader, int width, int height, int pass) {
 			if (true) {
+				if (pass >= 0) {
+					shader.setUniformf("u_resolution", width);
+					shader.setUniformf("u_radius", 1f);
+					if (pass == 0) {
+						shader.setUniformf("u_dir", 0, 1);
+					} else {
+						shader.setUniformf("u_dir", 1, 0);
+					}
+				}
+			}
+			if (false) {
 				if (pass == 0) {
 					shader.setUniformf("u_viewportInverse", 1f / width, 1f / height);
 					shader.setUniformf("u_thickness", 1 * getScaleX());
@@ -327,7 +344,7 @@ public class UIShader2Test extends BaseScreen {
 			batch.begin();
 
 //			sa.init(shader, fbo.getWidth(), fbo.getHeight(), 0);
-			sa.shaderDraw(batch, parentAlpha, 0);
+			sa.shaderDraw(batch, parentAlpha, -1);
 
 
 //			batch.flush();
@@ -361,7 +378,7 @@ public class UIShader2Test extends BaseScreen {
 				region.setRegion(0, fbo.getHeight(), fbo.getWidth(), -fbo.getHeight());
 //				batch.draw(region, 450, 400, size, size);
 //				batch.draw(region, 750, 0, fbo.getWidth()/2, fbo.getHeight()/2);
-				batch.draw(region, 450, 0, fbo1.getWidth()/3, fbo1.getHeight()/3);
+				batch.draw(region, 600, 0, fbo1.getWidth()/2, fbo1.getHeight()/2);
 				batch.end();
 //				batch.setProjectionMatrix(batch.getProjectionMatrix().translate(-ab.aabb.x, -ab.aabb.y, 0));
 			}
@@ -372,6 +389,9 @@ public class UIShader2Test extends BaseScreen {
 
 			ShaderProgram prevShader = batch.getShader();
 
+			ShaderProgram shader = sa.shader();
+			batch.setShader(shader);
+			batch.begin();
 			while (--passes >= 0) {
 				region.setTexture(fbo.getColorBufferTexture());
 				region.setRegion(ab.aabb.x, ab.aabb.y, ab.aabb.width, ab.aabb.height);
@@ -379,27 +399,19 @@ public class UIShader2Test extends BaseScreen {
 				swap();
 				fbos.add(fbo);
 				FrameBuffers.begin(fbo);
+				Gdx.gl.glClearColor(0, 0, 0, 0);
 				Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-				batch.begin();
-				if (false) {
-					batch.draw(region, ab.aabb.x, ab.aabb.y + region.getRegionHeight(), region.getRegionWidth(), -region.getRegionHeight());
-				}
-				ShaderProgram shader = sa.shader();
-				batch.setShader(shader);
+//				batch.begin();
 				sa.init(shader, fbo.getWidth(), fbo.getHeight(), passes);
 				batch.draw(region, ab.aabb.x, ab.aabb.y + region.getRegionHeight(), region.getRegionWidth(), -region.getRegionHeight());
-				batch.setShader(prevShader);
-				if (false) {
-					batch.draw(region, ab.aabb.x, ab.aabb.y + region.getRegionHeight(), region.getRegionWidth(), -region.getRegionHeight());
-				}
-				batch.end();
+				batch.flush();
 				FrameBuffers.end();
 
 			}
-
 			batch.setShader(prevShader);
 
 			actor.getColor().a = a;
+			batch.end();
 			batch.begin();
 
 //			glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE);
@@ -423,7 +435,7 @@ public class UIShader2Test extends BaseScreen {
 					region.setRegion(0, fbo.getHeight(), fbo.getWidth(), -fbo.getHeight());
 //				batch.draw(region, 450, 400, size, size);
 //				batch.draw(region, 750, 0, fbo.getWidth()/2, fbo.getHeight()/2);
-					batch.draw(region, 450, fbo.getHeight()/3f * id, fbo.getWidth()/3f, fbo.getHeight()/3f);
+					batch.draw(region, 600, fbo.getHeight()/3f * id, fbo.getWidth()/2f, fbo.getHeight()/2f);
 					id++;
 				}
 //
