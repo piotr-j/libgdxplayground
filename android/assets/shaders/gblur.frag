@@ -11,6 +11,7 @@ uniform vec2 u_dir;
 #define SIZE 5
 
 // http://rastergrid.com/blog/2010/09/efficient-gaussian-blur-with-linear-sampling/#comment-65003
+// initialization doesnt work on macos for whatever reason
 uniform float offset[SIZE] = float[](0.0, 1.0, 2.0, 3.0, 4.0);
 uniform float weight[SIZE] = float[](0.2270270270, 0.1945945946, 0.1216216216, 0.0540540541, 0.0162162162);
 

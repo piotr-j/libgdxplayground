@@ -13,8 +13,9 @@ uniform vec2 u_dir;
 // http://rastergrid.com/blog/2010/09/efficient-gaussian-blur-with-linear-sampling/#comment-65003
 // in this version we exploit gpu linear filtering to sample two adjecent texels at same itme
 // texture we sample must have linear filtering set
-uniform float offset[SIZE] = float[]( 0.0, 1.3846153846, 3.2307692308 );
-uniform float weight[SIZE] = float[]( 0.2270270270, 0.3162162162, 0.0702702703 );
+// does not compile on macos, fun times
+uniform float offset[SIZE];// = float[]( 0.0, 1.3846153846, 3.2307692308 );
+uniform float weight[SIZE];// = float[]( 0.2270270270, 0.3162162162, 0.0702702703 );
 
 void main() {
     vec2 tc = v_texCoords;
