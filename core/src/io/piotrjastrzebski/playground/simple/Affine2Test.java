@@ -9,6 +9,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Affine2;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.TimeUtils;
@@ -39,6 +40,8 @@ public class Affine2Test extends BaseScreen {
 		thing.position.set(-2, -2);
 		thing.origin.set(2, 0);
 		thing.size.set(4, 4);
+		thing.polygon = rectPoly(4, 4);
+
 		Thing child = new Thing();
 		thing.children.add(child);
 		child.parent = thing;
@@ -48,6 +51,8 @@ public class Affine2Test extends BaseScreen {
 		child.size.set(2, 2);
 		child.origin.set(1, 1);
 		child.region = new TextureRegion(texture);
+		child.polygon = rectPoly(2, 2);
+
 		for (int i = 0; i < 4; i++) {
 			Thing child2 = new Thing();
 			child.children.add(child2);
@@ -58,9 +63,14 @@ public class Affine2Test extends BaseScreen {
 			child2.rotate = MathUtils.random(-90, 90);
 			child2.position.set(MathUtils.random(-5, 5), MathUtils.random(-5, 5));
 			child2.origin.set(.5f, .5f);
+			child2.polygon = rectPoly(1, 1);
 		}
 		things.add(thing);
 		MathUtils.random.setSeed(TimeUtils.millis());
+	}
+
+	private Polygon rectPoly (float width, float height) {
+		return new Polygon(new float[]{0, 0, width, 0, width, height, 0, height});
 	}
 
 	float state = 0;
@@ -108,6 +118,7 @@ public class Affine2Test extends BaseScreen {
 	protected static class Thing {
 		protected Color tint = new Color(MathUtils.random(), MathUtils.random(), MathUtils.random(), 1);
 		protected TextureRegion region;
+		protected Polygon polygon;
 		protected Vector2 tmp = new Vector2();
 		protected Vector2 tmp2 = new Vector2();
 
@@ -128,7 +139,18 @@ public class Affine2Test extends BaseScreen {
 		public void update (float delta, float state) {
 			rotation = state * rotate;
 			transform.setToTrnRotScl(position.x + origin.x, position.y + origin.y, rotation, scale.x, scale.y);
-			if (origin.x != 0 || origin.y != 0) transform.translate(-origin.x, -origin.y);
+			if (origin.x != 0 || origin.y != 0) {
+				transform.translate(-origin.x, -origin.y);
+				// extra rotation for lulz
+				if (false) {
+					float ox = origin.x / 2;
+					float oy = origin.y / 2;
+					transform.translate(ox, oy);
+					transform.rotate(-rotation / 2);
+					transform.translate(-ox, -oy);
+				}
+			}
+
 			resultTransform.set(transform);
 			if (parent != null) {
 //				rotation += rotate * delta;
@@ -149,10 +171,23 @@ public class Affine2Test extends BaseScreen {
 			}
 		}
 
+		private Vector2 v2 = new Vector2();
 		public void debugDraw(ShapeRenderer renderer) {
-			renderer.setColor(Color.WHITE);
 			tmp.set(origin);
 			resultTransform.applyTo(tmp);
+			if (polygon != null) {
+				renderer.setColor(Color.YELLOW);
+				float[] vertices = polygon.getVertices();
+				// probably dont rebuild this
+				float[] transformed = new float[vertices.length];
+				for (int i = 0; i < vertices.length; i+=2) {
+					resultTransform.applyTo(v2.set(vertices[i], vertices[i + 1]));
+					transformed[i] = v2.x;
+					transformed[i + 1] = v2.y;
+				}
+				renderer.polygon(transformed);
+			}
+			renderer.setColor(Color.WHITE);
 			for (Thing child : children) {
 				tmp2.set(child.origin);
 				child.resultTransform.applyTo(tmp2);
