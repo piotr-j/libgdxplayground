@@ -23,12 +23,12 @@ allprojects {
         box2DLightsVersion = '1.4'
         ashleyVersion = '1.7.3'
         aiVersion = '1.8.1'
-        visuiVersion = '1.2.5'
+        visuiVersion = '1.4.2'
         artemisOdbVersion = "2.1.0"
         artemisOdbcontribVersion = "1.1.0"
         gdxVideoVersion = "0.0.1"
         kryoVersion = "4.0.2"
-        gdxUtilsVersion = "0.13.3"
+        gdxUtilsVersion = "0.13.4"
         spineVersion = "3.6.34.0"
     }
 
@@ -47,7 +47,7 @@ project(":desktop") {
 
     dependencies {
         compile project(":core")
-        compile 'org.lwjgl.lwjgl:lwjgl:2.9.2'
+//        compile 'org.lwjgl.lwjgl:lwjgl:2.9.2'
         compile "com.badlogicgames.gdx:gdx-backend-lwjgl:$gdxVersion"
         compile "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
         compile "com.badlogicgames.gdx:gdx-box2d-platform:$gdxVersion:natives-desktop"
@@ -84,9 +84,9 @@ project(":core") {
 
         compile fileTree(dir: '../libs', include: '*.jar')
 
-        compile "com.badlogicgames.ashley:ashley:1.6.0"
+        compile "com.badlogicgames.ashley:ashley:1.7.3"
 
-        compile 'org.lwjgl.lwjgl:lwjgl:2.9.2'
+//        compile 'org.lwjgl.lwjgl:lwjgl:2.9.2'
         compile "com.badlogicgames.gdx:gdx-backend-lwjgl:$gdxVersion"
         compile "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
         compile "com.badlogicgames.gdx:gdx-box2d-platform:$gdxVersion:natives-desktop"
