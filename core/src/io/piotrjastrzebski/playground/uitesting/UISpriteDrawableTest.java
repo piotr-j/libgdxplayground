@@ -9,6 +9,8 @@ import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.utils.SpriteDrawable;
 import io.piotrjastrzebski.playground.BaseScreen;
 import io.piotrjastrzebski.playground.GameReset;
+import io.piotrjastrzebski.playground.PlaygroundGame;
+import io.piotrjastrzebski.playground.box2dtest.ColorGradeTest;
 
 /**
  * Created by PiotrJ on 20/06/15.
@@ -44,6 +46,20 @@ public class UISpriteDrawableTest extends BaseScreen {
 		private Color c4 = new Color();
 		public GradientSpriteDrawable (Sprite sprite) {
 			super(sprite);
+		}
+
+		@Override public void draw (Batch batch, float x, float y, float width, float height) {
+			Sprite sprite = getSprite();
+			sprite.setBounds(x, y, width, height);
+
+			Color batchColor = batch.getColor();
+			float[] vertices = sprite.getVertices();
+			vertices[Batch.C1] = tmpColor.set(c1).mul(batchColor).toFloatBits();
+			vertices[Batch.C2] = tmpColor.set(c2).mul(batchColor).toFloatBits();
+			vertices[Batch.C3] = tmpColor.set(c3).mul(batchColor).toFloatBits();
+			vertices[Batch.C4] = tmpColor.set(c4).mul(batchColor).toFloatBits();
+
+			sprite.draw(batch);
 		}
 
 		Color tmpColor = new Color();
@@ -96,5 +112,9 @@ public class UISpriteDrawableTest extends BaseScreen {
 		public Color getLowerRight () {
 			return c4;
 		}
+	}
+
+	public static void main (String[] args) {
+		PlaygroundGame.start(args, UISpriteDrawableTest.class);
 	}
 }
