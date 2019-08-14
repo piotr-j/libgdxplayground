@@ -58,8 +58,8 @@ public class IsoTest extends BaseScreen {
 		renderer.circle(cs.x, cs.y, 0.1f, 16);
 		renderer.setColor(Color.CYAN);
 
-		int x = (int)((isoPos.y)/2f - .5f);
-		int y = (int)((isoPos.x)/2f + .5f);
+		int x = MathUtils.floor((isoPos.y)/2f - .5f);
+		int y = MathUtils.floor((isoPos.x)/2f + .5f);
 		TiledMapTileLayer.Cell cell = mapLayer.getCell(x, y);
 		if (cell != null) {
 			Gdx.app.log("x", x + ", " + y);
