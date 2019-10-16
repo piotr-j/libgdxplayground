@@ -33,10 +33,10 @@ public class UIDrawerTest extends BaseScreen {
 		treeStyle.background = VisUI.getSkin().getDrawable("window");
 		VisTree visTree = new VisTree(treeStyle);
 		for (int i = 0; i < 6; i++) {
-			Tree.Node node = new Tree.Node(new VisLabel("NODE " + i));
+			Tree.Node node = new Tree.Node(new VisLabel("NODE " + i)) {};
 			visTree.add(node);
 			for (int j = 0; j < 3; j++) {
-				node.add(new Tree.Node(new VisLabel("NODE " + i + "_" + j)));
+				node.add(new Tree.Node(new VisLabel("NODE " + i + "_" + j)) {});
 			}
 		}
 		content.add(visTree).expand().fill();

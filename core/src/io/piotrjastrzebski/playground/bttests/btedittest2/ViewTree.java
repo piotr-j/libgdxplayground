@@ -267,7 +267,7 @@ public class ViewTree<E> extends VisTree implements Pool.Poolable, BTModelListen
 		if (parent.getModelTask() == task) {
 			return parent;
 		}
-		for (Node node : parent.getChildren()) {
+		for (Object node : parent.getChildren()) {
 			ViewTask<E> found = find((ViewTask<E>)node, task);
 			if (found != null) return found;
  		}

@@ -38,7 +38,7 @@ public class ViewTask<E> extends VisTree.Node implements Pool.Poolable {
 		super(new VisTable());
 		this.owner = owner;
 		// object is used to find this node in tree
-		setObject(this);
+		setValue(this);
 		separator = owner.getSeparator();
 		dad = owner.dad;
 		container = (VisTable)getActor();
@@ -89,7 +89,7 @@ public class ViewTask<E> extends VisTree.Node implements Pool.Poolable {
 	}
 
 	public void update (float delta) {
-		for (Tree.Node node : getChildren()) {
+		for (Object node : getChildren()) {
 			((ViewTask)node).update(delta);
 		}
 	}
@@ -99,7 +99,7 @@ public class ViewTask<E> extends VisTree.Node implements Pool.Poolable {
 		task = null;
 		dad.removeSource(source);
 		dad.removeTarget(target);
-		for (Tree.Node node : getChildren()) {
+		for (Object node : getChildren()) {
 			owner.freeVT((ViewTask<E>)node);
 		}
 	}

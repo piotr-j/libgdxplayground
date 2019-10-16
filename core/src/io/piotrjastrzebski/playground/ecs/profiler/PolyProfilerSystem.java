@@ -75,7 +75,11 @@ public class PolyProfilerSystem extends BaseSystem {
 		polyBatch.setProjectionMatrix(camera.combined);
 //		renderer.setProjectionMatrix(camera.combined);
 		update += world.getDelta();
-		Sort.instance().sort(SystemProfiler.get());
+		Sort.instance().sort(SystemProfiler.get(), new Comparator<SystemProfiler>() {
+			@Override public int compare (SystemProfiler o1, SystemProfiler o2) {
+				return Integer.compare(o1.index, o2.index);
+			}
+		});
 		drawer.setTextureRegion(white);
 		polyBatch.begin();
 		drawGraph(SystemProfiler.get());

@@ -167,7 +167,7 @@ public class UIDaDTest extends BaseScreen {
 
 		public ViewNode (String text) {
 			super(new VisLabel(text));
-			setObject(this);
+			setValue(this);
 			dadAdd.addTarget(new Target(getActor()) {
 				@Override public boolean drag (Source source, Payload payload, float x, float y, int pointer) {
 					// check if we want the payload
