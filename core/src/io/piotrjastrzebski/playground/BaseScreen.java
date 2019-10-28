@@ -53,7 +53,7 @@ public abstract class BaseScreen implements Screen, InputProcessor {
 		renderer = new ShapeRenderer();
 
 		skin = new Skin(Gdx.files.internal("gui/uiskin.json"));
-		stage = new Stage(guiViewport, batch);
+		stage = newStage();
 		stage.setDebugAll(debugStage);
 		root = new Table();
 		root.setFillParent(true);
@@ -61,6 +61,10 @@ public abstract class BaseScreen implements Screen, InputProcessor {
 		Gdx.input.setInputProcessor(multiplexer = new InputMultiplexer(stage, this));
 
 		Gdx.app.log(TAG, "F1 - toggle stage debug");
+	}
+
+	protected Stage newStage() {
+		return new Stage(guiViewport, batch);
 	}
 
 	@Override public void show () {
