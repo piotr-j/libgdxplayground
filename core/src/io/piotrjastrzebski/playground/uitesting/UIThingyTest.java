@@ -7,7 +7,6 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
@@ -16,17 +15,13 @@ import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
-import com.badlogic.gdx.scenes.scene2d.actions.AddAction;
-import com.badlogic.gdx.scenes.scene2d.actions.ColorAction;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
-import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.ActorGestureListener;
-import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.utils.Align;
-import com.kotcrab.vis.ui.widget.VisTextButton;
 import io.piotrjastrzebski.playground.BaseScreen;
 import io.piotrjastrzebski.playground.GameReset;
 import io.piotrjastrzebski.playground.PLog;
@@ -76,11 +71,9 @@ public class UIThingyTest extends BaseScreen {
 		}
 		container.setZIndex(0);
 
-//		container.debugAll();
 		clear.set(Color.GRAY);
 
 		{
-
 			final Dude dude = new Dude(skin, true);
 			container.setTouchable(Touchable.enabled);
 			container.addListener(new ActorGestureListener(){
@@ -119,8 +112,6 @@ public class UIThingyTest extends BaseScreen {
 			targetSize++;
 			resizing = true;
 			resizeTime = 0;
-			// we want this to take some time
-//			bounds.set(-(WIDTH * (size-1)) * .5f, 0, WIDTH * size, HEIGHT);
 		}
 
 		void contractSize () {
@@ -128,9 +119,6 @@ public class UIThingyTest extends BaseScreen {
 			targetSize--;
 			resizing = true;
 			resizeTime = 0;
-			// we want this to take some time
-//			bounds.set(-(WIDTH * (size-1)) * .5f, 0, WIDTH * size, HEIGHT);
-			// invalidate dude paths?
 		}
 
 		Dude main;
@@ -161,31 +149,13 @@ public class UIThingyTest extends BaseScreen {
 				parentToLocalCoordinates(v2.set(0, 0));
 				float lx = getX() + v2.x + WIDTH * .2f;
 				float rx = getX() + v2.x + WIDTH * .8f;
-//				PLog.log("dude x " + v2.x + " " + parent.getWidth());
 				if (dx < lx) {
 					float offset = lx - dx;
-//					float o = rx - main.getX(Align.center);
 					setX(getX() + offset);
-//					PLog.log("right");
 				} else if (dx > rx) {
 					float offset = dx - rx;
 					setX(getX() - offset);
-//					float o = main.getX(Align.center);
-//					setX(getX() + o);
-//					PLog.log("left");
 				}
-
-//				if (v2.y > center.getHeight() * topScroll) {
-//					float offset = v2.y - center.getHeight() * topScroll;
-//					float y = bounds.y - offset;
-//					// dont move more then top edge allows
-//					bounds.y = Math.max(y, center.getHeight() - bounds.height);
-//				} else if (v2.y < center.getHeight() * botScroll) {
-//					float offset = center.getHeight() * botScroll - v2.y;
-//					float y = bounds.y + offset;
-//					// dont move more then bottom edge allows
-//					bounds.y = Math.min(y, 0);
-//				}
 			}
 			if (Gdx.input.isKeyJustPressed(Input.Keys.LEFT)) {
 				setX(getX() - 10);
@@ -236,15 +206,11 @@ public class UIThingyTest extends BaseScreen {
 			float lx = cx - WIDTH * .3f;
 			float rx = cx + WIDTH * .3f;
 
-//			shapes.line(bx + WIDTH * .2f, by, bx + WIDTH * .2f, by + HEIGHT);
-//			shapes.line(bx + WIDTH * .8f, by, bx + WIDTH * .8f, by + HEIGHT);
 			parentToLocalCoordinates(v2.set(0, 0));
 			float plx = bx + v2.x + WIDTH * .2f;
 			float prx = bx + v2.x + WIDTH * .8f;
 			shapes.line(plx, by, plx, by + HEIGHT);
 			shapes.line(prx, by, prx, by + HEIGHT);
-//			shapes.line(plx + bx + lx, by, plx + bx + lx, by + HEIGHT);
-//			shapes.line(prx + bx + rx, by, prx + bx + rx, by + HEIGHT);
 		}
 
 		@Override public Actor hit (float x, float y, boolean touchable) {
@@ -264,19 +230,26 @@ public class UIThingyTest extends BaseScreen {
 	}
 
 	static class Dude extends Image {
+		static int ids = 1;
+		int id = ids++;
 		final boolean main;
 
 		public Dude (Skin skin, boolean main) {
 			super(skin, "white");
 			this.main = main;
 			setSize(33, 33);
-			setTouchable(Touchable.disabled);
+			setTouchable(Touchable.enabled);
 			if (main) {
 				setColor(Color.YELLOW);
 			} else {
 				setColor(Color.ORANGE);
 				moveRandomly();
 			}
+			addListener(new ClickListener(){
+				@Override public void clicked (InputEvent event, float x, float y) {
+					PLog.log("Clicked dude " + id);
+				}
+			});
 		}
 
 		@Override public void act (float delta) {
