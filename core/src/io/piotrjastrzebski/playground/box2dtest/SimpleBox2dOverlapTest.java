@@ -1,11 +1,14 @@
 package io.piotrjastrzebski.playground.box2dtest;
 
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.FPSLogger;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.*;
@@ -37,6 +40,7 @@ public class SimpleBox2dOverlapTest extends BaseScreen {
 		gameCamera = new OrthographicCamera();
 		gameViewport = new ExtendViewport(VP_WIDTH, VP_HEIGHT, gameCamera);
 		debugRenderer = new Box2DDebugRenderer();
+		debugRenderer.setDrawAABBs(true);
 		world = new World(new Vector2(0, -10), true);
 		box = new Texture("badlogic.jpg");
 
@@ -99,6 +103,7 @@ public class SimpleBox2dOverlapTest extends BaseScreen {
 		PolygonShape shape = new PolygonShape();
 		shape.setAsBox(box.width / 2, box.height / 2);
 		box.body.createFixture(shape, 1);
+		box.body.setUserData(box);
 		shape.dispose();
 
 		boxes.add(box);
@@ -116,6 +121,7 @@ public class SimpleBox2dOverlapTest extends BaseScreen {
 		fpsLogger.log();
 	}
 
+	Rectangle lastTouch = new Rectangle();
 	private void draw () {
 		if (debugDraw) {
 			debugRenderer.render(world, gameCamera.combined);
@@ -126,6 +132,13 @@ public class SimpleBox2dOverlapTest extends BaseScreen {
 			box.draw(batch);
 		}
 		batch.end();
+
+		renderer.setProjectionMatrix(gameCamera.combined);
+		renderer.begin(ShapeRenderer.ShapeType.Line);
+
+		renderer.setColor(Color.MAGENTA);
+		renderer.rect(lastTouch.x, lastTouch.y, lastTouch.width, lastTouch.height);
+		renderer.end();
 	}
 
 	private class Box {
@@ -138,6 +151,7 @@ public class SimpleBox2dOverlapTest extends BaseScreen {
 		float height;
 		int srcWidth;
 		int srcHeight;
+		Color tint = new Color(Color.WHITE);
 
 		public Box (float x, float y, float rotation, Texture texture) {
 			this.x = x;
@@ -158,8 +172,10 @@ public class SimpleBox2dOverlapTest extends BaseScreen {
 		}
 
 		public void draw (Batch batch) {
+			batch.setColor(tint);
 			batch.draw(texture, x - width / 2, y - height / 2, width / 2, height / 2, width, height, 1, 1, rot, 0, 0, srcWidth,
 				srcHeight, false, false);
+			batch.setColor(Color.WHITE);
 		}
 	}
 
@@ -202,6 +218,26 @@ public class SimpleBox2dOverlapTest extends BaseScreen {
 			mouseJoint = (MouseJoint) world.createJoint(def);
 			hitBody.setAwake(true);
 		}
+
+		for (Box box : boxes) {
+			box.tint.set(Color.WHITE);
+		}
+
+		float size = VP_WIDTH * .1f;
+		world.QueryAABB(new QueryCallback() {
+			@Override public boolean reportFixture (Fixture fixture) {
+				if (fixture.getBody() == groundBody)
+					return true;
+				Object userData = fixture.getBody().getUserData();
+				if (userData instanceof Box) {
+					Box box = (Box)userData;
+					box.tint.set(Color.RED);
+				}
+				return true;
+			}
+		}, testPoint.x - size, testPoint.y - size, testPoint.x + size, testPoint.y + size);
+
+		lastTouch.set(testPoint.x - size, testPoint.y - size, size * 2, size * 2);
 
 		return super.touchDown(screenX, screenY, pointer, button);
 	}
