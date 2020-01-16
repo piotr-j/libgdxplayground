@@ -2,8 +2,11 @@ package io.piotrjastrzebski.playground.uitesting;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -35,13 +38,28 @@ public class UIInputTest extends BaseScreen {
 		super(game);
 		// we care about vis widgets mainly for reasons...
 
-		Array<Focusable> focusables = new Array<>();
+		final Array<Focusable> focusables = new Array<>();
+		stage.addListener(new FL("Stage") {
+			@Override public void keyboardFocusChanged (FocusEvent event, Actor actor, boolean focused) {
+				super.keyboardFocusChanged(event, actor, focused);
+				if (!focused && event.getRelatedActor() == null) {
+					PLog.log("No focus?");
+				}
+//					Focusable focusable = focusables.get(0);
+//					FocusManager.switchFocus(stage, focusable);
+//					Actor newFocus = (Actor)focusable;
+//					stage.setKeyboardFocus(newFocus);
+//				}
+			}
+		});
+
 		{
-			final VisTextButton button = new VisTextButton("Dialog: 1");
+			final VisTextButton button = new VisTextButton("DialogA: 1");
+			button.setName("B::"+button.getText().toString());
 			button.addListener(new FocusableListener(button, focusables));
 			button.addListener(new ChangeListener() {
 				@Override public void changed (ChangeEvent event, Actor actor) {
-					showDialog("Dialog", 1);
+					showDialog("DialogA", 1);
 				}
 			});
 			root.add(button).pad(8).row();
@@ -50,29 +68,33 @@ public class UIInputTest extends BaseScreen {
 			stage.setKeyboardFocus(button);
 		}
 		{
-			final VisTextButton button = new VisTextButton("Dialog: 1");
+			final VisTextButton button = new VisTextButton("DialogB: 1");
+			button.setName("B::"+button.getText().toString());
 			button.addListener(new FocusableListener(button, focusables));
 			button.addListener(new ChangeListener() {
 				@Override public void changed (ChangeEvent event, Actor actor) {
-					showDialog("Dialog", 1);
+					showDialog("DialogB", 1);
 				}
 			});
 			root.add(button).pad(8).row();
 		}
-
-		stage.addListener(new FL("Stage"));
 	}
 
-	private void showDialog (final String name, final int depth) {
+	void showDialog (final String name, final int depth) {
 		String tag = name + ": " + depth;
-		VisDialog dialog = new VisDialog(tag);
-		dialog.setName(tag);
+		final VisDialog dialog = new VisDialog(tag);
+		dialog.setName("D::"+tag);
 
 		dialog.addCloseButton();
+		dialog.closeOnEscape();
 		Table content = dialog.getContentTable();
+
+		final Array<Focusable> focusables = new Array<>();
 		{
 
 			final VisTextButton button = new VisTextButton("Spawn: " + name + "A: " + (depth + 1));
+			button.setName("B::"+button.getText().toString());
+			button.addListener(new FocusableListener(button, focusables));
 			button.addListener(new ChangeListener() {
 				@Override public void changed (ChangeEvent event, Actor actor) {
 					showDialog(name + "A", depth + 1);
@@ -83,6 +105,8 @@ public class UIInputTest extends BaseScreen {
 		content.add().height(16).row();
 		{
 			final VisTextButton button = new VisTextButton("Spawn: " + name + "B: " + (depth + 1));
+			button.setName("B::"+button.getText().toString());
+			button.addListener(new FocusableListener(button, focusables));
 			button.addListener(new ChangeListener() {
 				@Override public void changed (ChangeEvent event, Actor actor) {
 					showDialog(name + "B", depth + 1);
@@ -90,6 +114,20 @@ public class UIInputTest extends BaseScreen {
 			});
 			content.add(button).row();
 		}
+
+		dialog.addListener(new FL(tag) {
+			@Override public void keyboardFocusChanged (FocusEvent event, Actor actor, boolean focused) {
+				super.keyboardFocusChanged(event, actor, focused);
+				// if dialog gets focus, delegate to first of our own focusables
+				if (focused && actor == dialog) {
+					Focusable focusable = focusables.get(0);
+					FocusManager.switchFocus(stage, focusable);
+					Actor newFocus = (Actor)focusable;
+					stage.setKeyboardFocus(newFocus);
+				}
+			}
+		});
+
 
 		dialog.show(stage);
 		dialog.setPosition(
@@ -102,6 +140,18 @@ public class UIInputTest extends BaseScreen {
 		super.render(delta);
 		stage.act(delta);
 		stage.draw();
+
+		enableBlending();
+		renderer.setProjectionMatrix(stage.getCamera().combined);
+		renderer.begin(ShapeRenderer.ShapeType.Filled);
+//		renderer.setColor(Color.GOLD);
+		renderer.setColor(1f, .85f, 0f, .5f);
+		Actor focus = stage.getKeyboardFocus();
+		if (focus != null) {
+			Vector2 pos = focus.localToStageCoordinates(new Vector2());
+			renderer.rect(pos.x, pos.y, focus.getWidth(), focus.getHeight());
+		}
+		renderer.end();
 	}
 
 	private static class FL extends FocusListener {
@@ -114,9 +164,19 @@ public class UIInputTest extends BaseScreen {
 		@Override public void keyboardFocusChanged (FocusEvent event, Actor actor, boolean focused) {
 			Actor relatedActor = event.getRelatedActor();
 			if (relatedActor != null) {
-				PLog.log(tag + ": KB focus '" + actor.getName() + "': " + focused + ", rel: " + relatedActor.getName());
+				if (focused) {
+					// relative actor is actor that lost focus
+					PLog.log(tag + ": focus gained: '" + actor.getName() + "', lost: " + relatedActor.getName());
+				} else {
+					// relative actor is actor that gained focus
+					PLog.log(tag + ": focus lost  : '" + actor.getName() + "', gained: " + relatedActor.getName());
+				}
 			} else {
-				PLog.log(tag + ": KB focus '" + actor.getName() + "': " + focused);
+				if (focused) {
+					PLog.log(tag + ": focus gained: '" + actor.getName() + "'");
+				} else {
+					PLog.log(tag + ": focus lost  : '" + actor.getName() + "'");
+				}
 			}
 		}
 
@@ -126,6 +186,7 @@ public class UIInputTest extends BaseScreen {
 	}
 
 	private static class FocusableListener  extends ClickListener {
+		private final String tag;
 		private final Focusable owner;
 		private final Array<Focusable> focusables;
 
@@ -135,6 +196,7 @@ public class UIInputTest extends BaseScreen {
 		 * @param focusables array of all widgets that will be participate in focus traversal
 		 */
 		public FocusableListener (Focusable owner, Array<Focusable> focusables) {
+			this.tag = ((Actor)owner).getName();
 			this.owner = owner;
 			this.focusables = focusables;
 			if (!focusables.contains(owner, true)) {
@@ -154,6 +216,7 @@ public class UIInputTest extends BaseScreen {
 
 		@Override public boolean keyUp (InputEvent event, int keycode) {
 			if (keycode == Input.Keys.TAB) {
+				PLog.log("Next focus from '" + tag + "'");
 				int index = focusables.indexOf(owner, true);
 				if (index == -1) return false;
 				Stage stage = event.getStage();
@@ -169,6 +232,7 @@ public class UIInputTest extends BaseScreen {
 				stage.setKeyboardFocus((Actor)target);
 				return true;
 			} else if (keycode == Input.Keys.ENTER || keycode == Input.Keys.SPACE) {
+				PLog.log("Prev focus from '" + tag + "'");
 				// if we have focus and enter/space is pressed, do type specific action
 				if (owner instanceof Button) {
 					// got to use checked, also handles checkbox
