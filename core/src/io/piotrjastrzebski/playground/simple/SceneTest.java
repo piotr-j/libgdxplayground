@@ -1,9 +1,11 @@
 package io.piotrjastrzebski.playground.simple;
 
 import com.badlogic.gdx.*;
-import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
-import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
-import com.badlogic.gdx.graphics.*;
+import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
+import com.badlogic.gdx.graphics.Camera;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
@@ -15,9 +17,9 @@ import com.badlogic.gdx.scenes.scene2d.ui.Value;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.utils.Scaling;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
-import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.kotcrab.vis.ui.VisUI;
+import io.piotrjastrzebski.playground.PlaygroundGame;
 
 /**
  * Self contained test for proper touch/mouse handling
@@ -180,10 +182,8 @@ public class SceneTest extends ApplicationAdapter implements InputProcessor {
 
 
 	public static void main (String[] arg) {
-		LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
-		config.width = 720 * 3 / 4;
-		config.height = 1280* 3 / 4;
-		config.useHDPI = true;
-		new LwjglApplication(new SceneTest(), config);
+		Lwjgl3ApplicationConfiguration config = PlaygroundGame.config();
+		config.setWindowedMode(1280/2, 720/2);
+		PlaygroundGame.start(new SceneTest(), config);
 	}
 }

@@ -2,7 +2,7 @@ package io.piotrjastrzebski.playground.simple;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
+import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Rectangle;
@@ -10,7 +10,6 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.IntMap;
 import com.badlogic.gdx.utils.Pool;
-import com.badlogic.gdx.utils.Pools;
 import io.piotrjastrzebski.playground.BaseScreen;
 import io.piotrjastrzebski.playground.GameReset;
 import io.piotrjastrzebski.playground.PlaygroundGame;
@@ -277,9 +276,8 @@ public class TokensTest extends BaseScreen {
 
 	// allow us to start this test directly
 	public static void main (String[] args) {
-		LwjglApplicationConfiguration config = PlaygroundGame.config();
-		config.width = 720/2;
-		config.height = 1280/2;
+		Lwjgl3ApplicationConfiguration config = PlaygroundGame.config();
+		config.setWindowedMode(1280/2, 720/2);
 		PlaygroundGame.start(args, config, TokensTest.class);
 	}
 }

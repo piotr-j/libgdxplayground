@@ -1,7 +1,7 @@
 package io.piotrjastrzebski.playground.simple;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
+import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -134,12 +134,8 @@ public class MinkowskyiDistanceTest extends BaseScreen {
 
 	// allow us to start this test directly
 	public static void main (String[] args) {
-		LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
-		config.width = 1280;
-		config.height = 720;
-		config.useHDPI = true;
-		config.samples = 4;
-
+		Lwjgl3ApplicationConfiguration config = PlaygroundGame.config();
+		config.setBackBufferConfig(8, 8, 8, 8, 8, 8, 4);
 		PlaygroundGame.start(args, MinkowskyiDistanceTest.class);
 	}
 }

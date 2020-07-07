@@ -3,13 +3,15 @@ package io.piotrjastrzebski.playground.uitesting;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputProcessor;
-import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
+import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.math.*;
+import com.badlogic.gdx.math.Bezier;
+import com.badlogic.gdx.math.Interpolation;
+import com.badlogic.gdx.math.Path;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
@@ -253,9 +255,8 @@ public class UIStacks7Test extends BaseScreen {
 	}
 
 	public static void main (String[] args) {
-		LwjglApplicationConfiguration config = PlaygroundGame.config();
-		config.width *= .5f;
-		config.height *= .5f;
+		Lwjgl3ApplicationConfiguration config = PlaygroundGame.config();
+		config.setWindowedMode(1280/2, 720/2);
 		PlaygroundGame.start(args, config, UIStacks7Test.class);
 	}
 

@@ -2,7 +2,7 @@ package io.piotrjastrzebski.playground.uitesting;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
+import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
@@ -24,7 +24,6 @@ import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
 import com.kotcrab.vis.ui.VisUI;
-import com.kotcrab.vis.ui.widget.VisLabel;
 import com.kotcrab.vis.ui.widget.VisTextButton;
 import com.kotcrab.vis.ui.widget.VisWindow;
 import io.piotrjastrzebski.playground.BaseScreen;
@@ -373,9 +372,8 @@ public class UIEdit2Test extends BaseScreen {
 	}
 
 	public static void main (String[] args) {
-		LwjglApplicationConfiguration config = PlaygroundGame.config();
-		config.width /= 2;
-		config.height /= 2;
+		Lwjgl3ApplicationConfiguration config = PlaygroundGame.config();
+		config.setWindowedMode(1280/2, 720/2);
 		PlaygroundGame.start(args, config, UIEdit2Test.class);
 	}
 }

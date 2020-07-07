@@ -2,8 +2,6 @@ package io.piotrjastrzebski.playground.simple;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.MathUtils;
@@ -231,8 +229,6 @@ public class Lightning2Test extends BaseScreen {
 
 	// allow us to start this test directly
 	public static void main (String[] args) {
-		LwjglApplicationConfiguration config = PlaygroundGame.config();
-//		config.samples = 8;
-		PlaygroundGame.start(args, config, Lightning2Test.class);
+		PlaygroundGame.start(args, Lightning2Test.class);
 	}
 }

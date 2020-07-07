@@ -1,7 +1,7 @@
 package io.piotrjastrzebski.playground.simple;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
+import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
@@ -236,9 +236,9 @@ public class ParseTest extends BaseScreen {
 
     // allow us to start this test directly
     public static void main (String[] args) {
-        LwjglApplicationConfiguration config = PlaygroundGame.config();
-        config.width = 720/2;
-        config.height = 1280/2;
+
+        Lwjgl3ApplicationConfiguration config = PlaygroundGame.config();
+        config.setWindowedMode(720/2, 1280/2);
         PlaygroundGame.start(args, config, ParseTest.class);
     }
 }

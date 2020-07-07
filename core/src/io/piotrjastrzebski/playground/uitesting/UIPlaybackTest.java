@@ -2,7 +2,7 @@ package io.piotrjastrzebski.playground.uitesting;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
+import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
@@ -393,9 +393,8 @@ public class UIPlaybackTest extends BaseScreen {
 	}
 
 	public static void main (String[] args) {
-		LwjglApplicationConfiguration config = PlaygroundGame.config();
-		config.width *= .5f;
-		config.height *= .5f;
+		Lwjgl3ApplicationConfiguration config = PlaygroundGame.config();
+		config.setWindowedMode(1280/2, 720/2);
 		PlaygroundGame.start(args, config, UIPlaybackTest.class);
 	}
 

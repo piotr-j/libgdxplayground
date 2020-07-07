@@ -1,8 +1,7 @@
 package io.piotrjastrzebski.playground.simple;
 
 import com.badlogic.gdx.*;
-import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
-import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
+import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
@@ -13,18 +12,16 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
-import com.badlogic.gdx.scenes.scene2d.ui.Value;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.utils.Scaling;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.kotcrab.vis.ui.VisUI;
 import com.kotcrab.vis.ui.widget.VisImage;
-import com.kotcrab.vis.ui.widget.VisTextButton;
 import com.kotcrab.vis.ui.widget.VisWindow;
+import io.piotrjastrzebski.playground.PlaygroundGame;
 
 import static com.badlogic.gdx.scenes.scene2d.ui.Value.percentHeight;
-import static com.badlogic.gdx.scenes.scene2d.ui.Value.percentWidth;
 
 /**
  * Self contained test for testing scene2d adaptation for different resolutions and orientations
@@ -259,10 +256,8 @@ public class GUIAdaptTest extends ApplicationAdapter implements InputProcessor {
 
 
 	public static void main (String[] arg) {
-		LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
-		config.width = 1280 * 3 / 4;
-		config.height = 720 * 3 / 4;
-		config.useHDPI = true;
-		new LwjglApplication(new GUIAdaptTest(), config);
+		Lwjgl3ApplicationConfiguration config = PlaygroundGame.config();
+		config.setWindowedMode(1280 * 3 / 4, 720 * 3 / 4);
+		PlaygroundGame.start(new GUIAdaptTest(), config);
 	}
 }

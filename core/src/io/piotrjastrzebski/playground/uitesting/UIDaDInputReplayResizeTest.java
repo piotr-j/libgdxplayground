@@ -3,7 +3,7 @@ package io.piotrjastrzebski.playground.uitesting;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputProcessor;
-import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
+import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -541,9 +541,8 @@ public class UIDaDInputReplayResizeTest extends BaseScreen {
 	}
 
 	public static void main (String[] args) {
-		LwjglApplicationConfiguration config = PlaygroundGame.config();
-		config.width /= 2;
-		config.height /= 2;
+		Lwjgl3ApplicationConfiguration config = PlaygroundGame.config();
+		config.setWindowedMode(1280/2, 720/2);
 		PlaygroundGame.start(args, config, UIDaDInputReplayResizeTest.class);
 	}
 }

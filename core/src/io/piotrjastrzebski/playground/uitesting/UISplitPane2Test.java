@@ -1,8 +1,8 @@
 package io.piotrjastrzebski.playground.uitesting;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.scenes.scene2d.ui.SplitPane;
 import com.kotcrab.vis.ui.widget.VisLabel;
-import com.kotcrab.vis.ui.widget.VisSplitPane;
 import com.kotcrab.vis.ui.widget.VisTable;
 import io.piotrjastrzebski.playground.BaseScreen;
 import io.piotrjastrzebski.playground.GameReset;
@@ -11,8 +11,8 @@ import io.piotrjastrzebski.playground.PlaygroundGame;
 /**
  * Created by PiotrJ on 20/06/15.
  */
-public class UISplitPaneTest extends BaseScreen {
-	public UISplitPaneTest (GameReset game) {
+public class UISplitPane2Test extends BaseScreen {
+	public UISplitPane2Test (GameReset game) {
 		super(game);
 		clear.set(Color.GRAY);
 //		stage.setDebugAll(true);
@@ -37,7 +37,7 @@ public class UISplitPaneTest extends BaseScreen {
 		tableB.add(new VisLabel("LabelB3")).row();
 
 
-		VisSplitPane splitPaneAB = new VisSplitPane(tableA, tableB, false);
+		SplitPane splitPaneAB = new SplitPane(tableA, tableB, false, skin);
 		splitPaneAB.setMinSplitAmount(.1f);
 
 		VisTable tableC = new VisTable();
@@ -53,17 +53,16 @@ public class UISplitPaneTest extends BaseScreen {
 		tableD.add(new VisLabel("LabelC3")).row();
 
 
-		VisSplitPane splitPaneCD = new VisSplitPane(tableC, tableD, false);
+		SplitPane splitPaneCD = new SplitPane(tableC, tableD, false, skin);
 		splitPaneCD.setMinSplitAmount(.1f);
 
-		VisSplitPane splitPaneABCD = new VisSplitPane(splitPaneAB, splitPaneCD, false);
+		SplitPane splitPaneABCD = new SplitPane(splitPaneAB, splitPaneCD, false, skin);
 		splitPaneABCD.setMinSplitAmount(.1f);
 //		splitPaneABC.setSplitAmount(0.66f);
 
-		VisSplitPane splitPaneV = new VisSplitPane(splitPaneABCD, tableY, true);
+		SplitPane splitPaneV = new SplitPane(splitPaneABCD, tableY, true, skin);
 		splitPaneV.setSplitAmount(.8f);
 		splitPaneV.setMinSplitAmount(.1f);
-
 
 
 		root.add(splitPaneV).grow();
@@ -77,6 +76,6 @@ public class UISplitPaneTest extends BaseScreen {
 	}
 
 	public static void main (String[] args) {
-		PlaygroundGame.start(args, UISplitPaneTest.class);
+		PlaygroundGame.start(args, UISplitPane2Test.class);
 	}
 }

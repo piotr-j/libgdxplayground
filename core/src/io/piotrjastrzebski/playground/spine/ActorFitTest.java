@@ -1,22 +1,16 @@
 package io.piotrjastrzebski.playground.spine;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
-import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.PolygonSpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
-import com.badlogic.gdx.math.Intersector;
-import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.Container;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.Scaling;
 import com.esotericsoftware.spine.*;
-import com.esotericsoftware.spine.attachments.Attachment;
 import com.esotericsoftware.spine.attachments.BoundingBoxAttachment;
 import com.esotericsoftware.spine.utils.SkeletonActor;
 import com.kotcrab.vis.ui.widget.VisWindow;
@@ -195,9 +189,8 @@ public class ActorFitTest extends BaseScreen {
 
     // allow us to start this test directly
     public static void main (String[] args) {
-        LwjglApplicationConfiguration config = PlaygroundGame.config();
-        config.width /= 2;
-        config.height /= 2;
+        Lwjgl3ApplicationConfiguration config = PlaygroundGame.config();
+        config.setWindowedMode(1280/2, 720/2);
         PlaygroundGame.start(args, config, ActorFitTest.class);
     }
 }

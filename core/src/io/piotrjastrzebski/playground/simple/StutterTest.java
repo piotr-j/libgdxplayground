@@ -4,8 +4,7 @@ import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputProcessor;
-import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
-import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
+import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -15,6 +14,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
+import io.piotrjastrzebski.playground.PlaygroundGame;
 
 import java.util.Iterator;
 
@@ -237,16 +237,7 @@ public class StutterTest extends ApplicationAdapter implements InputProcessor {
 	}
 
 	public static void main (String[] args) {
-		LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
-		if (true) {
-			config.width = 1920;
-			config.height = 1200;
-			config.fullscreen = true;
-		} else {
-			config.width = 1280 * 3 / 4;
-			config.height = 720 * 3 / 4;
-		}
-		config.useHDPI = true;
-		new LwjglApplication(new StutterTest(), config);
+		Lwjgl3ApplicationConfiguration config = PlaygroundGame.config();
+		PlaygroundGame.start(new StutterTest(), config);
 	}
 }

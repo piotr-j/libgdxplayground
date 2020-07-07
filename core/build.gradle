@@ -9,12 +9,12 @@ sourceSets.main.java.srcDirs = [ "src/" ]
 sourceSets.test.java.srcDirs = [ "test/" ]
 
 weave {
+    classesDir = sourceSets.main.java.outputDir
+    dependsOn build
     enableArtemisPlugin = true
-    enablePackedWeaving = true
     enablePooledWeaving = true
-    ideFriendlyPacking = true
+    generateLinkMutators = true
     optimizeEntitySystems = true
-    classesDir = sourceSets.main.output.classesDir
 }
 
 classes.finalizedBy weave

@@ -1,6 +1,6 @@
 package io.piotrjastrzebski.playground.simple;
 
-import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
+import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ImmediateModeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
@@ -81,8 +81,8 @@ public class ArcTest extends BaseScreen {
 
 	// allow us to start this test directly
 	public static void main (String[] args) {
-		LwjglApplicationConfiguration config = PlaygroundGame.config();
-		config.samples = 4;
+		Lwjgl3ApplicationConfiguration config = PlaygroundGame.config();
+		config.setBackBufferConfig(8, 8, 8, 8, 8, 8, 4);
 		PlaygroundGame.start(args, config, ArcTest.class);
 	}
 }

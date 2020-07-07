@@ -4,13 +4,12 @@ import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputProcessor;
-import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
-import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
+import io.piotrjastrzebski.playground.PlaygroundGame;
 
 /**
  * Self contained test for proper touch/mouse handling
@@ -103,10 +102,6 @@ public class SimplerTouchTest extends ApplicationAdapter implements InputProcess
 	}
 
 	public static void main (String[] arg) {
-		LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
-		config.width = 1280;
-		config.height = 720;
-		config.useHDPI = true;
-		new LwjglApplication(new SimplerTouchTest(), config);
+		PlaygroundGame.start(new SimplerTouchTest());
 	}
 }

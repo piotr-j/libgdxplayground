@@ -2,7 +2,6 @@ package io.piotrjastrzebski.playground.uitesting;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -550,9 +549,6 @@ public class UIShaderTest extends BaseScreen {
 	}
 
 	public static void main (String[] args) {
-		LwjglApplicationConfiguration config = PlaygroundGame.config();
-//		config.width /= 2;
-//		config.height /= 2;
-		PlaygroundGame.start(args, config, UIShaderTest.class);
+		PlaygroundGame.start(args, UIShaderTest.class);
 	}
 }

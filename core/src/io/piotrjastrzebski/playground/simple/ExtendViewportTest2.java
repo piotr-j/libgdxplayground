@@ -1,7 +1,7 @@
 package io.piotrjastrzebski.playground.simple;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
+import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -79,9 +79,8 @@ public class ExtendViewportTest2 extends BaseScreen {
 
 	// allow us to start this test directly
 	public static void main (String[] args) {
-		LwjglApplicationConfiguration config = PlaygroundGame.config();
-		config.width = 720/2 + 40;
-		config.height = 1280/2;
+		Lwjgl3ApplicationConfiguration config = PlaygroundGame.config();
+		config.setWindowedMode(720/2 + 40, 1280/2);
 		PlaygroundGame.start(args, config, ExtendViewportTest2.class);
 	}
 }

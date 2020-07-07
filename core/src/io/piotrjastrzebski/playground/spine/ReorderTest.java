@@ -1,7 +1,7 @@
 package io.piotrjastrzebski.playground.spine;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
+import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import com.badlogic.gdx.graphics.g2d.PolygonSpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.math.Vector2;
@@ -177,9 +177,8 @@ public class ReorderTest extends BaseScreen {
 
     // allow us to start this test directly
 	public static void main (String[] args) {
-		LwjglApplicationConfiguration config = PlaygroundGame.config();
-		config.width /= 2;
-		config.height /= 2;
+        Lwjgl3ApplicationConfiguration config = PlaygroundGame.config();
+        config.setWindowedMode(1280/2, 720/2);
 		PlaygroundGame.start(args, config, ReorderTest.class);
 	}
 }

@@ -1,19 +1,20 @@
 package io.piotrjastrzebski.playground.dungeon;
 
-import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
-import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.math.*;
+import com.badlogic.gdx.math.DelaunayTriangulator;
+import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ShortArray;
 import io.piotrjastrzebski.playground.BaseScreen;
 import io.piotrjastrzebski.playground.GameReset;
+import io.piotrjastrzebski.playground.PlaygroundGame;
 
 import java.util.Comparator;
 
@@ -443,16 +444,8 @@ public class DungeonGeneratorTest extends BaseScreen {
 		return super.keyDown(keycode);
 	}
 
-	public static void main (String[] arg) {
-		LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
-		config.width = 1280;
-		config.height = 720;
-		config.useHDPI = true;
-		new LwjglApplication(new Game() {
-			@Override public void create () {
-				setScreen(new DungeonGeneratorTest(new Reset()));
-			}
-		}, config);
+	public static void main (String[] args) {
+		PlaygroundGame.start(args, DungeonGeneratorTest.class);
 	}
 
 	public static class Reset implements GameReset {

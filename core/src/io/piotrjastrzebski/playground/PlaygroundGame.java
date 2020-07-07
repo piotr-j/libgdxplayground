@@ -4,9 +4,10 @@ import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
-import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
+import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
+import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.glutils.HdpiMode;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
@@ -14,7 +15,6 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ObjectMap;
 import com.badlogic.gdx.utils.reflect.ClassReflection;
-import com.badlogic.gdx.utils.reflect.ReflectionException;
 import com.kotcrab.vis.ui.VisUI;
 import com.kotcrab.vis.ui.widget.*;
 import io.piotrjastrzebski.playground.asyncscreentest.AsyncScreenTest;
@@ -30,9 +30,9 @@ import io.piotrjastrzebski.playground.clientserverv2.CSTestV2;
 import io.piotrjastrzebski.playground.dungeon.DungeonGeneratorTest;
 import io.piotrjastrzebski.playground.ecs.AshleyPhysicsTest;
 import io.piotrjastrzebski.playground.ecs.ECSOrderTest;
+import io.piotrjastrzebski.playground.ecs.ECSPooledCompTest;
 import io.piotrjastrzebski.playground.ecs.aijobs.ECSAIJobsTest;
 import io.piotrjastrzebski.playground.ecs.aitest.AIECSTest;
-import io.piotrjastrzebski.playground.ecs.ECSPooledCompTest;
 import io.piotrjastrzebski.playground.ecs.assettest.ECSAssetTest;
 import io.piotrjastrzebski.playground.ecs.deferredsystemtest.DeferredSystemTest;
 import io.piotrjastrzebski.playground.ecs.entityedittest.EntityEditTest;
@@ -142,8 +142,8 @@ public class PlaygroundGame extends Game implements GameReset {
 		ObjectMap<VisTextButton, ClickListener> clickers = new ObjectMap<>();
 		public TestSelectScreen (PlaygroundGame game) {
 			super(game);
-			root.add(new VisLabel("Select test to run, ESC to go back"));
-			root.row();
+			root.add(new VisLabel("Select test to run, ESC to go back while in test screen")).row();
+			root.add(new VisLabel("Not all tests are available in here, often the can be started directly from the ide")).row();
 			final VisTextField filter = new VisTextField("");
 			filter.addListener(new ChangeListener() {
 				 @Override public void changed (ChangeEvent event, Actor actor) {
@@ -154,11 +154,7 @@ public class PlaygroundGame extends Game implements GameReset {
 			root.row();
 
 			data = new VisTable();
-			Arrays.sort(testScreens, new Comparator<Class>() {
-				@Override public int compare (Class o1, Class o2) {
-					return o1.getSimpleName().compareTo(o2.getSimpleName());
-				}
-			});
+			Arrays.sort(testScreens, Comparator.comparing(Class::getSimpleName));
 			for (final Class cls : testScreens) {
 				final VisTextButton button;
 				button = new VisTextButton(cls.getSimpleName());
@@ -219,12 +215,11 @@ public class PlaygroundGame extends Game implements GameReset {
 		VisUI.dispose();
 	}
 
-	public static LwjglApplicationConfiguration config () {
-		LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
-		config.width = 1280;
-		config.height = 720;
-		config.useHDPI = true;
-		config.stencil = 8;
+	public static Lwjgl3ApplicationConfiguration config () {
+		Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
+		config.setWindowedMode(1280, 720);
+		config.setBackBufferConfig(8, 8, 8, 8, 8, 8, 0);
+		config.setHdpiMode(HdpiMode.Logical);
 		return config;
 	}
 
@@ -232,15 +227,15 @@ public class PlaygroundGame extends Game implements GameReset {
 		start(args, config(), target);
 	}
 
-	public static void start (String[] args, LwjglApplicationConfiguration config, Class<? extends BaseScreen> target) {
-		new LwjglApplication(new PlaygroundGame(new DesktopBridge(), target), config);
+	public static void start (String[] args, Lwjgl3ApplicationConfiguration config, Class<? extends BaseScreen> target) {
+		new Lwjgl3Application(new PlaygroundGame(new DesktopBridge(), target), config);
 	}
 
-	public static void start (ApplicationListener listener, LwjglApplicationConfiguration config) {
-		new LwjglApplication(listener, config);
+	public static void start (ApplicationListener listener, Lwjgl3ApplicationConfiguration config) {
+		new Lwjgl3Application(listener, config);
 	}
 
 	public static void start (ApplicationListener listener) {
-		new LwjglApplication(listener, config());
+		new Lwjgl3Application(listener, config());
 	}
 }

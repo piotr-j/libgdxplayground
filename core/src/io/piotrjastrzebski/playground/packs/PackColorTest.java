@@ -4,9 +4,6 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.TextureData;
-import com.badlogic.gdx.graphics.g2d.TextureAtlas;
-import com.badlogic.gdx.tools.texturepacker.TexturePacker;
 import io.piotrjastrzebski.playground.BaseScreen;
 import io.piotrjastrzebski.playground.GameReset;
 import io.piotrjastrzebski.playground.PlaygroundGame;
@@ -19,6 +16,8 @@ public class PackColorTest extends BaseScreen {
 		super(game);
 		clear.set(Color.PINK);
 
+		// this requires tools dependency that conflicts with lwjgl3 backend, so its commented out
+		/*
 		TexturePacker.Settings settings = new TexturePacker.Settings();
 		String in = Gdx.files.internal("pack_in").file().getAbsolutePath();
 		String out = Gdx.files.internal("pack_out").file().getAbsolutePath();
@@ -36,6 +35,7 @@ public class PackColorTest extends BaseScreen {
 		dst.drawPixmap(rawDst, 0, 0, colors.getRegionX(), colors.getRegionY(), colors.getRegionWidth(), colors.getRegionHeight());
 		compare(src, dst);
 		atlas.dispose();
+		 */
 	}
 
 	private void compare (Pixmap src, Pixmap dst) {
@@ -57,6 +57,7 @@ public class PackColorTest extends BaseScreen {
 
 	@Override public void render (float delta) {
 		super.render(delta);
+		if (src == null) return;
 		Texture srcTexture = new Texture(src);
 		Texture dstTexture = new Texture(dst);
 		batch.setProjectionMatrix(guiCamera.combined);

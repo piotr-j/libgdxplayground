@@ -2,21 +2,15 @@ package io.piotrjastrzebski.playground.simple;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
+import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import com.badlogic.gdx.graphics.*;
-import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.scenes.scene2d.ui.Image;
-import com.badlogic.gdx.scenes.scene2d.utils.SpriteDrawable;
-import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
-import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import com.badlogic.gdx.utils.TimeUtils;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import io.piotrjastrzebski.playground.BaseScreen;
 import io.piotrjastrzebski.playground.GameReset;
@@ -261,12 +255,12 @@ public class FTSTest extends BaseScreen {
 		return false;
 	}
 	public static void main (String[] args) {
-		LwjglApplicationConfiguration config = PlaygroundGame.config();
+		Lwjgl3ApplicationConfiguration config = PlaygroundGame.config();
 //		config.vSyncEnabled = false;
 		if (false) {
-			config.width = 1980;
-			config.height = 1200;
-			config.fullscreen = true;
+//			config.width = 1980;
+//			config.height = 1200;
+//			config.fullscreen = true;
 		}
 		PlaygroundGame.start(args, config, FTSTest.class);
 	}

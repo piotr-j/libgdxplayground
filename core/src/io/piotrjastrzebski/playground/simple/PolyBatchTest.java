@@ -1,12 +1,13 @@
 package io.piotrjastrzebski.playground.simple;
 
 import com.badlogic.gdx.ApplicationAdapter;
-import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
-import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
-import com.badlogic.gdx.graphics.*;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Pixmap;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.PolygonRegion;
 import com.badlogic.gdx.graphics.g2d.PolygonSpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import io.piotrjastrzebski.playground.PlaygroundGame;
 
 /**
  * Self contained test for proper touch/mouse handling
@@ -34,7 +35,6 @@ public class PolyBatchTest extends ApplicationAdapter {
 	}
 
 	public static void main (String[] arg) {
-		LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
-		new LwjglApplication(new PolyBatchTest(), config);
+		PlaygroundGame.start(new PolyBatchTest());
 	}
 }

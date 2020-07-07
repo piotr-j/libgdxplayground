@@ -2,7 +2,6 @@ package io.piotrjastrzebski.playground.simple;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -12,6 +11,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
+import io.piotrjastrzebski.playground.PlaygroundGame;
 
 public class ParticleEffectAtlasBug extends ApplicationAdapter {
 	public final static float SCALE = 128f;
@@ -68,6 +68,6 @@ public class ParticleEffectAtlasBug extends ApplicationAdapter {
 	}
 
 	public static void main (String[] arg) {
-		new LwjglApplication(new ParticleEffectAtlasBug());
+		PlaygroundGame.start(new ParticleEffectAtlasBug());
 	}
 }

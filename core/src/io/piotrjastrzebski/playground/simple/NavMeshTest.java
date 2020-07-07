@@ -2,21 +2,16 @@ package io.piotrjastrzebski.playground.simple;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
+import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.math.DelaunayTriangulator;
-import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.FloatArray;
-import com.badlogic.gdx.utils.ShortArray;
 import io.piotrjastrzebski.playground.BaseScreen;
 import io.piotrjastrzebski.playground.GameReset;
 import io.piotrjastrzebski.playground.PlaygroundGame;
 import io.piotrjastrzebski.playground.poly2tri.CDT;
-import io.piotrjastrzebski.playground.poly2tri.Poly2Tri;
 import io.piotrjastrzebski.playground.poly2tri.Shapes;
 import io.piotrjastrzebski.playground.poly2tri.Shapes.Triangle;
 
@@ -110,13 +105,8 @@ public class NavMeshTest extends BaseScreen {
 
 	// allow us to start this test directly
 	public static void main (String[] args) {
-		LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
-		config.width = 1280;
-		config.height = 720;
-		config.useHDPI = true;
-		config.stencil = 8;
-		// for mesh based sub pixel rendering multi sampling is required or post process aa
-		config.samples = 4;
+		Lwjgl3ApplicationConfiguration config = PlaygroundGame.config();
+		config.setBackBufferConfig(8, 8, 8, 8, 8, 8, 4);
 		PlaygroundGame.start(args, config, NavMeshTest.class);
 	}
 }

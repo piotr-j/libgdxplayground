@@ -2,14 +2,13 @@ package io.piotrjastrzebski.playground.simple;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
-import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import io.piotrjastrzebski.playground.PlaygroundGame;
 
 public class LinesTest extends ApplicationAdapter {
 	ScreenViewport viewport;
@@ -45,9 +44,6 @@ public class LinesTest extends ApplicationAdapter {
 	}
 
 	public static void main (String[] arg) {
-		LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
-		config.width = 1280;
-		config.height = 720;
-		new LwjglApplication(new LinesTest(), config);
+		PlaygroundGame.start(new LinesTest());
 	}
 }

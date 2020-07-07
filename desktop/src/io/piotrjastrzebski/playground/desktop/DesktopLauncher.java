@@ -1,10 +1,10 @@
 package io.piotrjastrzebski.playground.desktop;
 
-import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
-import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
+import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
+import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
+import com.badlogic.gdx.graphics.glutils.HdpiMode;
 import io.piotrjastrzebski.playground.PlatformBridge;
 import io.piotrjastrzebski.playground.PlaygroundGame;
-import org.lwjgl.opengl.Display;
 
 public class DesktopLauncher {
 	public static void main (String[] arg) {
@@ -18,18 +18,19 @@ public class DesktopLauncher {
 //			}
 //		});
 
-		LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
-		config.width = 1280;
-		config.height = 720;
-		config.useHDPI = true;
-		config.stencil = 8;
-		new LwjglApplication(new PlaygroundGame(new DesktopBridge()), config);
+		Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
+		config.setWindowedMode(1280, 720);
+		config.setBackBufferConfig(8, 8, 8, 8, 8, 8, 0);
+		config.setHdpiMode(HdpiMode.Logical);
+		new Lwjgl3Application(new PlaygroundGame(new DesktopBridge()), config);
 	}
 
 	private static class DesktopBridge implements PlatformBridge {
 
 		@Override public float getPixelScaleFactor () {
-			return Display.getPixelScaleFactor();
+			// cba to find replacement right now
+//			return org.lwjgl.opengl.Display.getPixelScaleFactor();
+			return 1.0f;
 		}
 	}
 }

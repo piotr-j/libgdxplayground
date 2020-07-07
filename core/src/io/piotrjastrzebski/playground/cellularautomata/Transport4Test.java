@@ -2,7 +2,7 @@ package io.piotrjastrzebski.playground.cellularautomata;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
+import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
@@ -635,13 +635,8 @@ public class Transport4Test extends BaseScreen {
 	}
 
 	public static void main (String[] args) {
-		LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
-		config.width = 1280;
-		config.height = 720;
-		config.useHDPI = true;
-		config.stencil = 8;
-		// for mesh based sub pixel rendering multi sampling is required or post process aa
-		config.samples = 4;
+		Lwjgl3ApplicationConfiguration config = PlaygroundGame.config();
+		config.setBackBufferConfig(8, 8, 8, 8, 8, 8, 4);
 		PlaygroundGame.start(args, config, Transport4Test.class);
 	}
 }

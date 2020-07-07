@@ -2,7 +2,6 @@ package io.piotrjastrzebski.playground.simple;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Pixmap;
@@ -178,9 +177,6 @@ public class LineTest extends BaseScreen {
 
     // allow us to start this test directly
     public static void main (String[] args) {
-        LwjglApplicationConfiguration config = PlaygroundGame.config();
-        // cleans stuff up nicely
-//        config.samples = 16;
-        PlaygroundGame.start(args, config, LineTest.class);
+        PlaygroundGame.start(args, LineTest.class);
     }
 }
