@@ -17,18 +17,19 @@ allprojects {
     version = '1.0'
     ext {
         appName = 'playground'
-        gdxVersion = '1.9.10'
+        gdxVersion = '1.9.11'
         roboVMVersion = '1.2.0'
         box2DLightsVersion = '1.5'
         ashleyVersion = '1.7.3'
         aiVersion = '1.8.2'
-        visuiVersion = '1.4.4'
+        visuiVersion = '1.4.6'
         artemisOdbVersion = "2.2.0"
         artemisOdbcontribVersion = "2.4.0"
         gdxVideoVersion = "0.0.1"
         kryoVersion = "4.0.2"
         gdxUtilsVersion = "0.13.4"
         spineVersion = "3.6.34.0"
+        shapeDrawerVersion = "2.3.0"
     }
 
     repositories {
@@ -80,7 +81,7 @@ project(":core") {
 
         compile fileTree(dir: '../libs', include: '*.jar')
 
-        compile "com.badlogicgames.ashley:ashley:1.7.3"
+        compile "com.badlogicgames.ashley:ashley:$ashleyVersion"
 
         compile "com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdxVersion"
         compile "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
@@ -93,6 +94,8 @@ project(":core") {
 
         compile "net.dermetfan.libgdx-utils:libgdx-utils-box2d:$gdxUtilsVersion"
         compile "net.dermetfan.libgdx-utils:libgdx-utils:$gdxUtilsVersion"
+
+        compile "space.earlygrey:shapedrawer:$shapeDrawerVersion"
     }
 }
 

@@ -4,7 +4,9 @@ import com.badlogic.gdx.*;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
@@ -13,7 +15,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
-import com.kotcrab.vis.ui.VisUI;
+import space.earlygrey.shapedrawer.ShapeDrawer;
 
 /**
  * Created by EvilEntity on 07/06/2015.
@@ -32,6 +34,7 @@ public abstract class BaseScreen implements Screen, InputProcessor {
 
 	protected SpriteBatch batch;
 	protected ShapeRenderer renderer;
+	protected ShapeDrawer shapes;
 
 	protected Stage stage;
 	protected Table root;
@@ -51,6 +54,7 @@ public abstract class BaseScreen implements Screen, InputProcessor {
 
 		batch = new SpriteBatch();
 		renderer = new ShapeRenderer();
+		shapes = new ShapeDrawer(batch, new TextureRegion(new Texture(Gdx.files.internal("white.png")), 1, 1, 1, 1));
 
 		skin = new Skin(Gdx.files.internal("gui/uiskin.json"));
 		stage = newStage();
@@ -108,6 +112,7 @@ public abstract class BaseScreen implements Screen, InputProcessor {
 		renderer.dispose();
 		stage.dispose();
 		skin.dispose();
+		shapes.getRegion().getTexture().dispose();
 	}
 
 	@Override public boolean keyDown (int keycode) {
