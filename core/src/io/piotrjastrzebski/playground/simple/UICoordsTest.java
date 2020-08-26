@@ -10,12 +10,12 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.HdpiUtils;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.badlogic.gdx.scenes.scene2d.InputEvent;
-import com.badlogic.gdx.scenes.scene2d.InputListener;
-import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.*;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
+import com.kotcrab.vis.ui.VisUI;
+import com.kotcrab.vis.ui.widget.VisScrollPane;
 import io.piotrjastrzebski.playground.PLog;
 import io.piotrjastrzebski.playground.PlaygroundGame;
 
@@ -24,7 +24,7 @@ import io.piotrjastrzebski.playground.PlaygroundGame;
  */
 public class UICoordsTest extends ApplicationAdapter implements InputProcessor {
 	private final static String TAG = UICoordsTest.class.getSimpleName();
-	public static float SCALE = 32f;
+	public static float SCALE = 2f;
 	public static float INV_SCALE = 1.f/ SCALE;
 	public static float WIDTH = 1280 * INV_SCALE;
 	public static float HEIGHT = 720 * INV_SCALE;
@@ -51,37 +51,59 @@ public class UICoordsTest extends ApplicationAdapter implements InputProcessor {
 		batch = new SpriteBatch();
 
 		stage = new Stage(gameVP, batch);
+//		stage = new Stage(new ScreenViewport(), batch);
 		Gdx.input.setInputProcessor(new InputMultiplexer(this, stage));
 
 		stage.addListener(new InputListener(){
 			@Override
 			public boolean touchDown (InputEvent event, float x, float y, int pointer, int button) {
 				PLog.log("Stage touch down x = " + x + ", y = " + y);
-				return true;
+				return false;
 			}
 		});
 
 		badlogic = new Texture("badlogic.jpg");
 
-		{ // bottom left
+		float size = badlogic.getWidth() * INV_SCALE;
+
+		Table root = new Table();
+		root.setFillParent(true);
+		stage.addActor(root);
+
+		Table scrolled = new Table();
+		scrolled.setTouchable(Touchable.childrenOnly);
+		{
 			Image image = new Image(badlogic);
-			image.setPosition(1, 1);
-			image.setScale(INV_SCALE);
-			stage.addActor(image);
-			image.addListener(new InputListener(){
-				@Override
-				public boolean touchDown (InputEvent event, float x, float y, int pointer, int button) {
-					PLog.log("Image touch down x = " + x + ", y = " + y);
-					return true;
-				}
-			});
+			image.addListener(new ImageListener());
+			scrolled.add(image).size(size).padRight(size * .5f);
+		}
+		{
+			Image image = new Image(badlogic);
+			image.addListener(new ImageListener());
+			scrolled.add(image).size(size).row();
+		}
+		scrolled.add().height(size * .5f).row();
+		{
+			Image image = new Image(badlogic);
+			image.addListener(new ImageListener());
+			scrolled.add(image).size(size).padRight(size * .5f);
+		}
+		{
+			Image image = new Image(badlogic);
+			image.addListener(new ImageListener());
+			scrolled.add(image).size(size);
 		}
 
-		float size = badlogic.getWidth() * INV_SCALE;
-		stage.addActor(image(1, 1, Color.WHITE));
-		stage.addActor(image(1, HEIGHT - 1 - size, Color.RED));
-		stage.addActor(image(WIDTH - 1 - size, 1, Color.GREEN));
-		stage.addActor(image(WIDTH - 1 - size, HEIGHT - 1 - size, Color.BLUE));
+		// vis just for easy style
+		VisUI.load();
+		VisScrollPane pane = new VisScrollPane(scrolled);
+		root.add(pane).size(size * 1.25f);
+
+		float offset = 25;
+		stage.addActor(image(offset, offset, Color.WHITE));
+		stage.addActor(image(offset, HEIGHT - offset - size, Color.RED));
+		stage.addActor(image(WIDTH - offset - size, offset, Color.GREEN));
+		stage.addActor(image(WIDTH - offset - size, HEIGHT - offset - size, Color.BLUE));
 	}
 
 	private Actor image (float ix, float iy, Color color) {
@@ -90,23 +112,25 @@ public class UICoordsTest extends ApplicationAdapter implements InputProcessor {
 		image.setScale(INV_SCALE);
 		image.setColor(color);
 		stage.addActor(image);
-		image.addListener(new InputListener(){
-			@Override
-			public boolean touchDown (InputEvent event, float x, float y, int pointer, int button) {
-				PLog.log("Image touch down x = " + x + ", y = " + y);
-
-				{
-					Vector2 sc = image.localToStageCoordinates(new Vector2(x, y));
-					PLog.log("Image touch down stage coordinates x = " + sc.x + ", y = " + sc.y);
-				}
-				{
-					Vector2 sc = image.localToScreenCoordinates(new Vector2(x, y));
-					PLog.log("Image touch down screen coordinates x = " + sc.x + ", y = " + sc.y);
-				}
-				return true;
-			}
-		});
+		image.addListener(new ImageListener());
 		return image;
+	}
+
+	static class ImageListener extends InputListener {
+		@Override
+		public boolean touchDown (InputEvent event, float x, float y, int pointer, int button) {
+			PLog.log("Image touch down x = " + x + ", y = " + y);
+
+			{
+				Vector2 sc = event.getTarget().localToStageCoordinates(new Vector2(x, y));
+				PLog.log("Image touch down stage coordinates x = " + sc.x + ", y = " + sc.y);
+			}
+			{
+				Vector2 sc = event.getTarget().localToScreenCoordinates(new Vector2(x, y));
+				PLog.log("Image touch down screen coordinates x = " + sc.x + ", y = " + sc.y);
+			}
+			return false;
+		}
 	}
 
 	@Override public void render () {
@@ -150,6 +174,7 @@ public class UICoordsTest extends ApplicationAdapter implements InputProcessor {
 	}
 
 	@Override public boolean touchDown (int screenX, int screenY, int pointer, int button) {
+		PLog.log("------- -------------- -------");
 		PLog.log("raw touchDown x = " + screenX + ", y = " + screenY);
 		return false;
 	}
