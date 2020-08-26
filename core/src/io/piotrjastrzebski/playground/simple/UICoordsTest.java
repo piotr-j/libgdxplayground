@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.glutils.HdpiUtils;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
@@ -111,9 +112,12 @@ public class UICoordsTest extends ApplicationAdapter implements InputProcessor {
 	@Override public void render () {
 		Gdx.gl.glClearColor(0.25f, 0.25f, 0.25f, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-
+		Gdx.gl.glEnable(GL20.GL_SCISSOR_TEST);
+		HdpiUtils.glScissor(0, 0, (int)(Gdx.graphics.getWidth() * .85f), (int)(Gdx.graphics.getHeight() * .75f));
 		stage.act(Gdx.graphics.getDeltaTime());
 		stage.draw();
+
+		Gdx.gl.glDisable(GL20.GL_SCISSOR_TEST);
 
 	}
 
