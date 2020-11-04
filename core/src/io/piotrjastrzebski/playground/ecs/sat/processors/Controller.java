@@ -2,15 +2,13 @@ package io.piotrjastrzebski.playground.ecs.sat.processors;
 
 import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
-import com.artemis.Entity;
 import com.artemis.annotations.Wire;
-import com.artemis.systems.EntityProcessingSystem;
 import com.artemis.systems.IteratingSystem;
+import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.Input.Keys;
 import io.piotrjastrzebski.playground.ecs.Input;
 import io.piotrjastrzebski.playground.ecs.sat.SATTest;
 import io.piotrjastrzebski.playground.ecs.sat.components.Circle;
@@ -145,7 +143,7 @@ public class Controller extends IteratingSystem implements Input, InputProcessor
 		return false;
 	}
 
-	@Override public boolean scrolled (int amount) {
+	@Override public boolean scrolled (float amountX, float amountY) {
 		return false;
 	}
 

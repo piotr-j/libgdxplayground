@@ -1,10 +1,8 @@
 package io.piotrjastrzebski.playground.splitscreen;
 
 import box2dLight.*;
-import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -17,7 +15,6 @@ import com.badlogic.gdx.physics.box2d.joints.MouseJointDef;
 import io.piotrjastrzebski.playground.BaseScreen;
 import io.piotrjastrzebski.playground.GameReset;
 import io.piotrjastrzebski.playground.PlaygroundGame;
-import io.piotrjastrzebski.playground.simple.CurveEdit2Test;
 
 import java.util.ArrayList;
 
@@ -576,9 +573,8 @@ public class SplitTest extends BaseScreen {
 		return false;
 	}
 
-	@Override
-	public boolean scrolled(int amount) {
-		camera1.rotate((float) amount * 3f, 0, 0, 1);
+	@Override public boolean scrolled (float amountX, float amountY) {
+		camera1.rotate((float) amountX * 3f, 0, 0, 1);
 		return false;
 	}
 

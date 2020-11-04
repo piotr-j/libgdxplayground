@@ -540,8 +540,8 @@ public class PackedTerrainTileGenTest extends BaseScreen {
 		return true;
 	}
 
-	@Override public boolean scrolled (int amount) {
-		gameCamera.zoom = MathUtils.clamp(gameCamera.zoom + gameCamera.zoom * amount * 0.1f, 0.1f, 3f);
+	@Override public boolean scrolled (float amountX, float amountY) {
+		gameCamera.zoom = MathUtils.clamp(gameCamera.zoom + gameCamera.zoom * amountX * 0.1f, 0.1f, 3f);
 		gameCamera.update();
 		return true;
 	}

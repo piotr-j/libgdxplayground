@@ -4,20 +4,18 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.maps.tiled.*;
+import com.badlogic.gdx.maps.tiled.AtlasTmxMapLoader;
+import com.badlogic.gdx.maps.tiled.TiledMap;
+import com.badlogic.gdx.maps.tiled.TiledMapTile;
+import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.renderers.BatchTiledMapRenderer;
-import com.badlogic.gdx.maps.tiled.renderers.IsometricStaggeredTiledMapRenderer;
-import com.badlogic.gdx.maps.tiled.renderers.IsometricTiledMapRenderer;
 import com.badlogic.gdx.math.*;
 import io.piotrjastrzebski.playground.BaseScreen;
 import io.piotrjastrzebski.playground.GameReset;
 import io.piotrjastrzebski.playground.PlaygroundGame;
 
 import static com.badlogic.gdx.graphics.g2d.Batch.*;
-import static com.badlogic.gdx.graphics.g2d.Batch.U2;
-import static com.badlogic.gdx.graphics.g2d.Batch.U3;
 
 /**
  * Created by EvilEntity on 07/06/2015.
@@ -119,8 +117,8 @@ public class IsoTest2 extends BaseScreen {
 		return true;
 	}
 
-	@Override public boolean scrolled (int amount) {
-		gameCamera.zoom = MathUtils.clamp(gameCamera.zoom + gameCamera.zoom * amount * 0.1f, 0.1f, 3f);
+	@Override public boolean scrolled (float amountX, float amountY) {
+		gameCamera.zoom = MathUtils.clamp(gameCamera.zoom + gameCamera.zoom * amountX * 0.1f, 0.1f, 3f);
 		gameCamera.update();
 		return true;
 	}

@@ -251,9 +251,10 @@ public class FTSTest extends BaseScreen {
 		return false;
 	}
 
-	@Override public boolean scrolled (int amount) {
+	@Override public boolean scrolled (float amountX, float amountY) {
 		return false;
 	}
+
 	public static void main (String[] args) {
 		Lwjgl3ApplicationConfiguration config = PlaygroundGame.config();
 //		config.vSyncEnabled = false;

@@ -45,8 +45,8 @@ public class DarkEchoTest extends BaseScreen {
 		gameCamera.update();
 	}
 
-	@Override public boolean scrolled (int amount) {
-		gameCamera.zoom = MathUtils.clamp(gameCamera.zoom + amount * 0.01f, 0.1f, 1f);
+	@Override public boolean scrolled (float amountX, float amountY) {
+		gameCamera.zoom = MathUtils.clamp(gameCamera.zoom + amountX * 0.01f, 0.1f, 1f);
 		return true;
 	}
 

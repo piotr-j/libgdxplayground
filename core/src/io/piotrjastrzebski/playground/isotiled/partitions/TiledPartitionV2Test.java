@@ -370,11 +370,11 @@ public class TiledPartitionV2Test extends BaseScreen {
 		return super.keyDown(keycode);
 	}
 
-	@Override public boolean scrolled (int amount) {
-		degreeOfSeparation = Math.max(Math.min(degreeOfSeparation + amount, 32), 0);
+	@Override public boolean scrolled (float amountX, float amountY) {
+		degreeOfSeparation = (int)Math.max(Math.min(degreeOfSeparation + amountX, 32), 0);
 		Gdx.app.log("", "degreeOfSeparation = " + degreeOfSeparation);
 
-		return super.scrolled(amount);
+		return true;
 	}
 
 	private Vector3 temp = new Vector3();

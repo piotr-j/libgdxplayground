@@ -344,13 +344,13 @@ public class UIDaDInputReplayResizeTest extends BaseScreen {
 			return false;
 		}
 
-		@Override public boolean scrolled (int amount) {
+		@Override public boolean scrolled (float amountX, float amountY) {
 			switch (state) {
 			case RECORD:
-				replayEvents.add(new ReplayEvent(ReplayEvent.SCROLLED, amount));
+				replayEvents.add(new ReplayEvent(ReplayEvent.SCROLLED, (int)amountX));
 			case PASS:
 				for (int i = 0, n = processors.size; i < n; i++)
-					if (processors.get(i).scrolled(amount))
+					if (processors.get(i).scrolled(amountX, amountY))
 						return true;
 				break;
 			case REPLAY:
@@ -451,7 +451,7 @@ public class UIDaDInputReplayResizeTest extends BaseScreen {
 			} break;
 			case ReplayEvent.SCROLLED: {
 				for (int i = 0, n = processors.size; i < n; i++)
-					if (processors.get(i).scrolled(event.scrolled()))
+					if (processors.get(i).scrolled(event.scrolled(), 0))
 						return;
 			} break;
 			}

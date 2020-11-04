@@ -3,18 +3,14 @@ package io.piotrjastrzebski.playground.uitesting;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.scenes.scene2d.*;
+import com.badlogic.gdx.scenes.scene2d.Group;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
-import com.badlogic.gdx.scenes.scene2d.utils.ActorGestureListener;
-import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
-import com.badlogic.gdx.utils.Scaling;
 import com.kotcrab.vis.ui.widget.VisScrollPane;
-import com.kotcrab.vis.ui.widget.VisTable;
-import com.kotcrab.vis.ui.widget.VisTextButton;
 import com.kotcrab.vis.ui.widget.VisWindow;
 import io.piotrjastrzebski.playground.BaseScreen;
 import io.piotrjastrzebski.playground.GameReset;
-import io.piotrjastrzebski.playground.PLog;
 import io.piotrjastrzebski.playground.PlaygroundGame;
 
 /**
@@ -72,8 +68,8 @@ public class UIPane2Test extends BaseScreen {
 			}
 
 			@Override
-			public boolean scrolled (InputEvent event, float x, float y, int amount) {
-				float toAdd = amount * 10;
+			public boolean scrolled (InputEvent event, float x, float y, float amountX, float amountY) {
+				float toAdd = amountX * 10;
 				image.setSize(image.getWidth() + toAdd, image.getHeight() + toAdd);
 				// pane wont notice unless we tell it
 //				image.invalidateHierarchy();

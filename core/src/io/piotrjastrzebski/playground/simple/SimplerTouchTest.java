@@ -97,7 +97,8 @@ public class SimplerTouchTest extends ApplicationAdapter implements InputProcess
 		return false;
 	}
 
-	@Override public boolean scrolled (int amount) {
+	@Override
+	public boolean scrolled (float amountX, float amountY) {
 		return false;
 	}
 

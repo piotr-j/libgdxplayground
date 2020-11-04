@@ -6,7 +6,6 @@ import com.badlogic.gdx.math.*;
 import com.badlogic.gdx.utils.Array;
 import io.piotrjastrzebski.playground.BaseScreen;
 import io.piotrjastrzebski.playground.GameReset;
-import io.piotrjastrzebski.playground.PLog;
 import io.piotrjastrzebski.playground.PlaygroundGame;
 
 /**
@@ -146,11 +145,12 @@ public class PolygonOverlapTest extends BaseScreen {
         return true;
     }
 
-    @Override public boolean scrolled (int amount) {
+    @Override
+    public boolean scrolled (float amountX, float amountY) {
         if (selected != null) {
-            selected.polygon.rotate(amount * 5);
+            selected.polygon.rotate(amountX * 5);
         }
-        return super.scrolled(amount);
+        return super.scrolled(amountX, amountY);
     }
 
     // allow us to start this test directly

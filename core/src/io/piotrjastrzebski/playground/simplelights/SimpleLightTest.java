@@ -2,7 +2,10 @@ package io.piotrjastrzebski.playground.simplelights;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.graphics.*;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Pixmap;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.math.MathUtils;
@@ -126,9 +129,9 @@ public class SimpleLightTest extends BaseScreen {
 		return true;
 	}
 
-	@Override public boolean scrolled (int amount) {
+	@Override public boolean scrolled (float amountX, float amountY) {
 		if (current != null) {
-			current.rotation += amount * 15;
+			current.rotation += amountX * 15;
 		}
 		return true;
 	}

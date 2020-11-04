@@ -97,7 +97,8 @@ public class CamMover extends BaseSystem implements Input, InputProcessor {
 		return false;
 	}
 
-	@Override public boolean scrolled (int amount) {
+	@Override
+	public boolean scrolled (float amountX, float amountY) {
 		return false;
 	}
 

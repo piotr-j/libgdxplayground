@@ -162,7 +162,8 @@ public abstract class BaseScreen implements Screen, InputProcessor {
 		cs.set(temp.x, temp.y);
 	}
 
-	@Override public boolean scrolled (int amount) {
+	@Override
+	public boolean scrolled (float amountX, float amountY) {
 		return false;
 	}
 }

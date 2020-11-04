@@ -62,11 +62,11 @@ public class MouseZoomTest extends BaseScreen {
 
 	Vector3 tp = new Vector3();
 	@Override
-	public boolean scrolled (int change) {
+	public boolean scrolled (float amountX, float amountY) {
 		gameCamera.unproject(tp.set(Gdx.input.getX(), Gdx.input.getY(), 0 ));
 		float oldX = tp.x;
 		float oldY = tp.y;
-		gameCamera.zoom += change * gameCamera.zoom * 0.1f;
+		gameCamera.zoom += amountX * gameCamera.zoom * 0.1f;
 		gameCamera.update();
 
 		gameCamera.unproject(tp.set(Gdx.input.getX(), Gdx.input.getY(), 0 ));

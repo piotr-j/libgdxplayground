@@ -4,7 +4,6 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.Batch;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.maps.tiled.TiledMap;
@@ -448,9 +447,9 @@ public class FogOfWarTest extends BaseScreen {
 		return false;
 	}
 
-	@Override public boolean scrolled (int amount) {
-		gameCamera.zoom = MathUtils.clamp(gameCamera.zoom *= (1f + .15f * amount), 0.1f, 3.0f);
-		return super.scrolled(amount);
+	@Override public boolean scrolled (float amountX, float amountY) {
+		gameCamera.zoom = MathUtils.clamp(gameCamera.zoom *= (1f + .15f * amountX), 0.1f, 3.0f);
+		return super.scrolled(amountX, amountY);
 	}
 
 	@Override public void dispose () {

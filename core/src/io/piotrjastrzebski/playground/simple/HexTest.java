@@ -13,7 +13,6 @@ import com.badlogic.gdx.maps.tiled.TiledMapTile;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.maps.tiled.renderers.BatchTiledMapRenderer;
-import com.badlogic.gdx.maps.tiled.renderers.HexagonalTiledMapRenderer;
 import com.badlogic.gdx.maps.tiled.tiles.AnimatedTiledMapTile;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
@@ -22,7 +21,6 @@ import io.piotrjastrzebski.playground.GameReset;
 import io.piotrjastrzebski.playground.PlaygroundGame;
 
 import static com.badlogic.gdx.graphics.g2d.Batch.*;
-import static com.badlogic.gdx.graphics.g2d.Batch.V4;
 
 /**
  * Simple hex map test
@@ -205,8 +203,8 @@ public class HexTest extends BaseScreen {
 		return false;
 	}
 
-	@Override public boolean scrolled (int amount) {
-		gameCamera.zoom = MathUtils.clamp(gameCamera.zoom + 0.1f * amount, .1f, 2.5f);
+	@Override public boolean scrolled (float amountX, float amountY) {
+		gameCamera.zoom = MathUtils.clamp(gameCamera.zoom + 0.1f * amountX, .1f, 2.5f);
 		gameCamera.update();
 		return true;
 	}

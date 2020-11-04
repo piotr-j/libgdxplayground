@@ -2,14 +2,11 @@ package io.piotrjastrzebski.playground.ecs.jobs;
 
 import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
-import com.artemis.Entity;
 import com.artemis.annotations.Wire;
-import com.artemis.systems.EntityProcessingSystem;
 import com.artemis.systems.IteratingSystem;
 import com.artemis.utils.IntBag;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector3;
 
@@ -87,7 +84,7 @@ public class Selector extends IteratingSystem implements InputProcessor {
 		return false;
 	}
 
-	@Override public boolean scrolled (int amount) {
+	@Override public boolean scrolled (float amountX, float amountY) {
 		return false;
 	}
 }

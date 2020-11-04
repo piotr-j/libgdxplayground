@@ -3,7 +3,6 @@ package io.piotrjastrzebski.playground.tiledgentest;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.ui.Widget;
@@ -22,8 +21,8 @@ public class MapWidget extends Widget {
 		size = 1;
 
 		addListener(new InputListener(){
-			@Override public boolean scrolled (InputEvent event, float x, float y, int amount) {
-				size -= amount * 0.1f;
+			@Override public boolean scrolled (InputEvent event, float x, float y, float amountX, float amountY) {
+				size -= amountX * 0.1f;
 				invalidateHierarchy();
 				return true;
 			}

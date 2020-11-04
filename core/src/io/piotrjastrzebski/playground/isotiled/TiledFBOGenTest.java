@@ -2,7 +2,6 @@ package io.piotrjastrzebski.playground.isotiled;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -23,7 +22,6 @@ import com.badlogic.gdx.utils.IntArray;
 import com.badlogic.gdx.utils.async.AsyncExecutor;
 import com.badlogic.gdx.utils.async.AsyncResult;
 import com.badlogic.gdx.utils.async.AsyncTask;
-import com.badlogic.gdx.utils.async.ThreadUtils;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import io.piotrjastrzebski.playground.BaseScreen;
@@ -371,8 +369,8 @@ public class TiledFBOGenTest extends BaseScreen {
 
 	}
 
-	@Override public boolean scrolled (int amount) {
-		gameCamera.zoom = MathUtils.clamp(gameCamera.zoom + gameCamera.zoom * 0.1f * amount , 0.1f, 4f);
+	@Override public boolean scrolled (float amountX, float amountY) {
+		gameCamera.zoom = MathUtils.clamp(gameCamera.zoom + gameCamera.zoom * 0.1f * amountX , 0.1f, 4f);
 		gameCamera.update();
 		return true;
 	}
