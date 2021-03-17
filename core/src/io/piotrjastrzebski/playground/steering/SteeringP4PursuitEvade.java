@@ -1,6 +1,5 @@
 package io.piotrjastrzebski.playground.steering;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
@@ -32,7 +31,7 @@ public class SteeringP4PursuitEvade extends BaseScreen {
 				circleCenter.set(velocity).nor().scl(circleOffset);
 
 				displacement.set(0, -1).scl(circleRadius);
-				displacement.rotate(wanderAngle);
+				displacement.rotateDeg(wanderAngle);
 				wanderAngle += MathUtils.random(-10, 10);
 
 				wanderForce.set(circleCenter).add(displacement);

@@ -42,7 +42,7 @@ public class SimpleRayLight implements RayCastCallback, Light {
 	public void fixedUpdate() {
 		for (int i = 0; i < rays; i++) {
 			rayId = i;
-			target.set(radius, 0).setAngle(i);
+			target.set(radius, 0).setAngleDeg(i);
 			target.add(pos);
 			xs[rayId] = target.x;
 			ys[rayId] = target.y;

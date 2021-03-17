@@ -47,7 +47,7 @@ public class SplineTrailTest extends BaseScreen {
 		Gdx.gl.glEnable(GL20.GL_BLEND);
 		Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
 		batch.setProjectionMatrix(gameCamera.combined);
-		program.begin();
+		program.bind();
 		program.setUniformMatrix("u_projTrans", gameCamera.combined);
 //		rect.render(program, GL20.GL_TRIANGLES);
 		if (mesh != null) {
@@ -61,7 +61,6 @@ public class SplineTrailTest extends BaseScreen {
 			smoothed.add(new Vector2(3, 0));
 			createTriangleStrip(smoothed);
 		}
-		program.end();
 		renderer.setProjectionMatrix(gameCamera.combined);
 		renderer.begin(ShapeRenderer.ShapeType.Line);
 //		renderer.setColor(Color.RED);

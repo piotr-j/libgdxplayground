@@ -79,11 +79,10 @@ public class ColorGradeTest extends BaseScreen {
 			Gdx.app.error(TAG, colorGradeShader.getLog());
 			throw new AssertionError("welp");
 		}
-		colorGradeShader.begin();
+		colorGradeShader.bind();
 		colorGradeShader.setUniformi(colorGradeShader.getUniformLocation("u_texture"), 0);
 		colorGradeShader.setUniformi(colorGradeShader.getUniformLocation("u_color_grade"), 1);
 		colorGradeShader.setUniformf(colorGradeShader.getUniformLocation("u_lut_size"), 16.0f);
-		colorGradeShader.end();
 	}
 
 	Body groundBody;
@@ -172,11 +171,10 @@ public class ColorGradeTest extends BaseScreen {
 				Gdx.app.error(TAG, colorGradeShader.getLog());
 			} else {
 				colorGradeShader = shader;
-				colorGradeShader.begin();
+				colorGradeShader.bind();
 				colorGradeShader.setUniformi(colorGradeShader.getUniformLocation("u_texture"), 0);
 				colorGradeShader.setUniformi(colorGradeShader.getUniformLocation("u_color_grade"), 1);
 				colorGradeShader.setUniformf(colorGradeShader.getUniformLocation("u_lut_size"), 16.0f);
-				colorGradeShader.end();
 			}
 		}
 		world.step(1f / 60f, 6, 4);

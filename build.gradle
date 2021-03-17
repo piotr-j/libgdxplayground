@@ -18,12 +18,12 @@ allprojects {
     version = '1.0'
     ext {
         appName = 'playground'
-        gdxVersion = '1.9.12'
+        gdxVersion = '1.9.14'
         roboVMVersion = '1.2.0'
         box2DLightsVersion = '1.5'
-        ashleyVersion = '1.7.3'
+        ashleyVersion = '1.7.4'
         aiVersion = '1.8.2'
-        visuiVersion = '1.4.6'
+        visuiVersion = '1.4.11'
         artemisOdbVersion = "2.3.0"
         artemisOdbcontribVersion = "2.4.0"
         gdxVideoVersion = "0.0.1"
@@ -45,59 +45,64 @@ allprojects {
 }
 
 project(":desktop") {
-    apply plugin: "java"
+    apply plugin: "java-library"
 
     dependencies {
-        compile project(":core")
-        compile "com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdxVersion"
-        compile "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
-        compile "com.badlogicgames.gdx:gdx-box2d-platform:$gdxVersion:natives-desktop"
+        api project(":core")
+        api "com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdxVersion"
+        api "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
+        api "com.badlogicgames.gdx:gdx-box2d-platform:$gdxVersion:natives-desktop"
 
-        compile "com.badlogicgames.gdx:gdx-freetype-platform:$gdxVersion:natives-desktop"
+        api "com.badlogicgames.gdx:gdx-freetype-platform:$gdxVersion:natives-desktop"
 
-        compile "com.badlogicgames.gdx:gdx-tools:$gdxVersion"
+        api "com.badlogicgames.gdx:gdx-tools:$gdxVersion"
     }
 }
 
 project(":core") {
-    apply plugin: "java"
+    apply plugin: "java-library"
     apply plugin: 'idea'
 
     dependencies {
-        compile "com.badlogicgames.gdx:gdx:$gdxVersion"
-        compile "com.badlogicgames.gdx:gdx-box2d:$gdxVersion"
-        compile "com.badlogicgames.box2dlights:box2dlights:$box2DLightsVersion"
+        api "com.badlogicgames.gdx:gdx:$gdxVersion"
+        api "com.badlogicgames.gdx:gdx-box2d:$gdxVersion"
+        api "com.badlogicgames.box2dlights:box2dlights:$box2DLightsVersion"
 
-        compile "com.badlogicgames.gdx:gdx-bullet:$gdxVersion"
-        compile "com.badlogicgames.gdx:gdx-bullet-platform:$gdxVersion:natives-desktop"
+        api "com.badlogicgames.gdx:gdx-bullet:$gdxVersion"
+        api "com.badlogicgames.gdx:gdx-bullet-platform:$gdxVersion:natives-desktop"
 
-        compile "com.badlogicgames.gdx:gdx-ai:$aiVersion"
-        compile "com.kotcrab.vis:vis-ui:$visuiVersion"
-        compile "net.onedaybeard.artemis:artemis-odb:$artemisOdbVersion"
-        compile "net.onedaybeard.artemis:artemis-odb-serializer-json-libgdx:$artemisOdbVersion"
-        compile "net.mostlyoriginal.artemis-odb:contrib-core:$artemisOdbcontribVersion"
-        compile "com.esotericsoftware:kryo:$kryoVersion"
-        compile "com.esotericsoftware.spine:spine-libgdx:$spineVersion"
+        api "com.badlogicgames.gdx:gdx-ai:$aiVersion"
+        api "com.kotcrab.vis:vis-ui:$visuiVersion"
+        api "net.onedaybeard.artemis:artemis-odb:$artemisOdbVersion"
 
-//        compile "com.badlogicgames.gdxvideo:gdx-video:$gdxVideoVersion"
+//        implementation group: 'net.onedaybeard.artemis', name: 'artemis-odb', version: '2.3.0'
 
-        compile fileTree(dir: '../libs', include: '*.jar')
 
-        compile "com.badlogicgames.ashley:ashley:$ashleyVersion"
+        api "net.onedaybeard.artemis:artemis-odb-serializer-json-libgdx:$artemisOdbVersion"
 
-        compile "com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdxVersion"
-        compile "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
-        compile "com.badlogicgames.gdx:gdx-box2d-platform:$gdxVersion:natives-desktop"
+        api "net.mostlyoriginal.artemis-odb:contrib-core:$artemisOdbcontribVersion"
+        api "com.esotericsoftware:kryo:$kryoVersion"
+        api "com.esotericsoftware.spine:spine-libgdx:$spineVersion"
 
-        compile "com.badlogicgames.gdx:gdx-freetype:$gdxVersion"
+//        api "com.badlogicgames.gdxvideo:gdx-video:$gdxVideoVersion"
+
+        api fileTree(dir: '../libs', include: '*.jar')
+
+        api "com.badlogicgames.ashley:ashley:$ashleyVersion"
+
+        api "com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdxVersion"
+        api "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
+        api "com.badlogicgames.gdx:gdx-box2d-platform:$gdxVersion:natives-desktop"
+
+        api "com.badlogicgames.gdx:gdx-freetype:$gdxVersion"
 
         testCompile 'junit:junit:4.12'
         testCompile "org.mockito:mockito-core:1.+"
 
-        compile "net.dermetfan.libgdx-utils:libgdx-utils-box2d:$gdxUtilsVersion"
-        compile "net.dermetfan.libgdx-utils:libgdx-utils:$gdxUtilsVersion"
+        api "net.dermetfan.libgdx-utils:libgdx-utils-box2d:$gdxUtilsVersion"
+        api "net.dermetfan.libgdx-utils:libgdx-utils:$gdxUtilsVersion"
 
-        compile "space.earlygrey:shapedrawer:$shapeDrawerVersion"
+        api "space.earlygrey:shapedrawer:$shapeDrawerVersion"
     }
 }
 

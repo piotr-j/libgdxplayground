@@ -7,10 +7,8 @@ import com.artemis.annotations.Wire;
 import com.artemis.systems.EntityProcessingSystem;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import io.piotrjastrzebski.playground.ecs.ECSTestBase;
-import io.piotrjastrzebski.playground.ecs.fancywalltest.components.Bounds;
 import io.piotrjastrzebski.playground.ecs.fancywalltest.components.Tint;
 import io.piotrjastrzebski.playground.ecs.fancywalltest.components.Transform;
 import io.piotrjastrzebski.playground.ecs.fancywalltest.components.Wall;
@@ -45,7 +43,7 @@ public class DebugWallRenderer extends EntityProcessingSystem {
 		Wall wall = mWall.get(e);
 		Tint tint = mTint.get(e);
 		renderer.setColor(tint.color);
-		tmp.set(1, 0).setAngle(t.angle).scl(wall.height);
+		tmp.set(1, 0).setAngleDeg(t.angle).scl(wall.height);
 		renderer.line(
 			t.pos.x, t.pos.y,
 			t.pos.x + tmp.x,

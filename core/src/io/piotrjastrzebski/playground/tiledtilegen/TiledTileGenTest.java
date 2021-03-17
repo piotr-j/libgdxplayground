@@ -18,7 +18,6 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.BufferUtils;
-import com.badlogic.gdx.utils.ScreenUtils;
 import com.kotcrab.vis.ui.widget.VisTextButton;
 import io.piotrjastrzebski.playground.BaseScreen;
 import io.piotrjastrzebski.playground.GameReset;
@@ -111,7 +110,7 @@ public class TiledTileGenTest extends BaseScreen {
 			polyBatch.begin();
 			polyBatch.draw(region, 0, 0, pixelSize, pixelSize);
 			polyBatch.end();
-			Pixmap pm = ScreenUtils.getFrameBufferPixmap(0, 0, 32, 32);
+			Pixmap pm = Pixmap.createFromFrameBuffer(0, 0, 32, 32);
 			tileFBO.end();
 			flipPM(pm);
 			packer.pack(name + type.name(), pm);

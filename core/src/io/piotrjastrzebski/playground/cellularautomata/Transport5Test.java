@@ -419,7 +419,7 @@ import java.util.Iterator;
                 Vector2 tmp = new Vector2();
                 for (int i = 0; i < BELT_CURVE_SIZE; i++) {
                     float a = 90 - (i + .5f) / BELT_CURVE_SIZE * 90;
-                    tmp.set(0, .5f).rotate(a);
+                    tmp.set(0, .5f).rotateDeg(a);
                     slots[i] = new Slot(this, i, tmp.x + .5f, tmp.y - .5f);
                 }
             }
@@ -429,7 +429,7 @@ import java.util.Iterator;
                 Vector2 tmp = new Vector2();
                 for (int i = 0; i < BELT_CURVE_SIZE; i++) {
                     float a = (i + .5f) / BELT_CURVE_SIZE * 90 - 90;
-                    tmp.set(0, -.5f).rotate(a);
+                    tmp.set(0, -.5f).rotateDeg(a);
                     slots[i] = new Slot(this, i, tmp.x + .5f, tmp.y + .5f);
                 }
             }
@@ -575,7 +575,7 @@ import java.util.Iterator;
                 v2.set(x, y);
                 switch (direction) {
                 case DIR_NORTH: {
-                    v2.rotate(90);
+                    v2.rotateDeg(90);
                 }
                 break;
                 case DIR_EAST: {
@@ -583,11 +583,11 @@ import java.util.Iterator;
                 }
                 break;
                 case DIR_SOUTH: {
-                    v2.rotate(270);
+                    v2.rotateDeg(270);
                 }
                 break;
                 case DIR_WEST: {
-                    v2.rotate(180);
+                    v2.rotateDeg(180);
                 }
                 break;
                 }

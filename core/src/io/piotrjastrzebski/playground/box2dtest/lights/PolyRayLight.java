@@ -138,8 +138,8 @@ public class PolyRayLight implements RayCastCallback, QueryCallback, Light {
 				tmp.set(body.getWorldPoint(tmp));
 				if (ignoreRadius || tmp.dst2(pos) <= radius * radius) {
 					getTmpRay().set(tmp);
-					getTmpRay().set(tmp2.set(tmp).sub(pos).rotate(extra).setLength(radius).add(pos));
-					getTmpRay().set(tmp2.set(tmp).sub(pos).rotate(-extra).setLength(radius).add(pos));
+					getTmpRay().set(tmp2.set(tmp).sub(pos).rotateDeg(extra).setLength(radius).add(pos));
+					getTmpRay().set(tmp2.set(tmp).sub(pos).rotateDeg(-extra).setLength(radius).add(pos));
 				}
 			}
 			break;
@@ -155,9 +155,9 @@ public class PolyRayLight implements RayCastCallback, QueryCallback, Light {
 				getTmpRay().set(cp);
 				if (findTangents(cp, r, pos, tanA, tanB)) {
 					getTmpRay().set(tmp.set(tanA).sub(pos).limit2(r2).add(pos));
-					getTmpRay().set(tmp.set(tanA).sub(pos).rotate(cExtra).setLength2(r2).add(pos));
+					getTmpRay().set(tmp.set(tanA).sub(pos).rotateDeg(cExtra).setLength2(r2).add(pos));
 					getTmpRay().set(tmp.set(tanB).sub(pos).limit2(r2).add(pos));
-					getTmpRay().set(tmp.set(tanB).sub(pos).rotate(-cExtra).setLength2(r2).add(pos));
+					getTmpRay().set(tmp.set(tanB).sub(pos).rotateDeg(-cExtra).setLength2(r2).add(pos));
 				}
 			}
 			break;
@@ -346,7 +346,7 @@ public class PolyRayLight implements RayCastCallback, QueryCallback, Light {
 		public void set(float cx, float cy, float ex, float ey) {
 			this.ex = ex;
 			this.ey = ey;
-			a = aTmp.set(cx, cy).sub(ex, ey).angle();
+			a = aTmp.set(cx, cy).sub(ex, ey).angleDeg();
 		}
 
 		@Override public int compareTo (Ray o) {

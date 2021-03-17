@@ -59,17 +59,15 @@ public class UIShader2Test extends BaseScreen {
 			throw new AssertionError(TAG + " : Shader not compiled!\n" + blurShader.getLog());
 		}
 		// so default values set in shader dont compile on macos, fun times
-		blurShader.begin();
+		blurShader.bind();
 		blurShader.setUniform1fv("offset", new float[] {0, 1.3846153846f, 3.2307692308f}, 0, 4);
 		blurShader.setUniform1fv("weight", new float[] {0.2270270270f, 0.3162162162f, 0.0702702703f}, 0, 4);
-		blurShader.end();
 
-		outlineShader.begin();
+		outlineShader.bind();
 		outlineShader.setUniformf("u_viewportInverse", 1f / Gdx.graphics.getWidth(), 1f / Gdx.graphics.getHeight());
 		outlineShader.setUniformf("u_thickness", 8);
 		outlineShader.setUniformf("u_step", Math.min(1f, Gdx.graphics.getWidth() / 70f));
 		outlineShader.setUniformf("u_color", Color.CYAN.r, Color.CYAN.g, Color.CYAN.b);
-		outlineShader.end();
 
 		shaderRenderer = new ActorShaderRenderer();
 		shaderRenderer.debug = true;

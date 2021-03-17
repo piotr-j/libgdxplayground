@@ -55,7 +55,7 @@ public class RayCastForce2dTest extends BaseIForce2dTest implements RayCastCallb
 		rayAngle += 360/20*delta;
 		float rayLength = 25;
 		tmpA.set(0, 0);
-		tmpB.set(rayLength, 0).rotate(rayAngle);
+		tmpB.set(rayLength, 0).rotateDeg(rayAngle);
 		bounces = 0;
 		renderer.setProjectionMatrix(gameCamera.combined);
 		renderer.begin(ShapeRenderer.ShapeType.Line);

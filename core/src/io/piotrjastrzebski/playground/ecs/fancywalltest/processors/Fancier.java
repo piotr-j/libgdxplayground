@@ -5,15 +5,14 @@ import com.artemis.ComponentMapper;
 import com.artemis.Entity;
 import com.artemis.EntityEdit;
 import com.artemis.annotations.Wire;
-import com.artemis.systems.EntityProcessingSystem;
 import com.artemis.systems.IteratingSystem;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.math.*;
+import com.badlogic.gdx.math.Interpolation;
+import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.IntArray;
 import com.badlogic.gdx.utils.IntMap;
-import io.piotrjastrzebski.playground.ecs.ECSTestBase;
 import io.piotrjastrzebski.playground.ecs.fancywalltest.components.*;
 
 /**
@@ -117,7 +116,7 @@ public class Fancier extends IteratingSystem {
 		Transform src = mTransform.get(e);
 		Wall wall = mWall.get(e);
 		Tint tint = mTint.get(e);
-		tmp.set(1, 0).setAngle(src.angle).scl(wall.height).add(src.pos);
+		tmp.set(1, 0).setAngleDeg(src.angle).scl(wall.height).add(src.pos);
 		if (overlaps(src.pos, tmp, vb)) {
 			if (!mTransformed.has(e)) {
 				tint.color.set(Color.RED);

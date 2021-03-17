@@ -67,11 +67,10 @@ public class TiledWrapTest extends BaseScreen {
 		if (!radialShader.isCompiled()) {
 			Gdx.app.log("", "Failed to load shader " + radialShader.getLog());
 		} else {
-			radialShader.begin();
+			radialShader.bind();
 			radialShader.setUniformf("distortion", .4f);
 			radialShader.setUniformf("zoom", 3.7f);
 			radialShader.setUniformf("resolution", Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-			radialShader.end();
 		}
 		fboRegion = new TextureRegion();
 		useShader = true;
@@ -83,9 +82,8 @@ public class TiledWrapTest extends BaseScreen {
 		fbo = new FrameBuffer(Pixmap.Format.RGBA8888, width, height, false);
 		fboRegion.setRegion(fbo.getColorBufferTexture());
 		fboRegion.flip(false, true);
-		radialShader.begin();
+		radialShader.bind();
 		radialShader.setUniformf("resolution", width, height);
-		radialShader.end();
 	}
 
 	@Override public boolean keyDown (int keycode) {
@@ -97,11 +95,10 @@ public class TiledWrapTest extends BaseScreen {
 			} else {
 				radialShader.dispose();
 				radialShader = shader;
-				radialShader.begin();
+				radialShader.bind();
 				radialShader.setUniformf("distortion", .4f);
 				radialShader.setUniformf("zoom", 3.7f);
 				radialShader.setUniformf("resolution", Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-				radialShader.end();
 			}
 			break;
 		case Input.Keys.F3:

@@ -58,9 +58,8 @@ public class MaskTest extends BaseScreen {
         if (program.isCompiled()) {
             if (shaderMask != null) shaderMask.dispose();
             shaderMask = program;
-            shaderMask.begin();
+            shaderMask.bind();
             PLog.log("Shader reloaded " + shaderMask.getLog());
-            shaderMask.end();
         } else {
             PLog.log("Shader failed to compile " + program.getLog());
         }

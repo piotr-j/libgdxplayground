@@ -1,14 +1,13 @@
 package io.piotrjastrzebski.playground.simple;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.*;
+import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import io.piotrjastrzebski.playground.BaseScreen;
 import io.piotrjastrzebski.playground.GameReset;
 import io.piotrjastrzebski.playground.PlaygroundGame;
-
-import java.nio.ByteBuffer;
 
 /**
  * Shader based outline drawing
@@ -31,12 +30,11 @@ public class ShaderOutlineTest extends BaseScreen {
 			throw new AssertionError(TAG + " : Shader not compiled!\n" + outlineShader.getLog());
 		}
 
-		outlineShader.begin();
+		outlineShader.bind();
 		outlineShader.setUniformf("u_viewportInverse", 1f / Gdx.graphics.getWidth(), 1f / Gdx.graphics.getHeight());
 		outlineShader.setUniformf("u_thickness", 8);
 		outlineShader.setUniformf("u_step", Math.min(1f, Gdx.graphics.getWidth() / 70f));
 		outlineShader.setUniformf("u_color", 1f, 0f, 0f);
-		outlineShader.end();
 
 		source = new Texture("test-shape.png");
 		source.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);

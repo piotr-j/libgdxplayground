@@ -109,9 +109,9 @@ public class PathsTest extends BaseScreen {
 			}
 
 			obj.setPosition(tmpV.x, tmpV.y);
-			objAngle = tmpV2.angle() - 90;
+			objAngle = tmpV2.angleDeg() - 90;
 			obj2.setPosition(tmpV4.x, tmpV4.y);
-			obj2Angle = tmpV3.angle() - 90;
+			obj2Angle = tmpV3.angleDeg() - 90;
 		}
 
 		renderer.setProjectionMatrix(gameCamera.combined);
@@ -151,11 +151,11 @@ public class PathsTest extends BaseScreen {
 		}
 		renderer.setColor(Color.RED);
 		renderer.circle(obj.x, obj.y, obj.radius, 16);
-		tmpV.set(0, 1).rotate(objAngle);
+		tmpV.set(0, 1).rotateDeg(objAngle);
 		renderer.line(obj.x, obj.y, obj.x + tmpV.x, obj.y + tmpV.y);
 		renderer.setColor(Color.GREEN);
 		renderer.circle(obj2.x, obj2.y, obj2.radius, 16);
-		tmpV.set(0, 1).rotate(obj2Angle);
+		tmpV.set(0, 1).rotateDeg(obj2Angle);
 		renderer.line(obj2.x, obj2.y, obj2.x + tmpV.x, obj2.y + tmpV.y);
 		renderer.end();
 	}

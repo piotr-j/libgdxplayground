@@ -76,7 +76,7 @@ public class MinkowskyiDistanceTest extends BaseScreen {
 		float step = 360f/points;
 		for (int i = 0; i < points; i++) {
 			float a = i * step;
-			tmp.set(1, 0).rotate(a + step/2);
+			tmp.set(1, 0).rotateDeg(a + step / 2);
 //			renderer.setColor(Color.GREEN);
 //			renderer.point(tmpCircle.x, tmpCircle.y, 0);
 
@@ -90,7 +90,7 @@ public class MinkowskyiDistanceTest extends BaseScreen {
 			float lastDiff = 999;
 			// using very low iteration count produces cool effects!
 			for (int j = 0; j < 16; j++) {
-				tmp.set(unit, 0).rotate(a);
+				tmp.set(unit, 0).rotateDeg(a);
 				// to plot a circle, we need to find point with distance = 1 from centre
 				float distance = getDistance(tmp.x, tmp.y, 0, 0, p);
 				if (MathUtils.isEqual(distance, 1, 0.001f)) {

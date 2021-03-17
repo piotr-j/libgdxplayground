@@ -83,7 +83,7 @@ public class StutterTest extends ApplicationAdapter implements InputProcessor {
 			centre.set(tp);
 		}
 
-		float rdt = Gdx.graphics.getRawDeltaTime();
+		float rdt = Gdx.graphics.getDeltaTime();
 		if (rdt > MAX_DT) rdt = MAX_DT;
 
 		acc += rdt;
@@ -100,7 +100,7 @@ public class StutterTest extends ApplicationAdapter implements InputProcessor {
 					spawnTimer -= spawnTime;
 					float angle = bulletOffset;
 					for (int i = 0; i < count; i++) {
-						tmp.set(1, 0).rotate(angle);
+						tmp.set(1, 0).rotateDeg(angle);
 						Bullet collider = bulletPool.obtain().init(centre.x + tmp.x, centre.y + tmp.y, .25f);
 						collider.texture(texture);
 						collider.update(0);

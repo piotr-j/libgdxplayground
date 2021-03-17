@@ -1,9 +1,12 @@
 package io.piotrjastrzebski.playground.ecs.fancywalltest;
 
-import com.artemis.*;
+import com.artemis.Entity;
+import com.artemis.EntityEdit;
+import com.artemis.WorldConfiguration;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Vector2;
 import io.piotrjastrzebski.playground.GameReset;
+import io.piotrjastrzebski.playground.PlaygroundGame;
 import io.piotrjastrzebski.playground.ecs.ECSTestBase;
 import io.piotrjastrzebski.playground.ecs.fancywalltest.components.Tint;
 import io.piotrjastrzebski.playground.ecs.fancywalltest.components.Transform;
@@ -59,7 +62,11 @@ public class ECSFancyWallsTest extends ECSTestBase {
 		edit.create(Tint.class).color.set(Color.GREEN);
 		Wall wall = edit.create(Wall.class);
 		wall.height = height;
-		tmp.set(1, 0).setAngle(angle).scl(height).add(x, y);
+		tmp.set(1, 0).setAngleDeg(angle).scl(height).add(x, y);
 		wall.off.set(tmp.x, tmp.y);
+	}
+
+	public static void main (String[] args) {
+		PlaygroundGame.start(args, ECSFancyWallsTest.class);
 	}
 }

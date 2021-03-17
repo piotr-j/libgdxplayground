@@ -31,7 +31,7 @@ public class SteeringP5MovementManager extends BaseScreen {
 				circleCenter.set(velocity).nor().scl(circleOffset);
 
 				displacement.set(0, -1).scl(circleRadius);
-				displacement.rotate(wanderAngle);
+				displacement.rotateDeg(wanderAngle);
 				wanderAngle += MathUtils.random(-10, 10);
 
 				wanderForce.set(circleCenter).add(displacement);

@@ -201,7 +201,7 @@ public class LightningCurveTest extends BaseScreen {
 				at += STEP;
 				bezier.valueAt(tmp2, at);
 				polygon.setPosition(tmp.x, tmp.y);
-				float angle = tmpAngle.set(tmp2).sub(tmp).angle();
+				float angle = tmpAngle.set(tmp2).sub(tmp).angleDeg();
 				polygon.setRotation(angle);
 				polygon.setScale(tmp.dst(tmp2), .2f);
 				if (polygon.contains(x, y)) return true;

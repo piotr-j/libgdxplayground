@@ -2,16 +2,13 @@ package io.piotrjastrzebski.playground.simple;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.math.DelaunayTriangulator;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.IntArray;
-import com.badlogic.gdx.utils.ShortArray;
 import io.piotrjastrzebski.playground.BaseScreen;
 import io.piotrjastrzebski.playground.GameReset;
 import io.piotrjastrzebski.playground.PlaygroundGame;
-import net.dermetfan.gdx.math.BayazitDecomposer;
 
 /**
  * Created by EvilEntity on 25/01/2016.
@@ -137,7 +134,7 @@ public class ShrinkPathTest extends BaseScreen {
 				Vector2 p3 = rawPoints.get((i + 2) % rawPoints.size);
 				tmp1.set(p1).sub(p2);
 				tmp2.set(p2).sub(p3);
-				tmp3.set(0, 1).rotate(tmp1.angle(tmp2)/2 + tmp1.angle()).nor().scl(2f);
+				tmp3.set(0, 1).rotateDeg(tmp1.angleDeg(tmp2) / 2 + tmp1.angleDeg()).nor().scl(2f);
 				shrinkPoints.add(new Vector2(p2).sub(tmp3));
 			}
 
@@ -168,7 +165,7 @@ public class ShrinkPathTest extends BaseScreen {
 //				renderer.line(pos.x + p2.x * scale, pos.y + p2.y * scale, pos.x + p3.x * scale, pos.y + p3.y * scale);
 				tmp1.set(p1).sub(p2);
 				tmp2.set(p2).sub(p3);
-				tmp3.set(0, 1).rotate(tmp1.angle(tmp2)/2 + tmp1.angle()).nor().scl(.1f);
+				tmp3.set(0, 1).rotateDeg(tmp1.angleDeg(tmp2) / 2 + tmp1.angleDeg()).nor().scl(.1f);
 //				tmp3.set(0, 1).rotate(45).nor();
 				renderer.line(p2.x * scale, p2.y * scale, p2.x * scale -tmp3.x, p2.y * scale - tmp3.y);
 				renderer.setColor(Color.YELLOW);

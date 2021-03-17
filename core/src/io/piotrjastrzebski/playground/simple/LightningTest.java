@@ -1,6 +1,5 @@
 package io.piotrjastrzebski.playground.simple;
 
-import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
@@ -40,7 +39,7 @@ public class LightningTest extends BaseScreen {
 
 	static Vector2 rngPoint (float x, float y, float range, float angle, Vector2 out) {
 		out.set(x, y);
-		out.nor().rotate(MathUtils.random(-angle, angle)).scl(range);
+		out.nor().rotateDeg(MathUtils.random(-angle, angle)).scl(range);
 		return out;
 	}
 

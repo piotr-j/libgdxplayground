@@ -4,7 +4,6 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import io.piotrjastrzebski.playground.BaseScreen;
@@ -87,7 +86,7 @@ public class SteeringP3Wander extends BaseScreen {
 			circleCenter.set(velocity).nor().scl(circleOffset);
 
 			displacement.set(0, -1).scl(circleRadius);
-			displacement.rotate(wanderAngle);
+			displacement.rotateDeg(wanderAngle);
 			wanderAngle += MathUtils.random(-10, 10);
 
 			wanderForce.set(circleCenter).add(displacement);

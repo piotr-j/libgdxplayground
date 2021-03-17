@@ -320,7 +320,7 @@ public class GpuShadows extends BaseScreen {
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
 		//set our shadow map shader
-		shadowMapShader.begin();
+		shadowMapShader.bind();
 		shadowMapShader.setUniformf("invResolution", 1.0f / (lightSize));
 
 		occluders.getTexture().bind();
@@ -386,7 +386,7 @@ public class GpuShadows extends BaseScreen {
 		Gdx.gl20.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE);
 
 		//set the shader which actually draws the light/shadow
-		shadowRenderShader.begin();
+		shadowRenderShader.bind();
 
 		for (int j = 0; j < lights.size; j++) {
 			Light o = lights.get(j);
@@ -401,7 +401,6 @@ public class GpuShadows extends BaseScreen {
 			shadowMap1D.getTexture().bind();
 			lightMesh.render(shadowRenderShader, GL20.GL_TRIANGLES);
 		}
-		shadowRenderShader.end();
 		lightMap.end();
 
 	}
@@ -413,12 +412,11 @@ public class GpuShadows extends BaseScreen {
 		// horizontal
 		lightMap2.begin();
 		{
-			blurShader.begin();
+			blurShader.bind();
 			blurShader.setUniformi("u_texture", 0);
 			blurShader.setUniformf("dir", 1f, 0f);
 			blurShader.setUniformf("size", lightMap2.getWidth(), lightMap2.getHeight());
 			lightMapMesh.render(blurShader, GL20.GL_TRIANGLE_FAN, 0, 4);
-			blurShader.end();
 		}
 		lightMap2.end();
 
@@ -426,10 +424,9 @@ public class GpuShadows extends BaseScreen {
 		// vertical
 		//              lightMap.begin();
 		{
-			blurShader.begin();
+			blurShader.bind();
 			blurShader.setUniformf("dir", 0f, 1f);
 			lightMapMesh.render(blurShader, GL20.GL_TRIANGLE_FAN, 0, 4);
-			blurShader.end();
 
 			//            lightMap.end();
 		}

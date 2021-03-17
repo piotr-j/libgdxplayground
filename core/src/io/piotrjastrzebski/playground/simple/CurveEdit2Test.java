@@ -485,7 +485,7 @@ public class CurveEdit2Test extends BaseScreen {
 			tmp.set(cache.get(0));
 			tmp2.set(cache.get(1));
 
-			tmp3.set(tmp2).sub(tmp).nor().rotate(90).scl(polyScale);
+			tmp3.set(tmp2).sub(tmp).nor().rotateDeg(90).scl(polyScale);
 			vertices[vid++] = tmp.x + tmp3.x;
 			vertices[vid++] = tmp.y + tmp3.y;
 			vertices[vid++] = tmp.x - tmp3.x;
@@ -502,13 +502,13 @@ public class CurveEdit2Test extends BaseScreen {
 
 				tmp4.set(tmp2).sub(tmp).nor();
 				tmp5.set(tmp2).sub(tmp3).nor();
-				float angle = tmp4.angle(tmp5);
+				float angle = tmp4.angleDeg(tmp5);
 				// flip it around so we are always on the same side of the curve
 				if (angle < 0) {
 					angle = 360 + angle;
 				}
-				angle = tmp4.angle() + angle/2;
-				tmp5.set(1, 0).rotate(angle).nor().scl(polyScale);
+				angle = tmp4.angleDeg() + angle/2;
+				tmp5.set(1, 0).rotateDeg(angle).nor().scl(polyScale);
 
 				vertices[vid++] = tmp2.x + tmp5.x;
 				vertices[vid++] = tmp2.y + tmp5.y;
@@ -525,7 +525,7 @@ public class CurveEdit2Test extends BaseScreen {
 
 			tmp.set(cache.get(cache.size-1));
 			tmp2.set(cache.get(cache.size-2));
-			tmp3.set(tmp2).sub(tmp).nor().rotate(90).scl(polyScale);
+			tmp3.set(tmp2).sub(tmp).nor().rotateDeg(90).scl(polyScale);
 			vertices[vid++] = tmp.x - tmp3.x;
 			vertices[vid++] = tmp.y - tmp3.y;
 			vertices[vid++] = tmp.x + tmp3.x;

@@ -44,11 +44,9 @@ public class MeshShadowTest extends BaseScreen {
 				float w = MathUtils.random(1, 3);
 				float h = MathUtils.random(1, 3);
 				float angle = MathUtils.random(360);
-				Vector2[] vector2s = new Vector2[]{
-					v2(x + -w/2, y + -h/2).rotate(angle),
-					v2(x + w/2, y - h/2).rotate(angle),
-					v2(x + w/2, y + h/2).rotate(angle),
-					v2(x + -w/2, y + h/2).rotate(angle)
+				Vector2[] vector2s = new Vector2[]{v2(x + -w / 2, y + -h / 2).rotateDeg(angle),
+					v2(x + w / 2, y - h / 2).rotateDeg(angle), v2(x + w / 2, y + h / 2).rotateDeg(angle),
+					v2(x + -w / 2, y + h / 2).rotateDeg(angle)
 				};
 				casters.add(new ShadowCaster(x, y, vector2s));
 			} break;
@@ -63,7 +61,7 @@ public class MeshShadowTest extends BaseScreen {
 				float angle = 0;
 				float step = 360f/(c-1);
 				for (int j = 0; j < c; j++) {
-					tmp.set(1, 0).rotate(angle).scl(r);
+					tmp.set(1, 0).rotateDeg(angle).scl(r);
 					vector2s[j] = new Vector2(x, y).add(tmp);
 					angle += step;
 				}
@@ -73,10 +71,8 @@ public class MeshShadowTest extends BaseScreen {
 				float x = MathUtils.random(-17f, 15);
 				float y = MathUtils.random(-10f, 10);
 				float angle = MathUtils.random(360);
-				Vector2[] vector2s = new Vector2[]{
-					v2(x + -1, y + 0).rotate(angle),
-					v2(x + 1, y + 0).rotate(angle),
-					v2(x + 0, y + .5f).rotate(angle)
+				Vector2[] vector2s = new Vector2[]{v2(x + -1, y + 0).rotateDeg(angle), v2(x + 1, y + 0).rotateDeg(angle),
+					v2(x + 0, y + .5f).rotateDeg(angle)
 				};
 				casters.add(new ShadowCaster(x, y, vector2s));
 			} break;
@@ -87,11 +83,8 @@ public class MeshShadowTest extends BaseScreen {
 				float x = MathUtils.random(-17f, 15);
 				float y = MathUtils.random(-10f, 10);
 				float angle = MathUtils.random(360);
-				Vector2[] vector2s = new Vector2[]{
-					v2(x + 0, y + 1).rotate(angle),
-					v2(x - 1, y - 1).rotate(angle),
-					v2(x + 0, y + 0).rotate(angle),
-					v2(x + 1, y - 1).rotate(angle),
+				Vector2[] vector2s = new Vector2[]{v2(x + 0, y + 1).rotateDeg(angle), v2(x - 1, y - 1).rotateDeg(angle),
+					v2(x + 0, y + 0).rotateDeg(angle), v2(x + 1, y - 1).rotateDeg(angle),
 //					v2(x + 0, y + 0).rotate(angle),
 //					v2(x + 0, y + 0).rotate(angle)
 				};

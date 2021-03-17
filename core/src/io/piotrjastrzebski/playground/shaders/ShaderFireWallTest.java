@@ -51,10 +51,9 @@ public class ShaderFireWallTest extends ShaderTestBase {
 		} else {
 			ShaderProgram fire = shader.get();
 			batch.setShader(fire);
-			fire.begin();
+			fire.bind();
 			fire.setUniformf("u_time", time += delta);
 			fire.setUniformi("u_noise", 1);
-			fire.end();
 
 			noise.bind(1);
 		}

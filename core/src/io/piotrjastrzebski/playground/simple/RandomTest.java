@@ -36,8 +36,8 @@ public class RandomTest extends BaseScreen {
 		if (rng.size < 100000) {
 			for (int i = 0; i < 100; i++) {
 				float rot = MathUtils.random(0f, 180f);
-				rngCircle.add(new Vector2(MathUtils.random(-5f, 5f), 0).rotate(rot));
-				rngTriCircle.add(new Vector2(MathUtils.randomTriangular(-5f, 5f), 0).rotate(rot));
+				rngCircle.add(new Vector2(MathUtils.random(-5f, 5f), 0).rotateDeg(rot));
+				rngTriCircle.add(new Vector2(MathUtils.randomTriangular(-5f, 5f), 0).rotateDeg(rot));
 				rng.add(new Vector2(MathUtils.random(-5f, 5f), MathUtils.random(-5f, 5f)));
 				rngTri.add(new Vector2(MathUtils.randomTriangular(-5f, 5f), MathUtils.randomTriangular(-5f, 5f)));
 			}

@@ -4,7 +4,6 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ai.btree.BehaviorTree;
 import com.badlogic.gdx.ai.btree.Task;
 import com.badlogic.gdx.ai.btree.utils.BehaviorTreeParser;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.math.Vector2;
@@ -173,7 +172,7 @@ public class UISImpleGraphTest extends BaseScreen {
 				nodeActor.localToAscendantCoordinates(this, end);
 
 				float len = tmp.set(end).sub(sx, sy).len();
-				float angle = tmp.angle();
+				float angle = tmp.angleDeg();
 				batch.setColor(node.actor.getColor());
 				line.draw(batch, sx, sy, 0, 1.5f, len, 3, 1, 1, angle);
 				drawConnections(batch, node);

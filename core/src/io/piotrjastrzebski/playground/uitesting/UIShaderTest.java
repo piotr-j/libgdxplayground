@@ -52,12 +52,11 @@ public class UIShaderTest extends BaseScreen {
 			throw new AssertionError(TAG + " : Shader not compiled!\n" + outlineShader.getLog());
 		}
 
-		outlineShader.begin();
+		outlineShader.bind();
 		outlineShader.setUniformf("u_viewportInverse", 1f / Gdx.graphics.getWidth(), 1f / Gdx.graphics.getHeight());
 		outlineShader.setUniformf("u_thickness", 8);
 		outlineShader.setUniformf("u_step", Math.min(1f, Gdx.graphics.getWidth() / 70f));
 		outlineShader.setUniformf("u_color", Color.CYAN.r, Color.CYAN.g, Color.CYAN.b);
-		outlineShader.end();
 
 		shaderRenderer = new ActorShaderRenderer();
 		shaderRenderer.debug = true;
