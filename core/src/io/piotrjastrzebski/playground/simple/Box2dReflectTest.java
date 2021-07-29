@@ -43,6 +43,8 @@ public class Box2dReflectTest extends BaseScreen implements RayCastCallback {
 	private Vector2 rayEnd = new Vector2();
 	private Vector2 tmp = new Vector2();
 	private Vector2 tmp2 = new Vector2();
+	int rayCastId;
+
 	@Override public void render (float delta) {
 		Gdx.gl.glClearColor(.5f, .5f, .5f, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
@@ -68,10 +70,14 @@ public class Box2dReflectTest extends BaseScreen implements RayCastCallback {
 		rayStart.set(handleA.x, handleA.y);
 		rayEnd.set(handleB.x, handleB.y).sub(rayStart).setLength2(900);
 		renderer.setColor(Color.MAGENTA);
+		Gdx.app.log(TAG, "RayCasts start");
 		for (int i = 0; i <= reflections; i++) {
+			rayCastId = i;
 			tmp.set(rayStart.x + rayEnd.x, rayStart.y + rayEnd.y);
 			lastPoint.set(tmp);
+			Gdx.app.log(TAG, "RayCast " + rayCastId + " start " + Thread.currentThread());
 			world.rayCast(this, rayStart, tmp);
+			Gdx.app.log(TAG, "RayCast " + rayCastId + " end" + Thread.currentThread());
 			renderer.setColor(Color.MAGENTA);
 			renderer.getColor().a = (reflections-i)/(float)(reflections)/2 + .25f;
 			renderer.rectLine(rayStart.x, rayStart.y, lastPoint.x, lastPoint.y, 0.1f);
@@ -92,6 +98,7 @@ public class Box2dReflectTest extends BaseScreen implements RayCastCallback {
 			tmp.set(rayEnd).setLength2(0.0025f);
 			rayStart.set(lastPoint.x, lastPoint.y).add(tmp);
 		}
+		Gdx.app.log(TAG, "RayCasts end");
 
 		renderer.setColor(Color.RED);
 		renderer.circle(handleA.x, handleA.y, handleA.radius, 16);
@@ -106,6 +113,7 @@ public class Box2dReflectTest extends BaseScreen implements RayCastCallback {
 	private Vector2 lastPoint = new Vector2();
 	private Vector2 lastNormal = new Vector2();
 	@Override public float reportRayFixture (Fixture fixture, Vector2 point, Vector2 normal, float fraction) {
+		Gdx.app.log(TAG, "RayCast " + rayCastId + " hit " + Thread.currentThread());
 		lastPoint.set(point);
 		lastNormal.set(normal);
 		return fraction;
