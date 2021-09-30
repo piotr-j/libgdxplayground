@@ -101,6 +101,9 @@ public class InterpolationTest extends BaseScreen {
 
 		renderer.begin(ShapeRenderer.ShapeType.Line);
 		renderer.rect(bottomLeftX, bottomLeftY, graphWidth, graphHeight); // graph bounds
+		renderer.setColor(Color.GRAY);
+		renderer.line(bottomLeftX, bottomLeftY, bottomLeftX + graphWidth, bottomLeftY + graphHeight);
+		renderer.setColor(Color.WHITE);
 		float lastX = bottomLeftX, lastY = bottomLeftY;
 		for (float step = 0; step <= steps; step++) {
 			Interpolation interpolation = getInterpolation(selectedInterpolation);

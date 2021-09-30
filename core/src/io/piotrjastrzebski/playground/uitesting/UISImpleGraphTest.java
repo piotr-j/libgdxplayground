@@ -18,6 +18,7 @@ import com.kotcrab.vis.ui.VisUI;
 import com.kotcrab.vis.ui.widget.*;
 import io.piotrjastrzebski.playground.BaseScreen;
 import io.piotrjastrzebski.playground.GameReset;
+import io.piotrjastrzebski.playground.PlaygroundGame;
 import io.piotrjastrzebski.playground.bttests.dog2.Dog;
 
 import java.io.Reader;
@@ -185,5 +186,9 @@ public class UISImpleGraphTest extends BaseScreen {
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 		stage.act(delta);
 		stage.draw();
+	}
+
+	public static void main (String[] args) {
+		PlaygroundGame.start(args, UISImpleGraphTest.class);
 	}
 }

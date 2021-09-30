@@ -17,7 +17,6 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Sort;
-import com.kotcrab.vis.ui.widget.VisTable;
 
 import java.util.Comparator;
 
@@ -274,7 +273,6 @@ public class SystemProfilerGUI extends Window {
 			max = label("", skin, Align.right);
 			localMax = label("", skin, Align.right);
 			avg = label("", skin, Align.right);
-			debugAll();
 			add(draw);
 			add(name).expandX().fillX();;
 			add(max).minWidth(MIN_LABEL_WIDTH);
@@ -286,7 +284,7 @@ public class SystemProfilerGUI extends Window {
 
 		public void init (final SystemProfiler profiler) {
 			this.profiler = profiler;
-			draw.removeListener(listener);
+			if (listener != null) draw.removeListener(listener);
 			draw.setChecked(profiler.getDrawGraph());
 			draw.addListener(listener = new ChangeListener() {
 				@Override public void changed (ChangeEvent event, Actor actor) {

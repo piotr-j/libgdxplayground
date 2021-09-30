@@ -6,6 +6,7 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import io.piotrjastrzebski.playground.BaseScreen;
 import io.piotrjastrzebski.playground.GameReset;
+import io.piotrjastrzebski.playground.PlaygroundGame;
 import io.piotrjastrzebski.playground.ecs.profilerv2.lib.ProfilerInvocationStrategy;
 import io.piotrjastrzebski.playground.ecs.profilerv2.lib.SystemProfiler;
 
@@ -90,5 +91,9 @@ public class ECSProfilerTest extends BaseScreen {
 	}
 
 	public static class DebugRenderable extends Component {
+	}
+
+	public static void main (String[] args) {
+		PlaygroundGame.start(args, ECSProfilerTest.class);
 	}
 }
