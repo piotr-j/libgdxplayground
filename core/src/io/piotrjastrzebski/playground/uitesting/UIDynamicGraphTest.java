@@ -1,9 +1,14 @@
 package io.piotrjastrzebski.playground.uitesting;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Pixmap;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
@@ -11,25 +16,59 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Widget;
 import com.badlogic.gdx.scenes.scene2d.utils.ActorGestureListener;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.FloatArray;
 import com.badlogic.gdx.utils.TimeUtils;
 import io.piotrjastrzebski.playground.BaseScreen;
 import io.piotrjastrzebski.playground.GameReset;
 import io.piotrjastrzebski.playground.PlaygroundGame;
+import space.earlygrey.shapedrawer.JoinType;
+import space.earlygrey.shapedrawer.ShapeDrawer;
 
 /**
  * Created by PiotrJ on 20/06/15.
  */
 public class UIDynamicGraphTest extends BaseScreen {
-	DynamicGraph graph;
+	ShapeDrawer drawer;
+	Array<DynamicGraph> graphs;
+
 	public UIDynamicGraphTest (GameReset game) {
 		super(game);
-		graph = new DynamicGraph(skin, renderer);
-		root.add(graph).grow().pad(100);
+
+
+		graphs = new Array<>();
+		{
+			DynamicGraph graph = new RendererDynamicGraph(skin, renderer);
+			root.add(graph).grow().pad(50);
+			graphs.add(graph);
+		}
+		{
+			DynamicGraph graph = new DrawerDynamicGraph(skin, shapes);
+			root.add(graph).grow().pad(50);
+			graphs.add(graph);
+		}
+		if (false){
+			// it seems it sets the uv to single pixel in middle or whatever :<
+			Pixmap pixmap = new Pixmap(5, 5, Pixmap.Format.RGBA8888);
+			pixmap.setColor(Color.CLEAR);
+//			pixmap.setColor(Color.WHITE);
+			pixmap.fill();
+			pixmap.setColor(Color.WHITE);
+			pixmap.fillRectangle(1, 1, 3, 3);
+			drawer = new ShapeDrawer(batch, new TextureRegion(new Texture(pixmap)));
+			DynamicGraph graph = new DrawerDynamicGraph(skin, drawer);
+			root.add(graph).grow().pad(50);
+			graphs.add(graph);
+		}
+
+
+
 	}
 
 	float time;
 	float source;
 	float scale = 100;
+	float sampleDelay;
+	float sampleRate = .1f;
 	@Override public void render (float delta) {
 		super.render(delta);
 
@@ -43,16 +82,130 @@ public class UIDynamicGraphTest extends BaseScreen {
 			source -= MathUtils.PI2;
 			scale += 50;
 		}
+		sampleDelay += delta;
+		if (sampleDelay < sampleRate) return;
+		sampleDelay -= sampleRate;
 		float sample = MathUtils.sin(source) * scale;
 //		if (sample < 0) sample = -sample;
-		graph.addSample(time, sample);
+		for (DynamicGraph graph : graphs) {
+			graph.addSample(time, sample);
+		}
+
 	}
 
-	static class DynamicGraph extends Widget {
-		Skin skin;
+	static class RendererDynamicGraph extends DynamicGraph {
 		ShapeRenderer renderer;
+		public RendererDynamicGraph (Skin skin, ShapeRenderer renderer) {
+			super(skin);
+			this.renderer = renderer;
+		}
 
-		int sampleToShow = 1000;
+		@Override
+		public void draw (Batch batch, float parentAlpha) {
+			super.draw(batch, parentAlpha);
+			batch.end();
+			renderer.begin(ShapeRenderer.ShapeType.Line);
+			float x = getX();
+			float y = getY();
+			float width = getWidth();
+			float height = getHeight();
+			renderer.setColor(Color.CYAN);
+			renderer.rect(x, y, width, height);
+			drawGuides();
+			if (samples.size >= 2) {
+				setDrawColor(1, .5f, 0, 1);
+				drawGraph();
+			}
+			renderer.end();
+			Gdx.gl.glLineWidth(1);
+			batch.begin();
+
+			drawLabels(batch);
+		}
+
+		@Override
+		protected void setDrawColor (float r, float g, float b, float a) {
+			renderer.setColor(r, g, b, a);
+		}
+
+		float lineWidth = 1;
+		@Override
+		protected void line (float x1, float y1, float x2, float y2, float width) {
+			if (lineWidth != width) {
+				lineWidth = width;
+				renderer.flush();
+				Gdx.gl.glLineWidth(width);
+			}
+			renderer.line(x1, y1, x2, y2);
+		}
+	}
+
+	static class DrawerDynamicGraph extends DynamicGraph {
+		ShapeDrawer drawer;
+
+		public DrawerDynamicGraph (Skin skin, ShapeDrawer drawer) {
+			super(skin);
+			this.drawer = drawer;
+		}
+
+		FloatArray path = new FloatArray();
+		@Override
+		public void draw (Batch batch, float parentAlpha) {
+			super.draw(batch, parentAlpha);
+			batch.enableBlending();
+			float x = getX();
+			float y = getY();
+			float width = getWidth();
+			float height = getHeight();
+			drawer.setColor(Color.CYAN);
+			drawer.rectangle(x, y, width, height, 1f);
+			drawGuides();
+			if (samples.size >= 2) {
+				setDrawColor(1, .5f, 0, .3f);
+				batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE);
+				path.clear();
+				drawGraph();
+				drawPath();
+				batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+			}
+
+			drawLabels(batch);
+		}
+
+		private void drawPath () {
+			// if the path is very dense, this will be quite slow depending on number of passes
+			// 2-3 passes seems sufficient, unless path is very wide
+			float width = pathWidth;
+			int passes = 3;
+			float step = width/passes;
+			while (width > 0f) {
+				drawer.path(path, width, JoinType.SMOOTH, true);
+				width -= step;
+			}
+		}
+
+		@Override
+		protected void setDrawColor (float r, float g, float b, float a) {
+			drawer.setColor(r, g, b, a);
+		}
+
+		float pathWidth = 1;
+		@Override
+		protected void line (float x1, float y1, float x2, float y2, float width) {
+			if (width <= 1) {
+				drawer.line(x1, y1, x2, y2, width);
+				return;
+			}
+			pathWidth = width;
+//			path.add(x1, y1, x2, y2);
+			path.add(x1, y1);
+		}
+	}
+
+	static abstract class DynamicGraph extends Widget {
+		Skin skin;
+
+		int sampleToShow = 100;
 		float sampleOffset = 0;
 		float min = 0;
 		float max = 50;
@@ -60,9 +213,8 @@ public class UIDynamicGraphTest extends BaseScreen {
 		BitmapFont font;
 		long lastPan = 0;
 
-		public DynamicGraph (Skin skin, ShapeRenderer renderer) {
+		public DynamicGraph (Skin skin) {
 			this.skin = skin;
-			this.renderer = renderer;
 			font = skin.getFont("default-font");
 			addListener(new ActorGestureListener() {
 				@Override
@@ -97,28 +249,7 @@ public class UIDynamicGraphTest extends BaseScreen {
 			//samples.sort();
 		}
 
-		@Override
-		public void draw (Batch batch, float parentAlpha) {
-			super.draw(batch, parentAlpha);
-			batch.end();
-			renderer.begin(ShapeRenderer.ShapeType.Line);
-			float x = getX();
-			float y = getY();
-			float width = getWidth();
-			float height = getHeight();
-			renderer.setColor(Color.CYAN);
-			renderer.rect(x, y, width, height);
-			drawGuides();
-			if (samples.size >= 2) {
-				drawGraph();
-			}
-			renderer.end();
-			batch.begin();
-
-			drawLabels(batch);
-		}
-
-		private void drawLabels (Batch batch) {
+		protected void drawLabels (Batch batch) {
 			float x = getX() + 5;
 			float y = getY() + 25;
 			float width = getWidth() - 10;
@@ -127,7 +258,7 @@ public class UIDynamicGraphTest extends BaseScreen {
 			float range = Math.abs(min) + Math.abs(max);
 			// lets show 4 values, min max and two middle?
 
-			renderer.setColor(.5f, .5f, .5f, .5f);
+			setDrawColor(.5f, .5f, .5f, .5f);
 
 			{
 				float n = normalize(0, height, min);
@@ -162,7 +293,7 @@ public class UIDynamicGraphTest extends BaseScreen {
 			}
 		}
 
-		private void drawGuides () {
+		protected void drawGuides () {
 			float x = getX() + 5;
 			float y = getY() + 25;
 			float width = getWidth() - 10;
@@ -171,29 +302,28 @@ public class UIDynamicGraphTest extends BaseScreen {
 			float range = Math.abs(min) + Math.abs(max);
 			// lets show 4 values, min max and two middle?
 
-			renderer.setColor(.5f, .5f, .5f, .5f);
+			setDrawColor(.5f, .5f, .5f, .5f);
 			{
 				float n = normalize(0, height, min);
-				renderer.line(x, y + n, x + width, y + n);
+				line(x, y + n, x + width, y + n, 1);
 			}
 			{
 				float n = normalize(0, height, max);
-				renderer.line(x, y + n, x + width, y + n);
+				line(x, y + n, x + width, y + n, 1);
 			}
 			for (float i = min + range/3; i < max; i += range/3) {
 				float n = normalize(0, height, i);
-				renderer.line(x, y + n, x + width, y + n);
+				line(x, y + n, x + width, y + n, 1);
 			}
 		}
 
-		private void drawGraph () {
+		protected void drawGraph () {
 			float x = getX() + 25;
 			float y = getY() + 25;
 			float width = getWidth() - 50;
 			float height = getHeight() - 50;
 
 
-			renderer.setColor(Color.ORANGE);
 			float sampleLen = width / sampleToShow;
 			int offset = MathUtils.round(sampleOffset);
 			Sample first = samples.get(offset);
@@ -204,7 +334,7 @@ public class UIDynamicGraphTest extends BaseScreen {
 				float sx2 = sampleLen * (i - offset);
 				float sy2 = normalize(0, height, second.value);
 
-				renderer.line(x + sx1, y + sy1, x + sx2, y + sy2);
+				line(x + sx1, y + sy1, x + sx2, y + sy2, 10);
 
 				first = second;
 			}
@@ -213,6 +343,9 @@ public class UIDynamicGraphTest extends BaseScreen {
 		private float normalize (float y, float height, float value) {
 			return MathUtils.map(min, max, y, height, value);
 		}
+
+		protected abstract void setDrawColor(float r, float g, float b, float a);
+		protected abstract void line(float x1, float y1, float x2, float y2, float width);
 	}
 
 	static class Sample implements Comparable<Sample> {
@@ -233,7 +366,8 @@ public class UIDynamicGraphTest extends BaseScreen {
 	// allow us to start this test directly
 	public static void main (String[] args) {
 		Lwjgl3ApplicationConfiguration config = PlaygroundGame.config();
-		config.setWindowedMode(1280/3 * 2, 720/3 * 2);
+		config.setBackBufferConfig(8, 8, 8, 8, 16, 0, 4);
+//		config.setWindowedMode(1280/3 * 2, 720/3 * 2);
 		PlaygroundGame.start(args, config, UIDynamicGraphTest.class);
 	}
 }
