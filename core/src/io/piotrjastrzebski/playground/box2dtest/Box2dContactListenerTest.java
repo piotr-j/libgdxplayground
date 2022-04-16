@@ -87,17 +87,24 @@ public class Box2dContactListenerTest extends BaseScreen {
 			float x = MathUtils.random(-15, 15);
 			float y = MathUtils.random(-8, 8);
 			float rotation = MathUtils.random(90);
-			createBox(x, y, rotation);
+			createBox(x, y, rotation, BodyDef.BodyType.DynamicBody);
+		}
+
+		for (int i = 0; i < 3; i++) {
+			float x = MathUtils.random(-15, 15);
+			float y = MathUtils.random(-8, 8);
+			float rotation = MathUtils.random(90);
+			createBox(x, y, rotation, BodyDef.BodyType.KinematicBody);
 		}
 	}
 
-	private void createBox (float x, float y, float rotation) {
+	private void createBox (float x, float y, float rotation, BodyDef.BodyType type) {
 		Box box = new Box(x, y, rotation);
 
 		BodyDef def = new BodyDef();
 		def.position.set(x, y);
 		def.angle = rotation * MathUtils.degreesToRadians;
-		def.type = BodyDef.BodyType.DynamicBody;
+		def.type = type;
 		box.body = world.createBody(def);
 		PolygonShape shape = new PolygonShape();
 		shape.setAsBox(box.width / 2, box.height / 2);
