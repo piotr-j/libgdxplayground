@@ -1,7 +1,11 @@
 package io.piotrjastrzebski.playground.simple;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Graphics;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
+import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Graphics;
+import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Window;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Pixmap;
@@ -10,6 +14,8 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import io.piotrjastrzebski.playground.BaseScreen;
 import io.piotrjastrzebski.playground.GameReset;
@@ -35,7 +41,7 @@ public class LineTest extends BaseScreen {
             Texture texture = new Texture(pixmap);
             texture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
             Sprite sprite = new Sprite(texture);
-            sprite.setOriginBasedPosition(-3.5f, 0);
+            sprite.setOriginBasedPosition(-4.5f, -4);
             sprite.setScale(INV_SCALE * 2);
             sprite.setOriginCenter();
             pixmap.dispose();
@@ -50,7 +56,7 @@ public class LineTest extends BaseScreen {
             Texture texture = new Texture(pixmap);
             texture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
             Sprite sprite = new Sprite(texture);
-            sprite.setOriginBasedPosition(3.5f, 0);
+            sprite.setOriginBasedPosition(4.5f, -4);
             sprite.setScale(INV_SCALE * 2);
             pixmap.dispose();
             sprites.add(sprite);
@@ -71,31 +77,36 @@ public class LineTest extends BaseScreen {
         // 2x scale seems to work the best
         if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_1)) {
             fboScale(1);
-            PLog.log("fbo scale = " + fboScale);
             resizeFBO(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         }
         if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_2)) {
             fboScale(2);
-            PLog.log("fbo scale = " + fboScale);
             resizeFBO(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         }
         if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_3)) {
             fboScale(4);
-            PLog.log("fbo scale = " + fboScale);
             resizeFBO(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         }
         if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_4)) {
             fboScale(8);
-            PLog.log("fbo scale = " + fboScale);
             resizeFBO(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         }
         if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_5)) {
             fboScale(16);
-            PLog.log("fbo scale = " + fboScale);
             resizeFBO(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         }
         if (Gdx.input.isKeyJustPressed(Input.Keys.R)) {
             rotate = !rotate;
+        }
+        if (Gdx.input.isKeyJustPressed(Input.Keys.Q)) {
+            gameCamera.zoom = MathUtils.clamp(gameCamera.zoom + .1f, .5f, 2f);
+            gameCamera.update();
+            PLog.log("zoom " + gameCamera.zoom);
+        }
+        if (Gdx.input.isKeyJustPressed(Input.Keys.E)) {
+            gameCamera.zoom = MathUtils.clamp(gameCamera.zoom - .1f, .5f, 2f);
+            gameCamera.update();
+            PLog.log("zoom " + gameCamera.zoom);
         }
 
 
@@ -135,8 +146,10 @@ public class LineTest extends BaseScreen {
         } else {
             useFbo = !useFbo;
         }
+        PLog.log("fbo scale = " + fboScale + ", use fbo " + useFbo);
     }
 
+    Vector2 v2 = new Vector2();
     private void draw () {
         renderer.begin(ShapeRenderer.ShapeType.Filled);
         renderer.setColor(Color.MAGENTA);
@@ -145,6 +158,13 @@ public class LineTest extends BaseScreen {
         renderer.rect(-.5f, -.5f, .5f, .5f, 1, 1, 1, 1, 45);
         renderer.rect(-.5f, -2.5f, .5f, .5f, 1, 1, 1, 1, 22.5f);
         renderer.rect(-.5f, 1.5f, .5f, .5f, 1, 1, 1, 1, 67.5f);
+        renderer.setColor(Color.BLACK);
+        v2.set(0, 3.33f).rotateDeg(rotation);
+        renderer.rectLine(-4.5f - v2.x, 4 - v2.y, -4.5f + v2.x, 4 + v2.y, .075f);
+        renderer.end();
+        Gdx.gl.glLineWidth(4 * (useFbo?fboScale:1));
+        renderer.begin(ShapeRenderer.ShapeType.Line);
+        renderer.line(4.5f - v2.x, 4 - v2.y, 4.5f + v2.x, 4 + v2.y);
         renderer.end();
 
         batch.enableBlending();
@@ -177,6 +197,8 @@ public class LineTest extends BaseScreen {
 
     // allow us to start this test directly
     public static void main (String[] args) {
-        PlaygroundGame.start(args, LineTest.class);
+        Lwjgl3ApplicationConfiguration config = PlaygroundGame.config();
+//        config.setBackBufferConfig(8, 8, 8, 8, 8, 8, 8);
+        PlaygroundGame.start(args, config, LineTest.class);
     }
 }
