@@ -11,6 +11,7 @@ import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import io.piotrjastrzebski.playground.BaseScreen;
 import io.piotrjastrzebski.playground.GameReset;
+import io.piotrjastrzebski.playground.PlaygroundGame;
 
 /**
  * Created by EvilEntity on 07/06/2015.
@@ -70,5 +71,9 @@ public class SimpleTiledTest extends BaseScreen {
 		gameCamera.position.add(temp.x, temp.y, 0);
 		gameCamera.update();
 		return true;
+	}
+
+	public static void main (String[] args) {
+		PlaygroundGame.start(args, SimpleTiledTest.class);
 	}
 }
