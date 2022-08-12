@@ -12,6 +12,7 @@ import com.kotcrab.vis.ui.util.TableUtils;
 import com.kotcrab.vis.ui.widget.*;
 import io.piotrjastrzebski.playground.BaseScreen;
 import io.piotrjastrzebski.playground.GameReset;
+import io.piotrjastrzebski.playground.PlaygroundGame;
 
 /**
  * Created by PiotrJ on 20/06/15.
@@ -190,4 +191,7 @@ public class UITableBuilderTest extends BaseScreen {
 		}
 	}
 
+	public static void main (String[] args) {
+		PlaygroundGame.start(args, UITableBuilderTest.class);
+	}
 }

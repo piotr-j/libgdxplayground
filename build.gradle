@@ -4,10 +4,9 @@ buildscript {
         mavenCentral()
         maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
         google()
-        jcenter()
     }
     dependencies {
-        classpath "net.onedaybeard.artemis:artemis-odb-gradle-plugin:2.2.0"
+
     }
 }
 
@@ -18,19 +17,20 @@ allprojects {
     version = '1.0'
     ext {
         appName = 'playground'
-        gdxVersion = '1.10.0'
+        gdxVersion = '1.11.0'
         roboVMVersion = '1.2.0'
         box2DLightsVersion = '1.5'
         ashleyVersion = '1.7.4'
         aiVersion = '1.8.2'
-        visuiVersion = '1.4.11'
+        visuiVersion = '1.5.0'
         artemisOdbVersion = "2.3.0"
         artemisOdbcontribVersion = "2.4.0"
         gdxVideoVersion = "0.0.1"
         kryoVersion = "4.0.2"
         gdxUtilsVersion = "0.13.4"
         spineVersion = "3.8.55.1"
-        shapeDrawerVersion = "2.4.0"
+        shapeDrawerVersion = "2.5.0"
+        textratypistVersion = '0.6.3'
     }
 
     repositories {
@@ -40,7 +40,6 @@ allprojects {
         maven { url "https://oss.sonatype.org/content/repositories/releases/" }
         maven { url "https://jitpack.io" }
         google()
-        jcenter()
     }
 }
 
@@ -103,6 +102,8 @@ project(":core") {
         api "net.dermetfan.libgdx-utils:libgdx-utils:$gdxUtilsVersion"
 
         api "space.earlygrey:shapedrawer:$shapeDrawerVersion"
+
+        api "com.github.tommyettinger:textratypist:$textratypistVersion"
     }
 }
 

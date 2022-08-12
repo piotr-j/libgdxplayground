@@ -26,11 +26,11 @@ import static com.badlogic.gdx.utils.Align.*;
 /**
  * Created by PiotrJ on 20/06/15.
  */
-public class UIImageTest extends BaseScreen {
-    protected static final String TAG = UIImageTest.class.getSimpleName();
+public class UIScaledImageTest extends BaseScreen {
+    protected static final String TAG = UIScaledImageTest.class.getSimpleName();
 
     TextureRegion region;
-    public UIImageTest (GameReset game) {
+    public UIScaledImageTest (GameReset game) {
         super(game);
         Pixmap pixmap = new Pixmap(128, 256, Pixmap.Format.RGBA8888);
         pixmap.setColor(Color.BLACK);
@@ -403,6 +403,6 @@ public class UIImageTest extends BaseScreen {
     public static void main (String[] args) {
         Lwjgl3ApplicationConfiguration config = PlaygroundGame.config();
         config.setWindowedMode(1280, 720 + 200);
-        PlaygroundGame.start(args, config, UIImageTest.class);
+        PlaygroundGame.start(args, config, UIScaledImageTest.class);
     }
 }

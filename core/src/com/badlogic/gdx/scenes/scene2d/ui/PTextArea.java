@@ -1,6 +1,7 @@
 package com.badlogic.gdx.scenes.scene2d.ui;
 
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import io.piotrjastrzebski.playground.PLog;
@@ -184,5 +185,9 @@ public class PTextArea extends TextArea {
             i -= 2;
         }
         return out;
+    }
+
+    protected void setFirstLineShowing (int line) {
+        firstLineShowing = MathUtils.clamp(line, 0, Math.max(0, getLines() - 1));
     }
 }

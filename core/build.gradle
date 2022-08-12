@@ -1,5 +1,4 @@
 apply plugin: "java"
-apply plugin: "artemis"
 
 sourceCompatibility = 1.8
 sourceCompatibility = 1.8
@@ -7,17 +6,6 @@ sourceCompatibility = 1.8
 
 sourceSets.main.java.srcDirs = [ "src/" ]
 sourceSets.test.java.srcDirs = [ "test/" ]
-
-weave {
-    classesDir = sourceSets.main.java.outputDir
-    dependsOn build
-    enableArtemisPlugin = true
-    enablePooledWeaving = true
-    generateLinkMutators = true
-    optimizeEntitySystems = true
-}
-
-classes.finalizedBy weave
 
 eclipse.project {
     name = appName + "-core"
