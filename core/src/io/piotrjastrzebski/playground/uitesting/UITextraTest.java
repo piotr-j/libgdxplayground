@@ -26,12 +26,16 @@ public class UITextraTest extends BaseScreen {
 		BitmapFont[] bitmapFonts = getFonts();
 		Table labels = new Table();
 		labels.defaults().pad(2);
+		labels.add(new VisLabel("Font")).expandX().left();
+		labels.add(new VisLabel("TypingLabel")).expandX().left();
+		labels.add(new VisLabel("Label")).expandX().left().row();
 		for (int i = 0; i < fonts.length; i++) {
 			Font font = fonts[i];
 			labels.add(new VisLabel(font.name)).left();
 			TypingLabel label = new TypingLabel("Dummy Text 123\nAnd some more yy?", skin, font);
 			labels.add(label).expandX().left();
 			label.validate();
+			label.debug();
 
 			BitmapFont bf = bitmapFonts[i];
 			if (bf != null) {
@@ -43,14 +47,13 @@ public class UITextraTest extends BaseScreen {
 				float scale = label.getPrefHeight()/bmLabel.getPrefHeight();
 				bmLabel.setFontScale(scale);
 				labels.add(bmLabel).expandX().left();
+				bmLabel.debug();
 			} else {
 				labels.add(new VisLabel("MISSING!")).expandX().left();
 			}
 			labels.row();
 		}
-
 		root.add(labels);
-		labels.debugAll();
 
 	}
 
