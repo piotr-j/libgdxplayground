@@ -74,6 +74,8 @@ import java.util.Arrays;
 import java.util.Comparator;
 
 public class PlaygroundGame extends Game implements GameReset {
+	public final static int WIDTH = 1280;
+	public final static int HEIGHT = 720;
 
 	// should be a class that extends BaseScreen
 	final Class[] testScreens = new Class[]{DungeonGeneratorTest.class, SATTest.class, ParticleFaceTest.class, SimpleTiledCropTest.class,
@@ -217,7 +219,7 @@ public class PlaygroundGame extends Game implements GameReset {
 
 	public static Lwjgl3ApplicationConfiguration config () {
 		Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
-		config.setWindowedMode(1280, 720);
+		config.setWindowedMode(WIDTH, HEIGHT);
 		config.setBackBufferConfig(8, 8, 8, 8, 8, 8, 0);
 		config.setHdpiMode(HdpiMode.Logical);
 		return config;

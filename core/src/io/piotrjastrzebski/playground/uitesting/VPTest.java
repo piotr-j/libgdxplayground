@@ -1,12 +1,12 @@
 package io.piotrjastrzebski.playground.uitesting;
 
-import com.badlogic.gdx.assets.loaders.I18NBundleLoader;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import io.piotrjastrzebski.playground.BaseScreen;
 import io.piotrjastrzebski.playground.GameReset;
+import io.piotrjastrzebski.playground.PlaygroundGame;
 
 public class VPTest extends BaseScreen {
 	public final static float VP_WIDTH = 40f;
@@ -41,5 +41,9 @@ public class VPTest extends BaseScreen {
 	@Override public void resize (int width, int height) {
 		super.resize(width, height);
 		viewport.update(width, height, false);
+	}
+
+	public static void main (String[] args) {
+		PlaygroundGame.start(args, VPTest.class);
 	}
 }

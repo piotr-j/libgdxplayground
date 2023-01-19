@@ -6,11 +6,10 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.viewport.FitViewport;
-import com.kotcrab.vis.ui.widget.VisLabel;
-import com.kotcrab.vis.ui.widget.VisScrollPane;
 import com.kotcrab.vis.ui.widget.VisWindow;
 import io.piotrjastrzebski.playground.BaseScreen;
 import io.piotrjastrzebski.playground.GameReset;
+import io.piotrjastrzebski.playground.PlaygroundGame;
 
 /**
  * Created by PiotrJ on 20/06/15.
@@ -52,5 +51,9 @@ public class FitVPTest extends BaseScreen {
 		super.resize(width, height);
 		if (fitViewport != null)
 			fitViewport.update(width, height, true);
+	}
+
+	public static void main (String[] args) {
+		PlaygroundGame.start(args, FitVPTest.class);
 	}
 }
