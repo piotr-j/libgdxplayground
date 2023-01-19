@@ -17,7 +17,6 @@ import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.ObjectMap;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import io.piotrjastrzebski.playground.BaseScreen;
 import io.piotrjastrzebski.playground.GameReset;
@@ -47,9 +46,6 @@ public class PixelArtShaderV3Test extends BaseScreen {
 	protected Texture charactersTextureNearest;
 	protected Texture charactersTextureLinear;
 
-	ObjectMap<Texture, Texture> linearToNearest;
-	private TextureRegion[][] charactersRegions;
-
 	protected float cx;
 	protected float cy;
 	private Array<AnimChar> characters;
@@ -63,20 +59,11 @@ public class PixelArtShaderV3Test extends BaseScreen {
 
 		charactersTextureLinear = new Texture("pixels/characters.png");
 		charactersTextureLinear.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
-		charactersTextureNearest = new Texture("pixels/characters.png");
-		charactersTextureNearest.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
 
 		TextureRegion[][] regions = new TextureRegion(charactersTextureLinear).split(32, 32);
 
 		backgroundTextureLinear = new Texture("pixels/scene.png");
 		backgroundTextureLinear.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
-		backgroundTextureNearest = new Texture("pixels/scene.png");
-		backgroundTextureNearest.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
-
-		linearToNearest = new ObjectMap<>();
-		linearToNearest.put(charactersTextureLinear, charactersTextureNearest);
-		linearToNearest.put(backgroundTextureLinear, backgroundTextureNearest);
-
 
 		shader = new ShaderProgram(Gdx.files.internal("pixels/pixelartv3.vsh"), Gdx.files.internal("pixels/pixelartv3.fsh"));
 
@@ -131,7 +118,6 @@ public class PixelArtShaderV3Test extends BaseScreen {
 		float state;
 
 		public AnimChar(Animation<TextureRegion> animation) {
-//			this.animation = new Animation<TextureRegion>(animation.getFrameDuration(), new Array<>(animation.getKeyFrames()), animation.getPlayMode());
 			this.animation = animation;
 			setDrawable(new TextureRegionDrawable(animation.getKeyFrame(state)));
 			setSize(getPrefWidth(), getPrefHeight());
